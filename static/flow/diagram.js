@@ -1,7 +1,7 @@
 var g_nextBlockId = 1;  // used to assign unique numeric IDs to each block
 
 
-// create an object represent a data flow diagram
+// create an object representing a data flow diagram
 function createDiagram() {
 	var diagram = {};
 	diagram.blocks = [];
@@ -161,14 +161,17 @@ function createPin(block, index, isInput) {
 // create a diagram object from a diagram spec dictionary (deserialize a diagram)
 function specToDiagram(diagramSpec) {
 	var diagram = createDiagram();
-	
+
 	// first pass: create blocks
 	for (var i = 0; i < diagramSpec.blocks.length; i++) {
 		var blockSpec = diagramSpec.blocks[i];
 		var block = createFlowBlock(blockSpec);
 		diagram.blocks.push(block);
+		if (block.id >= g_nextBlockId) {
+			g_nextBlockId = block.id + 1;
+		}
 	}
-	
+
 	// second pass: create links between blocks (between pins)
 	for (var i = 0; i < diagramSpec.blocks.length; i++) {
 		var blockSpec = diagramSpec.blocks[i];
