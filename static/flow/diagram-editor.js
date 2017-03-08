@@ -615,8 +615,9 @@ function structureModified() {
 	console.log('sent diagram');
 }
 
-window.onbeforeunload = function (e) {
-		if (window.g_modified){
-			return 'Your changes have not been saved. Are you sure you want to close the page?';
-		}
-};
+
+window.addEventListener('beforeunload', function(){
+	if (g_modified){
+		return 'Your changes have not been saved. Are you sure you want to close the page?';
+	}
+})
