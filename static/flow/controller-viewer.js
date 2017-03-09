@@ -43,10 +43,11 @@ function initControllerViewer() {
 			renameAction.click(diagramIndex, function(e){
 				var diagramSpec = g_diagramSpecs[e.data];
 				// TODO: add validator similar to diagram save prompt
-				modalPrompt({title: 'Rename Diagram', prompt: 'Name', default: diagramSpec.name, resultFunc: function(name) {
-					sendMessage('save_diagram', {'name': name, 'diagram': diagramSpec});
-					diagramSpec.name = name;
+				modalPrompt({title: 'Rename Diagram', prompt: 'Name', default: diagramSpec.name, resultFunc: function(newName) {
+					sendMessage('rename_diagram', {'old_name': diagramSpec.name, 'new_name': newName});
+					diagramSpec.name = newName;
 					updateDiagramSpec(diagramSpec);
+					btnGroup.find('.diagram-name').html(newName);
 				}});
 			});
 
@@ -56,6 +57,7 @@ function initControllerViewer() {
 				modalConfirm({title: 'Delete Diagram', prompt: 'Are you sure you want to delete this diagram?', yesFunc: function() {
 					sendMessage('delete_diagram', {'name': diagramSpec.name });
 					deleteDiagramSpec(diagramSpec.name);
+					btnGroup.remove();
 				}});
 			});
 			diagramMenu.appendTo(btnGroup);
@@ -66,7 +68,7 @@ function initControllerViewer() {
 			var diagram = g_diagramSpecs[i];
 			var diagramDiv = $('<div>', {class: 'listButton'});
 			var btnGroup = $('<div>', {class: 'btn-group'});
-			var diagramName = $('<button>', {class: 'btn btn-lg', html: diagram.name}).appendTo(btnGroup);
+			var diagramName = $('<button>', {class: 'btn btn-lg diagram-name', html: diagram.name}).appendTo(btnGroup);
 			diagramName.click(i, function(e) {
 				showDiagramEditor();
 				sendMessage('start_diagram', g_diagramSpecs[e.data]);
