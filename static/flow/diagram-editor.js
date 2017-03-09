@@ -614,3 +614,10 @@ function structureModified() {
 	sendMessage('set_diagram', {diagram: diagramToSpec(g_diagram)});
 	console.log('sent diagram');
 }
+
+
+window.addEventListener('beforeunload', function(){
+	if (g_modified){
+		return 'Your changes have not been saved. Are you sure you want to close the page?';
+	}
+})
