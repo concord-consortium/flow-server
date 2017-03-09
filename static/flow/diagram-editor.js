@@ -94,7 +94,7 @@ function inputMouseDown(e) {
 function blockMouseDown(e) {
 	var x = e.pageX;
 	var y = e.pageY;
-	
+
 	// idenfify and store block
 	for (var i = 0; i < g_diagram.blocks.length; i++) {
 		var block = g_diagram.blocks[i];
@@ -168,7 +168,7 @@ function exploreData(e) {
 function displayBlock(block) {
 	var blockDiv = $('<div>', {class: 'flowBlock', id: 'b_' + block.id});
 	block.view.div = blockDiv;
-	
+
 	// add menu
 	var menuData = createMenuData();
 	menuData.add('Delete', deleteBlock, {id: block.id});
@@ -219,7 +219,7 @@ function displayBlock(block) {
 		}
 		div.appendTo(blockDiv);
 	}
-	
+
 	// position the block as specified
 	var x = block.view.x;
 	var y = block.view.y;
@@ -228,22 +228,22 @@ function displayBlock(block) {
 
 	// add a mousedown handler for dragging/moving blocks
 	blockDiv.mousedown(blockMouseDown);
-	
+
 	// add to DOM before get dimensions
 	blockDiv.appendTo($('#diagramHolder'));
-	
+
 	// display plot after added to DOM
 	if (block.type === 'plot') {
 		displayPlot(block);
 	}
-	
+
 	// get dimensions of block div
 	var w = parseInt(blockDiv.outerWidth(true));  // true to include the margin in the width
     var h = parseInt(blockDiv.outerHeight());  // not passing true here because we don't want the bottom margin
 	block.view.w = w;
 	block.view.h = h;
 	var pinRadius = 15;
-	
+
 	// position and draw pins
 	for (var i = 0; i < block.pins.length; i++) {
 		var pin = block.pins[i];
@@ -274,13 +274,13 @@ function displayBlock(block) {
 
 // move a block along with its pins and connections
 function moveBlock(block, x, y) {
-	
+
 	// move block div
 	block.view.div.css('top', y + 'px');
 	block.view.div.css('left', x + 'px');
 	block.view.x = x;
 	block.view.y = y;
-	
+
 	// move pins
 	for (var i = 0; i < block.pins.length; i++) {
 		var pin = block.pins[i];
@@ -291,7 +291,7 @@ function moveBlock(block, x, y) {
 			moveConn(pin);
 		}
 	}
-	
+
 	// move connections
 	var destPins = g_diagram.findDestPins(block);
 	for (var i = 0; i < destPins.length; i++) {
@@ -333,7 +333,7 @@ function undisplayBlock(block) {
 			pin.view.svgConn.remove();
 		}
 	}
-	
+
 	// remove connections from this block
 	var destPins = g_diagram.findDestPins(block);
 	for (var i = 0; i < destPins.length; i++) {
@@ -350,7 +350,7 @@ function displayPlot(block) {
 	block.view.xData.type = 'timestamp';
 	block.view.yData = createDataColumn('value', []);
 	var dataPairs = [
-		{ 
+		{
 			'xData': block.view.xData,
 			'yData': block.view.yData,
 		}
@@ -401,7 +401,7 @@ function displayBlockValue(block) {
 
 // initialize the diagram editor view (everything in this file); sets up handlers for messages from controller
 function initDiagramEditor() {
-	
+
 	// request list of devices currently connected to controller
 	// fix(soon): if we're loading a diagram, should we do this after we've loaded it?
 	sendMessage('list_devices');
@@ -411,7 +411,7 @@ function initDiagramEditor() {
 		g_svgDrawer = SVG('diagramHolder');
 		$('#diagramHolder').mousemove(mouseMove);
 		$('#diagramHolder').mouseup(mouseUp);
-		
+
 		// handle a list of devices from the controller
 		addMessageHandler('device_list', function(timestamp, params) {
 			var devices = params.devices;
@@ -419,7 +419,7 @@ function initDiagramEditor() {
 				addDevice(devices[i]);
 			}
 		});
-		
+
 		// handle a newly added device from the controller
 		addMessageHandler('device_added', function(timestamp, params) {
 			console.log('device_added');
@@ -445,7 +445,7 @@ function initDiagramEditor() {
 				structureModified();
 			}
 		});
-		
+
 		// handle a device being unplugged
 		addMessageHandler('device_removed', function(timestamp, params) {
 			var block = g_diagram.findBlockByName(params.name);
@@ -455,7 +455,7 @@ function initDiagramEditor() {
 				structureModified();
 			}
 		});
-		
+
 		// handle a new set of values for the blocks in the diagram
 		// (the controller code is responsible for computing diagram block values)
 		addMessageHandler('update_diagram', function(timestamp, params) {
@@ -471,7 +471,7 @@ function initDiagramEditor() {
 				}
 			}
 		});
-		
+
 		g_diagramEditorInitialized = true;
 	}
 }
@@ -507,7 +507,7 @@ function addNumericBlock() {
 	var block = createFlowBlock({name: 'number', type: 'number_entry', output_count: 1});
 	g_diagram.blocks.push(block);
 	block.view.x = 100;
-	block.view.y = 100;	
+	block.view.y = 100;
 	displayBlock(block);
 	structureModified();
 }
@@ -518,7 +518,7 @@ function addFilterBlock(e) {
 	var type = e.data;
 	$('#filterModal').modal('hide');
 	var blockSpec = {
-		name: type, 
+		name: type,
 		type: type,
 		input_count: 2,
 		output_count: 1,
@@ -570,13 +570,28 @@ function addPlotBlock() {
 function closeDiagramEditor() {
 	if (g_modified) {
 		modalConfirm({title: 'Save Diagram?', prompt: 'Do you want to save this diagram?', yesFunc: function() {
-			modalPrompt({title: 'Save Diagram', prompt: 'Name', default: g_diagramName, resultFunc: function(name) {
-				var diagramSpec = diagramToSpec(g_diagram);
-				sendMessage('save_diagram', {'name': name, 'diagram': diagramSpec});  // fix(soon): should check for success
-				diagramSpec.name = g_diagramName;  // fix(clean): this is a bit messy; sometime diagram spec has name, sometimes not
-				updateDiagramSpec(diagramSpec);
-				showControllerViewer();
-			}});
+
+			var validator = function(diagramName){
+				var forbidden = ['/', '\\', '*', '?']; // Might be easier to just ensure alphanumeracy?
+
+				var hasForbidden = forbidden.some(function(c){
+					return diagramName.indexOf(c) !== -1
+				});
+				return !hasForbidden;
+			}
+
+			modalPrompt({
+				title: 'Save Diagram',
+				prompt: 'Name',
+				default: g_diagramName,
+				validator: validator,
+				resultFunc: function(name) {
+					var diagramSpec = diagramToSpec(g_diagram);
+					sendMessage('save_diagram', {'name': name, 'diagram': diagramSpec});  // fix(soon): should check for success
+					diagramSpec.name = g_diagramName;  // fix(clean): this is a bit messy; sometime diagram spec has name, sometimes not
+					updateDiagramSpec(diagramSpec);
+					showControllerViewer();
+				}});
 		}, noFunc: function() {
 			showControllerViewer();
 		}});
