@@ -203,6 +203,9 @@ function displayBlock(block) {
 		input.keyup(block.id, numberEntryChanged);
 	} else if (block.type === 'plot') {
 		var canvas = $('<canvas>', {class: 'flowBlockPlot', width: 300, height: 200, id: 'bc_' + block.id}).appendTo(blockDiv);
+			canvas.mousedown(blockMouseDown);
+			canvas.mousemove(mouseMove);
+			canvas.mouseup(mouseUp);
 		blockDiv.addClass('flowBlockWithPlot');
 	} else if (block.type === 'camera') {
 		$('<img>', {class: 'flowBlockImage', width: 320, height: 240, id: 'bi_' + block.id}).appendTo(blockDiv);
