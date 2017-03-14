@@ -217,13 +217,13 @@ function createWebSocketHolder() {
 	// fix(clean): move out into blocks.js
 	wsh.addHandler('sequence_update', function(timestamp, params) {
 		//console.log('sequence: ' + params['name'] + ', value: ' + params['value']);
-		var sequenceName = params['name'];
-		$.each(g_liveBlocks, function(id, block) {
-			if (block.sequenceName && block.sequenceName == sequenceName) {
-				// fix(soon): should use params['timestamp']? (not defined if from arduino)
-				block.onValue(timestamp, params['value']);
-			}
-		});
+		// var sequenceName = params['name'];
+		// $.each(g_liveBlocks, function(id, block) {
+		// 	if (block.sequenceName && block.sequenceName == sequenceName) {
+		// 		// fix(soon): should use params['timestamp']? (not defined if from arduino)
+		// 		block.onValue(timestamp, params['value']);
+		// 	}
+		// });
 	});
 
 	return wsh;

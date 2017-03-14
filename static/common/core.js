@@ -533,8 +533,6 @@ function modalPrompt(params) {
 	modal.appendTo($('body'));
 	var fg = createFormGroup({id: 'promptInput', label: params.prompt}).appendTo($('#prompt-body'));
 	createTextInput({id: 'promptInput', value: params['default'] || ''}).appendTo(fg);
-
-	console.log(params.validator);
 	var checkInput = function() {
 		fg.removeClass('has-error');
 		var value = $('#promptInput').val();
