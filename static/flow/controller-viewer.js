@@ -8,6 +8,7 @@ function initControllerViewer() {
 	// if we've already initialized the view but are returning to it again, we should request the list of diagrams again
 	if (g_controllerViewerInitialized) {
 		sendMessage('list_diagrams');
+		sendMessage('request_status');
 		return;
 	}
 
@@ -20,6 +21,7 @@ function initControllerViewer() {
 	// open websocket connect to server
 	connectWebSocket(function() {
 		sendMessage('list_diagrams');
+		sendMessage('request_status');
 	});
 
 	// handle diagram list message from controller
@@ -42,13 +44,14 @@ function initControllerViewer() {
 
 			renameAction.click(diagramIndex, function(e){
 				var diagramSpec = g_diagramSpecs[e.data];
-				// TODO: add validator similar to diagram save prompt
-				modalPrompt({title: 'Rename Diagram', prompt: 'Name', default: diagramSpec.name, resultFunc: function(newName) {
-					sendMessage('rename_diagram', {'old_name': diagramSpec.name, 'new_name': newName});
-					diagramSpec.name = newName;
-					updateDiagramSpec(diagramSpec);
-					btnGroup.find('.diagram-name').html(newName);
-				}});
+				modalPrompt({title: 'Rename Diagram', prompt: 'Name', default: diagramSpec.name,
+					validator: Util.diagramValidator,
+					resultFunc: function(newName) {
+						sendMessage('rename_diagram', {'old_name': diagramSpec.name, 'new_name': newName});
+						diagramSpec.name = newName;
+						updateDiagramSpec(diagramSpec);
+						btnGroup.find('.diagram-name').html(newName);
+					}});
 			});
 
 			deleteAction.click(diagramIndex, function(e){
@@ -82,8 +85,9 @@ function initControllerViewer() {
 
 	// handle status message from the controller
 	addMessageHandler('status', function(timestamp, params) {
-		console.log(params);
-	})
+		console.log('status', params);
+		$('#controllerStatus').empty().html('Number of devices: ' + params.device_count);
+	});
 
 	g_controllerViewerInitialized = true;
 }

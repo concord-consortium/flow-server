@@ -573,21 +573,11 @@ function addPlotBlock() {
 function closeDiagramEditor() {
 	if (g_modified) {
 		modalConfirm({title: 'Save Diagram?', prompt: 'Do you want to save this diagram?', yesFunc: function() {
-
-			var validator = function(diagramName){
-				var forbidden = ['/', '\\', '*', '?']; // Might be easier to just ensure alphanumeracy?
-
-				var hasForbidden = forbidden.some(function(c){
-					return diagramName.indexOf(c) !== -1
-				});
-				return !hasForbidden;
-			}
-
 			modalPrompt({
 				title: 'Save Diagram',
 				prompt: 'Name',
 				default: g_diagramName,
-				validator: validator,
+				validator: Util.diagramValidator,
 				resultFunc: function(name) {
 					var diagramSpec = diagramToSpec(g_diagram);
 					sendMessage('save_diagram', {'name': name, 'diagram': diagramSpec});  // fix(soon): should check for success
