@@ -401,9 +401,9 @@ function displayBlockValue(block) {
 
 /* ======== OTHER FUNCTIONS ======= */
 
-
 // initialize the diagram editor view (everything in this file); sets up handlers for messages from controller
 function initDiagramEditor() {
+	var controllerConnected = false;
 
 	// request list of devices currently connected to controller
 	// fix(soon): if we're loading a diagram, should we do this after we've loaded it?
@@ -417,6 +417,8 @@ function initDiagramEditor() {
 
 		// handle a list of devices from the controller
 		addMessageHandler('device_list', function(timestamp, params) {
+			controllerConnected = true;
+
 			var devices = params.devices;
 			for (var i = 0; i < devices.length; i++) {
 				addDevice(devices[i]);
@@ -425,6 +427,8 @@ function initDiagramEditor() {
 
 		// handle a newly added device from the controller
 		addMessageHandler('device_added', function(timestamp, params) {
+			controllerConnected = true;
+
 			console.log('device_added');
 			var deviceInfo = params;
 			if (g_diagram.findBlockByName(deviceInfo.name) === null) {
@@ -451,6 +455,8 @@ function initDiagramEditor() {
 
 		// handle a device being unplugged
 		addMessageHandler('device_removed', function(timestamp, params) {
+			controllerConnected = true;
+
 			var block = g_diagram.findBlockByName(params.name);
 			if (block) {
 				undisplayBlock(block);  // remove UI elements
@@ -462,6 +468,8 @@ function initDiagramEditor() {
 		// handle a new set of values for the blocks in the diagram
 		// (the controller code is responsible for computing diagram block values)
 		addMessageHandler('update_diagram', function(timestamp, params) {
+			controllerConnected = true;
+
 			var values = params.values;
 			for (var blockId in values) {
 				if (values.hasOwnProperty(blockId)) {
@@ -474,6 +482,16 @@ function initDiagramEditor() {
 				}
 			}
 		});
+
+		// Check that the controller has sent a message upon init
+		window.setTimeout(function(){
+			if (!controllerConnected){
+				modalConfirm({title: 'Not connected to the controller', prompt: 'Would you like to exit?', yesFunc: function() {
+					showControllerSelector();
+				}, noFunc: function() {
+				}});
+			}
+		}, 1000);
 
 		g_diagramEditorInitialized = true;
 	}
