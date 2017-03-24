@@ -470,7 +470,9 @@ function initDiagramEditor() {
 					if (block) {
 						block.value = value;  // will be null if no defined value (disconnected)
 						displayBlockValue(block);
-					}
+					} else {
+			       sendMessage('list_devices');  // request devices in case we missed one
+			    }
 				}
 			}
 		});
