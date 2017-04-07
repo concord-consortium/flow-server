@@ -147,7 +147,7 @@ function viewData(e) {
 	var block = g_diagram.findBlockById(e.data.id);
 	if (block) {
 		showPlotter();
-		addSequence(block.name);
+		addSequence(block);
 	}
 }
 

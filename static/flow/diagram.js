@@ -95,9 +95,13 @@ function createFlowBlock(blockSpec) {
 		g_nextBlockId++;
 	}
 
-	block.history = [];
+	block.history = {
+		values: [],
+		timestamps: []
+	};
 	if (block.value){
-		block.history.push(block.value);
+		block.history.values.push(block.value);
+		block.history.timestamps.push(moment().valueOf() * 0.001);
 	}
 
 	// view-related data is stored in this sub-object
@@ -149,10 +153,12 @@ function createFlowBlock(blockSpec) {
 
 	block.updateValue = function(value){
 		this.value = value;
-		this.history.push(value);
+		this.history.values.push(value);
+		this.history.timestamps.push(moment().valueOf() * 0.001);
 
 		if (this.history.length === BLOCK_HISTORY_LIMIT){
-			this.history.shift();
+			this.history.values.shift();
+			this.history.timestamps.shift();
 		}
 	};
 

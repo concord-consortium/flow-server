@@ -20,8 +20,22 @@ function closePlotter() {
 
 
 // add a sequence to be displayed in the plotter screen
-function addSequence(sequenceName) {
-	g_sequenceName = sequenceName;
+function addSequence(block) {
+	g_sequenceName = block.name;
+
+	// Init the sequence with local data first
+	g_xData = createDataColumn('timestamp', block.history.timestamps);
+	g_xData.type = 'timestamp';
+	g_yData = createDataColumn('value', block.history.values);
+	g_yData.name = g_sequenceName;
+	var dataPairs = [
+		{
+			'xData': g_xData,
+			'yData': g_yData,
+		}
+	];
+	g_plotHandler.plotter.setData(dataPairs);
+	g_plotHandler.drawPlot(null, null);
 
 	// handle sequence history data received from server
 	var handler = function(data) {
@@ -38,11 +52,22 @@ function addSequence(sequenceName) {
 			}
 		}
 
-		// create plot using manyplot library
-		g_xData = createDataColumn('timestamp', timestamps);
+		// merge server data with local data
+		var localTimestamps = block.history.timestamps;
+
+		// sanity check to ensure server timestamps are earlier than local time
+		if (localTimestamps[0] - timestamps[0] > 0){
+			g_xData = createDataColumn('timestamp', timestamps.concat(localTimestamps));
+			g_yData = createDataColumn('value', values.concat(block.history.values));
+		} else {
+			// Ignore local timestamps, assume server data is more reliable
+			g_xData = createDataColumn('timestamp', timestamps);
+			g_yData = createDataColumn('value', values);
+		}
+
 		g_xData.type = 'timestamp';
-		g_yData = createDataColumn('value', values);
-		g_yData.name = sequenceName;
+		g_yData.name = g_sequenceName;
+
 		var dataPairs = [
 			{
 				'xData': g_xData,
@@ -55,7 +80,6 @@ function addSequence(sequenceName) {
 	}
 
 	var updateHandler = function(timestamp, params) {
-		console.log('sequence: ' + params['name'] + ', value: ' + params['value']);
 		var unixTimestamp = timestamp.unix();
 		var value = params['value'];
 
@@ -67,7 +91,7 @@ function addSequence(sequenceName) {
 	}
 
 	// request sequence history data from server
-	var url = '/api/v1/resources' + g_controller.path + '/' + sequenceName;
+	var url = '/api/v1/resources' + g_controller.path + '/' + g_sequenceName;
 	var params = {
 		count: 10000,
 	}
