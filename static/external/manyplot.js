@@ -4,7 +4,7 @@ function createPlotHandler( canvas, multiFrame ) {
 	plotHandler.plotter = createPlotter( canvas, multiFrame );
 	plotHandler.mouseDown = false;
 	plotHandler.xDownLast = null;
-	
+
 	plotHandler.drawPlot = function( xMouse, yMouse ) {
 		var args = {
 			"useTimestamp": true,
@@ -34,10 +34,10 @@ function createPlotHandler( canvas, multiFrame ) {
 			plotHandler.xDownLast = x;
 		} else {
 			plotHandler.drawPlot( x, y );
-			plotHandler.xDownLast = null; 
+			plotHandler.xDownLast = null;
 		}
 	};
-	
+
 	canvas.addEventListener( "mousemove", plotHandler.onMouse, false );
 	canvas.addEventListener( "mouseup", plotHandler.onMouse, false );
 	canvas.addEventListener( "mousedown", plotHandler.onMouse, false );
