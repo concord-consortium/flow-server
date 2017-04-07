@@ -122,9 +122,9 @@ function numberEntryChanged(e) {
 	var block = g_diagram.findBlockById(e.data);
 	var val = parseFloat($('#bv_' + block.id).val());
 	if (isNaN(val)) {
-		block.value = null;
+		block.updateValue(null);
 	} else {
-		block.value = val;
+		block.updateValue(val);
 	}
 	// fix(faster): only trigger if value has changed
 	structureModified();  // fix(clean): add a separate valueChanged function?
@@ -147,7 +147,7 @@ function viewData(e) {
 	var block = g_diagram.findBlockById(e.data.id);
 	if (block) {
 		showPlotter();
-		addSequence(block.name);
+		addSequence(block);
 	}
 }
 
@@ -476,7 +476,7 @@ function initDiagramEditor() {
 					var value = values[blockId];
 					var block = g_diagram.findBlockById(parseInt(blockId));  // fix(later): why aren't blockIds coming through as integers?
 					if (block) {
-						block.value = value;  // will be null if no defined value (disconnected)
+						block.updateValue(value); // will be null if no defined value (disconnected)
 						displayBlockValue(block);
 					}
 				}

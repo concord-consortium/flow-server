@@ -1,21 +1,23 @@
 var g_nextBlockId = 1;  // used to assign unique numeric IDs to each block
 
+var BLOCK_HISTORY_LIMIT = 1000;
+
 
 // create an object representing a data flow diagram
 function createDiagram() {
 	var diagram = {};
 	diagram.blocks = [];
 	g_nextBlockId = 1;
-	
+
 	// remove a block from the diagram (this doesn't update user interface, just the diagram data structure)
 	diagram.removeBlock = function(block) {
-		
+
 		// remove connections involving block
 		var destPins = this.findDestPins(block);
 		for (var i = 0; i < destPins.length; i++) {
 			destPins[i].sourcePin = null;
 		}
-		
+
 		// remove blocks
 		var blocks = [];
 		for (var i = 0; i < this.blocks.length; i++) {
@@ -51,7 +53,7 @@ function createDiagram() {
 		}
 		return block;
 	};
-	
+
 	// find a list of connection destination pins (pins for which the given block is source)
 	diagram.findDestPins = function(block) {
 		var pins = [];
@@ -66,7 +68,7 @@ function createDiagram() {
 		}
 		return pins;
 	};
-	
+
 	return diagram;
 }
 
@@ -92,7 +94,16 @@ function createFlowBlock(blockSpec) {
 		block.id = g_nextBlockId;
 		g_nextBlockId++;
 	}
-	
+
+	block.history = {
+		values: [],
+		timestamps: []
+	};
+	if (block.value){
+		block.history.values.push(block.value);
+		block.history.timestamps.push(moment().valueOf() * 0.001);
+	}
+
 	// view-related data is stored in this sub-object
 	block.view = {};
 	block.view.x = 0;
@@ -101,7 +112,7 @@ function createFlowBlock(blockSpec) {
 		block.view.x = blockSpec.view.x || 0;
 		block.view.y = blockSpec.view.y || 0;
 	}
-	
+
 	// add pins
 	for (var i = 0; i < block.inputCount; i++) {
 		var pin = createPin(block, i, true);
@@ -111,7 +122,7 @@ function createFlowBlock(blockSpec) {
 		var pin = createPin(block, i, false);
 		block.pins.push(pin);
 	}
-	
+
 	// serialize to dictionary (suitable for conversion to JSON)
 	block.asSpec = function() {
 		var sources = [];
@@ -139,7 +150,18 @@ function createFlowBlock(blockSpec) {
 			},
 		}
 	};
-	
+
+	block.updateValue = function(value){
+		this.value = value;
+		this.history.values.push(value);
+		this.history.timestamps.push(moment().valueOf() * 0.001);
+
+		if (this.history.length === BLOCK_HISTORY_LIMIT){
+			this.history.values.shift();
+			this.history.timestamps.shift();
+		}
+	};
+
 	return block;
 }
 
@@ -178,7 +200,7 @@ function specToDiagram(diagramSpec) {
 		if (blockSpec.sources) {
 			var block = diagram.blocks[i];
 			for (var j = 0; j < blockSpec.sources.length; j++) {
-				
+
 				// find the source pin (output pin of source block)
 				var sourceId = blockSpec.sources[j];
 				var sourceBlock = diagram.findBlockById(sourceId);
@@ -215,4 +237,3 @@ function diagramToSpec(diagram) {
 	}
 	return {'file_version': '0.1', 'blocks': blocks};
 }
-
