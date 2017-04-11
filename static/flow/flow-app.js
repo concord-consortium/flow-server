@@ -3,7 +3,7 @@
 
 // initialize the app
 function initFlowApp() {
-	showControllerSelector();
+	initControllerSelector();
 }
 
 
