@@ -1,125 +1,113 @@
-var g_controllerViewerInitialized = false;
 var g_diagramSpecs = [];  // a collection of all diagrams on the controller
-
+var g_controllerViewerInitialized = false;
 
 // prepare an interface for viewing the diagrams contained within a controller
-function initControllerViewer() {
-
-	// if we've already initialized the view but are returning to it again, we should request the list of diagrams again
-	if (g_controllerViewerInitialized) {
-		sendMessage('list_diagrams');
-		sendMessage('request_status');
-		return;
-	}
-
-	// subscribe to message for this controller
-	subscribeToFolder(g_controller.path);
-
-	// set outgoing messages to go to this controller
-	setTargetFolder(g_controller.path);
-
-	// open websocket connect to server
-	connectWebSocket(function() {
-		sendMessage('list_diagrams');
-		sendMessage('request_status');
-	});
-
-	// handle diagram list message from controller
-	addMessageHandler('diagram_list', function(timestamp, params) {
-		var diagramListDiv = $('#diagramList');
-		diagramListDiv.empty();
-		g_diagramSpecs = params.diagrams;
-
-		var createMenu = function(btnGroup, diagramIndex){
-			var diagramActions = $('<button>', {class: 'btn btn-lg dropdown-toggle', html: '<span class="caret"></span>'});
-			diagramActions
-				.css({ height: '45px'})
-				.attr({ 'data-toggle': 'dropdown'})
-				.appendTo(btnGroup);
-
-			var diagramMenu = $('<ul>', { class: 'dropdown-menu '});
-
-			var renameAction = $('<li>', { html: '<a href="#">Rename</a>' }).appendTo(diagramMenu);
-			var deleteAction = $('<li>', { html: '<a href="#">Delete</a>' }).appendTo(diagramMenu);
-
-			renameAction.click(diagramIndex, function(e){
-				var diagramSpec = g_diagramSpecs[e.data];
+function controllerViewerView() {
+	return Vue.component('controller-viewer', {
+		template: [
+			'<div id="controllerViewerPanel" class="flowPanel center-block">',
+				'<div class="row">',
+					'<div class="col-md-4"></div>',
+					'<div class="col-md-4">',
+						'<h2>Flow Diagrams</h2> <span class="controllerStatus"><a data-toggle="collapse" href="#controllerStatus" aria-expanded="false" aria-controls="controllerStatus">Status</a></span>',
+						'<div class="collapse" id="controllerStatus">',
+						  '<div class="well">',
+						    '{{statusMsg}}',
+						  '</div>',
+						'</div>',
+						'<div v-if="connecting">Connecting to controller...</div>',
+						'<div id="diagramList" v-for="(diagram, i) in diagrams">',
+							'<div class="listButton">',
+								'<div class="btn-group">',
+									'<button class="btn btn-lg diagram-name" v-on:click="viewDiagram(diagram)">{{diagram.name}}</button>',
+									'<button class="btn btn-lg dropdown-toggle" style="height:45px;" data-toggle="dropdown"><span class="caret"></span></button>',
+									'<ul class="dropdown-menu">',
+										'<li v-on:click="renameDiagram(diagram)"><a>Rename</a></li>',
+										'<li v-on:click="deleteDiagram(diagram, i)"><a>Delete</a></li>',
+									'</ul>',
+								'</div>',
+							'</div>',
+						'</div>',
+						'<button class="btn btn-primary" v-on:click="newDiagram()">New Diagram</button>',
+						'<button class="btn btn-primary" v-on:click="closeView()">Close Controller</button>',
+					'</div>',
+					'<div class="col-md-4"></div>',
+				'</div>',
+			'</div>'
+		].join('\n'),
+		data: function(){
+			return {
+				connecting: true,
+				diagrams: [], // Populate from message handler
+				statusMsg: '...'
+			}
+		},
+		methods: {
+			newDiagram: function(){
+				// open a new flow diagram in the diagram editor
+				showDiagramEditor();
+				loadDiagram({'blocks': []});  // load an empty diagram
+				sendMessage('set_diagram', {diagram: diagramToSpec(g_diagram)});  // send empty diagram to controller
+			},
+			viewDiagram: function(diagramSpec){
+				showDiagramEditor();
+				sendMessage('start_diagram', diagramSpec);
+				loadDiagram(diagramSpec);
+			},
+			renameDiagram: function(diagramSpec){
 				modalPrompt({title: 'Rename Diagram', prompt: 'Name', default: diagramSpec.name,
 					validator: Util.diagramValidator,
 					resultFunc: function(newName) {
 						sendMessage('rename_diagram', {'old_name': diagramSpec.name, 'new_name': newName});
 						diagramSpec.name = newName;
-						updateDiagramSpec(diagramSpec);
-						btnGroup.find('.diagram-name').html(newName);
 					}});
-			});
-
-			deleteAction.click(diagramIndex, function(e){
-				var diagramSpec = g_diagramSpecs[e.data];
+			},
+			deleteDiagram: function(diagramSpec, i){
+				var view = this;
 				// TODO: add validator similar to diagram save prompt
 				modalConfirm({title: 'Delete Diagram', prompt: 'Are you sure you want to delete this diagram?', yesFunc: function() {
 					sendMessage('delete_diagram', {'name': diagramSpec.name });
-					deleteDiagramSpec(diagramSpec.name);
-					btnGroup.remove();
+					view.diagrams.splice(i, 1);
 				}});
-			});
-			diagramMenu.appendTo(btnGroup);
-		};
+			},
+			closeView: function(){
+				showControllerSelector();
+			}
+		},
+		created: function(){
+			var view = this;
+			// if we've already initialized the view but are returning to it again, we should request the list of diagrams again
 
+			// subscribe to message for this controller
+			subscribeToFolder(g_controller.path);
 
-		for (var i = 0; i < g_diagramSpecs.length; i++) {
-			var diagram = g_diagramSpecs[i];
-			var diagramDiv = $('<div>', {class: 'listButton'});
-			var btnGroup = $('<div>', {class: 'btn-group'});
-			var diagramName = $('<button>', {class: 'btn btn-lg diagram-name', html: diagram.name}).appendTo(btnGroup);
-			diagramName.click(i, function(e) {
-				showDiagramEditor();
-				sendMessage('start_diagram', g_diagramSpecs[e.data]);
-				loadDiagram(g_diagramSpecs[e.data]);
+			// set outgoing messages to go to this controller
+			setTargetFolder(g_controller.path);
+
+			// open websocket connect to server
+			if (g_controllerViewerInitialized) {
+				sendMessage('list_diagrams');
+				sendMessage('request_status');
+			} else {
+				connectWebSocket(function() {
+					sendMessage('list_diagrams');
+					sendMessage('request_status');
+				});
+			}
+
+			addMessageHandler('diagram_list', function(timestamp, params){
+				view.connecting = false;
+				view.diagrams = params.diagrams;
 			});
-			createMenu(btnGroup, i)
-			btnGroup.appendTo(diagramDiv);
-			diagramDiv.appendTo(diagramListDiv);
+
+			// handle status message from the controller
+			addMessageHandler('status', function(timestamp, params) {
+				console.log('status', params);
+				view.statusMsg = 'Number of devices: ' + params.device_count;
+			});
+
+			g_controllerViewerInitialized = true;
+
 		}
 	});
-
-	// handle status message from the controller
-	addMessageHandler('status', function(timestamp, params) {
-		console.log('status', params);
-		$('#controllerStatus').empty().html('Number of devices: ' + params.device_count);
-	});
-
-	g_controllerViewerInitialized = true;
-}
-
-
-// update a diagram spec in the list of diagrams after user makes edits
-function updateDiagramSpec(diagramSpec) {
-	for (var i = 0; i < g_diagramSpecs.length; i++) {
-		if (g_diagramSpecs[i].name === diagramSpec.name) {
-			g_diagramSpecs[i] = diagramSpec;
-		}
-	}
-}
-
-function deleteDiagramSpec(name) {
-	for (var i = 0; i < g_diagramSpecs.length; i++) {
-		if (g_diagramSpecs[i].name === name) {
-			delete g_diagramSpecs[i];
-		}
-	}
-}
-
-
-// close the controller viewer and go back to the controller selector
-function closeControllerViewer() {
-	showControllerSelector();
-}
-
-
-// open a new flow diagram in the diagram editor
-function newDiagram() {
-	showDiagramEditor();
-	loadDiagram({'blocks': []});  // load an empty diagram
-	sendMessage('set_diagram', {diagram: diagramToSpec(g_diagram)});  // send empty diagram to controller
 }

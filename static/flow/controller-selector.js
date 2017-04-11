@@ -1,6 +1,6 @@
 // initialize a view that lets the user choose a controller
-function initControllerSelector() {
-	var vm = new Vue({
+function controllerSelectorView() {
+	return Vue.component('controller-selector', {
 		template: [
 			'<div id="controllerSelectorPanel" class="flowPanel">',
 				'<div class="row">',
@@ -21,15 +21,16 @@ function initControllerSelector() {
 				'</div>',
 			'</div>'
 		].join('\n'),
-	  el: '#app',
-		data: {
-			controllers: g_controllers, // Populate if user is logged in
-			customController: ''
+		data: function(){
+			return {
+				controllers: g_controllers, // Populate if user is logged in
+				customController: ''
+			}
 		},
 		methods: {
 			viewController: function(controller){
 				g_controller = controller;
-				// showControllerViewer();
+				showControllerViewer();
 			},
 			fetchController: function(){
 				$.ajax({

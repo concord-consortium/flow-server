@@ -1,47 +1,44 @@
 // This file provide top-level control for the data flow app.
 
+var g_app;
 
 // initialize the app
 function initFlowApp() {
-	initControllerSelector();
+	g_app = new Vue({
+		el: '#app',
+		template: [
+			'<component v-bind:is="currentView"></component>'
+		].join('\n'),
+		data: {
+			currentView: 'controllerSelector',
+		},
+		components: {
+			'controllerSelector': controllerSelectorView(),
+			'controllerViewer': controllerViewerView()
+		}
+	});
 }
 
 
 // change screens within the app: show the controller selection screen
 function showControllerSelector() {
-	initControllerSelector();
-	$('#controllerSelectorPanel').show();
-	$('#controllerViewerPanel').hide();
-	$('#diagramEditorPanel').hide();
-	$('#plotterPanel').hide();
+	g_app.currentView = 'controllerSelector'
 }
 
 
 // change screens within the app: show the controller contents (diagram list) screen
 function showControllerViewer() {
-	initControllerViewer();
-	$('#controllerSelectorPanel').hide();
-	$('#controllerViewerPanel').show();
-	$('#diagramEditorPanel').hide();
-	$('#plotterPanel').hide();
+	g_app.currentView = 'controllerViewer'
 }
 
 
 // change screens within the app: show the flow diagram editor screen
 function showDiagramEditor() {
 	initDiagramEditor();
-	$('#controllerSelectorPanel').hide();
-	$('#controllerViewerPanel').hide();
-	$('#diagramEditorPanel').show();
-	$('#plotterPanel').hide();
 }
 
 
 // change screens within the app: show the plotter screen
 function showPlotter() {
 	initPlotter();
-	$('#controllerSelectorPanel').hide();
-	$('#controllerViewerPanel').hide();
-	$('#diagramEditorPanel').hide();
-	$('#plotterPanel').show();
 }
