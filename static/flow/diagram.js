@@ -151,10 +151,14 @@ function createFlowBlock(blockSpec) {
 		}
 	};
 
-	block.updateValue = function(value){
+	block.updateValue = function(value, timestamp){
 		this.value = value;
+
+		timestamp = timestamp || Math.round(moment().valueOf() * 0.001);
 		this.history.values.push(value);
-		this.history.timestamps.push(moment().valueOf() * 0.001);
+		this.history.timestamps.push(timestamp);
+
+		console.log('Updated:', value, 'at', timestamp)
 
 		if (this.history.length === BLOCK_HISTORY_LIMIT){
 			this.history.values.shift();
