@@ -9,6 +9,7 @@ var g_dragBlock = null;
 var g_dragBlockOffsetX = null;
 var g_dragBlockOffsetY = null;
 var g_startTimestamp = moment().valueOf() * 0.001;  // a unix timestamp used as the starting point for time series plots
+var g_viewingBlockId = null; // When showing block data, track id
 
 
 /* ======== EVENT HANDLERS ======= */
@@ -148,6 +149,7 @@ function viewData(e) {
 	if (block) {
 		showPlotter();
 		addSequence(block);
+		g_viewingBlockId = block.id;
 	}
 }
 
@@ -475,7 +477,7 @@ function initDiagramEditor() {
 				if (values.hasOwnProperty(blockId)) {
 					var value = values[blockId];
 					var block = g_diagram.findBlockById(parseInt(blockId));  // fix(later): why aren't blockIds coming through as integers?
-					if (block) {
+					if (block && value !== null) {
 						block.updateValue(value); // will be null if no defined value (disconnected)
 						displayBlockValue(block);
 					}

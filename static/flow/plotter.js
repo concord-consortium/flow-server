@@ -3,6 +3,8 @@ var g_xData = null;
 var g_yData = null;
 var g_sequenceName = null;
 var g_sequenceBlock = null;
+var g_localTimestamps = null;
+var g_localValues = null;
 
 
 // initialize the plotter view
@@ -25,6 +27,14 @@ function getServerSequenceData(params) {
 		var values = data.values;
 		var timestamps = data.timestamps;
 
+		console.log('Received:');
+		for(var i = 0; i < values.length; i++){
+			console.log(values[i], timestamps[i]);
+		}
+
+		// console.log('received', values.length, 'values');
+		// console.log('received', timestamps.length, 'timestamps');
+
 		// make sure all values are numeric (or null)
 		// fix(faster): do on server
 		var len = values.length;
@@ -36,28 +46,13 @@ function getServerSequenceData(params) {
 		}
 
 		// merge server data with local data
-		var localTimestamps = g_sequenceBlock.history.timestamps;
 
 		// sanity check to ensure server timestamps are earlier than local time
-		if (localTimestamps[0] - timestamps[0] > 0){
-			g_xData = createDataColumn('timestamp', timestamps.concat(localTimestamps));
-			g_yData = createDataColumn('value', values.concat(g_sequenceBlock.history.values));
-		} else {
-			// Ignore local timestamps, assume server data is more reliable
-			g_xData = createDataColumn('timestamp', timestamps);
-			g_yData = createDataColumn('value', values);
+		if (g_localTimestamps[0] - timestamps[0] > 0){
+	    Array.prototype.unshift.apply(g_localTimestamps, timestamps);
+			Array.prototype.unshift.apply(g_localValues, values);
 		}
-
-		g_xData.type = 'timestamp';
-		g_yData.name = g_sequenceName;
-
-		var dataPairs = [
-			{
-				'xData': g_xData,
-				'yData': g_yData,
-			}
-		];
-		g_plotHandler.plotter.setData(dataPairs);
+		g_plotHandler.plotter.autoBounds();
 		g_plotHandler.drawPlot(null, null);
 
 	}
@@ -72,9 +67,11 @@ function addSequence(block) {
 	g_sequenceName = block.name;
 
 	// Init the sequence with local data first
-	g_xData = createDataColumn('timestamp', block.history.timestamps);
+	g_localTimestamps = block.history.timestamps;
+	g_localValues = block.history.values;
+	g_xData = createDataColumn('timestamp', g_localTimestamps);
 	g_xData.type = 'timestamp';
-	g_yData = createDataColumn('value', block.history.values);
+	g_yData = createDataColumn('value', g_localValues);
 	g_yData.name = g_sequenceName;
 	var dataPairs = [
 		{
