@@ -6,12 +6,27 @@ var g_sequenceBlock = null;
 var g_localTimestamps = null;
 var g_localValues = null;
 
+var PLOTTER_MARGIN_BOTTOM = 94; // px
+
+function resizeCanvas(){
+	canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight - PLOTTER_MARGIN_BOTTOM;
+
+	if (g_plotHandler){
+		g_plotHandler.drawPlot(null, null);
+	}
+}
+
 
 // initialize the plotter view
 function initPlotter() {
 	if (g_plotHandler === null) {
 		var canvas = document.getElementById('canvas');
 		g_plotHandler = createPlotHandler(canvas);
+
+		context = canvas.getContext('2d');
+		window.addEventListener('resize', resizeCanvas, false);
+		resizeCanvas();
 	}
 }
 
