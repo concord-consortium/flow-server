@@ -9,6 +9,7 @@ var g_dragBlock = null;
 var g_dragBlockOffsetX = null;
 var g_dragBlockOffsetY = null;
 var g_startTimestamp = moment().valueOf() * 0.001;  // a unix timestamp used as the starting point for time series plots
+var g_viewingBlockId = null; // When showing block data, track id
 
 function diagramEditorView() {
 	return Vue.component('diagram-editor', {
@@ -30,103 +31,102 @@ function diagramEditorView() {
 		].join('\n'),
 		methods: {
 
+		},
+		created: function(){
+			var controllerConnected = false;
+
+			// request list of devices currently connected to controller
+			// fix(soon): if we're loading a diagram, should we do this after we've loaded it?
+			sendMessage('list_devices');
+
+			// one-time initialization of UI elements and message handlers
+			if (g_diagramEditorInitialized === false) {
+				g_svgDrawer = SVG('diagramHolder');
+				$('#diagramHolder').mousemove(mouseMove);
+				$('#diagramHolder').mouseup(mouseUp);
+
+				// handle a list of devices from the controller
+				addMessageHandler('device_list', function(timestamp, params) {
+					controllerConnected = true;
+
+					var devices = params.devices;
+					for (var i = 0; i < devices.length; i++) {
+						addDevice(devices[i]);
+					}
+				});
+
+				// handle a newly added device from the controller
+				addMessageHandler('device_added', function(timestamp, params) {
+					controllerConnected = true;
+
+					console.log('device_added');
+					var deviceInfo = params;
+					if (g_diagram.findBlockByName(deviceInfo.name) === null) {
+						var inputCount = (deviceInfo.dir === 'out') ? 1 : 0;
+						var outputCount = (deviceInfo.dir === 'in') ? 1 : 0;
+						var blockSpec = {
+							name: deviceInfo.name,
+							type: deviceInfo.type,
+							units: deviceInfo.units,
+							has_seq: (deviceInfo.dir === 'in'),  // assume all inputs have sequences (for now)
+							input_count: inputCount,
+							output_count: outputCount,
+							view: {
+								x: 100 + g_diagram.blocks.length * 50,  // fix(later): smarter positioning
+								y: 100 + g_diagram.blocks.length * 50,
+							}
+						};
+						var block = createFlowBlock(blockSpec);
+						g_diagram.blocks.push(block);
+						displayBlock(block);
+						structureModified();
+					}
+				});
+
+				// handle a device being unplugged
+				addMessageHandler('device_removed', function(timestamp, params) {
+					controllerConnected = true;
+
+					var block = g_diagram.findBlockByName(params.name);
+					if (block) {
+						undisplayBlock(block);  // remove UI elements
+						g_diagram.removeBlock(block);
+						structureModified();
+					}
+				});
+
+				// handle a new set of values for the blocks in the diagram
+				// (the controller code is responsible for computing diagram block values)
+				addMessageHandler('update_diagram', function(timestamp, params) {
+					controllerConnected = true;
+
+					var values = params.values;
+					for (var blockId in values) {
+						if (values.hasOwnProperty(blockId)) {
+							var value = values[blockId];
+							var block = g_diagram.findBlockById(parseInt(blockId));  // fix(later): why aren't blockIds coming through as integers?
+							if (block && value !== null) {
+								block.updateValue(value); // will be null if no defined value (disconnected)
+								displayBlockValue(block);
+							}
+						}
+					}
+				});
+
+				// Check that the controller has sent a message upon init
+				window.setTimeout(function(){
+					if (!controllerConnected){
+						modalConfirm({title: 'Not connected to the controller', prompt: 'Would you like to exit?', yesFunc: function() {
+							showControllerSelector();
+						}, noFunc: function() {
+						}});
+					}
+				}, 1000);
+				
+				g_diagramEditorInitialized = true;
+			}
 		}
 	});
-}
-
-function initDiagramEditor() {
-	var controllerConnected = false;
-
-	// request list of devices currently connected to controller
-	// fix(soon): if we're loading a diagram, should we do this after we've loaded it?
-	sendMessage('list_devices');
-
-	// one-time initialization of UI elements and message handlers
-	if (g_diagramEditorInitialized === false) {
-		g_svgDrawer = SVG('diagramHolder');
-		$('#diagramHolder').mousemove(mouseMove);
-		$('#diagramHolder').mouseup(mouseUp);
-
-		// handle a list of devices from the controller
-		addMessageHandler('device_list', function(timestamp, params) {
-			controllerConnected = true;
-
-			var devices = params.devices;
-			for (var i = 0; i < devices.length; i++) {
-				addDevice(devices[i]);
-			}
-		});
-
-		// handle a newly added device from the controller
-		addMessageHandler('device_added', function(timestamp, params) {
-			controllerConnected = true;
-
-			console.log('device_added');
-			var deviceInfo = params;
-			if (g_diagram.findBlockByName(deviceInfo.name) === null) {
-				var inputCount = (deviceInfo.dir === 'out') ? 1 : 0;
-				var outputCount = (deviceInfo.dir === 'in') ? 1 : 0;
-				var blockSpec = {
-					name: deviceInfo.name,
-					type: deviceInfo.type,
-					units: deviceInfo.units,
-					has_seq: (deviceInfo.dir === 'in'),  // assume all inputs have sequences (for now)
-					input_count: inputCount,
-					output_count: outputCount,
-					view: {
-						x: 100 + g_diagram.blocks.length * 50,  // fix(later): smarter positioning
-						y: 100 + g_diagram.blocks.length * 50,
-					}
-				};
-				var block = createFlowBlock(blockSpec);
-				g_diagram.blocks.push(block);
-				displayBlock(block);
-				structureModified();
-			}
-		});
-
-		// handle a device being unplugged
-		addMessageHandler('device_removed', function(timestamp, params) {
-			controllerConnected = true;
-
-			var block = g_diagram.findBlockByName(params.name);
-			if (block) {
-				undisplayBlock(block);  // remove UI elements
-				g_diagram.removeBlock(block);
-				structureModified();
-			}
-		});
-
-		// handle a new set of values for the blocks in the diagram
-		// (the controller code is responsible for computing diagram block values)
-		addMessageHandler('update_diagram', function(timestamp, params) {
-			controllerConnected = true;
-
-			var values = params.values;
-			for (var blockId in values) {
-				if (values.hasOwnProperty(blockId)) {
-					var value = values[blockId];
-					var block = g_diagram.findBlockById(parseInt(blockId));  // fix(later): why aren't blockIds coming through as integers?
-					if (block) {
-						block.updateValue(value); // will be null if no defined value (disconnected)
-						displayBlockValue(block);
-					}
-				}
-			}
-		});
-
-		// Check that the controller has sent a message upon init
-		window.setTimeout(function(){
-			if (!controllerConnected){
-				modalConfirm({title: 'Not connected to the controller', prompt: 'Would you like to exit?', yesFunc: function() {
-					showControllerSelector();
-				}, noFunc: function() {
-				}});
-			}
-		}, 1000);
-
-		g_diagramEditorInitialized = true;
-	}
 }
 
 /* ======== EVENT HANDLERS ======= */
@@ -266,6 +266,7 @@ function viewData(e) {
 	if (block) {
 		showPlotter();
 		addSequence(block);
+		g_viewingBlockId = block.id;
 	}
 }
 
@@ -518,7 +519,6 @@ function displayBlockValue(block) {
 
 
 /* ======== OTHER FUNCTIONS ======= */
-
 
 // load a diagram from a spec dictionary into the editor
 function loadDiagram(diagramSpec) {
