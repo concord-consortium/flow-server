@@ -5,6 +5,7 @@
 	<script src="/static/bootstrap/js/bootstrap.min.js"></script>
 	<script src="/ext/flow-server/static/external/svg.min.js"></script>
 	<script src="/static/js/moment.min.js"></script>
+	<script src="https://unpkg.com/vue"></script>
 	<script src="/ext/flow-server/static/common/core.js"></script>
 	<script src="/ext/flow-server/static/common/messages.js"></script>
 	<script src="/ext/flow-server/static/external/manyplot.js"></script>
@@ -25,70 +26,7 @@
 <title>Data Flow</title>
 </head>
 <body>
-
-<div id="controllerSelectorPanel" class="flowPanel">
-	<div class="row">
-		<div class="col-md-4"></div>
-		<div class="col-md-4">
-			<h2>Select a Controller</h2>
-			<div id="controllerList"></div>
-		</div>
-		<div class="col-md-4"></div>
-	</div>
-</div>
-<div id="controllerViewerPanel" class="flowPanel center-block">
-	<div class="row">
-		<div class="col-md-4"></div>
-		<div class="col-md-4">
-			<h2>Flow Diagrams</h2> <span class="controllerStatus"><a data-toggle="collapse" href="#controllerStatus" aria-expanded="false" aria-controls="controllerStatus">Status</a></span>
-			<div class="collapse" id="controllerStatus">
-			  <div class="well">
-			    ...
-			  </div>
-			</div>
-			<div id="diagramList">Connecting to controller...</div>
-			<button class="btn btn-primary" onclick="newDiagram()">New Diagram</button>
-			<button class="btn btn-primary" onclick="closeControllerViewer()">Close Controller</button>
-			<!--button class="btn" onclick="CodapTest.sendSequence([3,1,4,1,5,9,2,6,5]);">Test CODAP</button-->
-			<!-- <button class="btn" onclick="sendMessage('request_status');">Check Status</button> -->
-		</div>
-		<div class="col-md-4"></div>
-	</div>
-</div>
-<div id="diagramEditorPanel" class="flowPanel">
-	<div id="diagramHolder">
-	</div>
-	<div class="menuBar">
-		<button class="btn btn-primary" onclick="sendMessage('add_camera');">Add Camera</button>
-		<button class="btn btn-primary" onclick="addNumericBlock()">Add Numeric Entry</button>
-		<button class="btn btn-primary" onclick="showFilterBlockSelector()">Add Filter</button>
-		<button class="btn btn-primary" onclick="addPlotBlock()">Add Plot</button>
-		<button class="btn btn-primary" onclick="closeDiagramEditor()">Close Diagram</button>
-		<button class="btn" onclick="sendMessage('add_sim_sensor');">Add Sim Sensor</button>
-		<button class="btn" onclick="sendMessage('add_sim_actuator');">Add Sim Actuator</button>
-		<button class="btn" onclick="sendMessage('remove_sim_device');">Remove Sim Device</button>
-	</div>
-</div>
-<div id="plotterPanel" class="flowPanel">
-	<div>
-		<canvas id="canvas" width="800" height="400"></canvas>
-		<div class="timeframe-label">Select timeframe:</div>
-		<div class="btn-group timeframe" role="group" aria-label="timeframe">
-		  <button type="button" class="btn btn-default" onclick="setTimeFrame('1m')">1 min</button>
-			<button type="button" class="btn btn-default" onclick="setTimeFrame('10m')">10 mins</button>
-			<button type="button" class="btn btn-default" onclick="setTimeFrame('1h')">1 hr</button>
-			<button type="button" class="btn btn-default" onclick="setTimeFrame('24h')">24 hrs</button>
-			<button type="button" class="btn btn-default" onclick="setTimeFrame('7d')">7 days</button>
-			<button type="button" class="btn btn-default" onclick="setTimeFrame('30d')">30 days</button>
-		</div>
-	</div>
-	<div class="menuBar">
-		<button class="btn" onclick="g_plotHandler.zoomIn()">Zoom In</button>
-		<button class="btn" onclick="g_plotHandler.zoomOut()">Zoom Out</button>
-		<button class="btn btn-danger" onclick="deleteSequenceData()">Delete Data</button>
-		<button class="btn btn-primary" onclick="closePlotter()">Close Plotter</button>
-	</div>
-</div>
+	<div id="app"></div>
 
 <script>
 

@@ -6,6 +6,33 @@ var g_sequenceBlock = null;
 var g_localTimestamps = null;
 var g_localValues = null;
 
+function plotterView(){
+	return Vue.component('plotter', {
+		template: [
+			'<div id="plotterPanel" class="flowPanel">',
+				'<div>',
+					'<canvas id="canvas" width="800" height="400"></canvas>',
+					'<div class="timeframe-label">Select timeframe:</div>',
+					'<div class="btn-group timeframe" role="group" aria-label="timeframe">',
+					  '<button type="button" class="btn btn-default" onclick="setTimeFrame(\'1m\')">1 min</button>',
+						'<button type="button" class="btn btn-default" onclick="setTimeFrame(\'10m\')">10 mins</button>',
+						'<button type="button" class="btn btn-default" onclick="setTimeFrame(\'1h\')">1 hr</button>',
+						'<button type="button" class="btn btn-default" onclick="setTimeFrame(\'24h\')">24 hrs</button>',
+						'<button type="button" class="btn btn-default" onclick="setTimeFrame(\'7d\')">7 days</button>',
+						'<button type="button" class="btn btn-default" onclick="setTimeFrame(\'30d\')">30 days</button>',
+					'</div>',
+				'</div>',
+				'<div class="menuBar">',
+					'<button class="btn" onclick="g_plotHandler.zoomIn()">Zoom In</button>',
+					'<button class="btn" onclick="g_plotHandler.zoomOut()">Zoom Out</button>',
+					'<button class="btn btn-danger" onclick="deleteSequenceData()">Delete Data</button>',
+					'<button class="btn btn-primary" onclick="closePlotter()">Close Plotter</button>',
+				'</div>',
+			'</div>'
+		].join('\n')
+	});
+}
+
 
 // initialize the plotter view
 function initPlotter() {
