@@ -14,7 +14,9 @@ function initFlowApp() {
 		},
 		components: {
 			'controllerSelector': controllerSelectorView(),
-			'controllerViewer': controllerViewerView()
+			'controllerViewer': controllerViewerView(),
+			'diagramEditor': diagramEditorView(),
+			'plotter': plotterView(),
 		}
 	});
 }
@@ -22,23 +24,23 @@ function initFlowApp() {
 
 // change screens within the app: show the controller selection screen
 function showControllerSelector() {
-	g_app.currentView = 'controllerSelector'
+	g_app.currentView = 'controllerSelector';
 }
 
 
 // change screens within the app: show the controller contents (diagram list) screen
 function showControllerViewer() {
-	g_app.currentView = 'controllerViewer'
+	g_app.currentView = 'controllerViewer';
 }
 
 
 // change screens within the app: show the flow diagram editor screen
 function showDiagramEditor() {
-	initDiagramEditor();
+	g_app.currentView = 'diagramEditor';
 }
 
 
 // change screens within the app: show the plotter screen
 function showPlotter() {
-	initPlotter();
+	g_app.currentView = 'plotter'
 }

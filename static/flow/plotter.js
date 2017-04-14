@@ -3,6 +3,24 @@ var g_xData = null;
 var g_yData = null;
 var g_sequenceName = null;
 
+function plotterView(){
+	return Vue.component('plotter', {
+		template: [
+			'<div id="plotterPanel" class="flowPanel">',
+				'<div>',
+					'<canvas id="canvas" width="800" height="400"></canvas>',
+				'</div>',
+				'<div class="menuBar">',
+					'<button class="btn" onclick="g_plotHandler.zoomIn()">Zoom In</button>',
+					'<button class="btn" onclick="g_plotHandler.zoomOut()">Zoom Out</button>',
+					'<button class="btn btn-danger" onclick="deleteSequenceData()">Delete Data</button>',
+					'<button class="btn btn-primary" onclick="closePlotter()">Close Plotter</button>',
+				'</div>',
+			'</div>'
+		].join('\n')
+	});
+}
+
 
 // initialize the plotter view
 function initPlotter() {
