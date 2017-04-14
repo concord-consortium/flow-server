@@ -477,7 +477,7 @@ function initDiagramEditor() {
 				if (values.hasOwnProperty(blockId)) {
 					var value = values[blockId];
 					var block = g_diagram.findBlockById(parseInt(blockId));  // fix(later): why aren't blockIds coming through as integers?
-					if (block && value !== null) {
+					if (block) {
 						block.updateValue(value); // will be null if no defined value (disconnected)
 						displayBlockValue(block);
 					}
