@@ -81,6 +81,9 @@ button.filter {
 	-ms-user-select: none;
 	user-select: none;
 }
+.flowPanel {
+	display: none;
+}
 .listButton {
 	margin-bottom: 10px;
 }
