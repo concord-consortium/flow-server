@@ -85,6 +85,7 @@ function createFlowBlock(blockSpec) {
 	block.outputCount = blockSpec.output_count || 0;
 	block.value = blockSpec.value || null;  // null means no defined value
 	block.stale = true;  // value needs to be updated
+	block.params = blockSpec.params || [];  // for user-set block parameters (e.g. filter parameters)
 	block.inputType = blockSpec.input_type || 'n';  // default to numeric
 	block.outputType = blockSpec.output_type || 'n';  // default to numeric
 	block.hasSeq = blockSpec.has_seq || false;  // false if corresponds to physical hardware
@@ -143,7 +144,8 @@ function createFlowBlock(blockSpec) {
 			input_type: this.inputType,
 			output_type: this.outputType,
 			has_seq: this.hasSeq,
-			value: this.type === 'camera' ? '' : this.value,  // fix(soon): only really needed for user input blocks; make sure not saving misc images in spec
+			params: this.params,
+			value: this.output_type === 'i' ? '' : this.value,  // fix(soon): only really needed for user input blocks; make sure not saving misc images in spec
 			view: {
 				x: this.view.x,
 				y: this.view.y,
@@ -153,6 +155,11 @@ function createFlowBlock(blockSpec) {
 
 	block.updateValue = function(value, timestamp){
 		this.value = value;
+
+		// don't store images in history
+		if (this.outputType === 'i') {
+			return;
+		}
 
 		timestamp = timestamp || Math.round(moment().valueOf() * 0.001);
 		this.history.values.push(value);

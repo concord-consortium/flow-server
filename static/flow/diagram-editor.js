@@ -132,6 +132,23 @@ function numberEntryChanged(e) {
 }
 
 
+// triggered when a parameter entry field is edited
+function paramEntryChanged(e) {
+	var block = g_diagram.findBlockById(e.data);
+	for (var i = 0; i < block.params.length; i++) {
+		var param = block.params[i];
+		var val = parseFloat($('#bp_' + param.name).val()); // fix(soon): handle non-numeric params?
+		if (isNaN(val)) {
+			param.value = param['default'];
+		} else {
+			param.value = val;
+		}
+	}
+	// fix(faster): only trigger if value has changed
+	structureModified();  // fix(clean): add a separate valueChanged function?
+}
+
+
 // delete a block (using the block menu)
 function deleteBlock(e) {
 	var block = g_diagram.findBlockById(e.data.id);
@@ -209,9 +226,17 @@ function displayBlock(block) {
 			canvas.mousemove(mouseMove);
 			canvas.mouseup(mouseUp);
 		blockDiv.addClass('flowBlockWithPlot');
-	} else if (block.type === 'camera') {
+	} else if (block.outputType === 'i') {  // image-valued blocks
 		$('<img>', {class: 'flowBlockImage', width: 320, height: 240, id: 'bi_' + block.id}).appendTo(blockDiv);
 		blockDiv.addClass('flowBlockWithImage');
+		for (var i = 0; i < block.params.length; i++) {
+			var param = block.params[i];
+			param.value = param['default'];  // set value to default value so that we can send a value back to controller if no param entry change
+			$('<div>', {class: 'flowBlockParamLabel', html: param.name}).appendTo(blockDiv);
+			var input = $('<input>', {class: 'form-control flowBlockInput', type: 'text', id: 'bp_' + param.name, value: param['default']}).appendTo(blockDiv);
+			input.mousedown(function(e) {e.stopPropagation()});
+			input.keyup(block.id, paramEntryChanged);
+		}
 	} else {
 		var div = $('<div>', {class: 'flowBlockValueAndUnits noSelect'});
 		$('<span>', {class: 'flowBlockValue', html: '...', id: 'bv_' + block.id}).appendTo(div);
@@ -384,7 +409,7 @@ function displayBlockValue(block) {
 		}
 		block.view.plotHandler.plotter.autoBounds();
 		block.view.plotHandler.drawPlot(null, null);
-	} else if (block.type === 'camera') {
+	} else if (block.outputType === 'i') {  // image-valued blocks
 		if (block.value === null) {
 			// fix(soon): display something to let user know camera is offline
 		} else {
@@ -436,6 +461,8 @@ function initDiagramEditor() {
 			if (g_diagram.findBlockByName(deviceInfo.name) === null) {
 				var inputCount = (deviceInfo.dir === 'out') ? 1 : 0;
 				var outputCount = (deviceInfo.dir === 'in') ? 1 : 0;
+				var inputType = 'n';
+				var outputType = (deviceInfo.type === 'camera') ? 'i' : 'n';
 				var blockSpec = {
 					name: deviceInfo.name,
 					type: deviceInfo.type,
@@ -443,6 +470,8 @@ function initDiagramEditor() {
 					has_seq: (deviceInfo.dir === 'in'),  // assume all inputs have sequences (for now)
 					input_count: inputCount,
 					output_count: outputCount,
+					input_type: inputType,
+					output_type: outputType,
 					view: {
 						x: 100 + g_diagram.blocks.length * 50,  // fix(later): smarter positioning
 						y: 100 + g_diagram.blocks.length * 50,
@@ -545,9 +574,33 @@ function addFilterBlock(e) {
 		type: type,
 		input_count: 2,
 		output_count: 1,
+		input_type: 'n',
+		output_type: 'n',
 	}
-	if (type == 'not') {
+	if (type === 'not') {
 		blockSpec.input_count = 1;
+	}
+	if (type === 'blur' || type === 'brightness') {  // fix(soon): get this from controller block type spec list
+		blockSpec.input_type = 'i';
+		blockSpec.output_type = 'i';
+		blockSpec.input_count = 1;
+		if (type === 'blur') {
+			blockSpec.params = [{
+				'name': 'blur_amount',
+				'type': 'n',
+				'min': 0,
+				'max': 50,
+				'default': 5,
+			}];
+		} else {
+			blockSpec.params = [{
+				'name': 'brighness_adjustment',
+				'type': 'n',
+				'min': -100,
+				'max': 100,
+				'default': 0,
+			}];
+		}
 	}
 	var block = createFlowBlock(blockSpec);  // fix(soon): generate unique name from type
 	g_diagram.blocks.push(block);
@@ -567,6 +620,7 @@ function showFilterBlockSelector() {
 		"not", "and", "or", "xor", "nand",
 		"plus", "minus", "times", "divided by", "absolute value",
 		"equals", "not equals", "less than", "greater than",
+		"blur", "brightness",
 	];
 	for (var i = 0; i < filterTypes.length; i++) {
 		var type = filterTypes[i];
