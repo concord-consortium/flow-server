@@ -522,7 +522,7 @@ function initDiagramEditor() {
 				}, noFunc: function() {
 				}});
 			}
-		}, 1000);
+		}, 3000);
 
 		g_diagramEditorInitialized = true;
 	}
