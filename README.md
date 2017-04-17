@@ -12,12 +12,11 @@ The system is currently under construction. We'll provide more documentation as 
 4.  Place the `flow-server` repo (this repo) inside that.
     (If everything is in the right place, you should have a `rhizo-server/extensions/flow-server/ext.py` file.)
 5.  In `rhizo-server/settings/config.py` change the `EXTENSIONS = []` line to `EXTENSIONS = ['flow-server']`.
-6.  Start/restart the server (using `python run.py -s`) and visit it's web interface.
+6.  Start/restart the server (using `python run.py -s`) and visit it's web interface. 
+    If you are running the server locally, visit [http://localhost:5000/](http://localhost:5000/).
 7.  Log in as a system admin.
-8.  Select `System` / `Organizations` / `New Organization` and create a `flow-test` organization.
+8.  Select `System` / `Organizations` / `New Organization` and create a `Testing` organization with a `testing` folder name.
 9.  Click on the organization and then `Assign User` to add yourself to the new organization.
-10. Set up a controller using the instructions in the `flow` repo.
-11. Visit the `/ext/flow` URL on the server.
 
 ## Data Flow Diagram Structure
 
