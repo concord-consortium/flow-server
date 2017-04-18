@@ -594,7 +594,7 @@ function addFilterBlock(e) {
 			}];
 		} else {
 			blockSpec.params = [{
-				'name': 'brighness_adjustment',
+				'name': 'brightness_adjustment',
 				'type': 'n',
 				'min': -100,
 				'max': 100,
