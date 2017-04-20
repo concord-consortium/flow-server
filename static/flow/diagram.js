@@ -86,8 +86,8 @@ function createFlowBlock(blockSpec) {
 	block.value = blockSpec.value || null;  // null means no defined value
 	block.stale = true;  // value needs to be updated
 	block.params = blockSpec.params || [];  // for user-set block parameters (e.g. filter parameters)
-	block.inputType = blockSpec.input_type || 'n';  // default to numeric
-	block.outputType = blockSpec.output_type || 'n';  // default to numeric
+	block.inputType = ('input_type' in blockSpec) ? blockSpec.input_type : 'n';  // default to numeric for now
+	block.outputType = ('output_type' in blockSpec) ? blockSpec.output_type : 'n';  // default to numeric for now
 	block.hasSeq = blockSpec.has_seq || false;  // false if corresponds to physical hardware
 	if (blockSpec.id) {
 		block.id = blockSpec.id;

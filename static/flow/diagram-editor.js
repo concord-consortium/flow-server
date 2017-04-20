@@ -463,6 +463,12 @@ function initDiagramEditor() {
 				var outputCount = (deviceInfo.dir === 'in') ? 1 : 0;
 				var inputType = 'n';
 				var outputType = (deviceInfo.type === 'camera') ? 'i' : 'n';
+				if (inputCount === 0) {
+					inputType = null;
+				}
+				if (outputCount === 0) {
+					outputType = null;
+				}
 				var blockSpec = {
 					name: deviceInfo.name,
 					type: deviceInfo.type,
@@ -556,7 +562,7 @@ function loadDiagram(diagramSpec) {
 
 // add a numeric data entry block to the diagram
 function addNumericBlock() {
-	var block = createFlowBlock({name: 'number', type: 'number_entry', output_count: 1});
+	var block = createFlowBlock({name: 'number', type: 'number_entry', output_count: 1, output_type: 'n'});
 	g_diagram.blocks.push(block);
 	block.view.x = 100;
 	block.view.y = 100;
@@ -634,7 +640,7 @@ function showFilterBlockSelector() {
 
 // add a plotting block to the current diagram
 function addPlotBlock() {
-	var block = createFlowBlock({name: 'plot', type: 'plot', input_count: 1});
+	var block = createFlowBlock({name: 'plot', type: 'plot', input_count: 1, input_type: 'n'});
 	g_diagram.blocks.push(block);
 	block.view.x = 500;
 	block.view.y = 300;
