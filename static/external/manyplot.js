@@ -4,11 +4,13 @@ function createPlotHandler( canvas, multiFrame ) {
 	plotHandler.plotter = createPlotter( canvas, multiFrame );
 	plotHandler.mouseDown = false;
 	plotHandler.xDownLast = null;
+	plotHandler.intervalSelect = false; // Start in pan mode
 
 	plotHandler.drawPlot = function( xMouse, yMouse ) {
 		var args = {
 			"useTimestamp": true,
 			"presentIsZero": false,
+			"intervalSelect": this.intervalSelect
 		};
 		this.plotter.drawPlot( xMouse, yMouse, args );
 	}
@@ -28,7 +30,11 @@ function createPlotHandler( canvas, multiFrame ) {
 		}
 		if (plotHandler.mouseDown) {
 			if (plotHandler.xDownLast) {
-				plotHandler.plotter.pan( plotHandler.xDownLast, x );
+				if (plotHandler.intervalSelect){
+					// plotHandler.plotter.selectInterval( plotHandler.xDownLast, x );
+				} else {
+					plotHandler.plotter.pan( plotHandler.xDownLast, x );
+				}
 			}
 			plotHandler.drawPlot( x, y );
 			plotHandler.xDownLast = x;
@@ -38,11 +44,27 @@ function createPlotHandler( canvas, multiFrame ) {
 		}
 	};
 
+	plotHandler.onClick = function( e ) {
+		if (!plotHandler.intervalSelect) return;
+		var x = objectClickX( e );
+		var y = objectClickY( e );
+		e.preventDefault();
+		e.stopPropagation();
+		var args = {
+			"useTimestamp": true,
+			"presentIsZero": false,
+			"intervalSelect": plotHandler.intervalSelect,
+			"isClick": true
+		};
+		plotHandler.plotter.drawPlot( x, y, args );
+	}
+
 	canvas.addEventListener( "mousemove", plotHandler.onMouse, false );
 	canvas.addEventListener( "mouseup", plotHandler.onMouse, false );
 	canvas.addEventListener( "mousedown", plotHandler.onMouse, false );
 	canvas.addEventListener( "mouseout", plotHandler.onMouse, false );
 	canvas.addEventListener( "mouseleave", plotHandler.onMouse, false );
+	canvas.addEventListener( "click", plotHandler.onClick, false );
 
 	plotHandler.zoomIn = function() {
 		plotHandler.plotter.zoomIn();
@@ -52,6 +74,12 @@ function createPlotHandler( canvas, multiFrame ) {
 	plotHandler.zoomOut = function() {
 		plotHandler.plotter.zoomOut();
 		plotHandler.drawPlot( null, null );
+	};
+
+	plotHandler.toggleIntervalSelect = function() {
+		plotHandler.intervalSelect = !plotHandler.intervalSelect;
+		console.log('Toggling:', plotHandler.intervalSelect);
+
 	};
 
 	return plotHandler;
@@ -281,7 +309,9 @@ function createPlotter( canvas, multiFrame ) {
 					xMouse,
 					yMouse,
 					args["useTimestamp"],
-					args["presentIsZero"]
+					args["presentIsZero"],
+					args["intervalSelect"],
+					args["isClick"]
 				);
 				break;
 			case 'histogram':
@@ -298,7 +328,7 @@ function createPlotter( canvas, multiFrame ) {
 	};
 
 	// All parameters optional.
-	plotter.drawLinePlot = function(xMouse, yMouse, useTimestamp, presentIsZero){
+	plotter.drawLinePlot = function(xMouse, yMouse, useTimestamp, presentIsZero, intervalSelect, isClick){
 		// If useTimestamp is either undefined or false
 		if(useTimestamp === undefined || !useTimestamp){
 			var captionOverrides = this.elapsedTimeBounds(presentIsZero);
@@ -317,6 +347,9 @@ function createPlotter( canvas, multiFrame ) {
 		}
 		if(xMouse !== null && yMouse !== null){
 			this.highlightValue( xMouse, yMouse, useTimestamp, presentIsZero );
+			if (intervalSelect && isClick){
+				this.selectInterval(xMouse, yMouse);
+			}
 		}
 	};
 
@@ -644,6 +677,17 @@ function createPlotter( canvas, multiFrame ) {
 		var xDiff = currentXData - lastXData;
 		if(isNaN(xDiff)) xDiff = 0;
 		this.addToBounds(-xDiff, -xDiff, null, null);
+	};
+
+	plotter.selectInterval = function(x, y){
+		if(this.plotMode !== "line" || this.frames.length < 1) return;
+
+		var xMouseData = this.frames[ 0 ].screenToDataX( x );
+
+		for (var i = 0; i < this.frames.length; i++) {
+			var frame = this.frames[i];
+			frame.selectInterval( this.dataPairs[i].xData, this.dataPairs[i].yData, xMouseData);
+		}
 	};
 
 	plotter.zoomIn = function(){
@@ -1162,6 +1206,60 @@ function createFrame( ctx ) {
 					ctx.drawTriangle(xScreen, yScreen, xScreen + offset, yScreen - offset, xScreen - offset, yScreen - offset, false);
 				}
 			}
+		}
+	};
+
+	frame.selectInterval = function( xData, yData, xMouseData ) {
+		console.log(xData);
+		console.log(yData);
+		console.log(xMouseData);
+
+		// find nearest index (if mouse is within data bounds)
+		var nearestIndex = -1;
+		var nearestDist = 0;
+		var xDataRaw = xData.data;
+		// fix(later): should we use min( xData ) and max( xData )? is xData always monotonically increasing?
+		if (xMouseData >= xDataRaw[ 0 ] && xMouseData <= xDataRaw[ xDataRaw.length - 1 ]) {
+			for (var i = 0; i < xDataRaw.length; i++) {
+				var x = xDataRaw[ i ];
+				var xDiff = x - xMouseData;
+				if (xDiff < 0) xDiff = -xDiff;
+				if ((xDiff < nearestDist || nearestIndex == -1) && x >= frame.dataMinX && x <= frame.dataMaxX) {
+					nearestDist = xDiff;
+					nearestIndex = i;
+				}
+			}
+		}
+		if (nearestIndex >= 0) {
+			// Set interval lower and upper bounds depending on which click
+			if (!frame.intervalFirstBound){
+				frame.intervalFirstBound = nearestIndex;
+			} else if (!frame.intervalSecondBound){
+				// Set upper bound if lower bound already set
+				frame.intervalSecondBound = nearestIndex;
+			} else {
+				// If both are set, clear the interval
+				console.log('interval clear');
+				frame.intervalFirstBound = null;
+				frame.intervalSecondBound = null;
+			}
+
+			// When both are set highlight interval
+			if (frame.intervalFirstBound && frame.intervalSecondBound){
+				var lower, upper;
+				if (frame.intervalSecondBound - frame.intervalFirstBound >= 0){
+					lower = frame.intervalFirstBound;
+					upper = frame.intervalSecondBound;
+				} else {
+					lower = frame.intervalSecondBound;
+					upper = frame.intervalFirstBound;
+				}
+				console.log('interval set:')
+				console.log('lower:', lower);
+				console.log('upper:', upper);
+				console.log(xDataRaw);
+			}
+
 		}
 	};
 
