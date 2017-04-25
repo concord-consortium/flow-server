@@ -28,19 +28,26 @@ function createPlotHandler( canvas, multiFrame ) {
 		} else if (e.type === "mouseout" || e.type === "mouseleave") {
 			plotHandler.mouseDown = false;
 		}
-		if (plotHandler.mouseDown) {
-			if (plotHandler.xDownLast) {
-				if (plotHandler.intervalSelect){
-					// plotHandler.plotter.selectInterval( plotHandler.xDownLast, x );
-				} else {
+
+		if (plotHandler.intervalSelect){
+			if (e.type === "mousedown") {
+				plotHandler.plotter.setIntervalFirstBound(x);
+			} else if (e.type === "mouseup") {
+				plotHandler.plotter.setIntervalSecondBound(x);
+			} else {
+				plotHandler.drawPlot( x, y );
+			}
+		} else {
+			if (plotHandler.mouseDown) {
+				if (plotHandler.xDownLast) {
 					plotHandler.plotter.pan( plotHandler.xDownLast, x );
 				}
+				plotHandler.drawPlot( x, y );
+				plotHandler.xDownLast = x;
+			} else {
+				plotHandler.drawPlot( x, y );
+				plotHandler.xDownLast = null;
 			}
-			plotHandler.drawPlot( x, y );
-			plotHandler.xDownLast = x;
-		} else {
-			plotHandler.drawPlot( x, y );
-			plotHandler.xDownLast = null;
 		}
 	};
 
@@ -64,7 +71,7 @@ function createPlotHandler( canvas, multiFrame ) {
 	canvas.addEventListener( "mousedown", plotHandler.onMouse, false );
 	canvas.addEventListener( "mouseout", plotHandler.onMouse, false );
 	canvas.addEventListener( "mouseleave", plotHandler.onMouse, false );
-	canvas.addEventListener( "click", plotHandler.onClick, false );
+	// canvas.addEventListener( "click", plotHandler.onClick, false );
 
 	plotHandler.zoomIn = function() {
 		plotHandler.plotter.zoomIn();
@@ -580,6 +587,91 @@ function createPlotter( canvas, multiFrame ) {
 			}
 		}
 	};
+
+	plotter.setIntervalFirstBound = function(xMouse){
+		var frame, xData, nearestIndex;
+
+		var xMouseData = this.frames[ 0 ].screenToDataX( xMouse );
+		for (var i = 0; i < this.frames.length; i++) {
+			frame = this.frames[i];
+			xData = this.dataPairs[ i ].xData;
+
+			var nearestIndex = -1;
+			var nearestDist = 0;
+			var xDataRaw = xData.data;
+			if (xMouseData >= xDataRaw[ 0 ] && xMouseData <= xDataRaw[ xDataRaw.length - 1 ]) {
+				for (var i = 0; i < xDataRaw.length; i++) {
+					var x = xDataRaw[ i ];
+					var xDiff = x - xMouseData;
+					if (xDiff < 0) xDiff = -xDiff;
+					if ((xDiff < nearestDist || nearestIndex == -1) && x >= frame.dataMinX && x <= frame.dataMaxX) {
+						nearestDist = xDiff;
+						nearestIndex = i;
+					}
+				}
+			}
+
+			frame.intervalFirstBound = nearestIndex;
+		}
+	}
+	plotter.setIntervalSecondBound = function(xMouse){
+		var frame, xData, nearestIndex;
+
+		var xMouseData = this.frames[ 0 ].screenToDataX( xMouse );
+		for (var i = 0; i < this.frames.length; i++) {
+			frame = this.frames[i];
+			xData = this.dataPairs[ i ].xData;
+
+			var nearestIndex = -1;
+			var nearestDist = 0;
+			var xDataRaw = xData.data;
+			if (xMouseData >= xDataRaw[ 0 ] && xMouseData <= xDataRaw[ xDataRaw.length - 1 ]) {
+				for (var i = 0; i < xDataRaw.length; i++) {
+					var x = xDataRaw[ i ];
+					var xDiff = x - xMouseData;
+					if (xDiff < 0) xDiff = -xDiff;
+					if ((xDiff < nearestDist || nearestIndex == -1) && x >= frame.dataMinX && x <= frame.dataMaxX) {
+						nearestDist = xDiff;
+						nearestIndex = i;
+					}
+				}
+			}
+
+			frame.intervalSecondBound = nearestIndex;
+
+			if (frame.intervalFirstBound && frame.intervalSecondBound){
+				if (frame.intervalFirstBound === frame.intervalSecondBound){
+					this.clearIntervalBounds();
+					return;
+				}
+				var lower, upper;
+				if (frame.intervalSecondBound - frame.intervalFirstBound >= 0){
+					lower = frame.intervalFirstBound;
+					upper = frame.intervalSecondBound;
+				} else {
+					lower = frame.intervalSecondBound;
+					upper = frame.intervalFirstBound;
+				}
+
+				frame.intervalLower = lower;
+				frame.intervalUpper = upper;
+			} else {
+				// Sanity check
+				console.log('Interval improperly set: clearing')
+				this.clearIntervalBounds();
+			}
+		}
+	}
+
+	plotter.clearIntervalBounds = function(){
+		for (var i = 0; i < this.frames.length; i++) {
+			frame = this.frames[i];
+			frame.intervalFirstBound = null;
+			frame.intervalSecondBound = null;
+			frame.intervalLower = null;
+			frame.intervalUpper = null;
+		}
+	}
 
 	plotter.highlightHistogram = function(counts, xScreen, yScreen){
 		if(this.frames.length < 1) return;
