@@ -1018,6 +1018,27 @@ function createFrame( ctx ) {
 			}
 		}
 		ctx.stroke();
+
+		var preserveStrokeStyle = ctx.strokeStyle;
+		if (this.intervalLower && this.intervalUpper){
+			first = true; // reset
+			ctx.beginPath();
+			ctx.strokeStyle = 'red';
+			for (var i = this.intervalLower; i <= this.intervalUpper; i++) {
+				var y = yDataRaw[ i ];
+				if( y !== null ) {
+					var xPlot = xBoxMin + (xBoxMax - xBoxMin) * (xDataRaw[ i ] - xDataMin) / (xDataMax - xDataMin);
+					var yPlot = yBoxMin + (yBoxMax - yBoxMin) * (1.0 - (y - yDataMin) / (yDataMax - yDataMin));
+					if (first)
+						ctx.moveTo( xPlot, yPlot );
+					else
+						ctx.lineTo( xPlot, yPlot );
+					first = false;
+				}
+			}
+			ctx.stroke();
+		}
+		ctx.strokeStyle = preserveStrokeStyle;
 	};
 
 	// draw text in a box with a border in the plot; x and y are in canvas/pixel coordinates
@@ -1242,6 +1263,8 @@ function createFrame( ctx ) {
 				console.log('interval clear');
 				frame.intervalFirstBound = null;
 				frame.intervalSecondBound = null;
+				frame.intervalLower = null;
+				frame.intervalUpper = null;
 			}
 
 			// When both are set highlight interval
@@ -1254,6 +1277,9 @@ function createFrame( ctx ) {
 					lower = frame.intervalSecondBound;
 					upper = frame.intervalFirstBound;
 				}
+
+				frame.intervalLower = lower;
+				frame.intervalUpper = upper;
 				console.log('interval set:')
 				console.log('lower:', lower);
 				console.log('upper:', upper);
