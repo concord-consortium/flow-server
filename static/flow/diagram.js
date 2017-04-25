@@ -165,8 +165,6 @@ function createFlowBlock(blockSpec) {
 		this.history.values.push(value);
 		this.history.timestamps.push(timestamp);
 
-		console.log('Updated:', value, 'at', timestamp)
-
 		if (this.history.length === BLOCK_HISTORY_LIMIT){
 			this.history.values.shift();
 			this.history.timestamps.shift();
