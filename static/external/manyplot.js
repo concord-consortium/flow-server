@@ -626,13 +626,13 @@ function createPlotter( canvas, multiFrame ) {
 			var nearestDist = 0;
 			var xDataRaw = xData.data;
 			if (xMouseData >= xDataRaw[ 0 ] && xMouseData <= xDataRaw[ xDataRaw.length - 1 ]) {
-				for (var i = 0; i < xDataRaw.length; i++) {
-					var x = xDataRaw[ i ];
+				for (var j = 0; j < xDataRaw.length; j++) {
+					var x = xDataRaw[ j ];
 					var xDiff = x - xMouseData;
 					if (xDiff < 0) xDiff = -xDiff;
 					if ((xDiff < nearestDist || nearestIndex == -1) && x >= frame.dataMinX && x <= frame.dataMaxX) {
 						nearestDist = xDiff;
-						nearestIndex = i;
+						nearestIndex = j;
 					}
 				}
 			}
@@ -655,6 +655,17 @@ function createPlotter( canvas, multiFrame ) {
 
 				frame.intervalLower = lower;
 				frame.intervalUpper = upper;
+
+				console.log(this.dataPairs);
+
+				// Send CODAP data
+				if (typeof CodapTest !== 'undefined'){
+					console.log('Sending CODAP data')
+					var subset = this.dataPairs[i].yData.data.filter(function(data, i){
+						return i >= lower && i <= upper;
+					});
+					CodapTest.sendSequence(subset);
+				}
 			} else {
 				// Sanity check
 				console.log('Interval improperly set: clearing')
