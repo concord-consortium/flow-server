@@ -583,7 +583,7 @@ function addFilterBlock(e) {
 		input_type: 'n',
 		output_type: 'n',
 	}
-	if (type === 'not') {
+	if (type === 'not' || type == 'smoothing') {
 		blockSpec.input_count = 1;
 	}
 	if (type === 'blur' || type === 'brightness') {  // fix(soon): get this from controller block type spec list
@@ -626,7 +626,7 @@ function showFilterBlockSelector() {
 		"not", "and", "or", "xor", "nand",
 		"plus", "minus", "times", "divided by", "absolute value",
 		"equals", "not equals", "less than", "greater than",
-		"blur", "brightness",
+		"blur", "brightness", "smoothing",
 	];
 	for (var i = 0; i < filterTypes.length; i++) {
 		var type = filterTypes[i];
