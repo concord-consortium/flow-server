@@ -436,6 +436,9 @@ function initDiagramEditor() {
 	// fix(soon): if we're loading a diagram, should we do this after we've loaded it?
 	sendMessage('list_devices');
 
+	// request information about block types from controller
+	sendMessage('request_block_types');
+
 	// one-time initialization of UI elements and message handlers
 	if (g_diagramEditorInitialized === false) {
 		g_svgDrawer = SVG('diagramHolder');
@@ -671,6 +674,34 @@ function closeDiagramEditor() {
 	} else {
 		showControllerViewer();
 	}
+}
+
+
+// instruct the controller to start data recording (not just data displaying)
+function startRecordingData() {
+	var modal = createBasicModal('recordingSettings', 'Start Recording Data');
+	modal.appendTo($('body'));
+	var modalBody = $('#recordingSettings-body');
+	var fg = createFormGroup({id: 'rate', label: 'Update Rate (seconds)'}).appendTo(modalBody);
+	createTextInput({id: 'rate', value: '60'}).appendTo(fg);
+	$('#recordingSettings-ok').click(function() {
+		var params = {
+			'rate': parseInt($('#rate').val()),
+		};
+		sendMessage('start_recording', params);
+		$('#startRecording').hide();
+		$('#stopRecording').show();
+		$('#recordingSettings').modal('hide');
+	});
+	$('#recordingSettings').modal('show');
+}
+
+
+// instruct the controller to stop data recording
+function stopRecordingData() {
+	sendMessage('stop_recording');
+	$('#stopRecording').hide();
+	$('#startRecording').show();
 }
 
 

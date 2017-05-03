@@ -10,7 +10,7 @@ var PLOTTER_MARGIN_BOTTOM = 94; // px
 
 function resizeCanvas(){
 	canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight - PLOTTER_MARGIN_BOTTOM;
+	canvas.height = window.innerHeight - PLOTTER_MARGIN_BOTTOM;
 
 	if (g_plotHandler){
 		g_plotHandler.drawPlot(null, null);
@@ -125,7 +125,6 @@ function setTimeFrame(timeStr) {
 		frameSeconds = 60 * 60 * 24 * 30;
 	}
 
-
 	var now = moment().valueOf(),
 			start = moment(now - (frameSeconds * 1000)).toISOString(),
 			end = moment(now).toISOString();
@@ -135,6 +134,13 @@ function setTimeFrame(timeStr) {
 		start_timestamp: start,
 		end_timestamp: end
 	})
+}
+
+
+function explorePlotterData() {
+	if (g_yData && g_yData.data.length) {
+		CodapTest.sendSequence(g_yData.data);
+	}
 }
 
 
