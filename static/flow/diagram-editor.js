@@ -583,8 +583,18 @@ function addFilterBlock(e) {
 		input_type: 'n',
 		output_type: 'n',
 	}
-	if (type === 'not' || type == 'smoothing') {
+	if (type === 'not') {
 		blockSpec.input_count = 1;
+	}
+	if (type === 'simple moving average'|| type === 'exponential moving average') {
+		blockSpec.input_count = 1;
+		blockSpec.params = [{
+			'name': 'period',
+			'type': 'n',
+			'min': 0,
+			'max': 9999,
+			'default': 10
+		}];
 	}
 	if (type === 'blur' || type === 'brightness') {  // fix(soon): get this from controller block type spec list
 		blockSpec.input_type = 'i';
@@ -626,7 +636,7 @@ function showFilterBlockSelector() {
 		"not", "and", "or", "xor", "nand",
 		"plus", "minus", "times", "divided by", "absolute value",
 		"equals", "not equals", "less than", "greater than",
-		"blur", "brightness", "smoothing",
+		"blur", "brightness", "simple moving average", "exponential moving average" 
 	];
 	for (var i = 0; i < filterTypes.length; i++) {
 		var type = filterTypes[i];
