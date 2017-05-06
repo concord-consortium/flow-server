@@ -98,3 +98,6 @@ button.filter {
 #controllerViewerPanel .controllerStatus {
 	display: inline;
 }
+#stopRecording {
+	display: none;
+}

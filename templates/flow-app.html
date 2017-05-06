@@ -30,7 +30,7 @@
 	<div class="row">
 		<div class="col-md-4"></div>
 		<div class="col-md-4">
-			<h2>Select a Controller</h2>
+			<h2>Enter the name of your controller:</h2>
 			<div id="controllerList"></div>
 		</div>
 		<div class="col-md-4"></div>
@@ -59,14 +59,16 @@
 	<div id="diagramHolder">
 	</div>
 	<div class="menuBar">
-		<button class="btn btn-primary" onclick="sendMessage('add_camera');">Add Camera</button>
+		<button id="startRecording" class="btn btn-success" onclick="startRecordingData()">Start Recording Data</button>
+		<button id="stopRecording" class="btn btn-warning" onclick="stopRecordingData()">Stop Recording Data</button>
+		<button class="btn btn-primary" onclick="sendMessage('add_camera')">Add Camera</button>
 		<button class="btn btn-primary" onclick="addNumericBlock()">Add Numeric Entry</button>
 		<button class="btn btn-primary" onclick="showFilterBlockSelector()">Add Filter</button>
 		<button class="btn btn-primary" onclick="addPlotBlock()">Add Plot</button>
 		<button class="btn btn-primary" onclick="closeDiagramEditor()">Close Diagram</button>
-		<button class="btn" onclick="sendMessage('add_sim_sensor');">Add Sim Sensor</button>
-		<button class="btn" onclick="sendMessage('add_sim_actuator');">Add Sim Actuator</button>
-		<button class="btn" onclick="sendMessage('remove_sim_device');">Remove Sim Device</button>
+		<button class="btn" onclick="sendMessage('add_sim_sensor')">Add Sim Sensor</button>
+		<button class="btn" onclick="sendMessage('add_sim_actuator')">Add Sim Actuator</button>
+		<button class="btn" onclick="sendMessage('remove_sim_device')">Remove Sim Device</button>
 	</div>
 </div>
 <div id="plotterPanel" class="flowPanel">
@@ -83,7 +85,8 @@
 		</div>
 	</div>
 	<div class="menuBar">
-		<button class="btn" onclick="g_plotHandler.toggleIntervalSelect()">Interval select</button>
+		<button class="btn" onclick="g_plotHandler.toggleIntervalSelect()">Select Interval</button>
+		<button class="btn" onclick="explorePlotterData()">Explore Data in CODAP</button>
 		<button class="btn" onclick="g_plotHandler.zoomIn()">Zoom In</button>
 		<button class="btn" onclick="g_plotHandler.zoomOut()">Zoom Out</button>
 		<button class="btn btn-danger" onclick="deleteSequenceData()">Delete Data</button>
