@@ -32,11 +32,10 @@ function createPlotHandler( canvas, multiFrame ) {
 		if (plotHandler.intervalSelect){
 			if (e.type === "mousedown") {
 				plotHandler.plotter.setIntervalFirstBound(x);
-			} else if (e.type === "mouseup") {
+			} else if (plotHandler.mouseDown) {
 				plotHandler.plotter.setIntervalSecondBound(x);
-			} else {
-				plotHandler.drawPlot( x, y );
 			}
+			plotHandler.drawPlot( x, y );
 		} else {
 			if (plotHandler.mouseDown) {
 				if (plotHandler.xDownLast) {
@@ -86,7 +85,6 @@ function createPlotHandler( canvas, multiFrame ) {
 	plotHandler.toggleIntervalSelect = function() {
 		plotHandler.intervalSelect = !plotHandler.intervalSelect;
 		console.log('Toggling:', plotHandler.intervalSelect);
-
 	};
 
 	return plotHandler;
@@ -352,9 +350,9 @@ function createPlotter( canvas, multiFrame ) {
 		if (this.dataPairs.length) {
 			this.drawData( true );
 		}
-		if(xMouse !== null && yMouse !== null){
+		if (xMouse !== null && yMouse !== null) {
 			this.highlightValue( xMouse, yMouse, useTimestamp, presentIsZero );
-			if (intervalSelect && isClick){
+			if (intervalSelect && isClick) {
 				this.selectInterval(xMouse, yMouse);
 			}
 		}
@@ -589,83 +587,31 @@ function createPlotter( canvas, multiFrame ) {
 	};
 
 	plotter.setIntervalFirstBound = function(xMouse){
-		var frame, xData, nearestIndex;
-
 		var xMouseData = this.frames[ 0 ].screenToDataX( xMouse );
 		for (var i = 0; i < this.frames.length; i++) {
-			frame = this.frames[i];
-			xData = this.dataPairs[ i ].xData;
-
-			var nearestIndex = -1;
-			var nearestDist = 0;
-			var xDataRaw = xData.data;
-			if (xMouseData >= xDataRaw[ 0 ] && xMouseData <= xDataRaw[ xDataRaw.length - 1 ]) {
-				for (var i = 0; i < xDataRaw.length; i++) {
-					var x = xDataRaw[ i ];
-					var xDiff = x - xMouseData;
-					if (xDiff < 0) xDiff = -xDiff;
-					if ((xDiff < nearestDist || nearestIndex == -1) && x >= frame.dataMinX && x <= frame.dataMaxX) {
-						nearestDist = xDiff;
-						nearestIndex = i;
-					}
-				}
-			}
-
-			frame.intervalFirstBound = nearestIndex;
+			this.frames[i].intervalFirstBoundX = xMouseData;
 		}
 	}
-	plotter.setIntervalSecondBound = function(xMouse){
-		var frame, xData, nearestIndex;
 
+	plotter.setIntervalSecondBound = function(xMouse){
 		var xMouseData = this.frames[ 0 ].screenToDataX( xMouse );
 		for (var i = 0; i < this.frames.length; i++) {
-			frame = this.frames[i];
-			xData = this.dataPairs[ i ].xData;
+			var frame = this.frames[i];
+			frame.intervalSecondBoundX = xMouseData;
 
-			var nearestIndex = -1;
-			var nearestDist = 0;
-			var xDataRaw = xData.data;
-			if (xMouseData >= xDataRaw[ 0 ] && xMouseData <= xDataRaw[ xDataRaw.length - 1 ]) {
-				for (var j = 0; j < xDataRaw.length; j++) {
-					var x = xDataRaw[ j ];
-					var xDiff = x - xMouseData;
-					if (xDiff < 0) xDiff = -xDiff;
-					if ((xDiff < nearestDist || nearestIndex == -1) && x >= frame.dataMinX && x <= frame.dataMaxX) {
-						nearestDist = xDiff;
-						nearestIndex = j;
-					}
-				}
-			}
-
-			frame.intervalSecondBound = nearestIndex;
-
-			if (frame.intervalFirstBound && frame.intervalSecondBound){
-				if (frame.intervalFirstBound === frame.intervalSecondBound){
-					this.clearIntervalBounds();
-					return;
-				}
-				var lower, upper;
-				if (frame.intervalSecondBound - frame.intervalFirstBound >= 0){
-					lower = frame.intervalFirstBound;
-					upper = frame.intervalSecondBound;
+			if (frame.intervalFirstBoundX && frame.intervalSecondBoundX) {
+				var lowerX, upperX;
+				if (frame.intervalSecondBoundX >= frame.intervalFirstBoundX) {
+					lowerX = frame.intervalFirstBoundX;
+					upperX = frame.intervalSecondBoundX;
 				} else {
-					lower = frame.intervalSecondBound;
-					upper = frame.intervalFirstBound;
+					lowerX = frame.intervalSecondBoundX;
+					upperX = frame.intervalFirstBoundX;
 				}
 
-				frame.intervalLower = lower;
-				frame.intervalUpper = upper;
+				frame.intervalLowerX = lowerX;
+				frame.intervalUpperX = upperX;
 
-				console.log(this.dataPairs);
-
-				// Send CODAP data
-				if (typeof CodapTest !== 'undefined'){
-					console.log('Sending CODAP data')
-					var subset = this.dataPairs[i].yData.data.filter(function(data, i){
-						return i >= lower && i <= upper;
-					});
-					CodapTest.sendSequence(subset);
-				}
 			} else {
 				// Sanity check
 				console.log('Interval improperly set: clearing')
@@ -674,13 +620,13 @@ function createPlotter( canvas, multiFrame ) {
 		}
 	}
 
-	plotter.clearIntervalBounds = function(){
+	plotter.clearIntervalBounds = function() {
 		for (var i = 0; i < this.frames.length; i++) {
-			frame = this.frames[i];
-			frame.intervalFirstBound = null;
-			frame.intervalSecondBound = null;
-			frame.intervalLower = null;
-			frame.intervalUpper = null;
+			var frame = this.frames[i];
+			frame.intervalFirstBoundX = null;
+			frame.intervalSecondBoundX = null;
+			frame.intervalLowerIndex = null;
+			frame.intervalUpperIndex = null;
 		}
 	}
 
@@ -1111,10 +1057,12 @@ function createFrame( ctx ) {
 					if( y !== null ) {
 						var xPlot = xBoxMin + (xBoxMax - xBoxMin) * (xDataRaw[ i ] - xDataMin) / (xDataMax - xDataMin);
 						var yPlot = yBoxMin + (yBoxMax - yBoxMin) * (1.0 - (y - yDataMin) / (yDataMax - yDataMin));
-						if (first)
+						if (first) {
 							ctx.moveTo( xPlot, yPlot );
-						else
+						} else {
 							ctx.lineTo( xPlot, yPlot );
+							ctx.lineTo( xPlot + 0.1, yPlot );  // hack to avoid sharp spikes in plots
+						}
 						first = false;
 					}
 				}
@@ -1122,21 +1070,29 @@ function createFrame( ctx ) {
 		}
 		ctx.stroke();
 
+		// draw currently selected interval (if any)
 		var preserveStrokeStyle = ctx.strokeStyle;
-		if (this.intervalLower && this.intervalUpper){
+		if (this.intervalLowerX && this.intervalUpperX) {
 			first = true; // reset
 			ctx.beginPath();
 			ctx.strokeStyle = 'red';
-			for (var i = this.intervalLower; i <= this.intervalUpper; i++) {
-				var y = yDataRaw[ i ];
-				if( y !== null ) {
-					var xPlot = xBoxMin + (xBoxMax - xBoxMin) * (xDataRaw[ i ] - xDataMin) / (xDataMax - xDataMin);
-					var yPlot = yBoxMin + (yBoxMax - yBoxMin) * (1.0 - (y - yDataMin) / (yDataMax - yDataMin));
-					if (first)
-						ctx.moveTo( xPlot, yPlot );
-					else
-						ctx.lineTo( xPlot, yPlot );
-					first = false;
+			ctx.lineWidth = 4;
+//			for (var i = this.intervalLowerIndex; i <= this.intervalUpperIndex; i++) {
+			for (var i = 0; i < xDataRaw.length; i++) {
+				var x = xDataRaw[i];
+				if (x >= this.intervalLowerX && x <= this.intervalUpperX) {
+					var y = yDataRaw[ i ];
+					if( y !== null ) {
+						var xPlot = xBoxMin + (xBoxMax - xBoxMin) * (xDataRaw[ i ] - xDataMin) / (xDataMax - xDataMin);
+						var yPlot = yBoxMin + (yBoxMax - yBoxMin) * (1.0 - (y - yDataMin) / (yDataMax - yDataMin));
+						if (first) {
+							ctx.moveTo( xPlot, yPlot );
+						} else {
+							ctx.lineTo( xPlot, yPlot );
+							ctx.lineTo( xPlot + 0.1, yPlot );  // hack to avoid sharp spikes in plots
+						}
+						first = false;
+					}
 				}
 			}
 			ctx.stroke();
@@ -1334,6 +1290,7 @@ function createFrame( ctx ) {
 	};
 
 	frame.selectInterval = function( xData, yData, xMouseData ) {
+		console.log('selectInterval');
 		console.log(xData);
 		console.log(yData);
 		console.log(xMouseData);
@@ -1381,14 +1338,12 @@ function createFrame( ctx ) {
 					upper = frame.intervalFirstBound;
 				}
 
-				frame.intervalLower = lower;
-				frame.intervalUpper = upper;
+				frame.intervalLowerIndex = lower;
+				frame.intervalUpperIndex = upper;
 				console.log('interval set:')
 				console.log('lower:', lower);
 				console.log('upper:', upper);
-				console.log(xDataRaw);
 			}
-
 		}
 	};
 
