@@ -5,6 +5,7 @@ function initControllerSelector() {
 	
 	// if we have a list of controllers, the user is logged in and can pick one of them
 	if (g_controllers.length) {
+		$('#controllerSelectorLabel').html('Select your controller:');
 		for (var i = 0; i < g_controllers.length; i++) {
 			var controller = g_controllers[i];
 			var div = $('<div>');
@@ -18,6 +19,7 @@ function initControllerSelector() {
 	
 	// if not, assume user isn't logged in and allow them to type in a controller name
 	} else {
+		$('#controllerSelectorLabel').html('Enter the name of your controller:');
 		$('<input>', {class: 'form-control', id: 'controller_name_entry'}).appendTo(controllerListDiv);
 		$('<button>', {class: 'btn btn-primary', html: 'Go'}).appendTo(controllerListDiv).click(function() {
 			$.ajax({

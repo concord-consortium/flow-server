@@ -30,7 +30,7 @@
 	<div class="row">
 		<div class="col-md-4"></div>
 		<div class="col-md-4">
-			<h2>Enter the name of your controller:</h2>
+			<h2 id="controllerSelectorLabel"></h2>
 			<div id="controllerList"></div>
 		</div>
 		<div class="col-md-4"></div>
@@ -86,7 +86,9 @@
 	</div>
 	<div class="menuBar">
 		<button class="btn" onclick="g_plotHandler.toggleIntervalSelect()">Select Interval</button>
+		{% if use_codap %}
 		<button class="btn" onclick="explorePlotterData()">Explore Data in CODAP</button>
+		{% endif %}
 		<button class="btn" onclick="g_plotHandler.zoomIn()">Zoom In</button>
 		<button class="btn" onclick="g_plotHandler.zoomOut()">Zoom Out</button>
 		<button class="btn btn-danger" onclick="deleteSequenceData()">Delete Data</button>
