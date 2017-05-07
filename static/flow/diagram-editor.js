@@ -229,14 +229,7 @@ function displayBlock(block) {
 	} else if (block.outputType === 'i') {  // image-valued blocks
 		$('<img>', {class: 'flowBlockImage', width: 320, height: 240, id: 'bi_' + block.id}).appendTo(blockDiv);
 		blockDiv.addClass('flowBlockWithImage');
-		for (var i = 0; i < block.params.length; i++) {
-			var param = block.params[i];
-			param.value = param['default'];  // set value to default value so that we can send a value back to controller if no param entry change
-			$('<div>', {class: 'flowBlockParamLabel', html: param.name}).appendTo(blockDiv);
-			var input = $('<input>', {class: 'form-control flowBlockInput', type: 'text', id: 'bp_' + param.name, value: param['default']}).appendTo(blockDiv);
-			input.mousedown(function(e) {e.stopPropagation()});
-			input.keyup(block.id, paramEntryChanged);
-		}
+		appendBlockParametersToBlockDiv(block, blockDiv);
 	} else {
 		var div = $('<div>', {class: 'flowBlockValueAndUnits noSelect'});
 		$('<span>', {class: 'flowBlockValue', html: '...', id: 'bv_' + block.id}).appendTo(div);
@@ -248,6 +241,9 @@ function displayBlock(block) {
 			$('<span>', {class: 'flowBlockUnits', html: ' ' + units}).appendTo(div);
 		}
 		div.appendTo(blockDiv);
+		if (block.type === 'number_display_and_input') {
+			appendBlockParametersToBlockDiv(block, blockDiv);
+		}
 	}
 
 	// position the block as specified
@@ -269,7 +265,7 @@ function displayBlock(block) {
 
 	// get dimensions of block div
 	var w = parseInt(blockDiv.outerWidth(true));  // true to include the margin in the width
-    var h = parseInt(blockDiv.outerHeight());  // not passing true here because we don't want the bottom margin
+	var h = parseInt(blockDiv.outerHeight());  // not passing true here because we don't want the bottom margin
 	block.view.w = w;
 	block.view.h = h;
 	var pinRadius = 15;
@@ -301,6 +297,16 @@ function displayBlock(block) {
 	}
 }
 
+function appendBlockParametersToBlockDiv(block, blockDiv) {
+	for (var i = 0; i < block.params.length; i++) {
+		var param = block.params[i];
+		param.value = param['default'];	// set value to default value so that we can send a value back to controller if no param entry change
+		$('<div>', {class: 'flowBlockParamLabel', html: param.name}).appendTo(blockDiv);
+		var input = $('<input>', {class: 'form-control flowBlockInput', type: 'text', id: 'bp_' + param.name, value: param['default']}).appendTo(blockDiv);
+		input.mousedown(function(e) {e.stopPropagation()});
+		input.keyup(block.id, paramEntryChanged);
+	}
+}
 
 // move a block along with its pins and connections
 function moveBlock(block, x, y) {
@@ -586,8 +592,19 @@ function addFilterBlock(e) {
 		input_type: 'n',
 		output_type: 'n',
 	}
-	if (type === 'not' || type == 'smoothing') {
+	if (type === 'not') {
 		blockSpec.input_count = 1;
+	}
+	if (type === 'simple moving average'|| type === 'exponential moving average') {
+		blockSpec.input_count = 1;
+		blockSpec.type = "number_display_and_input"
+		blockSpec.params = [{
+			'name': 'period',
+			'type': 'n',
+			'min': 0,
+			'max': 9999,
+			'default': 10
+		}];
 	}
 	if (type === 'blur' || type === 'brightness') {  // fix(soon): get this from controller block type spec list
 		blockSpec.input_type = 'i';
@@ -629,7 +646,7 @@ function showFilterBlockSelector() {
 		"not", "and", "or", "xor", "nand",
 		"plus", "minus", "times", "divided by", "absolute value",
 		"equals", "not equals", "less than", "greater than",
-		"blur", "brightness", "smoothing",
+		"blur", "brightness", "simple moving average", "exponential moving average" 
 	];
 	for (var i = 0; i < filterTypes.length; i++) {
 		var type = filterTypes[i];
