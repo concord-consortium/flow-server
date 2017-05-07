@@ -803,6 +803,10 @@ function createFrame( ctx ) {
 	frame.dataMinY = null;
 	frame.dataMaxY = null;
 
+	// current interval selection (if any)
+	frame.intervalLowerX = null;
+	frame.intervalUpperX = null;
+
 	// captions
 	frame.labelX = "";
 	frame.minLabelX = "";

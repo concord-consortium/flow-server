@@ -161,7 +161,7 @@ function deleteBlock(e) {
 
 
 // view time series history for a block
-function viewData(e) {
+function viewRecordedData(e) {
 	var block = g_diagram.findBlockById(e.data.id);
 	if (block) {
 		showPlotter();
@@ -192,10 +192,10 @@ function displayBlock(block) {
 	var menuData = createMenuData();
 	menuData.add('Delete', deleteBlock, {id: block.id});
 	if (block.hasSeq) {
-		menuData.add('View Data', viewData, {id: block.id});
+		menuData.add('View Recorded Data', viewRecordedData, {id: block.id});
 	}
 	if (block.type === 'plot' && g_useCodap) {
-		menuData.add('Explore Data', exploreData, {id: block.id});
+		menuData.add('Explore Data in CODAP', exploreData, {id: block.id});
 	}
 	var menuHolderDiv = $('<div>', {class: 'flowBlockMenuHolder'});
 	var menuDiv = $('<div>', {class: 'dropdown flowBlockMenu'}).appendTo(menuHolderDiv);

@@ -148,7 +148,23 @@ function setTimeFrame(timeStr) {
 
 function explorePlotterData() {
 	if (g_yData && g_yData.data.length) {
-		CodapTest.sendSequence(g_yData.data);
+		var data;
+		var frame = g_plotHandler.plotter.frames[0];
+		if (frame.intervalLowerX === null || frame.intervalUpperX === null) {
+			data = g_yData.data;
+		} else {
+			data = [];
+			var xDataRaw = g_xData.data;
+			var yDataRaw = g_yData.data;
+			for (var i = 0; i < xDataRaw.length; i++) {
+				var x = xDataRaw[i];
+				if (x >= frame.intervalLowerX && x <= frame.intervalUpperX) {
+					data.push(yDataRaw[i]);
+				}
+			}
+		}
+		console.log('sending', data.length, 'values to CODAP');
+		CodapTest.sendSequence(data);
 	}
 }
 
