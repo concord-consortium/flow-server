@@ -100,10 +100,12 @@ function createFlowBlock(blockSpec) {
 		values: [],
 		timestamps: []
 	};
+	/* ---- disabling history storage for now ----
 	if (block.value){
 		block.history.values.push(block.value);
 		block.history.timestamps.push(moment().valueOf() * 0.001);
 	}
+	*/
 
 	// view-related data is stored in this sub-object
 	block.view = {};
@@ -161,14 +163,15 @@ function createFlowBlock(blockSpec) {
 			return;
 		}
 
+		/* ---- disabling history storage for now ----
 		timestamp = timestamp || Math.round(moment().valueOf() * 0.001);
 		this.history.values.push(value);
 		this.history.timestamps.push(timestamp);
-
 		if (this.history.length === BLOCK_HISTORY_LIMIT){
 			this.history.values.shift();
 			this.history.timestamps.shift();
 		}
+		*/
 	};
 
 	return block;

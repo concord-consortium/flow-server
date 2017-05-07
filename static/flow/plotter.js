@@ -6,12 +6,13 @@ var g_sequenceBlock = null;
 var g_localTimestamps = null;
 var g_localValues = null;
 
+
 var PLOTTER_MARGIN_BOTTOM = 94; // px
+
 
 function resizeCanvas(){
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight - PLOTTER_MARGIN_BOTTOM;
-
 	if (g_plotHandler){
 		g_plotHandler.drawPlot(null, null);
 	}
@@ -36,19 +37,15 @@ function closePlotter() {
 	showDiagramEditor();
 }
 
+
 function getServerSequenceData(params) {
 	// handle sequence history data received from server
 	var handler = function(data) {
 		var values = data.values;
 		var timestamps = data.timestamps;
 
-		console.log('Received:');
-		for(var i = 0; i < values.length; i++){
-			console.log(values[i], timestamps[i]);
-		}
-
-		// console.log('received', values.length, 'values');
-		// console.log('received', timestamps.length, 'timestamps');
+		console.log('received', values.length, 'values');
+		console.log('received', timestamps.length, 'timestamps');
 
 		// make sure all values are numeric (or null)
 		// fix(faster): do on server
@@ -60,13 +57,18 @@ function getServerSequenceData(params) {
 			}
 		}
 
-		// merge server data with local data
+		// update plot data
+		g_xData.data = timestamps;
+		g_yData.data = values;
 
+		/* ---- disabling local history for now ----
+		// merge server data with local data
 		// sanity check to ensure server timestamps are earlier than local time
 		if (g_localTimestamps[0] - timestamps[0] > 0){
-	    Array.prototype.unshift.apply(g_localTimestamps, timestamps);
+			Array.prototype.unshift.apply(g_localTimestamps, timestamps);
 			Array.prototype.unshift.apply(g_localValues, values);
 		}
+		*/
 		g_plotHandler.plotter.autoBounds();
 		g_plotHandler.drawPlot(null, null);
 
@@ -76,14 +78,19 @@ function getServerSequenceData(params) {
 	$.get(url, params, handler);
 }
 
+
 // add a sequence to be displayed in the plotter screen
 function addSequence(block) {
 	g_sequenceBlock = block;
 	g_sequenceName = block.name;
 
+	/* ---- disabling history storage for now ----
 	// Init the sequence with local data first
 	g_localTimestamps = block.history.timestamps;
 	g_localValues = block.history.values;
+	*/
+	g_localTimestamps = [];
+	g_localValues = [];
 	g_xData = createDataColumn('timestamp', g_localTimestamps);
 	g_xData.type = 'timestamp';
 	g_yData = createDataColumn('value', g_localValues);
@@ -98,15 +105,17 @@ function addSequence(block) {
 	g_plotHandler.drawPlot(null, null);
 
 	// request sequence history data from server
-	// getServerSequenceData({ count: 1000 }, handler)
+	setTimeFrame('10m');
 
+	/* ---- disabling auto-update for now ----
 	addMessageHandler('sequence_update', function(timestamp, params) {
 		// Since update_diagram is pushing new data to block history, simply update the plotter
 		g_plotHandler.plotter.autoBounds();
 		g_plotHandler.drawPlot(null, null);
 	});
-
+	*/
 }
+
 
 function setTimeFrame(timeStr) {
 	var frameSeconds;
@@ -130,7 +139,7 @@ function setTimeFrame(timeStr) {
 			end = moment(now).toISOString();
 
 	getServerSequenceData({
-		count: 1000,
+		count: 100000,
 		start_timestamp: start,
 		end_timestamp: end
 	})
