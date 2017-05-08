@@ -7,10 +7,20 @@ function initFlowApp() {
 	g_app = new Vue({
 		el: '#app',
 		template: [
-			'<component v-bind:is="currentView"></component>'
+			'<component v-bind:is="currentView" v-bind:diagram="currentDiagram" @loadDiagram="loadDiagram"></component>'
 		].join('\n'),
 		data: {
 			currentView: 'controllerSelector',
+			currentDiagram: null
+		},
+		methods: {
+			loadDiagram: function(diagramSpec){
+				if (diagramSpec){
+					this.currentDiagram = new Diagram(diagramSpec);
+				} else {
+					this.currentDiagram = null;
+				}
+			}
 		},
 		components: {
 			'controllerSelector': controllerSelectorView(),

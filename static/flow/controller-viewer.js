@@ -1,6 +1,3 @@
-var g_diagramSpecs = [];  // a collection of all diagrams on the controller
-var g_controllerViewerInitialized = false;
-
 // prepare an interface for viewing the diagrams contained within a controller
 function controllerViewerView() {
 	return Vue.component('controller-viewer', {
@@ -39,20 +36,23 @@ function controllerViewerView() {
 			return {
 				connecting: true,
 				diagrams: [], // Populate from message handler
-				statusMsg: '...'
+				statusMsg: '...',
+				controllerViewerInitialized: false
 			}
 		},
 		methods: {
 			newDiagram: function(){
 				// open a new flow diagram in the diagram editor
 				showDiagramEditor();
-				loadDiagram({'blocks': []});  // load an empty diagram
-				sendMessage('set_diagram', {diagram: diagramToSpec(g_diagram)});  // send empty diagram to controller
+				this.$emit('loadDiagram', {'blocks': []}); // load an empty diagram
+
+				// TODO: Perform in diagram editor?
+				// sendMessage('set_diagram', {diagram: diagramToSpec(g_diagram)});  // send empty diagram to controller
 			},
 			viewDiagram: function(diagramSpec){
 				showDiagramEditor();
 				sendMessage('start_diagram', diagramSpec);
-				loadDiagram(diagramSpec);
+				this.$emit('loadDiagram', diagramSpec);
 			},
 			renameDiagram: function(diagramSpec){
 				modalPrompt({title: 'Rename Diagram', prompt: 'Name', default: diagramSpec.name,
@@ -85,7 +85,8 @@ function controllerViewerView() {
 			setTargetFolder(g_controller.path);
 
 			// open websocket connect to server
-			if (g_controllerViewerInitialized) {
+			console.log(this);
+			if (this.controllerViewerInitialized) {
 				sendMessage('list_diagrams');
 				sendMessage('request_status');
 			} else {
@@ -106,7 +107,7 @@ function controllerViewerView() {
 				view.statusMsg = 'Number of devices: ' + params.device_count;
 			});
 
-			g_controllerViewerInitialized = true;
+			this.controllerViewerInitialized = true;
 
 		}
 	});

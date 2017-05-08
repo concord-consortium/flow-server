@@ -1,21 +1,9 @@
-var g_diagramEditorInitialized = false;
-var g_diagram = null;  // the diagram currently being edited
-var g_diagramName = null;
-var g_modified = false;  // true if the diagram has been modified since it was last saved
-var g_svgDrawer = null;
-var g_activeStartPin = null;
-var g_activeLineSvg = null;
-var g_dragBlock = null;
-var g_dragBlockOffsetX = null;
-var g_dragBlockOffsetY = null;
-var g_startTimestamp = moment().valueOf() * 0.001;  // a unix timestamp used as the starting point for time series plots
-var g_viewingBlockId = null; // When showing block data, track id
-
 function diagramEditorView() {
 	return Vue.component('diagram-editor', {
 		template: [
 			'<div id="diagramEditorPanel" class="flowPanel">',
-				'<div id="diagramHolder">',
+				'<div id="diagramHolder" v-on:mousemove="mouseMove" v-on:mouseup="mouseUp">',
+					'<block v-for="(block, i) in diagram.blocks" :key="block.id" v-bind:block="block"></block>',
 				'</div>',
 				'<div class="menuBar">',
 					'<button class="btn btn-primary" onclick="sendMessage(\'add_camera\');">Add Camera</button>',
@@ -29,10 +17,63 @@ function diagramEditorView() {
 				'</div>',
 			'</div>'
 		].join('\n'),
+		props: [
+			'diagram',
+		],
+		components: {
+			'block': blockComponent()
+		},
+		data: function(){
+			return {
+				svgDrawer: null,
+				activeStartPin: null,
+				diagramEditorInitialized: false,
+				// diagram: {},  // the diagram currently being edited
+				diagramName: null,
+				modified: false,  // true if the diagram has been modified since it was last saved
+				activeLineSvg: null,
+				dragBlock: null,
+				dragBlockOffsetX: null,
+				dragBlockOffsetY: null,
+				startTimestamp: moment().valueOf() * 0.001,  // a unix timestamp used as the starting point for time series plots
+				viewingBlockId: null, // When showing block data, track id
+			}
+		},
 		methods: {
+			// handle mouse moves in SVG area; move blocks or connections
+			mouseMove: function(e) {
+				if (this.activeStartPin) {
+					var x1 = this.activeStartPin.view.x;
+					var y1 = this.activeStartPin.view.y;
+					var x2 = e.pageX;
+					var y2 = e.pageY;
+					if (g_activeLineSvg) {
+						this.activeLineSvg.plot(x1, y1, x2, y2);
+					} else {
+						this.activeLineSvg = this.svgDrawer.line(x1, y1, x2, y2).stroke({width: 10, color: '#555'}).back();
+					}
+				}
+				if (this.dragBlock) {
+					var x = e.pageX;
+					var y = e.pageY;
+					moveBlock(this.dragBlock, x + this.dragBlockOffsetX, y + this.dragBlockOffsetY);
+					layoutModified();
+				}
+			},
+			// handle mouse button up in SVG area
+			mouseUp: function(e) {
+				this.activeStartPin = null;
+				this.dragBlock = null;
+				if (this.activeLineSvg) {
+					this.activeLineSvg.remove();
+					this.activeLineSvg = null;
+				}
+			},
+
 
 		},
-		created: function(){
+		mounted: function(){
+			var view = this;
 			var controllerConnected = false;
 
 			// request list of devices currently connected to controller
@@ -40,10 +81,8 @@ function diagramEditorView() {
 			sendMessage('list_devices');
 
 			// one-time initialization of UI elements and message handlers
-			if (g_diagramEditorInitialized === false) {
-				g_svgDrawer = SVG('diagramHolder');
-				$('#diagramHolder').mousemove(mouseMove);
-				$('#diagramHolder').mouseup(mouseUp);
+			if (this.diagramEditorInitialized === false) {
+				this.svgDrawer = SVG('diagramHolder');
 
 				// handle a list of devices from the controller
 				addMessageHandler('device_list', function(timestamp, params) {
@@ -51,7 +90,7 @@ function diagramEditorView() {
 
 					var devices = params.devices;
 					for (var i = 0; i < devices.length; i++) {
-						addDevice(devices[i]);
+						// view.addDevice(devices[i]); // TODO: where does this function live?
 					}
 				});
 
@@ -61,7 +100,7 @@ function diagramEditorView() {
 
 					console.log('device_added');
 					var deviceInfo = params;
-					if (g_diagram.findBlockByName(deviceInfo.name) === null) {
+					if (view.diagram.findBlockByName(deviceInfo.name) === null) {
 						var inputCount = (deviceInfo.dir === 'out') ? 1 : 0;
 						var outputCount = (deviceInfo.dir === 'in') ? 1 : 0;
 						var blockSpec = {
@@ -72,12 +111,12 @@ function diagramEditorView() {
 							input_count: inputCount,
 							output_count: outputCount,
 							view: {
-								x: 100 + g_diagram.blocks.length * 50,  // fix(later): smarter positioning
-								y: 100 + g_diagram.blocks.length * 50,
+								x: 100 + view.diagram.blocks.length * 50,  // fix(later): smarter positioning
+								y: 100 + view.diagram.blocks.length * 50,
 							}
 						};
 						var block = createFlowBlock(blockSpec);
-						g_diagram.blocks.push(block);
+						view.diagram.blocks.push(block);
 						displayBlock(block);
 						structureModified();
 					}
@@ -90,7 +129,7 @@ function diagramEditorView() {
 					var block = g_diagram.findBlockByName(params.name);
 					if (block) {
 						undisplayBlock(block);  // remove UI elements
-						g_diagram.removeBlock(block);
+						view.diagram.removeBlock(block);
 						structureModified();
 					}
 				});
@@ -104,7 +143,7 @@ function diagramEditorView() {
 					for (var blockId in values) {
 						if (values.hasOwnProperty(blockId)) {
 							var value = values[blockId];
-							var block = g_diagram.findBlockById(parseInt(blockId));  // fix(later): why aren't blockIds coming through as integers?
+							var block = view.diagram.findBlockById(parseInt(blockId));  // fix(later): why aren't blockIds coming through as integers?
 							if (block && value !== null) {
 								block.updateValue(value); // will be null if no defined value (disconnected)
 								displayBlockValue(block);
@@ -122,59 +161,24 @@ function diagramEditorView() {
 						}});
 					}
 				}, 1000);
-				
-				g_diagramEditorInitialized = true;
+
+				this.diagramEditorInitialized = true;
 			}
 		}
 	});
 }
 
-/* ======== EVENT HANDLERS ======= */
-
-
-// handle mouse moves in SVG area; move blocks or connections
-function mouseMove(e) {
-	if (g_activeStartPin) {
-		var x1 = g_activeStartPin.view.x;
-		var y1 = g_activeStartPin.view.y;
-		var x2 = e.pageX;
-		var y2 = e.pageY;
-		if (g_activeLineSvg) {
-			g_activeLineSvg.plot(x1, y1, x2, y2);
-		} else {
-			g_activeLineSvg = g_svgDrawer.line(x1, y1, x2, y2).stroke({width: 10, color: '#555'}).back();
-		}
-	}
-	if (g_dragBlock) {
-		var x = e.pageX;
-		var y = e.pageY;
-		moveBlock(g_dragBlock, x + g_dragBlockOffsetX, y + g_dragBlockOffsetY);
-		layoutModified();
-	}
-}
-
-
-// handle mouse button up in SVG area
-function mouseUp(e) {
-	g_activeStartPin = null;
-	g_dragBlock = null;
-	if (g_activeLineSvg) {
-		g_activeLineSvg.remove();
-		g_activeLineSvg = null;
-	}
-}
-
 
 // handle mouse down in pin SVG element
 function pinMouseDown(e) {
-	g_activeStartPin = this.remember('pin');
+	this.activeStartPin = this.remember('pin');
 }
 
 
 // handle mouse up in pin SVG; create a new connection between blocks
 function pinMouseUp(e) {
 	var endPin = this.remember('pin');
-	var startPin = g_activeStartPin;
+	var startPin = this.activeStartPin;
 	if (startPin.isInput != endPin.isInput) {
 		var sourcePin = endPin.isInput ? startPin : endPin;
 		var destPin = endPin.isInput ? endPin : startPin;
@@ -183,7 +187,7 @@ function pinMouseUp(e) {
 			displayConnection(destPin);
 			structureModified();
 		}
-		g_activeStartPin = null;
+		this.activeStartPin = null;
 		g_activeLineSvg.remove();
 		g_activeLineSvg = null;
 	}
@@ -283,122 +287,13 @@ function exploreData(e) {
 /* ======== DISPLAY/DRAW FUNCTIONS ======= */
 
 
-// create HTML/DOM elements for a block along with SVG pins (does not update diagram data structures)
-function displayBlock(block) {
-	var blockDiv = $('<div>', {class: 'flowBlock', id: 'b_' + block.id});
-	block.view.div = blockDiv;
-
-	// add menu
-	var menuData = createMenuData();
-	menuData.add('Delete', deleteBlock, {id: block.id});
-	if (block.hasSeq) {
-		menuData.add('View Data', viewData, {id: block.id});
-	}
-	if (block.type === 'plot' && g_useCodap) {
-		menuData.add('Explore Data', exploreData, {id: block.id});
-	}
-	var menuHolderDiv = $('<div>', {class: 'flowBlockMenuHolder'});
-	var menuDiv = $('<div>', {class: 'dropdown flowBlockMenu'}).appendTo(menuHolderDiv);
-	var menuInnerDiv = $('<div>', {
-		'class': 'dropdown-toggle',
-		'id': 'bm_' + block.id,
-		'data-toggle': 'dropdown',
-		'aria-expanded': 'true',
-	}).appendTo(menuDiv);
-	$('<span>', {class: 'flowBlockIcon glyphicon glyphicon-align-justify noSelect', 'aria-hidden': 'true'}).appendTo(menuInnerDiv);
-	createDropDownList({menuData: menuData}).appendTo(menuDiv);
-	menuHolderDiv.appendTo(blockDiv);
-
-	// add name, value, and units
-	if (block.type !== 'plot') {
-		$('<div>', {class: 'flowBlockName noSelect', html: block.name}).appendTo(blockDiv);
-	}
-	if (block.type === 'number_entry') {
-		var input = $('<input>', {class: 'form-control flowBlockInput', type: 'text', id: 'bv_' + block.id}).appendTo(blockDiv);
-		if (block.value !== null) {
-			input.val(block.value);
-		}
-		input.mousedown(function(e) {e.stopPropagation()});
-		input.keyup(block.id, numberEntryChanged);
-	} else if (block.type === 'plot') {
-		var canvas = $('<canvas>', {class: 'flowBlockPlot', width: 300, height: 200, id: 'bc_' + block.id}).appendTo(blockDiv);
-			canvas.mousedown(blockMouseDown);
-			canvas.mousemove(mouseMove);
-			canvas.mouseup(mouseUp);
-		blockDiv.addClass('flowBlockWithPlot');
-	} else if (block.type === 'camera') {
-		$('<img>', {class: 'flowBlockImage', width: 320, height: 240, id: 'bi_' + block.id}).appendTo(blockDiv);
-		blockDiv.addClass('flowBlockWithImage');
-	} else {
-		var div = $('<div>', {class: 'flowBlockValueAndUnits noSelect'});
-		$('<span>', {class: 'flowBlockValue', html: '...', id: 'bv_' + block.id}).appendTo(div);
-		console.log(block.units);
-		if (block.units) {
-			var units = block.units;
-			units = units.replace('degrees ', '&deg;');  // note removing space
-			units = units.replace('percent', '%');
-			$('<span>', {class: 'flowBlockUnits', html: ' ' + units}).appendTo(div);
-		}
-		div.appendTo(blockDiv);
-	}
-
-	// position the block as specified
-	var x = block.view.x;
-	var y = block.view.y;
-	blockDiv.css('top', y + 'px');
-	blockDiv.css('left', x + 'px');
-
-	// add a mousedown handler for dragging/moving blocks
-	blockDiv.mousedown(blockMouseDown);
-
-	// add to DOM before get dimensions
-	blockDiv.appendTo($('#diagramHolder'));
-
-	// display plot after added to DOM
-	if (block.type === 'plot') {
-		displayPlot(block);
-	}
-
-	// get dimensions of block div
-	var w = parseInt(blockDiv.outerWidth(true));  // true to include the margin in the width
-    var h = parseInt(blockDiv.outerHeight());  // not passing true here because we don't want the bottom margin
-	block.view.w = w;
-	block.view.h = h;
-	var pinRadius = 15;
-
-	// position and draw pins
-	for (var i = 0; i < block.pins.length; i++) {
-		var pin = block.pins[i];
-		if (pin.isInput) {
-			if (block.inputCount == 1) {
-				pin.view.offsetX = -5;
-				pin.view.offsetY = h / 2;
-			} else {
-				pin.view.offsetX = -5;
-				pin.view.offsetY = h / 4 + h / 2 * pin.index;
-			}
-		} else {
-			pin.view.offsetX = w + 5;
-			pin.view.offsetY = h / 2;
-		}
-		pin.view.x = x + pin.view.offsetX;
-		pin.view.y = y + pin.view.offsetY;
-		var pinSvg = g_svgDrawer.circle(pinRadius * 2).center(pin.view.x, pin.view.y).attr({fill: '#4682b4'});
-		pinSvg.remember('pin', pin);
-		pinSvg.mousedown(pinMouseDown);
-		pinSvg.mouseup(pinMouseUp);
-		pinSvg.mouseover(pinMouseOver);
-		pinSvg.mouseout(pinMouseOut);
-		pin.view.svg = pinSvg;
-	}
-}
 
 
 // move a block along with its pins and connections
 function moveBlock(block, x, y) {
 
 	// move block div
-	block.view.div.css('top', y + 'px');
+	block.view.div.css('top', y + 'px'); // TODO: use Block Vue css
 	block.view.div.css('left', x + 'px');
 	block.view.x = x;
 	block.view.y = y;
@@ -438,7 +333,7 @@ function displayConnection(destPin) {
 	var y1 = destPin.sourcePin.view.y;
 	var x2 = destPin.view.x;
 	var y2 = destPin.view.y;
-	var line = g_svgDrawer.line(x1, y1, x2, y2).stroke({width: 10, color: '#555'}).back();
+	var line = this.svgDrawer.line(x1, y1, x2, y2).stroke({width: 10, color: '#555'}).back();
 	line.remember('destPin', destPin);
 	line.click(connectionClick);
 	destPin.view.svgConn = line;
@@ -482,40 +377,6 @@ function displayPlot(block) {
 }
 
 
-// display the current value of a block in the UI
-function displayBlockValue(block) {
-	if (block.type === 'number_entry') {
-		// do nothing
-	} else if (block.type === 'plot') {
-		if (block.value !== null) {
-			var timestamp = moment().valueOf() * 0.001 - g_startTimestamp;
-			block.view.xData.data.push(timestamp);
-			block.view.yData.data.push(block.value);
-			if (block.view.xData.data.length > 30) {
-				block.view.xData.data.shift();
-				block.view.yData.data.shift();
-			}
-		} else {
-			block.view.xData.data = [];
-			block.view.yData.data = [];
-		}
-		block.view.plotHandler.plotter.autoBounds();
-		block.view.plotHandler.drawPlot(null, null);
-	} else if (block.type === 'camera') {
-		if (block.value === null) {
-			// fix(soon): display something to let user know camera is offline
-		} else {
-			console.log('set image ' + block.value.length);
-			$('#bi_' + block.id).attr('src', 'data:image/jpeg;base64,' + block.value);
-		}
-	} else {
-		if (block.value === null) {
-			$('#bv_' + block.id).html('...');
-		} else {
-			$('#bv_' + block.id).html(block.value);  // fix(faster): check whether value has changed
-		}
-	}
-}
 
 
 /* ======== OTHER FUNCTIONS ======= */
