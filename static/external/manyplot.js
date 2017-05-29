@@ -215,8 +215,9 @@ function createPlotter( canvas, multiFrame ) {
 
 		var i, xD, yD, xMin, xMax, yMin, yMax, frame;
 		if(multiFrame){
-			for(i = 0; i < this.frames.length; ++i){
-				frame = this.frames[ i ];
+			var xMinAll = null, xMaxAll = null;
+			for (i = 0; i < this.frames.length; ++i) {
+				frame = this.frames[i];
 				xD = this.dataPairs[i].xData;
 				yD = this.dataPairs[i].yData;
 				xD.computeBounds();
@@ -225,10 +226,19 @@ function createPlotter( canvas, multiFrame ) {
 				xMax = xD.maxBound === null ? xD.max : xD.maxBound;
 				yMin = yD.minBound === null ? yD.min : yD.minBound;
 				yMax = yD.maxBound === null ? yD.max : yD.maxBound;
-				frame.dataMinX = xMin;
-				frame.dataMaxX = xMax;
-				frame.dataMinY = yMin;
+				if (xMinAll === null || xMin < xMinAll) {
+					xMinAll = xMin;
+				}
+				if (xMaxAll === null || xMax > xMaxAll) {
+					xMaxAll = xMax;
+				}
+				frame.dataMinY = yMin;  // y bounds set per frame
 				frame.dataMaxY = yMax;
+			}
+			for (i = 0; i < this.frames.length; ++i) {
+				frame = this.frames[i];
+				frame.dataMinX = xMinAll;  // x bounds should be shared across frames (so all move in sync)
+				frame.dataMaxX = xMaxAll;
 			}
 		}else{
 			if(this.frames.length < 1) return;
@@ -797,7 +807,7 @@ function createFrame( ctx ) {
 	frame.boxMinY = null;
 	frame.boxMaxY = null;
 
-	// these are the bounds of the data values
+	// these are the current visible bounds of the data values
 	frame.dataMinX = null;
 	frame.dataMaxX = null;
 	frame.dataMinY = null;
