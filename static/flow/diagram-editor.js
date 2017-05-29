@@ -165,7 +165,6 @@ function viewRecordedData(e) {
 	var block = g_diagram.findBlockById(e.data.id);
 	if (block) {
 		showPlotter();
-		addSequence(block);
 		g_viewingBlockId = block.id;
 	}
 }
@@ -175,7 +174,16 @@ function viewRecordedData(e) {
 function exploreData(e) {
 	var block = g_diagram.findBlockById(e.data.id);
 	if (block) {
-		CodapTest.sendSequence(block.view.yData.data);
+		var attrs = [
+			{name: 'value', type: 'numeric', precision: 2},
+		];
+		CodapTest.prepCollection(attrs);
+		var data = [];
+		var yd = block.view.yData.data;
+		for (var i = 0; i < yd.length; i++) {
+			data.push({'value': yd[i]});
+		}
+		CodapTest.sendData(data);
 	}
 }
 

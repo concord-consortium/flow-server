@@ -1,10 +1,4 @@
 var g_plotHandler = null;
-var g_xData = null;
-var g_yData = null;
-var g_sequenceName = null;
-var g_sequenceBlock = null;
-var g_localTimestamps = null;
-var g_localValues = null;
 
 
 var PLOTTER_MARGIN_BOTTOM = 94; // px
@@ -28,7 +22,33 @@ function initPlotter() {
 		context = canvas.getContext('2d');
 		window.addEventListener('resize', resizeCanvas, false);
 		resizeCanvas();
+
+		/* ---- disabling auto-update for now ----
+		addMessageHandler('sequence_update', function(timestamp, params) {
+			// Since update_diagram is pushing new data to block history, simply update the plotter
+			g_plotHandler.plotter.autoBounds();
+			g_plotHandler.drawPlot(null, null);
+		});
+		*/
 	}
+	
+	// update which blocks are shown in plot
+	var dataPairs = [];
+	for (var i = 0; i < g_diagram.blocks.length; i++) {
+		var block = g_diagram.blocks[i];
+		if (block.inputCount === 0) {
+			var dataPair = findDataPair(block.name);
+			if (!dataPair) {
+				dataPair = createDataPair(block);
+			}
+			dataPairs.push(dataPair);
+		}
+	}
+	g_plotHandler.plotter.setData(dataPairs);
+	g_plotHandler.drawPlot(null, null);
+		
+	// request sequence history data from server
+	setTimeFrame('10m');
 }
 
 
@@ -38,7 +58,8 @@ function closePlotter() {
 }
 
 
-function getServerSequenceData(params) {
+function requestServerSequenceData(blockName, params) {
+	
 	// handle sequence history data received from server
 	var handler = function(data) {
 		var values = data.values;
@@ -57,10 +78,6 @@ function getServerSequenceData(params) {
 			}
 		}
 
-		// update plot data
-		g_xData.data = timestamps;
-		g_yData.data = values;
-
 		/* ---- disabling local history for now ----
 		// merge server data with local data
 		// sanity check to ensure server timestamps are earlier than local time
@@ -69,57 +86,56 @@ function getServerSequenceData(params) {
 			Array.prototype.unshift.apply(g_localValues, values);
 		}
 		*/
-		g_plotHandler.plotter.autoBounds();
-		g_plotHandler.drawPlot(null, null);
 
+		// update plot data
+		var dataPair = findDataPair(blockName);
+		if (dataPair) {
+			dataPair.xData.data = timestamps;  // we are updating the plotter's internal data
+			dataPair.yData.data = values;
+			g_plotHandler.plotter.autoBounds();
+			g_plotHandler.drawPlot(null, null);
+		}
 	}
 
-	var url = '/api/v1/resources' + g_controller.path + '/' + g_sequenceName;
+	var url = '/api/v1/resources' + g_controller.path + '/' + blockName;
 	$.get(url, params, handler);
 }
 
 
-// add a sequence to be displayed in the plotter screen
-function addSequence(block) {
-	g_sequenceBlock = block;
-	g_sequenceName = block.name;
+function createDataPair(block) {
+	var xData = createDataColumn('timestamp', []);
+	xData.type = 'timestamp';
+	var yData = createDataColumn('value', []);
+	yData.name = block.name;
+	return {
+		'xData': xData,
+		'yData': yData,
+	};
+}
 
-	/* ---- disabling history storage for now ----
-	// Init the sequence with local data first
-	g_localTimestamps = block.history.timestamps;
-	g_localValues = block.history.values;
-	*/
-	g_localTimestamps = [];
-	g_localValues = [];
-	g_xData = createDataColumn('timestamp', g_localTimestamps);
-	g_xData.type = 'timestamp';
-	g_yData = createDataColumn('value', g_localValues);
-	g_yData.name = g_sequenceName;
-	var dataPairs = [
-		{
-			'xData': g_xData,
-			'yData': g_yData,
+
+function findDataPair(blockName) {
+	var dataPair = null;
+	var dataPairs = g_plotHandler.plotter.dataPairs;
+	for (var i = 0; i < dataPairs.length; i++) {
+		var d = dataPairs[i];
+		if (d.yData.name === blockName) {
+			dataPair = d;
+			break;
 		}
-	];
-	g_plotHandler.plotter.setData(dataPairs);
-	g_plotHandler.drawPlot(null, null);
+	}
+	return dataPair;
+}
 
-	// request sequence history data from server
-	setTimeFrame('10m');
 
-	/* ---- disabling auto-update for now ----
-	addMessageHandler('sequence_update', function(timestamp, params) {
-		// Since update_diagram is pushing new data to block history, simply update the plotter
-		g_plotHandler.plotter.autoBounds();
-		g_plotHandler.drawPlot(null, null);
-	});
-	*/
+function addBlockToPlotter(block) {
 }
 
 
 function setTimeFrame(timeStr) {
-	var frameSeconds;
-
+	
+	// compute time bounds
+	var frameSeconds = 0;
 	if (timeStr === '1m'){
 		frameSeconds = 60;
 	} else if (timeStr === '10m'){
@@ -133,38 +149,126 @@ function setTimeFrame(timeStr) {
 	} else if (timeStr === '30d'){
 		frameSeconds = 60 * 60 * 24 * 30;
 	}
+	var now = moment().valueOf();
+	var start = moment(now - (frameSeconds * 1000)).toISOString();
+	var end = moment(now).toISOString();
 
-	var now = moment().valueOf(),
-			start = moment(now - (frameSeconds * 1000)).toISOString(),
-			end = moment(now).toISOString();
-
-	getServerSequenceData({
-		count: 100000,
-		start_timestamp: start,
-		end_timestamp: end
-	})
+	// request all current input blocks from server
+	for (var i = 0; i < g_diagram.blocks.length; i++) {
+		var block = g_diagram.blocks[i];
+		if (block.inputCount === 0) {
+			requestServerSequenceData(block.name, {
+				count: 100000,
+				start_timestamp: start,
+				end_timestamp: end
+			});
+		}
+	}
 }
 
 
-function explorePlotterData() {
-	if (g_yData && g_yData.data.length) {
-		var data;
-		var frame = g_plotHandler.plotter.frames[0];
-		if (frame.intervalLowerX === null || frame.intervalUpperX === null) {
-			data = g_yData.data;
-		} else {
-			data = [];
-			var xDataRaw = g_xData.data;
-			var yDataRaw = g_yData.data;
-			for (var i = 0; i < xDataRaw.length; i++) {
-				var x = xDataRaw[i];
-				if (x >= frame.intervalLowerX && x <= frame.intervalUpperX) {
-					data.push(yDataRaw[i]);
-				}
+function exploreRecordedDataInCODAP() {
+	var timeThresh = 0.4;  // seconds
+	var dataPairs = g_plotHandler.plotter.dataPairs;	
+	if (dataPairs.length && dataPairs[0].xData.data.length) {
+		
+		// set collection attributes based on current input blocks
+		var attrs = [{name: 'seconds', type: 'numeric', precision: 2}];
+		for (var i = 0; i < g_diagram.blocks.length; i++) {
+			var block = g_diagram.blocks[i];
+			if (block.inputCount === 0) {
+				attrs.push({
+					name: block.name, 
+					type: 'numeric', 
+					precision: 2,
+				});
 			}
 		}
-		console.log('sending', data.length, 'values to CODAP');
-		CodapTest.sendSequence(data);
+		CodapTest.prepCollection(attrs);		
+		
+		// get data for quick reference
+		var xs = [];
+		var ys = [];
+		for (var j = 0; j < dataPairs.length; j++) {
+			xs.push(dataPairs[j].xData.data);
+			ys.push(dataPairs[j].yData.data);
+		}
+		
+		// get timestamp bounds
+		var frame = g_plotHandler.plotter.frames[0];
+		var minTimestamp = frame.intervalLowerX;
+		var maxTimestamp = frame.intervalUpperX;
+		var ind = [];
+		for (var j = 0; j < dataPairs.length; j++) {
+			if (xs[j].length) {
+				ind[j] = 0;  // start at beginning
+			} else {
+				ind[j] = -1;  // no data; done with this pair
+			}
+		}
+		
+		// merge the sequences
+		var data = [];
+		var startTimestamp = null;
+		var step = 0;
+		while (1) {
+			
+			// get current timestamp: min across sequences at current position
+			var timestamp = null;
+			for (var j = 0; j < dataPairs.length; j++) {
+				if (ind[j] >= 0) {
+					var t = xs[j][ind[j]];
+					if (timestamp === null || t < timestamp) {
+						timestamp = t;
+					}
+				}
+			}
+			
+			// if no timestamp, then we've reached the end of all sequences, stop here
+			if (timestamp === null) {
+				break;
+			}
+						
+			// check whether to keep this point
+			var keepPoint = ((minTimestamp === null || timestamp >= minTimestamp - timeThresh) && (maxTimestamp === null || timestamp <= maxTimestamp + timeThresh));
+				
+			// first timestamp will be start timestamp
+			if (keepPoint && startTimestamp === null) {
+				startTimestamp = timestamp;
+			}
+
+			// grab the data for this timestamp and move indices forward
+			var dataPoint = {};
+			for (var j = 0; j < dataPairs.length; j++) {
+				if (ind[j] >= 0) {
+					var t = xs[j][ind[j]];
+					if (Math.abs(t - timestamp) < timeThresh) {
+						if (keepPoint) {
+							dataPoint[dataPairs[j].yData.name] = ys[j][ind[j]];
+						}
+						ind[j]++;  // move to next point for this sequence; we'll assume for now that each data point within a sequence has a distinct timestamp
+						if (ind[j] >= xs[j].length) {
+							ind[j] = -1;  // at end of this sequence
+						}
+					}
+				}
+			}
+			
+			// add to data set to send to CODAP
+			if (keepPoint) {
+				dataPoint['seconds'] = timestamp - startTimestamp;
+				data.push(dataPoint);
+			}
+			
+			// sanity check
+			step++;
+			if (step > 3000) {
+				break;
+			}
+		}
+		
+		// send data to CODAP
+		CodapTest.sendData(data);
 	}
 }
 
@@ -173,19 +277,34 @@ function explorePlotterData() {
 function deleteSequenceData() {
 	modalConfirm({
 		title: 'Delete Sequence Data',
-		'prompt': 'Are you sure you want to <b>delete all data</b> for sequence <b>' + g_sequenceName + '</b>?',
+		'prompt': 'Are you sure you want to <b>delete all data</b> for these blocks?',
 		yesFunc: function() {
-			$.ajax({
-				type: 'DELETE',
-				url: '/api/v1/resources' + g_controller.path + '/' + g_sequenceName,
-				data: {
-					'csrf_token': g_csrfToken,
-					'data_only': 1,
-				},
-				success: function() {
-					closePlotter();  // fix(later): just remove/clear this sequence
-				},
-			});
+			var first = true;
+			for (var i = 0; i < g_diagram.blocks.length; i++) {
+				var block = g_diagram.blocks[i];
+				if (block.inputCount === 0) {
+					$.ajax({
+						type: 'DELETE',
+						url: '/api/v1/resources' + g_controller.path + '/' + block.name,
+						data: {
+							'csrf_token': g_csrfToken,
+							'data_only': 1,
+						},
+						success: function() {
+							if (first) {  // only do this once
+								for (var j = 0; j < g_plotHandler.plotter.dataPairs.length; j++) {
+									var d = g_plotHandler.plotter.dataPairs[j];
+									d.xData.data = [];  // clear out data so it's not visible when come back
+									d.yData.data = [];
+								}
+								g_plotHandler.drawPlot(null, null);
+								closePlotter();  // close the plotter since there's no longer anything to see
+								first = false;
+							}
+						},
+					});
+				}
+			}
 		}
 	});
 }

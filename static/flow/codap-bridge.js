@@ -21,24 +21,6 @@ function initCodapBridge() {
 					resource: 'dataContext',
 					values: {
 						name: "Flow_Data",
-						collections: [  // There are two collections: a parent and a child
-							{
-								name: 'samples',
-								// The parent collection has just one attribute
-								attrs: [ {name: "sample", type: 'categorical'}],
-								childAttrName: "sample"
-							},
-							{
-								name: 'numbers',
-								parent: 'samples',
-								labels: {
-									pluralCase: "numbers",
-									setOfCasesWithArticle: "a sample"
-								},
-								// The child collection also has just one attribute
-								attrs: [{name: "number", type: 'numeric', precision: 1}]
-							}
-						]
 					}});
 				}
 			}
@@ -51,8 +33,36 @@ function initCodapBridge() {
 var CodapTest = {
 	state: codapInterface.getInteractiveState(),
 
-	// Here is the function that is triggered when the user presses the button
-	sendSequence: function (values) {
+	// set the format of the collection; attributes should be a list of fields: [{name: 'field_a', ...}, {name: 'field_b', ...}];
+	// see CODAP docs for more info about attributes
+	prepCollection: function(attrs) {
+		console.log('adding', attrs.length, 'fields to CODAP collection');
+		codapInterface.sendRequest({
+			action: 'create',
+			resource: 'collection',
+			values: [  // There are two collections: a parent and a child
+				{
+					name: 'samples',
+					// The parent collection has just one attribute
+					attrs: [{name: "sample", type: 'categorical'}],
+					childAttrName: "sample"
+				},
+				{
+					name: 'points',
+					parent: 'samples',
+					labels: {
+						pluralCase: "points",
+						setOfCasesWithArticle: "a sample"
+					},
+					attrs: attrs,
+				}
+			]
+		});
+	},
+	
+	// send data to the CODAP; data should be a list of dictionaries: [{field_a: 1, field_b: 2}, {field_a: 3, field_b: 4}]
+	sendData: function(data) {
+		console.log('sending', data.length, 'points to CODAP');
 
 		// we assume the connection should have been made by the time a button is
 		// pressed.
@@ -62,18 +72,20 @@ var CodapTest = {
 		}
 
 		// This function is called once the parent case is opened
-		var sendData = function( iResult ) {
+		var sendData = function(iResult) {
 			var tID = iResult.values[0].id;
-			for (var i = 0; i < values.length; i++) {  // fix(soon): is it ok to just call these in rapid succession? should wait until each one is done before sending next?
-				codapInterface.sendRequest({
-					action: 'create',
-					resource: 'collection[numbers].case',
-					values: {
-						parent: tID,
-						values: {number: values[i]}
-					}
+			var values = [];
+			for (var i = 0; i < data.length; i++) {
+				values.push({
+					parent: tID,
+					values: data[i],
 				});
 			}
+			codapInterface.sendRequest({
+				action: 'create',
+				resource: 'collection[points].case',
+				values: values,
+			});
 		};
 
 		// We keep track of the sampleNumber in interactiveState. If it doesn't exist
@@ -86,7 +98,7 @@ var CodapTest = {
 		this.state.sampleNumber++;
 
 		// Tell CODAP to open a parent case and call sendData when done
-		codapInterface.sendRequest( {
+		codapInterface.sendRequest({
 			action: 'create',
 			resource: 'collection[samples].case',
 			values: {values: {sample: this.state.sampleNumber}}
