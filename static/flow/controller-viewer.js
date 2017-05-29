@@ -1,5 +1,6 @@
 var g_controllerViewerInitialized = false;
 var g_diagramSpecs = [];  // a collection of all diagrams on the controller
+var g_recordingInterval = null;  // current recording interval
 
 
 // prepare an interface for viewing the diagrams contained within a controller
@@ -30,8 +31,8 @@ function initControllerViewer() {
 		diagramListDiv.empty();
 		g_diagramSpecs = params.diagrams;
 
-		var createMenu = function(btnGroup, diagramIndex){
-			var diagramActions = $('<button>', {class: 'btn btn-lg dropdown-toggle', html: '<span class="caret"></span>'});
+		var createMenu = function(btnGroup, diagramIndex, id){
+			var diagramActions = $('<button>', {class: 'btn btn-lg dropdown-toggle', html: '<span class="caret"></span>', id: id});
 			diagramActions
 				.css({ height: '45px'})
 				.attr({ 'data-toggle': 'dropdown'})
@@ -71,13 +72,13 @@ function initControllerViewer() {
 			var diagram = g_diagramSpecs[i];
 			var diagramDiv = $('<div>', {class: 'listButton'});
 			var btnGroup = $('<div>', {class: 'btn-group'});
-			var diagramName = $('<button>', {class: 'btn btn-lg diagram-name', html: diagram.name}).appendTo(btnGroup);
+			var diagramName = $('<button>', {class: 'btn btn-lg diagram-name', html: diagram.name, id: 'd_' + diagram.name}).appendTo(btnGroup);
 			diagramName.click(i, function(e) {
 				showDiagramEditor();
 				sendMessage('start_diagram', g_diagramSpecs[e.data]);
 				loadDiagram(g_diagramSpecs[e.data]);
 			});
-			createMenu(btnGroup, i)
+			createMenu(btnGroup, i, 'dm_' + diagram.name);
 			btnGroup.appendTo(diagramDiv);
 			diagramDiv.appendTo(diagramListDiv);
 		}
@@ -86,7 +87,19 @@ function initControllerViewer() {
 	// handle status message from the controller
 	addMessageHandler('status', function(timestamp, params) {
 		console.log('status', params);
-		$('#controllerStatus').empty().html('Number of devices: ' + params.device_count);
+		var statusDiv = $('#controllerStatus');
+		statusDiv.empty();
+		$('<div>', {html: 'Number of devices: ' + params.device_count}).appendTo(statusDiv);
+		$('<div>', {html: 'Recording interval: ' + (params.recording_interval ? params.recording_interval + ' second(s)' : 'none')}).appendTo(statusDiv);
+		g_recordingInterval = params.recording_interval;
+		if (params.current_diagram) {
+			var button = $('#d_' + params.current_diagram);
+			if (button) {
+				button.addClass('btn-success');
+				$('#dm_' + params.current_diagram).addClass('btn-success');
+				button.html(params.current_diagram + ' (running' + (g_recordingInterval ? ' and recording' : '') + ')');
+			}
+		}
 	});
 
 	g_controllerViewerInitialized = true;

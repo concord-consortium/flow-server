@@ -82,9 +82,8 @@ function createPlotHandler( canvas, multiFrame ) {
 		plotHandler.drawPlot( null, null );
 	};
 
-	plotHandler.toggleIntervalSelect = function() {
-		plotHandler.intervalSelect = !plotHandler.intervalSelect;
-		console.log('Toggling:', plotHandler.intervalSelect);
+	plotHandler.setIntervalSelect = function(intervalSelect) {
+		this.intervalSelect = intervalSelect;
 	};
 
 	return plotHandler;

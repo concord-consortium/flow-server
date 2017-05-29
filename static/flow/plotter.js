@@ -167,6 +167,19 @@ function setTimeFrame(timeStr) {
 }
 
 
+function selectInterval() {
+	if (g_plotHandler.intervalSelect) {
+		g_plotHandler.setIntervalSelect(false);
+		$('#selectInterval').html('Select Interval');
+		$('#selectInterval').removeClass('btn-info');
+	} else {
+		g_plotHandler.setIntervalSelect(true);		
+		$('#selectInterval').html('Done with Interval Selection');
+		$('#selectInterval').addClass('btn-info');
+	}
+}
+
+
 function exploreRecordedDataInCODAP() {
 	var timeThresh = 0.4;  // seconds
 	var dataPairs = g_plotHandler.plotter.dataPairs;	

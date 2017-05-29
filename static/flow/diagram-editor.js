@@ -446,6 +446,12 @@ function displayBlockValue(block) {
 function initDiagramEditor() {
 	var controllerConnected = false;
 
+	// if currently recording update recording button
+	if (g_recordingInterval) {
+		$('#startRecording').hide();
+		$('#stopRecording').show();
+	}
+	
 	// request list of devices currently connected to controller
 	// fix(soon): if we're loading a diagram, should we do this after we've loaded it?
 	sendMessage('list_devices');
@@ -710,13 +716,17 @@ function startRecordingData() {
 	var fg = createFormGroup({id: 'rate', label: 'Update Rate (seconds)'}).appendTo(modalBody);
 	createTextInput({id: 'rate', value: '60'}).appendTo(fg);
 	$('#recordingSettings-ok').click(function() {
-		var params = {
-			'rate': parseInt($('#rate').val()),
-		};
-		sendMessage('start_recording', params);
-		$('#startRecording').hide();
-		$('#stopRecording').show();
-		$('#recordingSettings').modal('hide');
+		var rate = parseInt($('#rate').val());
+		if (rate) {
+			g_recordingInterval = rate;
+			var params = {
+				'rate': rate,
+			};
+			sendMessage('start_recording', params);
+			$('#startRecording').hide();
+			$('#stopRecording').show();
+			$('#recordingSettings').modal('hide');
+		}
 	});
 	$('#recordingSettings').modal('show');
 }
@@ -727,6 +737,7 @@ function stopRecordingData() {
 	sendMessage('stop_recording');
 	$('#stopRecording').hide();
 	$('#startRecording').show();
+	g_recordingInterval = 0;
 }
 
 
