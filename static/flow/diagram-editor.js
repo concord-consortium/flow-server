@@ -11,6 +11,9 @@ var g_dragBlockOffsetY = null;
 var g_startTimestamp = moment().valueOf() * 0.001;  // a unix timestamp used as the starting point for time series plots
 var g_viewingBlockId = null; // When showing block data, track id
 
+// indicates if BLE should be used for message processing
+
+var g_useBle = true;
 
 /* ======== EVENT HANDLERS ======= */
 
@@ -525,23 +528,11 @@ function initDiagramEditor() {
 			}
 		});
 
-		// handle a new set of values for the blocks in the diagram
-		// (the controller code is responsible for computing diagram block values)
-		addMessageHandler('update_diagram', function(timestamp, params) {
-			controllerConnected = true;
-
-			var values = params.values;
-			for (var blockId in values) {
-				if (values.hasOwnProperty(blockId)) {
-					var value = values[blockId];
-					var block = g_diagram.findBlockById(parseInt(blockId));  // fix(later): why aren't blockIds coming through as integers?
-					if (block) {
-						block.updateValue(value); // will be null if no defined value (disconnected)
-						displayBlockValue(block);
-					}
-				}
-			}
-		});
+		if (g_useBle) {
+			bleaddMessageHandler('update_diagram', update_diagram_handler);
+		} else {
+			addMessageHandler('update_diagram', update_diagram_handler);
+		}
 
 		// Check that the controller has sent a message upon init
 		window.setTimeout(function(){
@@ -554,6 +545,27 @@ function initDiagramEditor() {
 		}, 3000);
 
 		g_diagramEditorInitialized = true;
+	}
+}
+
+// handle a new set of values for the blocks in the diagram
+// (the controller code is responsible for computing diagram block values)
+function update_diagram_handler(timestamp, params) {
+	controllerConnected = true;
+
+	var values = params.values;
+	for (var blockId in values) {
+		if (values.hasOwnProperty(blockId)) {
+			var value = values[blockId];
+			if (blockId == "1") {
+				//blockId = "26";
+			}
+			var block = g_diagram.findBlockById(parseInt(blockId));  // fix(later): why aren't blockIds coming through as integers?
+			if (block) {
+				block.updateValue(value); // will be null if no defined value (disconnected)
+				displayBlockValue(block);
+			}
+		}
 	}
 }
 

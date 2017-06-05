@@ -9,6 +9,7 @@ function initControllerViewer() {
 	// if we've already initialized the view but are returning to it again, we should request the list of diagrams again
 	if (g_controllerViewerInitialized) {
 		sendMessage('list_diagrams');
+		//sendMessage('list_diagrams_names');
 		sendMessage('request_status');
 		return;
 	}
@@ -22,6 +23,7 @@ function initControllerViewer() {
 	// open websocket connect to server
 	connectWebSocket(function() {
 		sendMessage('list_diagrams');
+		//sendMessage('list_diagrams_names');
 		sendMessage('request_status');
 	});
 

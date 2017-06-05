@@ -1,11 +1,14 @@
-// This code manages a websocket connection for passing messages to/from the server.
-// It maintains a list of message subscriptions and a set of message handlers.
-// It manages pinging the server and reconnecting when disconnected.
+// BLE websocket-like message handler
+// based on websocket manager/handler messages.js
+// For now only processed update_diagram messages
+// TODO: also allow to process:
+//   a list of message subscriptions
+//   pinging the server
+//   reconnecting when disconnected
 
 
-// global instance of WebSocketHolder; creating the holder does not connect; use connectWebSocket when ready to connect
-var g_wsh = createWebSocketHolder();
-
+// global instance of BLE WebSocketHolder; creating the holder does not connect; use connectWebSocket when ready to connect
+var g_blewsh = blecreateWebSocketHolder();
 
 
 // ======== public API functions ========
@@ -14,29 +17,29 @@ var g_wsh = createWebSocketHolder();
 // open a websocket connection to the server;
 // afterOpen (optional) will called after the websocket is opened (will be re-called if reconnect);
 // does not reconnect if already connected
-function connectWebSocket(afterOpen) {
-	g_wsh.afterOpen = afterOpen;
-	if (g_wsh.connectStarted) // fix(later): move inside connect? need to be sure that reconnects still work
+function bleconnectWebSocket(afterOpen) {
+	g_blewsh.afterOpen = afterOpen;
+	if (g_blewsh.connectStarted) // fix(later): move inside connect? need to be sure that reconnects still work
 		return;
-	g_wsh.connect();
+	g_blewsh.connect();
 }
 
 
 // subscript to messages from a folder;
 // if includeSelf is specified, messages sent from self will be reflected back
 // fix(clean): move contents of this function into webSocketHolder (so this is just a simple wrapper)?
-function subscribeToFolder(folderPath, includeSelf) {
+function blesubscribeToFolder(folderPath, includeSelf) {
 	console.log('subscribe: ' + folderPath);
-	for (var i = 0; i < g_wsh.subscriptions.length; i++) {
-		if (g_wsh.subscriptions[i].folder == folderPath)
+	for (var i = 0; i < g_blewsh.subscriptions.length; i++) {
+		if (g_blewsh.subscriptions[i].folder == folderPath)
 			return;
 	}
 	var subscription = {'folder': folderPath};
 	if (includeSelf)
 		subscription['include_self'] = 1;
-	g_wsh.subscriptions.push(subscription);
-	if (g_wsh.targetFolderPath === null) {
-		g_wsh.targetFolderPath = folderPath;  // fix(soon): require explicitly setting this on connect or using setTargetFolder?
+	g_blewsh.subscriptions.push(subscription);
+	if (g_blewsh.targetFolderPath === null) {
+		g_blewsh.targetFolderPath = folderPath;  // fix(soon): require explicitly setting this on connect or using setTargetFolder?
 	}
 }
 
@@ -44,24 +47,24 @@ function subscribeToFolder(folderPath, includeSelf) {
 // add a handler for a particular type of message;
 // when a message of this type is received the server, the function will be called;
 // the function will be passed three arguments: timestamp, message type, and message parameters (dictionary)
-function addMessageHandler(type, func) {
-	g_wsh.addHandler(type, func);
+function bleaddMessageHandler(type, func) {
+	g_blewsh.addHandler(type, func);
 }
 
 
 // top-level function for sending messages;
-// defaults to using g_wsh.targetFolderPath as the target/recipient folder
-function sendMessage(messageType, params, targetFolderPath) {
+// defaults to using g_blewsh.targetFolderPath as the target/recipient folder
+function blesendMessage(messageType, params, targetFolderPath) {
 	if (!params)
 		params = {};
-	g_wsh.sendMessage(messageType, params, targetFolderPath);
+	g_blewsh.sendMessage(messageType, params, targetFolderPath);
 }
 
 
 // set the default destination for messages
 // fix(clean): make this part of connect?
-function setTargetFolder(targetFolderPath) {
-	g_wsh.targetFolderPath = targetFolderPath;
+function blesetTargetFolder(targetFolderPath) {
+	g_blewsh.targetFolderPath = targetFolderPath;
 }
 
 
@@ -69,24 +72,24 @@ function setTargetFolder(targetFolderPath) {
 
 
 // create a websocket object with a few additional/custom methods
-function createWebSocketHolder() {
+function blecreateWebSocketHolder() {
 
 	// prepare the object
-	var wsh = {};
-	wsh.webSocket = null;
-	wsh.connected = false;
-	wsh.connectStarted = false;
-	wsh.handlers = {};
-	wsh.genericHandlers = [];
-	wsh.subscriptions = [];
-	wsh.errorModal = null;
-	wsh.pingStarted = false;
-	wsh.targetFolderPath = null;  // default target for messages
-	wsh.afterOpen = null;  // called after the websocket is opened (will be re-called if reconnect)
+	var blewsh = {};
+	blewsh.webSocket = null;
+	blewsh.connected = false;
+	blewsh.connectStarted = false;
+	blewsh.handlers = {};
+	blewsh.genericHandlers = [];
+	blewsh.subscriptions = [];
+	blewsh.errorModal = null;
+	blewsh.pingStarted = false;
+	blewsh.targetFolderPath = null;  // default target for messages
+	blewsh.afterOpen = null;  // called after the websocket is opened (will be re-called if reconnect)
 
 	// connect to the server; this creates a websocket object
-	wsh.connect = function() {
-		wsh.connectStarted = true; // fix(soon): could have race condition
+	blewsh.connect = function() {
+		blewsh.connectStarted = true; // fix(soon): could have race condition
 		console.log('connecting');
 
 		// compute url
@@ -112,48 +115,48 @@ function createWebSocketHolder() {
 					window.location.reload();
 				}
 			}
-			var func = wsh.handlers[type];
+			var func = blewsh.handlers[type];
 			if (func) {
-				//console.log(type + ":" + JSON.stringify(message['parameters']))
+				console.log("message['parameters']:" + JSON.stringify(message['parameters']))
 				func(moment(message['timestamp']), message['parameters']);
 			}
-			for (var i = 0; i < wsh.genericHandlers.length; i++) {
-				var func = wsh.genericHandlers[i];
+			for (var i = 0; i < blewsh.genericHandlers.length; i++) {
+				var func = blewsh.genericHandlers[i];
 				func(moment(message['timestamp']), type, message['parameters']);
 			}
 		};
 
 		// run this code after connection is opened
 		this.webSocket.onopen = function() {
-			wsh.connected = true;
+			blewsh.connected = true;
 
 			// send a connect message (can be used to provide client version info)
 			// fix(later): remove this if we're not sending any info?
-			wsh.sendMessage('connect');
+			blewsh.sendMessage('connect');
 
 			// send list of folders for which we want messages
-			console.log('subscriptions: ' + g_wsh.subscriptions.length);
-			wsh.sendMessage('subscribe', {'subscriptions': g_wsh.subscriptions});
+			console.log('subscriptions: ' + g_blewsh.subscriptions.length);
+			blewsh.sendMessage('subscribe', {'subscriptions': g_blewsh.subscriptions});
 
 			// call user-provided function (if any) to run after websocket is open
-			if (wsh.afterOpen)
-				wsh.afterOpen();
+			if (blewsh.afterOpen)
+				blewsh.afterOpen();
 
 			// hide reconnect modal if any
 			setTimeout(function() {
-				if (wsh.errorModal && wsh.connected) {
+				if (blewsh.errorModal && blewsh.connected) {
 					console.log('hide');
 					$('#wsError').modal('hide');
 					$('#wsError').remove();
 					$('body').removeClass('modal-open'); // fix(later): these two lines shouldn't be necessary, but otherwise window stays dark
 					$('.modal-backdrop').remove(); // fix(later): these two lines shouldn't be necessary, but otherwise window stays dark
-					wsh.errorModal = null;
+					blewsh.errorModal = null;
 				}
 			}, 1000);
 
 			// start pinging if not already started
-			if (wsh.pingStarted === false) {
-				wsh.pingStarted = true;
+			if (blewsh.pingStarted === false) {
+				blewsh.pingStarted = true;
 				setTimeout(pingServer, 20000);
 			}
 		};
@@ -161,15 +164,15 @@ function createWebSocketHolder() {
 		// run this code when connection is closed
 		this.webSocket.onclose = function() {
 			console.log('connection closed by server');
-			wsh.connected = false;
-			setTimeout(reconnect, 10000);
+			blewsh.connected = false;
+			setTimeout(blereconnect, 10000);
 
 			// show modal to display connection status
 			// fix(later): if this gets displayed repeatedly, each time the background gets darker
-			if (!wsh.errorModal) {
+			if (!blewsh.errorModal) {
 				console.log('show');
-				wsh.errorModal = createBasicModal('wsError', 'Reconnecting to server...', {infoOnly: true});
-				wsh.errorModal.appendTo($('body'));
+				blewsh.errorModal = createBasicModal('wsError', 'Reconnecting to server...', {infoOnly: true});
+				blewsh.errorModal.appendTo($('body'));
 				$('#wsError-body').html('Will attempt to reconnect shortly.');
 				$('#wsError').modal('show');
 			}
@@ -178,7 +181,7 @@ function createWebSocketHolder() {
 
 	// send a message to the server;
 	// messages should be addressed to a particular folder
-	wsh.sendMessage = function(type, parameters, folderPath) {
+	blewsh.sendMessage = function(type, parameters, folderPath) {
 		if (this.connected === false) {// fix(soon): queue message to send after reconnect?
 			return;
 		}
@@ -206,17 +209,17 @@ function createWebSocketHolder() {
 	// add a handler for a particular type of message;
 	// when a message of this type is received the server, the function will be called;
 	// the function will be passed three arguments: timestamp, message type, and message parameters (dictionary)
-	wsh.addHandler = function(type, func) {
-		wsh.handlers[type] = func;
+	blewsh.addHandler = function(type, func) {
+		blewsh.handlers[type] = func;
 	};
 
 	// fix(clean): remove this; instead append '*' handler (make handlers for each type be a list)
-	wsh.addGenericHandler = function(func) {
-		wsh.genericHandlers.push(func);
+	blewsh.addGenericHandler = function(func) {
+		blewsh.genericHandlers.push(func);
 	};
 
 	// fix(clean): move out into blocks.js
-	wsh.addHandler('sequence_update', function(timestamp, params) {
+	blewsh.addHandler('sequence_update', function(timestamp, params) {
 		//console.log('sequence: ' + params['name'] + ', value: ' + params['value']);
 		// var sequenceName = params['name'];
 		// $.each(g_liveBlocks, function(id, block) {
@@ -227,7 +230,7 @@ function createWebSocketHolder() {
 		// });
 	});
 
-	return wsh;
+	return blewsh;
 }
 
 
@@ -236,14 +239,14 @@ function createWebSocketHolder() {
 
 // periodically send a message so that the connection doesn't timeout on heroku
 // fix(later): should we disable this when disconnected?
-function pingServer() {
-	g_wsh.sendMessage('ping', {});
-	setTimeout(pingServer, 20000);
+function blepingServer() {
+	g_blewsh.sendMessage('ping', {});
+	setTimeout(blepingServer, 20000);
 }
 
 
 // attempt to reconnect to the server
-function reconnect() {
+function blereconnect() {
 	console.log('attempting to reconnect');
-	g_wsh.connect();
+	g_blewsh.connect();
 }

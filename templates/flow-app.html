@@ -7,9 +7,12 @@
 	<script src="/static/js/moment.min.js"></script>
 	<script src="/ext/flow-server/static/common/core.js"></script>
 	<script src="/ext/flow-server/static/common/messages.js"></script>
+	<script src="/ext/flow-server/static/common/blemessages.js"></script>
+	<script src="/ext/flow-server/static/common/manylabsble.js"></script>
 	<script src="/ext/flow-server/static/external/manyplot.js"></script>
 	<script src="/ext/flow-server/static/flow/flow-util.js"></script>
 	<script src="/ext/flow-server/static/flow/flow-app.js"></script>
+	<script src="/ext/flow-server/static/flow/ble-app.js"></script>
 	<script src="/ext/flow-server/static/flow/diagram.js"></script>
 	<script src="/ext/flow-server/static/flow/controller-selector.js"></script>
 	<script src="/ext/flow-server/static/flow/controller-viewer.js"></script>
@@ -66,10 +69,14 @@
 		<button class="btn btn-primary" onclick="showFilterBlockSelector()">Add Filter</button>
 		<button class="btn btn-primary" onclick="addPlotBlock()">Add Plot</button>
 		<button class="btn btn-primary" onclick="closeDiagramEditor()">Close Diagram</button>
+		<button class="btn btn-primary" onclick="bleStartConnect()">Select Bluetooth Device</button>
 		<button class="btn" onclick="sendMessage('add_sim_sensor')">Add Sim Sensor</button>
 		<button class="btn" onclick="sendMessage('add_sim_actuator')">Add Sim Actuator</button>
 		<button class="btn" onclick="sendMessage('remove_sim_device')">Remove Sim Device</button>
 	</div>
+    <div id="bleResponseText" >
+    </div>
+
 </div>
 <div id="plotterPanel" class="flowPanel">
 	<div>
