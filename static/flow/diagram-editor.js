@@ -447,6 +447,95 @@ function displayBlockValue(block) {
 
 // initialize the diagram editor view (everything in this file); sets up handlers for messages from controller
 function initDiagramEditor() {
+
+	// ******************************************
+	// *************** Embedded handler functions
+	// ******************************************
+	/**
+	 * handle a new set of values for the blocks in the diagram
+	 * (the controller code is responsible for computing diagram block values)
+	 * @param timestamp
+	 * @param params
+	 */
+	function update_diagram_handler(timestamp, params) {
+		controllerConnected = true;
+
+		var values = params.values;
+		for (var blockId in values) {
+			if (values.hasOwnProperty(blockId)) {
+				var value = values[blockId];
+				if (blockId == "1") {
+					//blockId = "26";
+				}
+				var block = g_diagram.findBlockById(parseInt(blockId));  // fix(later): why aren't blockIds coming through as integers?
+				if (block) {
+					block.updateValue(value); // will be null if no defined value (disconnected)
+					displayBlockValue(block);
+				}
+			}
+		}
+	}
+
+	function device_list_handler(timestamp, params) {
+		controllerConnected = true;
+
+		var devices = params.devices;
+		for (var i = 0; i < devices.length; i++) {
+			addDevice(devices[i]);
+		}
+
+	}
+
+	function device_added_handler(timestamp, params) {
+			controllerConnected = true;
+
+		console.log('device_added');
+		var deviceInfo = params;
+		if (g_diagram.findBlockByName(deviceInfo.name) === null) {
+			var inputCount = (deviceInfo.dir === 'out') ? 1 : 0;
+			var outputCount = (deviceInfo.dir === 'in') ? 1 : 0;
+			var inputType = 'n';
+			var outputType = (deviceInfo.type === 'camera') ? 'i' : 'n';
+			if (inputCount === 0) {
+				inputType = null;
+			}
+			if (outputCount === 0) {
+				outputType = null;
+			}
+			var blockSpec = {
+				name: deviceInfo.name,
+				type: deviceInfo.type,
+				units: deviceInfo.units,
+				has_seq: (deviceInfo.dir === 'in'),  // assume all inputs have sequences (for now)
+				input_count: inputCount,
+				output_count: outputCount,
+				input_type: inputType,
+				output_type: outputType,
+				view: {
+					x: 100 + g_diagram.blocks.length * 50,  // fix(later): smarter positioning
+					y: 100 + g_diagram.blocks.length * 50,
+				}
+			};
+			var block = createFlowBlock(blockSpec);
+			g_diagram.blocks.push(block);
+			displayBlock(block);
+			structureModified();
+		}
+	}
+
+	function device_removed_handler(timestamp, params) {
+		var block = g_diagram.findBlockByName(params.name);
+		if (block) {
+			undisplayBlock(block);  // remove UI elements
+			g_diagram.removeBlock(block);
+			structureModified();
+		}
+	}
+
+	// ******************************************
+	// ******** End of embedded handler functions
+	// ******************************************
+
 	var controllerConnected = false;
 
 	// if currently recording update recording button
@@ -468,69 +557,17 @@ function initDiagramEditor() {
 		$('#diagramHolder').mousemove(mouseMove);
 		$('#diagramHolder').mouseup(mouseUp);
 
-		// handle a list of devices from the controller
-		addMessageHandler('device_list', function(timestamp, params) {
-			controllerConnected = true;
 
-			var devices = params.devices;
-			for (var i = 0; i < devices.length; i++) {
-				addDevice(devices[i]);
-			}
-		});
-
-		// handle a newly added device from the controller
-		addMessageHandler('device_added', function(timestamp, params) {
-			controllerConnected = true;
-
-			console.log('device_added');
-			var deviceInfo = params;
-			if (g_diagram.findBlockByName(deviceInfo.name) === null) {
-				var inputCount = (deviceInfo.dir === 'out') ? 1 : 0;
-				var outputCount = (deviceInfo.dir === 'in') ? 1 : 0;
-				var inputType = 'n';
-				var outputType = (deviceInfo.type === 'camera') ? 'i' : 'n';
-				if (inputCount === 0) {
-					inputType = null;
-				}
-				if (outputCount === 0) {
-					outputType = null;
-				}
-				var blockSpec = {
-					name: deviceInfo.name,
-					type: deviceInfo.type,
-					units: deviceInfo.units,
-					has_seq: (deviceInfo.dir === 'in'),  // assume all inputs have sequences (for now)
-					input_count: inputCount,
-					output_count: outputCount,
-					input_type: inputType,
-					output_type: outputType,
-					view: {
-						x: 100 + g_diagram.blocks.length * 50,  // fix(later): smarter positioning
-						y: 100 + g_diagram.blocks.length * 50,
-					}
-				};
-				var block = createFlowBlock(blockSpec);
-				g_diagram.blocks.push(block);
-				displayBlock(block);
-				structureModified();
-			}
-		});
-
-		// handle a device being unplugged
-		addMessageHandler('device_removed', function(timestamp, params) {
-			controllerConnected = true;
-
-			var block = g_diagram.findBlockByName(params.name);
-			if (block) {
-				undisplayBlock(block);  // remove UI elements
-				g_diagram.removeBlock(block);
-				structureModified();
-			}
-		});
 
 		if (g_useBle) {
+			bleaddMessageHandler('device_list', device_list_handler);
+			bleaddMessageHandler('device_added', device_added_handler);
+			bleaddMessageHandler('device_removed', device_removed_handler);
 			bleaddMessageHandler('update_diagram', update_diagram_handler);
 		} else {
+			addMessageHandler('device_list', device_list_handler);
+			addMessageHandler('device_added', device_added_handler);
+			addMessageHandler('device_removed', device_removed_handler);
 			addMessageHandler('update_diagram', update_diagram_handler);
 		}
 
@@ -548,26 +585,7 @@ function initDiagramEditor() {
 	}
 }
 
-// handle a new set of values for the blocks in the diagram
-// (the controller code is responsible for computing diagram block values)
-function update_diagram_handler(timestamp, params) {
-	controllerConnected = true;
 
-	var values = params.values;
-	for (var blockId in values) {
-		if (values.hasOwnProperty(blockId)) {
-			var value = values[blockId];
-			if (blockId == "1") {
-				//blockId = "26";
-			}
-			var block = g_diagram.findBlockById(parseInt(blockId));  // fix(later): why aren't blockIds coming through as integers?
-			if (block) {
-				block.updateValue(value); // will be null if no defined value (disconnected)
-				displayBlockValue(block);
-			}
-		}
-	}
-}
 
 
 // load a diagram from a spec dictionary into the editor

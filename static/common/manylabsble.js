@@ -100,6 +100,35 @@ CONTROL_POINT_MAP = {
   init_maps();
 
   /**
+   * Check if data is compressed.
+   * Check header/signature as observed in compressed payload.
+   * @param binData data as received from ble
+   * @returns {boolean}
+   */
+  function isCompressed(binData) {
+      if (binData) {
+          // [120,
+          // 156,
+          if (binData[0] == 120 && binData[1] == 156) {
+              return true;
+          }
+      }
+      return false;
+  }
+
+  /**
+   * Perform zlib uncompressed
+   * @param binData data as received from ble
+   * @returns {string}
+   */
+  function doGunzip(binData) {
+      //var binData     = new Uint8Array(charData);
+      var data        = pako.inflate(binData);
+      return data;
+  }
+
+
+  /**
    * Sample usage:
    control_point_code("GET", "http")
    control_point_code("POST", "https")
@@ -107,6 +136,7 @@ CONTROL_POINT_MAP = {
   function control_point_code(method, schema) {
     return CONTROL_POINT_REVERSE_MAP[[method, schema]]
   }
+
 
   /**
    * 
@@ -179,8 +209,18 @@ CONTROL_POINT_MAP = {
     getHttpBody() {
       return this._readCharacteristicValue(BODY_CHRC)
       .then(value => {
+
         var value = value.buffer ? value : new DataView(value);
-        var decoded = decoder.decode(value)
+        var uintbuf = new Uint8Array(value.buffer)
+        var decoded;
+        if (isCompressed(uintbuf)) {
+          var data = doGunzip(uintbuf);
+          console.log("getHttpBody.value unzippped size " + value.byteLength + "->" + data.length);
+          //console.log("getHttpBody.value unzippped: " + data);
+          decoded = String.fromCharCode.apply(null, new Uint16Array(data));
+        } else {
+          decoded = decoder.decode(value)
+        }
         //console.log("getHttpBody.value decoded: " + value);
         return decoded;
      });

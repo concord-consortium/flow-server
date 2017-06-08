@@ -23,7 +23,9 @@ function formatTime(dt) {
   return ts;
 }
 
+
 function bleStartConnect() {
+
   manylabsBle.connect()
   .then( () =>  {
     //statusText.textContent = 'Waiting for notifications...';
