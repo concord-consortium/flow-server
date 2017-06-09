@@ -13,7 +13,7 @@ var g_viewingBlockId = null; // When showing block data, track id
 
 // indicates if BLE should be used for message processing
 
-var g_useBle = true;
+var g_useBle = false;
 
 /* ======== EVENT HANDLERS ======= */
 
