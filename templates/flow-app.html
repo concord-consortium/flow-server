@@ -36,8 +36,9 @@
 		<div class="col-md-6">
 			<h2 id="controllerSelectorLabel"></h2>
 			<div id="controllerList"></div>
-    		<button id="bleButton" class="btn btn-primary" onclick="bleStartConnect()">Select Bluetooth Device</button>
-
+{% if dev_enabled %}
+			<button id="bleButton" class="btn btn-primary" onclick="bleStartConnect()">Select Bluetooth Device</button>
+{% endif %}
 		</div>
 		<div class="col-md-3"></div>
 	</div>
@@ -55,8 +56,9 @@
 			<div id="diagramList">Connecting to controller...</div>
 			<button class="btn btn-primary" onclick="newDiagram()">New Diagram</button>
 			<button class="btn btn-primary" onclick="closeControllerViewer()">Close Controller</button>
-    		<button id="bleButton" class="btn btn-primary" onclick="bleStartConnect()">Select Bluetooth Device</button>
-
+{% if dev_enabled %}
+			<button id="bleButton" class="btn btn-primary" onclick="bleStartConnect()">Select Bluetooth Device</button>
+{% endif %}
 			<!--button class="btn" onclick="CodapTest.sendSequence([3,1,4,1,5,9,2,6,5]);">Test CODAP</button-->
 			<!-- <button class="btn" onclick="sendMessage('request_status');">Check Status</button> -->
 		</div>
@@ -69,15 +71,17 @@
 	<div class="menuBar">
 		<button id="startRecording" class="btn btn-success" onclick="startRecordingData()">Start Recording Data</button>
 		<button id="stopRecording" class="btn btn-warning" onclick="stopRecordingData()">Stop Recording Data</button>
-		<button class="btn btn-primary" onclick="sendMessage('add_camera')">Add Camera</button>
 		<button class="btn btn-primary" onclick="addNumericBlock()">Add Numeric Entry</button>
 		<button class="btn btn-primary" onclick="showFilterBlockSelector()">Add Filter</button>
 		<button class="btn btn-primary" onclick="addPlotBlock()">Add Plot</button>
 		<button class="btn btn-primary" onclick="closeDiagramEditor()">Close Diagram</button>
+{% if dev_enabled %}
 		<button id="bleButton" class="btn btn-primary" onclick="bleStartConnect()">Select Bluetooth Device</button>
+		<button class="btn" onclick="sendMessage('add_camera')">Add Camera</button>
 		<button class="btn" onclick="sendMessage('add_sim_sensor')">Add Sim Sensor</button>
 		<button class="btn" onclick="sendMessage('add_sim_actuator')">Add Sim Actuator</button>
 		<button class="btn" onclick="sendMessage('remove_sim_device')">Remove Sim Device</button>
+{% endif %}
 	</div>
     <div id="bleResponseText" >
     </div>
@@ -104,7 +108,7 @@
 		<button class="btn" onclick="g_plotHandler.zoomIn()">Zoom In</button>
 		<button class="btn" onclick="g_plotHandler.zoomOut()">Zoom Out</button>
 		<button class="btn btn-danger" onclick="deleteSequenceData()">Delete Data</button>
-		<button class="btn btn-primary" onclick="closePlotter()">Close Plotter</button>
+		<button class="btn btn-primary" onclick="closePlotter()">Close History Viewer</button>
 	</div>
 </div>
 
@@ -115,6 +119,7 @@ var g_controller = null;  // the currently selected controller
 var g_csrfToken = '{{ csrf_token() }}';
 var g_jsSim = false;
 var g_useCodap = {{ use_codap }};
+var g_devEnabled = {{ dev_enabled }};
 
 $(function() {
 	initFlowApp();

@@ -60,7 +60,8 @@ def flow_app():
                 })
     return flow_extension.render_template('flow-app.html',
         controllers_json = json.dumps(controller_infos),
-        use_codap = request.args.get('use_codap', 0)
+        use_codap = (request.args.get('use_codap', 0) or request.args.get('codap', 0)),
+        dev_enabled = request.args.get('dev', 0)
     )
 
 
