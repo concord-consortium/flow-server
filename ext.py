@@ -17,7 +17,7 @@ from main.extension import Extension
 
 # current global instance of this extension
 flow_extension = None
-
+default_dev_enabled = 0
 
 # a server extension class
 class Flow(Extension):
@@ -61,7 +61,7 @@ def flow_app():
     return flow_extension.render_template('flow-app.html',
         controllers_json = json.dumps(controller_infos),
         use_codap = (request.args.get('use_codap', 0) or request.args.get('codap', 0)),
-        dev_enabled = request.args.get('dev', 0)
+        dev_enabled = request.args.get('dev', default_dev_enabled)
     )
 
 
