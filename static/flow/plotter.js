@@ -46,7 +46,9 @@ function initPlotter() {
 	}
 	g_plotHandler.plotter.setData(dataPairs);
 	g_plotHandler.drawPlot(null, null);
-		
+	if (g_useBle) {
+		bleaddMessageHandler('history', bleHistoryResponseHandler);
+	}
 	// request sequence history data from server
 	setTimeFrame('10m');
 }
@@ -57,50 +59,93 @@ function closePlotter() {
 	showDiagramEditor();
 }
 
+function bleHistoryResponseHandler(timestamp, params) {
+	// translate from more compact ble format to format used by http service at /api/v1/resource
+	// convert timestamp strings to date type
 
-function requestServerSequenceData(blockName, params) {
-	
-	// handle sequence history data received from server
-	var handler = function(data) {
-		var values = data.values;
-		var timestamps = data.timestamps;
+	/*
+	sample data:
+	params.name
+	light
 
-		console.log('received', values.length, 'values');
-		console.log('received', timestamps.length, 'timestamps');
+	params.timestamps
+	14:23:15.784 (9) ["2017-06-16T21:14:00Z", "2017-06-16T21:15:00Z", "2017-06-16T21:16:00Z", "2017-06-16T21:17:00Z", "2017-06-16T21:18:00Z", "2017-06-16T21:19:00Z", "2017-06-16T21:20:00Z", "2017-06-16T21:21:00Z", "2017-06-16T21:22:00Z"]
+	14:23:15.784 params.values
+	14:23:15.784 (9) [230, 229.86666666666667, 229.6, 228, 228, 228.3, 228, 228, 227.5]
 
-		// make sure all values are numeric (or null)
-		// fix(faster): do on server
-		var len = values.length;
-		for (var i = 0; i < len; i++) {
-			var val = values[i];
-			if (val !== null) {
-				values[i] = +val;  // convert to number
-			}
-		}
 
-		/* ---- disabling local history for now ----
-		// merge server data with local data
-		// sanity check to ensure server timestamps are earlier than local time
-		if (g_localTimestamps[0] - timestamps[0] > 0){
-			Array.prototype.unshift.apply(g_localTimestamps, timestamps);
-			Array.prototype.unshift.apply(g_localValues, values);
-		}
-		*/
+	historyResponseHandler requires this timestamp format (epoch seconds):
+	timestamps
+    14:18:40.607 (3) [1497644353.195688, 1497644413.407017, 1497644473.750816]
 
-		// update plot data
-		var dataPair = findDataPair(blockName);
-		if (dataPair) {
-			dataPair.xData.data = timestamps;  // we are updating the plotter's internal data
-			dataPair.yData.data = values;
-			g_plotHandler.plotter.autoBounds();
-			g_plotHandler.drawPlot(null, null);
+
+	 */
+
+	var timestamps = params.timestamps.map(dt => new Date(dt).getTime()/1000.);
+	//var values = params.values.map(v => v.toString());
+	// convert to strings, except if value is null
+	var values = params.values.map( v => {if (v) { return v.toString() } else {return v}})
+	var newdata = {name: params.name, values: values, timestamps: timestamps}
+
+
+	historyResponseHandler(newdata);
+}
+
+function historyResponseHandler(data) {
+	blockName = data.name;
+	var values = data.values;
+	var timestamps = data.timestamps;
+
+	console.log('received', values.length, 'values');
+	console.log('received', timestamps.length, 'timestamps');
+	//console.log('timestamps: ', timestamps);
+	//console.log('values: ', values);
+
+	// make sure all values are numeric (or null)
+	// fix(faster): do on server
+	var len = values.length;
+	for (var i = 0; i < len; i++) {
+		var val = values[i];
+		if (val !== null) {
+			values[i] = +val;  // convert to number
 		}
 	}
 
-	var url = '/api/v1/resources' + g_controller.path + '/' + blockName;
-	$.get(url, params, handler);
+	/* ---- disabling local history for now ----
+	// merge server data with local data
+	// sanity check to ensure server timestamps are earlier than local time
+	if (g_localTimestamps[0] - timestamps[0] > 0){
+		Array.prototype.unshift.apply(g_localTimestamps, timestamps);
+		Array.prototype.unshift.apply(g_localValues, values);
+	}
+	*/
+
+	// update plot data
+	var dataPair = findDataPair(blockName);
+	if (dataPair) {
+		dataPair.xData.data = timestamps;  // we are updating the plotter's internal data
+		dataPair.yData.data = values;
+		g_plotHandler.plotter.autoBounds();
+		g_plotHandler.drawPlot(null, null);
+	}
 }
 
+
+function bleRequestHistory(params) {
+	//sendMessage('history?start=%s&end=%s&limit=%s' % (params.start_timestamp, params.end_timestamp, params.count));
+	sendMessage('history', params);
+}
+
+/*
+params example ( 1 hour)
+Object {count: 100000, start_timestamp: "2017-06-10T00:23:09.095Z", end_timestamp: "2017-06-10T01:23:09.095Z"}
+
+ */
+function requestServerSequenceData(blockName, params) {
+	// handle sequence history data received from server
+	var url = '/api/v1/resources' + g_controller.path + '/' + blockName;
+	$.get(url, params, historyResponseHandler);
+}
 
 function createDataPair(block) {
 	var xData = createDataColumn('timestamp', []);
@@ -157,11 +202,22 @@ function setTimeFrame(timeStr) {
 	for (var i = 0; i < g_diagram.blocks.length; i++) {
 		var block = g_diagram.blocks[i];
 		if (block.inputCount === 0) {
-			requestServerSequenceData(block.name, {
-				count: 100000,
-				start_timestamp: start,
-				end_timestamp: end
+			if (g_useBle) {
+				bleRequestHistory({
+					name: block.name,
+					count: 100000,
+					start_timestamp: start,
+					end_timestamp: end
+				});
+
+			} else {
+				requestServerSequenceData(block.name, {
+					count: 100000,
+					start_timestamp: start,
+					end_timestamp: end
 			});
+
+			}
 		}
 	}
 }
