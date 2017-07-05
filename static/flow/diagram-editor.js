@@ -713,22 +713,64 @@ function addPlotBlock() {
 }
 
 
-// close the diagram editor (optionally saving diagram changes) and go back to the controller viewer
-function closeDiagramEditor() {
+// save the diagram to the controller
+function saveDiagram(promptForName, closeWhenDone) {
 	if (g_modified) {
-		modalConfirm({title: 'Save Diagram?', prompt: 'Do you want to save this diagram?', yesFunc: function() {
+
+		// prompt for name
+		if (promptForName || !g_diagramName) {
 			modalPrompt({
 				title: 'Save Diagram',
 				prompt: 'Name',
 				default: g_diagramName,
 				validator: Util.diagramValidator,
 				resultFunc: function(name) {
+
+					// send diagram to controller
 					var diagramSpec = diagramToSpec(g_diagram);
 					sendMessage('save_diagram', {'name': name, 'diagram': diagramSpec});  // fix(soon): should check for success
+					g_diagramName = name;
+					g_modified = false;
+
+					// update diagram list
 					diagramSpec.name = g_diagramName;  // fix(clean): this is a bit messy; sometime diagram spec has name, sometimes not
 					updateDiagramSpec(diagramSpec);
-					showControllerViewer();
-				}});
+
+					if (closeWhenDone) {
+						showControllerViewer();
+					}
+				}
+			});
+
+		// or save using existing name
+		} else {
+
+			// send diagram to controller
+			var diagramSpec = diagramToSpec(g_diagram);
+			sendMessage('save_diagram', {'name': name, 'diagram': diagramSpec});  // fix(soon): should check for success
+			g_modified = false;
+
+			// update diagram list
+			diagramSpec.name = g_diagramName;  // fix(clean): this is a bit messy; sometime diagram spec has name, sometimes not
+			updateDiagramSpec(diagramSpec);
+
+			if (closeWhenDone) {
+				showControllerViewer();
+			}
+		}
+	} else {
+		if (closeWhenDone) {
+			showControllerViewer();
+		}
+	}
+}
+
+
+// close the diagram editor (optionally saving diagram changes) and go back to the controller viewer
+function closeDiagramEditor() {
+	if (g_modified) {
+		modalConfirm({title: 'Save Diagram?', prompt: 'Do you want to save this diagram?', yesFunc: function() {
+			saveDiagram(true, true);
 		}, noFunc: function() {
 			showControllerViewer();
 		}});

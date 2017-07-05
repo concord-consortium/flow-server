@@ -119,7 +119,6 @@ function initControllerViewer() {
 		addMessageHandler('status', status_handler);
 	}
 
-
 	g_controllerViewerInitialized = true;
 }
 
@@ -132,6 +131,7 @@ function updateDiagramSpec(diagramSpec) {
 		}
 	}
 }
+
 
 function deleteDiagramSpec(name) {
 	for (var i = 0; i < g_diagramSpecs.length; i++) {

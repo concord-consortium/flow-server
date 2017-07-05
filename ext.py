@@ -3,7 +3,7 @@ import json
 
 
 # external imports
-from flask import request, abort
+from flask import request, abort, current_app
 from flask_login import current_user, login_user
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -17,7 +17,7 @@ from main.extension import Extension
 
 # current global instance of this extension
 flow_extension = None
-default_dev_enabled = 0
+
 
 # a server extension class
 class Flow(Extension):
@@ -58,10 +58,11 @@ def flow_app():
                     'name': controller.name,
                     'path': controller.path(),
                 })
+    default_dev_enabled = current_app.config.get('FLOW_DEV', False)
     return flow_extension.render_template('flow-app.html',
         controllers_json = json.dumps(controller_infos),
         use_codap = (request.args.get('use_codap', 0) or request.args.get('codap', 0)),
-        dev_enabled = request.args.get('dev', default_dev_enabled)
+        dev_enabled = int(request.args.get('dev', default_dev_enabled))
     )
 
 
