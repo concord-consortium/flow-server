@@ -59,7 +59,32 @@ var CodapTest = {
 			]
 		});
 	},
-	
+
+    // send a log message to CODAP, values should be a dictionary: {topic: <string>, formatStr: <string>, replaceArgs: <array>}
+    // where topic is optional and formatStr can contain %@ placeholders that are replaced with the values in replaceArgs.
+    // example: {formatStr: "Launched rocket with %@ engine toward %@", replaceArgs: ["red", "satellite"]}
+    log: function (values) {
+        // ignore logging if not running in CODAP
+		if(codapInterface.connectionState !== 'active') {
+			return;
+		}
+
+        codapInterface.sendRequest({
+            action: 'notify',
+            resource: 'logMessage',
+            values: values
+        });
+    },
+
+    // shortcut for log() that sets formatStr based on topic
+    logTopic: function (topic) {
+        this.log({
+            topic: topic,
+            formatStr: "Logging topic: %@",
+            replaceArgs: [topic]
+        });
+    },
+
 	// send data to the CODAP; data should be a list of dictionaries: [{field_a: 1, field_b: 2}, {field_a: 3, field_b: 4}]
 	sendData: function(data) {
 		console.log('sending', data.length, 'points to CODAP');
