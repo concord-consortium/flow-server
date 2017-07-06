@@ -152,6 +152,25 @@ function paramEntryChanged(e) {
 }
 
 
+// rename a block (using the block menu)
+function renameBlock(e) {
+	var block = g_diagram.findBlockById(e.data.id);
+	if (block) {
+		modalPrompt({
+			title: 'Rename Block',
+			prompt: 'New Name',
+			default: block.name,
+			validator: Util.diagramValidator,
+			resultFunc: function(newName) {
+				block.name = newName;
+				$('#bn_' + block.id).html(newName);
+				structureModified();
+			}
+		});
+	}
+}
+
+
 // delete a block (using the block menu)
 function deleteBlock(e) {
 	var block = g_diagram.findBlockById(e.data.id);
@@ -201,6 +220,7 @@ function displayBlock(block) {
 
 	// add menu
 	var menuData = createMenuData();
+	menuData.add('Rename', renameBlock, {id: block.id});
 	menuData.add('Delete', deleteBlock, {id: block.id});
 	if (block.hasSeq) {
 		menuData.add('View Recorded Data', viewRecordedData, {id: block.id});
@@ -222,7 +242,7 @@ function displayBlock(block) {
 
 	// add name, value, and units
 	if (block.type !== 'plot') {
-		$('<div>', {class: 'flowBlockName noSelect', html: block.name}).appendTo(blockDiv);
+		$('<div>', {class: 'flowBlockName noSelect', id: 'bn_' + block.id, html: block.name}).appendTo(blockDiv);
 	}
 	if (block.type === 'number_entry') {
 		var input = $('<input>', {class: 'form-control flowBlockInput', type: 'text', id: 'bv_' + block.id}).appendTo(blockDiv);
