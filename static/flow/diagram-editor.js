@@ -163,6 +163,7 @@ function renameBlock(e) {
 			default: block.name,
 			validator: Util.diagramValidator,
 			resultFunc: function(newName) {
+				sendMessage('rename_block', {old_name: block.name, new_name: newName});
 				block.name = newName;
 				$('#bn_' + block.id).html(newName);
 				structureModified();
