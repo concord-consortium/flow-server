@@ -2,7 +2,7 @@
 function initControllerSelector() {
 	var controllerListDiv = $('#controllerList');
 	controllerListDiv.empty();
-	
+
 	// if we have a list of controllers, the user is logged in and can pick one of them
 	if (g_controllers.length) {
 		$('#controllerSelectorLabel').html('Select your controller:');
@@ -12,11 +12,12 @@ function initControllerSelector() {
 			var button = $('<button>', {class: 'btn btn-lg listButton', html: controller.name}).appendTo(div);
 			button.click(i, function(e) {
 				g_controller = g_controllers[e.data];
+                CodapTest.logTopic('Dataflow/SelectPi');
 				showControllerViewer();
 			});
 			div.appendTo(controllerListDiv);
 		}
-	
+
 	// if not, assume user isn't logged in and allow them to type in a controller name
 	} else {
 		$('#controllerSelectorLabel').html('Enter the name of your controller:');
@@ -28,6 +29,7 @@ function initControllerSelector() {
 				data: {controller_name: $('#controller_name_entry').val()},
 				success: function(data) {
 					g_controller = JSON.parse(data);
+                    CodapTest.logTopic('Dataflow/SelectPi');
 					showControllerViewer();
 				},
 				error: function(data) {

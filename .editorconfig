@@ -1,0 +1,11 @@
+# more info at : http://editorconfig.org
+
+# top-most EditorConfig file
+root = true
+
+# set options for all file types
+[*]
+end_of_line = lf
+charset = utf-8
+indent_style = space
+indent_size = 4

@@ -153,4 +153,5 @@ function newDiagram() {
 	showDiagramEditor();
 	loadDiagram({'blocks': []});  // load an empty diagram
 	sendMessage('set_diagram', {diagram: diagramToSpec(g_diagram)});  // send empty diagram to controller
+    CodapTest.logTopic('Dataflow/CreateDiagram');
 }
