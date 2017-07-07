@@ -72,6 +72,7 @@ function pinMouseUp(e) {
 		g_activeStartPin = null;
 		g_activeLineSvg.remove();
 		g_activeLineSvg = null;
+        CodapTest.logTopic('Dataflow/ConnectBlock');
 	}
 }
 
@@ -188,6 +189,7 @@ function viewRecordedData(e) {
 	if (block) {
 		showPlotter();
 		g_viewingBlockId = block.id;
+        CodapTest.logTopic('Dataflow/ViewRecordedData');
 	}
 }
 
@@ -540,6 +542,7 @@ function initDiagramEditor() {
 			g_diagram.blocks.push(block);
 			displayBlock(block);
 			structureModified();
+            CodapTest.logTopic('Dataflow/ConnectSensor');
 		}
 	}
 
@@ -563,7 +566,7 @@ function initDiagramEditor() {
 		$('#startRecording').hide();
 		$('#stopRecording').show();
 	}
-	
+
 	// request list of devices currently connected to controller
 	// fix(soon): if we're loading a diagram, should we do this after we've loaded it?
 	sendMessage('list_devices');
@@ -710,7 +713,7 @@ function showFilterBlockSelector() {
 		"not", "and", "or", "xor", "nand",
 		"plus", "minus", "times", "divided by", "absolute value",
 		"equals", "not equals", "less than", "greater than",
-		"blur", "brightness", "simple moving average", "exponential moving average" 
+		"blur", "brightness", "simple moving average", "exponential moving average"
 	];
 	for (var i = 0; i < filterTypes.length; i++) {
 		var type = filterTypes[i];
@@ -730,6 +733,7 @@ function addPlotBlock() {
 	block.view.y = 300;
 	displayBlock(block);
 	structureModified();
+    CodapTest.logTopic('Dataflow/AddPlot');
 }
 
 
@@ -818,9 +822,11 @@ function startRecordingData() {
 			$('#startRecording').hide();
 			$('#stopRecording').show();
 			$('#recordingSettings').modal('hide');
+            CodapTest.logTopic('Dataflow/SetUpdateRate');
 		}
 	});
 	$('#recordingSettings').modal('show');
+    CodapTest.logTopic('Dataflow/StartRecordingData');
 }
 
 
@@ -830,6 +836,7 @@ function stopRecordingData() {
 	$('#stopRecording').hide();
 	$('#startRecording').show();
 	g_recordingInterval = 0;
+    CodapTest.logTopic('Dataflow/StopRecordingData');
 }
 
 

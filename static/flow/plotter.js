@@ -31,7 +31,7 @@ function initPlotter() {
 		});
 		*/
 	}
-	
+
 	// update which blocks are shown in plot
 	var dataPairs = [];
 	for (var i = 0; i < g_diagram.blocks.length; i++) {
@@ -178,7 +178,7 @@ function addBlockToPlotter(block) {
 
 
 function setTimeFrame(timeStr) {
-	
+
 	// compute time bounds
 	var frameSeconds = 0;
 	if (timeStr === '1m'){
@@ -229,32 +229,33 @@ function selectInterval() {
 		$('#selectInterval').html('Select Interval');
 		$('#selectInterval').removeClass('btn-info');
 	} else {
-		g_plotHandler.setIntervalSelect(true);		
+		g_plotHandler.setIntervalSelect(true);
 		$('#selectInterval').html('Done with Interval Selection');
 		$('#selectInterval').addClass('btn-info');
+        CodapTest.logTopic('Dataflow/StartSelectDataToExport');
 	}
 }
 
 
 function exploreRecordedDataInCODAP() {
 	var timeThresh = 0.4;  // seconds
-	var dataPairs = g_plotHandler.plotter.dataPairs;	
+	var dataPairs = g_plotHandler.plotter.dataPairs;
 	if (dataPairs.length && dataPairs[0].xData.data.length) {
-		
+
 		// set collection attributes based on current input blocks
 		var attrs = [{name: 'seconds', type: 'numeric', precision: 2}];
 		for (var i = 0; i < g_diagram.blocks.length; i++) {
 			var block = g_diagram.blocks[i];
 			if (block.inputCount === 0) {
 				attrs.push({
-					name: block.name, 
-					type: 'numeric', 
+					name: block.name,
+					type: 'numeric',
 					precision: 2,
 				});
 			}
 		}
-		CodapTest.prepCollection(attrs);		
-		
+		CodapTest.prepCollection(attrs);
+
 		// get data for quick reference
 		var xs = [];
 		var ys = [];
@@ -262,7 +263,7 @@ function exploreRecordedDataInCODAP() {
 			xs.push(dataPairs[j].xData.data);
 			ys.push(dataPairs[j].yData.data);
 		}
-		
+
 		// get timestamp bounds
 		var frame = g_plotHandler.plotter.frames[0];
 		var minTimestamp = frame.intervalLowerX;
@@ -275,13 +276,13 @@ function exploreRecordedDataInCODAP() {
 				ind[j] = -1;  // no data; done with this pair
 			}
 		}
-		
+
 		// merge the sequences
 		var data = [];
 		var startTimestamp = null;
 		var step = 0;
 		while (1) {
-			
+
 			// get current timestamp: min across sequences at current position
 			var timestamp = null;
 			for (var j = 0; j < dataPairs.length; j++) {
@@ -292,15 +293,15 @@ function exploreRecordedDataInCODAP() {
 					}
 				}
 			}
-			
+
 			// if no timestamp, then we've reached the end of all sequences, stop here
 			if (timestamp === null) {
 				break;
 			}
-						
+
 			// check whether to keep this point
 			var keepPoint = ((minTimestamp === null || timestamp >= minTimestamp - timeThresh) && (maxTimestamp === null || timestamp <= maxTimestamp + timeThresh));
-				
+
 			// first timestamp will be start timestamp
 			if (keepPoint && startTimestamp === null) {
 				startTimestamp = timestamp;
@@ -322,22 +323,23 @@ function exploreRecordedDataInCODAP() {
 					}
 				}
 			}
-			
+
 			// add to data set to send to CODAP
 			if (keepPoint) {
 				dataPoint['seconds'] = timestamp - startTimestamp;
 				data.push(dataPoint);
 			}
-			
+
 			// sanity check
 			step++;
 			if (step > 3000) {
 				break;
 			}
 		}
-		
+
 		// send data to CODAP
 		CodapTest.sendData(data);
+        CodapTest.logTopic('Dataflow/ExportDataToCODAP');
 	}
 }
 

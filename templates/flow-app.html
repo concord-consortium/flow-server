@@ -23,6 +23,12 @@
 	<script src="/ext/flow-server/static/external/iframe-phone.js"></script>
 	<script src="/ext/flow-server/static/external/CodapInterface.js"></script>
 	<script src="/ext/flow-server/static/flow/codap-bridge.js"></script>
+{% else %}
+    <script>
+        window.CodapTest = {
+            logTopic: function () {}
+        };
+    </script>
 {% endif %}
 
 	<link rel="stylesheet" href="/ext/flow-server/static/flow/style.css">
