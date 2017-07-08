@@ -305,6 +305,19 @@ function createPlotter( canvas, multiFrame ) {
 		}
 	};
 
+
+	/**
+	 * Adjust dataPairs, including yData.decimalPlaces in individual
+	 * yData (column) objects
+	*/
+	plotter.adjustParameters = function() {
+
+        for (var i=0; i < this.dataPairs.length; i++) {
+            var dataPair = this.dataPairs[i];
+            dataPair.yData.decimalPlaces = countDecimals(dataPair.yData.data);
+        }
+	}
+
 	// ================ drawing ================
 
 	// This method draws the type of plot set with plotter.setPlotMode() to the
@@ -316,6 +329,9 @@ function createPlotter( canvas, multiFrame ) {
 
 		if(typeof xMouse === 'undefined' || isNaN(xMouse)) xMouse = null;
 		if(typeof yMouse === 'undefined' || isNaN(yMouse)) yMouse = null;
+
+        // adjust yData.decimalPlaces for all dataPairs based on actual data
+        this.adjustParameters();
 
 		switch(this.plotMode){
 			case 'line':
@@ -1421,7 +1437,7 @@ function createDataColumn( name, data ) {
 	dataColumn.data = data;
 	dataColumn.type = "numeric";
 	dataColumn.units = "";
-	dataColumn.decimalPlaces = 4;
+	dataColumn.decimalPlaces = 2;
 	dataColumn.isDefault = true;
 	dataColumn.rotateLabel = false;
 	// These are the computed min and max values from the data

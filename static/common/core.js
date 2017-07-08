@@ -2,6 +2,22 @@
 // The createX functions typically take a dictionary of parameters and return a jQuery DOM element.
 
 
+/**
+* Calculates number of decimals in the numbers within an array.
+* Currently uses simply the first element of array.
+* Params:
+*  arr: array of numbers
+* Return: number of decimals
+*/
+function countDecimals(arr) {
+    if (!arr || !arr.length)
+        return 0
+    var value = arr[0];
+    if(Math.floor(value) === value) return 0;
+    return value.toString().split(".")[1].length || 0;
+}
+
+
 // create a link (to a URL or function)
 function createLink(params) {
 	if (params.href) {

@@ -468,6 +468,8 @@ function displayBlockValue(block) {
 
 /* ======== OTHER FUNCTIONS ======= */
 
+
+
 // initialize the diagram editor view (everything in this file); sets up handlers for messages from controller
 function initDiagramEditor() {
 
@@ -486,10 +488,7 @@ function initDiagramEditor() {
 		var values = params.values;
 		for (var blockId in values) {
 			if (values.hasOwnProperty(blockId)) {
-				var value = values[blockId];
-				if (blockId == "1") {
-					//blockId = "26";
-				}
+				var value = parseFloat(values[blockId]);
 				var block = g_diagram.findBlockById(parseInt(blockId));  // fix(later): why aren't blockIds coming through as integers?
 				if (block) {
 					block.updateValue(value); // will be null if no defined value (disconnected)
@@ -812,13 +811,28 @@ function startRecordingData() {
 	var modalBody = $('#recordingSettings-body');
 	var fg = createFormGroup({id: 'rate', label: 'Update Rate (seconds)'}).appendTo(modalBody);
 	createTextInput({id: 'rate', value: '60'}).appendTo(fg);
+	// disable showing run_name
+	var showRunName = false;
+	if (showRunName) {
+        var fg2 = createFormGroup({id: 'run_name', label: 'Run name'}).appendTo(modalBody);
+        createTextInput({id: 'run_name', value: 'Noname'}).appendTo(fg2);
+	}
 	$('#recordingSettings-ok').click(function() {
 		var rate = parseInt($('#rate').val());
+		var run_name = $('#run_name').val();
 		if (rate) {
 			g_recordingInterval = rate;
-			var params = {
-				'rate': rate,
-			};
+			var params;
+           	if (showRunName) {
+                params = {
+                    'rate': rate,
+                    'run_name': run_name
+                };
+			} else {
+                params = {
+                    'rate': rate
+                };
+			}
 			sendMessage('start_recording', params);
 			$('#startRecording').hide();
 			$('#stopRecording').show();
