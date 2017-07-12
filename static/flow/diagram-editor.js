@@ -10,6 +10,15 @@ var g_dragBlockOffsetX = null;
 var g_dragBlockOffsetY = null;
 var g_startTimestamp = moment().valueOf() * 0.001;  // a unix timestamp used as the starting point for time series plots
 var g_viewingBlockId = null; // When showing block data, track id
+// current scaling value
+var g_scale = 1.0;
+
+/**
+* Scaling constants for scale step (scale vactor), and min and max scaling.
+*/
+var SCALE_FACTOR = 1.1;
+var SCALE_MIN = 0.5;
+var SCALE_MAX = 1.5;
 
 // indicates if BLE should be used for message processing
 
@@ -66,7 +75,7 @@ function pinMouseUp(e) {
 		var destPin = endPin.isInput ? endPin : startPin;
 		if (!destPin.sourcePin) {  // fix(later): remove existing connection and create new one
 			destPin.sourcePin = sourcePin;
-			displayConnection(destPin);
+			displayConnection(destPin, g_scale);
 			structureModified();
 		}
 		g_activeStartPin = null;
@@ -183,6 +192,45 @@ function deleteBlock(e) {
 	}
 }
 
+/**
+ * Redraw blocks. Usually called as part of scaling.
+*/
+function redrawBlocks() {
+	if (g_diagram) {  // remove any existing diagram elements
+		for (var i = 0; i < g_diagram.blocks.length; i++) {
+			undisplayBlock(g_diagram.blocks[i]);
+		}
+		for (var i = 0; i < g_diagram.blocks.length; i++) {
+			displayBlock(g_diagram.blocks[i]);
+		}
+	}
+    // redraw connections
+    for (var i = 0; i < g_diagram.blocks.length; i++) {
+        var block = g_diagram.blocks[i];
+        for (var j = 0; j < block.pins.length; j++) {
+            var pin = block.pins[j];
+            if (pin.sourcePin) {
+                displayConnection(pin, g_scale);
+            }
+        }
+    }
+
+
+}
+// zoomin a block (using the block menu)
+function zoominBlock(e) {
+	if (g_scale < SCALE_MAX) {
+	    g_scale = Math.min(g_scale * SCALE_FACTOR, SCALE_MAX);
+	    redrawBlocks();
+	}
+}
+
+function zoomoutBlock(e) {
+	if (g_scale > SCALE_MIN) {
+	    g_scale = Math.max(g_scale / SCALE_FACTOR, SCALE_MIN);
+	    redrawBlocks();
+	}
+}
 
 // view time series history for a block
 function viewRecordedData(e) {
@@ -220,11 +268,15 @@ function exploreData(e) {
 function displayBlock(block) {
 	var blockDiv = $('<div>', {class: 'flowBlock', id: 'b_' + block.id});
 	block.view.div = blockDiv;
-
+    //var scale = block.ctx.scale;
+    //var scale = 0.6;
 	// add menu
 	var menuData = createMenuData();
 	menuData.add('Rename', renameBlock, {id: block.id});
 	menuData.add('Delete', deleteBlock, {id: block.id});
+	menuData.add('Zoom In (Ctrl+i)', zoominBlock, {id: block.id});
+	menuData.add('Zoom Out (Ctrl+o)', zoomoutBlock, {id: block.id});
+
 	if (block.hasSeq) {
 		menuData.add('View Recorded Data', viewRecordedData, {id: block.id});
 	}
@@ -283,8 +335,11 @@ function displayBlock(block) {
 	// position the block as specified
 	var x = block.view.x;
 	var y = block.view.y;
+	x = x * g_scale;
+	y = y * g_scale;
 	blockDiv.css('top', y + 'px');
 	blockDiv.css('left', x + 'px');
+	console.log("blockDiv: x,y="+x+","+y);
 
 	// add a mousedown handler for dragging/moving blocks
 	blockDiv.mousedown(blockMouseDown);
@@ -296,14 +351,19 @@ function displayBlock(block) {
 	if (block.type === 'plot') {
 		displayPlot(block);
 	}
-
+    scaleClasses();
 	// get dimensions of block div
 	var w = parseInt(blockDiv.outerWidth(true));  // true to include the margin in the width
 	var h = parseInt(blockDiv.outerHeight());  // not passing true here because we don't want the bottom margin
+    //console.log("block w,h=" + w + ", " + h);
 	block.view.w = w;
 	block.view.h = h;
-	var pinRadius = 15;
-
+	var pinRadius = 15 * g_scale;
+	if (pinRadius > 15) {
+	    pinRadius = 15;
+	} else if (pinRadius < 8) {
+	    pinRadius = 8;
+	}
 	// position and draw pins
 	for (var i = 0; i < block.pins.length; i++) {
 		var pin = block.pins[i];
@@ -381,12 +441,18 @@ function moveConn(destPin) {
 
 
 // draw a connection between two blocks (as an SVG line)
-function displayConnection(destPin) {
+function displayConnection(destPin, scale) {
+    var strokeWidth = 10 * scale;
+    if (strokeWidth > 10) {
+        strokeWidth = 10;
+    } else if (strokeWidth < 4) {
+        strokeWidth = 4;
+    }
 	var x1 = destPin.sourcePin.view.x;
 	var y1 = destPin.sourcePin.view.y;
 	var x2 = destPin.view.x;
 	var y2 = destPin.view.y;
-	var line = g_svgDrawer.line(x1, y1, x2, y2).stroke({width: 10, color: '#555'}).back();
+	var line = g_svgDrawer.line(x1, y1, x2, y2).stroke({width: strokeWidth, color: '#555'}).back();
 	line.remember('destPin', destPin);
 	line.click(connectionClick);
 	destPin.view.svgConn = line;
@@ -609,17 +675,90 @@ function initDiagramEditor() {
 }
 
 
+/**
+ * zoom blocks
+ * Params:
+ *   blocks
+ *   factor: factor to zoom by, such as 0.7 or 1.3
+ */
+function zoomBlocks(blocks, factor) {
+	for (var i = 0; i < blocks.length; i++) {
+		blocks[i].view.x = Math.round(blocks[i].view.x * factor);
+		blocks[i].view.y = Math.round(blocks[i].view.y * factor);
+	}
+}
 
+/**
+ * scaling table for css classes.
+ * contains a map for each class for css properties to scale -> mapped to defautl value at 1.0 scale.
+*/
+var CLASS_SCALING_TABLE = {
+   'flowBlock': { "width": 175 },
+   'flowBlockValue': { "font-size": 36 },
+   'flowBlockValueAndUnits': { "margin-bottom": 15 },
+   'flowBlockName': { "font-size": 16 },
+   'flowBlockValue': { "font-size": 36 },
+   'flowBlockUnits': { "font-size": 22 },
+   'flowBlockInput': { "font-size": 20, "margin-bottom": 25 },
+   'flowBlockMenuHolder': { "height": 26 },
+};
+
+/**
+* Scale css classes based on current scale value.
+* Will scale the following css classes:
+* - flowBlockValueAndUnits
+* - flowBlockValue
+* etc. as specified in CLASS_SCALING_TABLE
+*/
+function scaleClasses() {
+	// adjust css sizing properties based on scale
+
+	// allow reset to exactly 1.0 scale if it's slightly off
+	if (g_scale > 0.95 && g_scale < 1.05) {
+	    do_reset = true;
+	    g_scale = 1.0;
+	} else {
+	    do_reset = false;
+	}
+    for (var key in CLASS_SCALING_TABLE) {
+      var node = $("." + key)
+      if (node) {
+        for (var cssProp in CLASS_SCALING_TABLE[key]) {
+            var value = node.css(cssProp);
+            if (value) {
+                var defaultValue = CLASS_SCALING_TABLE[key][cssProp];
+                var newValue = Math.round(defaultValue * g_scale);
+                // append "px" if needed
+                if (value && value.endsWith("px")) {
+                    newValue = "" + newValue + "px";
+                }
+                //console.log("scaleClasses: " + key + " - " + cssProp + ": " + value + " -> " + newValue);
+                node.css("." + cssProp, newValue);
+                //$("." + key).css(cssProp, newValue);
+            } else {
+                //console.log("scaleClasses: skipping " + key + " - " + cssProp);
+            }
+        }
+      }
+    }
+
+}
 
 // load a diagram from a spec dictionary into the editor
 function loadDiagram(diagramSpec) {
+    // bind zoom menu/function to keyboard keys
+    $(document).bind('keydown', 'ctrl+i', zoominBlock);
+    $(document).bind('keydown', 'ctrl+o', zoomoutBlock);
+
 	if (g_diagram) {  // remove any existing diagram elements
 		for (var i = 0; i < g_diagram.blocks.length; i++) {
 			undisplayBlock(g_diagram.blocks[i]);
 		}
 	}
+	g_scale = 1.0;
 	g_diagram = specToDiagram(diagramSpec);
 	g_diagramName = diagramSpec.name;
+	//zoomBlocks(g_diagram.blocks, g_scale);
 	for (var i = 0; i < g_diagram.blocks.length; i++) {
 		displayBlock(g_diagram.blocks[i]);
 	}
@@ -628,12 +767,13 @@ function loadDiagram(diagramSpec) {
 		for (var j = 0; j < block.pins.length; j++) {
 			var pin = block.pins[j];
 			if (pin.sourcePin) {
-				displayConnection(pin);
+				displayConnection(pin, g_scale);
 			}
 		}
 	}
 	g_modified = false;
 }
+
 
 
 // add a numeric data entry block to the diagram
