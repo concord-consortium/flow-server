@@ -339,7 +339,7 @@ function displayBlock(block) {
 	y = y * g_scale;
 	blockDiv.css('top', y + 'px');
 	blockDiv.css('left', x + 'px');
-	console.log("blockDiv: x,y="+x+","+y);
+	//console.log("blockDiv: x,y="+x+","+y);
 
 	// add a mousedown handler for dragging/moving blocks
 	blockDiv.mousedown(blockMouseDown);
@@ -701,6 +701,8 @@ var CLASS_SCALING_TABLE = {
    'flowBlockUnits': { "font-size": 22 },
    'flowBlockInput': { "font-size": 20, "margin-bottom": 25 },
    'flowBlockMenuHolder': { "height": 26 },
+   'flowBlockWithPlot': { "width": 330 },
+   'flowBlockWithImage': { "width": 330 },
 };
 
 /**
@@ -733,7 +735,7 @@ function scaleClasses() {
                     newValue = "" + newValue + "px";
                 }
                 //console.log("scaleClasses: " + key + " - " + cssProp + ": " + value + " -> " + newValue);
-                node.css("." + cssProp, newValue);
+                node.css(cssProp, newValue);
                 //$("." + key).css(cssProp, newValue);
             } else {
                 //console.log("scaleClasses: skipping " + key + " - " + cssProp);
