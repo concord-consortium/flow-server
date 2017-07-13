@@ -65,6 +65,11 @@ function diagram_list_handler(timestamp, params) {
 	}
 }
 
+function diagramSetRecordingInterval(interval) {
+	var recording_interval_text = interval ? interval + ' second(s)' : 'none';
+	$('#diagramInfo').html("<b>Recording Interval:</b> " + recording_interval_text)
+}
+
 /**
  Handle status message from the controller
  * @param timestamp
@@ -75,7 +80,8 @@ function status_handler(timestamp, params) {
 	var statusDiv = $('#controllerStatus');
 	statusDiv.empty();
 	$('<div>', {html: 'Number of devices: ' + params.device_count}).appendTo(statusDiv);
-	$('<div>', {html: 'Recording interval: ' + (params.recording_interval ? params.recording_interval + ' second(s)' : 'none')}).appendTo(statusDiv);
+	var recording_interval_text = params.recording_interval ? params.recording_interval + ' second(s)' : 'none';
+	$('<div>', {html: 'Recording interval: ' + recording_interval_text }).appendTo(statusDiv);
 	g_recordingInterval = params.recording_interval;
 	if (params.current_diagram) {
 		var button = $('#d_' + params.current_diagram);
@@ -85,6 +91,8 @@ function status_handler(timestamp, params) {
 			button.html(params.current_diagram + ' (running' + (g_recordingInterval ? ' and recording' : '') + ')');
 		}
 	}
+    diagramSetRecordingInterval(params.recording_interval);
+
 }
 
 // prepare an interface for viewing the diagrams contained within a controller

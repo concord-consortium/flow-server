@@ -84,6 +84,13 @@ button.filter {
 .flowPanel {
 	display: none;
 }
+
+#diagramHolder {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
 .listButton {
 	margin-bottom: 10px;
 }
@@ -100,4 +107,12 @@ button.filter {
 }
 #stopRecording {
 	display: none;
+}
+
+#diagramInfo {
+	float: left;
+	width: 400px;
+	font-size: 20px;
+	margin-left: 20px;
+	margin-top: 20px;
 }

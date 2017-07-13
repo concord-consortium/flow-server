@@ -976,6 +976,7 @@ function startRecordingData() {
                 };
 			}
 			sendMessage('start_recording', params);
+            diagramSetRecordingInterval(g_recordingInterval);
 			$('#startRecording').hide();
 			$('#stopRecording').show();
 			$('#recordingSettings').modal('hide');
@@ -994,6 +995,7 @@ function stopRecordingData() {
 	$('#startRecording').show();
 	g_recordingInterval = 0;
     CodapTest.logTopic('Dataflow/StopRecordingData');
+    diagramSetRecordingInterval(g_recordingInterval)
 }
 
 
