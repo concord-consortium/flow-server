@@ -207,7 +207,8 @@ function createPlotter( canvas, multiFrame ) {
 	};
 
 	// Recalculate the bounds based on the current data
-	plotter.autoBounds = function(){
+	plotter.autoBounds = function(adjustTimestamps){
+	    if (typeof adjustTimestamps === 'undefined') { adjustTimestamps = false; }
 		// If the plotter is zoomed, then presumably the user is inspecting
 		// some part of the plot and wouldn't want the view to snap back.
 		if(this.zoomLevel !== 1) return;
@@ -238,6 +239,10 @@ function createPlotter( canvas, multiFrame ) {
 				frame = this.frames[i];
 				frame.dataMinX = xMinAll;  // x bounds should be shared across frames (so all move in sync)
 				frame.dataMaxX = xMaxAll;
+				if (adjustTimestamps) {
+				    frame.dataMinX = Math.round(frame.dataMinX-0.5);
+				    frame.dataMaxX = Math.round(frame.dataMaxX+0.5);
+				}
 			}
 		}else{
 			if(this.frames.length < 1) return;
@@ -285,6 +290,11 @@ function createPlotter( canvas, multiFrame ) {
 			frame.dataMaxX = xMax;
 			frame.dataMinY = yMin;
 			frame.dataMaxY = yMax;
+            if (adjustTimestamps) {
+                frame.dataMinX = Math.round(frame.dataMinX-0.5);
+                frame.dataMaxX = Math.round(frame.dataMaxX+0.5);
+            }
+
 		}
 	};
 
@@ -1825,7 +1835,8 @@ function dateTimeStr( date, showSeconds ) {
 // convert a timestamp (seconds since epoch *local*) to a string
 // normally an epoch timestamp is measured relative to the UTC epoch; we're doing things differently!
 function localTimestampToStr( timestamp, showSeconds ) {
-	return moment(timestamp * 1000).format('YYYY/M/D H:mm:ss.SSS');
+	//return moment(timestamp * 1000).format('YYYY/M/D H:mm:ss.SSS');
+	return moment(timestamp * 1000).format('YYYY/M/D H:mm:ss');
 //    var date = new Date( timestamp * 1000 ); // create a date assuming timestamp is in UTC epoch seconds
 //    return dateStrUTC( date ) + " " + timeStrUTC( date, showSeconds ); // convert to string as would be viewed in UTC; this actually local
 }

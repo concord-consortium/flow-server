@@ -125,7 +125,8 @@ function historyResponseHandler(data) {
 	if (dataPair) {
 		dataPair.xData.data = timestamps;  // we are updating the plotter's internal data
 		dataPair.yData.data = values;
-		g_plotHandler.plotter.autoBounds();
+		// indicate to autoBounds to adjust timestamps
+		g_plotHandler.plotter.autoBounds(true);
 		g_plotHandler.drawPlot(null, null);
 	}
 }
@@ -194,7 +195,10 @@ function setTimeFrame(timeStr) {
 	} else if (timeStr === '30d'){
 		frameSeconds = 60 * 60 * 24 * 30;
 	}
+	// get current time
 	var now = moment().valueOf();
+	// round up to next whole second
+	now = Math.round((now + 999) / 1000) * 1000;
 	var start = moment(now - (frameSeconds * 1000)).toISOString();
 	var end = moment(now).toISOString();
 

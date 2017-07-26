@@ -234,12 +234,16 @@ function zoomoutBlock(e) {
 
 // view time series history for a block
 function viewRecordedData(e) {
-	var block = g_diagram.findBlockById(e.data.id);
-	if (block) {
-		showPlotter();
-		g_viewingBlockId = block.id;
-        CodapTest.logTopic('Dataflow/ViewRecordedData');
-	}
+    if (e) {
+        var block = g_diagram.findBlockById(e.data.id);
+        if (block) {
+            showPlotter();
+            g_viewingBlockId = block.id;
+            CodapTest.logTopic('Dataflow/ViewRecordedData');
+        }
+    } else {
+            showPlotter();
+    }
 }
 
 
@@ -274,12 +278,12 @@ function displayBlock(block) {
 	var menuData = createMenuData();
 	menuData.add('Rename', renameBlock, {id: block.id});
 	menuData.add('Delete', deleteBlock, {id: block.id});
-	menuData.add('Zoom In (Ctrl+i)', zoominBlock, {id: block.id});
-	menuData.add('Zoom Out (Ctrl+o)', zoomoutBlock, {id: block.id});
+	//menuData.add('Zoom In (Ctrl+i)', zoominBlock, {id: block.id});
+	//menuData.add('Zoom Out (Ctrl+o)', zoomoutBlock, {id: block.id});
 
-	if (block.hasSeq) {
-		menuData.add('View Recorded Data', viewRecordedData, {id: block.id});
-	}
+	//if (block.hasSeq) {
+	//	menuData.add('View Recorded Data', viewRecordedData, {id: block.id});
+	//}
 	if (block.type === 'plot' && g_useCodap) {
 		menuData.add('Explore Data in CODAP', exploreData, {id: block.id});
 	}
@@ -962,7 +966,10 @@ function startRecordingData() {
 	$('#recordingSettings-ok').click(function() {
 		var rate = parseInt($('#rate').val());
 		var run_name = $('#run_name').val();
-		if (rate) {
+		if (rate < 1) {
+			$('#recordingSettings').modal('hide');
+		    alert("Recording interval must be an integer >= 1.");
+		} else {
 			g_recordingInterval = rate;
 			var params;
            	if (showRunName) {
