@@ -153,6 +153,7 @@ function createDataPair(block) {
 	xData.type = 'timestamp';
 	var yData = createDataColumn('value', []);
 	yData.name = block.name;
+	yData.units = block.units;
 	return {
 		'xData': xData,
 		'yData': yData,

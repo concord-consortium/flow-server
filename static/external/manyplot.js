@@ -437,7 +437,7 @@ function createPlotter( canvas, multiFrame ) {
 	// fix(soon): remove/rework
 	// draw x-axis and y-axis labels on the plot
 	plotter.drawRawCaptions = function( xLabel, xMinLabel, xMaxLabel,
-										yLabel, yMinLabel, yMaxLabel, rotateLabelY ) {
+										yLabel, yLabelUnit, yMinLabel, yMaxLabel, rotateLabelY ) {
 		var ctx = this.ctx;
 		var width = this.canvas.width;
 		var height = this.canvas.height;
@@ -448,7 +448,7 @@ function createPlotter( canvas, multiFrame ) {
 
 		// fit frame to caption text and draw caption text
 		this.setFrameCount( 1 );
-		this.frames[ 0 ].setCaptions( xLabel, xMinLabel, xMaxLabel, yLabel, yMinLabel, yMaxLabel, rotateLabelY );
+		this.frames[ 0 ].setCaptions( xLabel, xMinLabel, xMaxLabel, yLabel, yLabelUnit, yMinLabel, yMaxLabel, rotateLabelY );
 		this.frames[ 0 ].fitBoxToCaptions( 0, width - 1, 0, height - 1 );
 		this.frames[ 0 ].drawCaptions();
 	};
@@ -493,7 +493,7 @@ function createPlotter( canvas, multiFrame ) {
 			var xMinLabel = xData.format( this.frames[ i ].dataMinX );
 			var xMaxLabel = xData.format( this.frames[ i ].dataMaxX );
 			units = yData.units;
-			var yLabel = units === "" ? yData.name : units;
+			var yLabel = yData.name;
 			var yMinLabel = yData.format( this.frames[ i ].dataMinY );
 			var yMaxLabel = yData.format( this.frames[ i ].dataMaxY );
 
@@ -511,7 +511,7 @@ function createPlotter( canvas, multiFrame ) {
 			var outerMaxY = Math.round( outerFrameHeight * (i + 1) - 1 );
 
 			// fit frame to caption text
-			this.frames[ i ].setCaptions( xLabel, xMinLabel, xMaxLabel, yLabel, yMinLabel, yMaxLabel, yData.rotateLabel );
+			this.frames[ i ].setCaptions( xLabel, xMinLabel, xMaxLabel, yLabel, units, yMinLabel, yMaxLabel, yData.rotateLabel );
 			this.frames[ i ].fitBoxToCaptions( outerMinX, outerMaxX, outerMinY, outerMaxY );
 		}
 
@@ -878,9 +878,10 @@ function createFrame( ctx ) {
 	};
 
 	// set captions for this frame
-	frame.setCaptions = function( labelX, minLabelX, maxLabelX, labelY, minLabelY, maxLabelY, rotateLabelY ) {
+	frame.setCaptions = function( labelX, minLabelX, maxLabelX, labelY, labelYUnit, minLabelY, maxLabelY, rotateLabelY ) {
 		this.labelX = labelX;
 		this.labelY = labelY;
+		this.labelYUnit = "[" + labelYUnit + "]";
 		if (typeof rotateLabelY !== 'undefined')
 			this.rotateLabelY = rotateLabelY;
 		this.minLabelX = minLabelX;
@@ -985,6 +986,7 @@ function createFrame( ctx ) {
 			ctx.restore();
 		} else {
 			ctx.fillText( this.labelY, boxMinX - 8, (boxMinY + boxMaxY) * 0.5 );
+			ctx.fillText( this.labelYUnit, boxMinX - 8, (boxMinY + boxMaxY) * 0.5 + 20);
 		}
 		//if (yUnits) ctx.fillText( unitsY, boxMinX - 8, (boxMinY + boxMaxY) * 0.5 + 7 );
 	};
