@@ -45,6 +45,7 @@ function initPlotter() {
 		}
 	}
 	g_plotHandler.plotter.setData(dataPairs);
+	g_plotHandler.plotter.resetReceived();
 	g_plotHandler.drawPlot(null, null);
 	if (g_useBle) {
 		bleaddMessageHandler('history', bleHistoryResponseHandler);
@@ -125,6 +126,7 @@ function historyResponseHandler(data) {
 	if (dataPair) {
 		dataPair.xData.data = timestamps;  // we are updating the plotter's internal data
 		dataPair.yData.data = values;
+		dataPair.dataReceived = true;
 		// indicate to autoBounds to adjust timestamps
 		g_plotHandler.plotter.autoBounds(true);
 		g_plotHandler.drawPlot(null, null);
@@ -157,6 +159,7 @@ function createDataPair(block) {
 	return {
 		'xData': xData,
 		'yData': yData,
+		'dataReceived': false,
 	};
 }
 
@@ -196,6 +199,8 @@ function setTimeFrame(timeStr) {
 	} else if (timeStr === '30d'){
 		frameSeconds = 60 * 60 * 24 * 30;
 	}
+    g_plotHandler.plotter.resetReceived();
+
 	// get current time
 	var now = moment().valueOf();
 	// round up to next whole second
