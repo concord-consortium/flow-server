@@ -226,10 +226,10 @@ function createPlotter( canvas, multiFrame ) {
 				xMax = xD.maxBound === null ? xD.max : xD.maxBound;
 				yMin = yD.minBound === null ? yD.min : yD.minBound;
 				yMax = yD.maxBound === null ? yD.max : yD.maxBound;
-				if (xMinAll === null || xMin < xMinAll) {
+				if (xMin && (xMinAll === null || xMin < xMinAll)) {
 					xMinAll = xMin;
 				}
-				if (xMaxAll === null || xMax > xMaxAll) {
+				if (xMax && (xMaxAll === null || xMax > xMaxAll)) {
 					xMaxAll = xMax;
 				}
 				frame.dataMinY = yMin;  // y bounds set per frame
