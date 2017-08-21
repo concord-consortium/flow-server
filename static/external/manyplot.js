@@ -328,6 +328,15 @@ function createPlotter( canvas, multiFrame ) {
         }
 	}
 
+	/**
+	 * Reset 'dataReceived' status.
+	*/
+	plotter.resetReceived = function(){
+        for (var i=0; i < this.dataPairs.length; i++) {
+            this.dataPairs[i].dataReceived = false;
+        }
+	}
+
 	// ================ drawing ================
 
 	// This method draws the type of plot set with plotter.setPlotMode() to the
@@ -365,7 +374,40 @@ function createPlotter( canvas, multiFrame ) {
 				this.drawScatterPlot(xMouse, yMouse);
 				break;
 		}
+
+        // checking for xMouse, yMouse inhibits alerts when moving mouse over the panel
+        //  after data has been loaded.
+        if (this.allPlotsEmpty() && (!xMouse && !yMouse)) {
+            alert("No historical data available for the given interval. Close history view and click 'Start Recording'.");
+
+        }
+
 	};
+
+    /**
+    * Returns true if all plot data arrived and all plot data is empty.
+    *
+    */
+	plotter.allPlotsEmpty = function() {
+		// check datapairs
+		var plotsEmpty = false;
+
+        for (var i = 0; i < this.dataPairs.length; i++) {
+            if (!this.dataPairs[i].dataReceived) {
+                // there is a datapair for which data has not been received
+                // therefore plots are not considered empty
+                return false;
+            }
+        }
+        for (var i = 0; i < this.dataPairs.length; i++) {
+            if (this.dataPairs[i].xData.data.length == 0) {
+                // at least one plot is empty
+                plotsEmpty = true;
+                break;
+            }
+        }
+        return plotsEmpty;
+	}
 
 	// All parameters optional.
 	plotter.drawLinePlot = function(xMouse, yMouse, useTimestamp, presentIsZero, intervalSelect, isClick){

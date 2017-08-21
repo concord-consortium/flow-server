@@ -14,7 +14,15 @@ function countDecimals(arr) {
         return 0
     var value = arr[0];
     if(Math.floor(value) === value) return 0;
-    return value.toString().split(".")[1].length || 0;
+    //return value.toString().split(".")[1].length || 0;
+    if (isNaN(value)) return 0;
+    var parts = value.toString().split(".")
+    if (parts.length < 2) {
+        return 0;
+    } else {
+        return parts[1].length || 0;
+    }
+
 }
 
 
