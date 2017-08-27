@@ -377,10 +377,9 @@ function createPlotter( canvas, multiFrame ) {
 
         // checking for xMouse, yMouse inhibits alerts when moving mouse over the panel
         //  after data has been loaded.
-        if (this.allPlotsEmpty() && (!xMouse && !yMouse)) {
-            alert("No historical data available for the given interval. Close history view and click 'Start Recording'.");
-
-        }
+//        if (this.allPlotsEmpty() && (!xMouse && !yMouse)) {
+//            alert("No historical data available for the given interval. Close history view and click 'Start Recording'.");
+//        }
 
 	};
 
