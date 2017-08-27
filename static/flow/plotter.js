@@ -32,21 +32,7 @@ function initPlotter() {
 		*/
 	}
 
-	// update which blocks are shown in plot
-	var dataPairs = [];
-	for (var i = 0; i < g_diagram.blocks.length; i++) {
-		var block = g_diagram.blocks[i];
-		if (block.inputCount === 0) {
-			var dataPair = findDataPair(block.name);
-			if (!dataPair) {
-				dataPair = createDataPair(block);
-			}
-			dataPairs.push(dataPair);
-		}
-	}
-	g_plotHandler.plotter.setData(dataPairs);
 	g_plotHandler.plotter.resetReceived();
-	g_plotHandler.drawPlot(null, null);
 	if (g_useBle) {
 		bleaddMessageHandler('history', bleHistoryResponseHandler);
 	}
@@ -123,6 +109,16 @@ function historyResponseHandler(data) {
 
 	// update plot data
 	var dataPair = findDataPair(blockName);
+	if (!dataPair) {
+		var block = g_diagram.findBlockByName(blockName);
+		if (block) {
+			dataPair = createDataPair(block);
+			
+			// add data pair to plotter
+			g_plotHandler.plotter.dataPairs.push(dataPair);
+			g_plotHandler.plotter.setData(g_plotHandler.plotter.dataPairs);
+		}
+	}
 	if (dataPair) {
 		dataPair.xData.data = timestamps;  // we are updating the plotter's internal data
 		dataPair.yData.data = values;
@@ -178,10 +174,6 @@ function findDataPair(blockName) {
 }
 
 
-function addBlockToPlotter(block) {
-}
-
-
 function setTimeFrame(timeStr) {
 
 	// compute time bounds
@@ -225,7 +217,7 @@ function setTimeFrame(timeStr) {
 					count: 100000,
 					start_timestamp: start,
 					end_timestamp: end
-			});
+				});
 
 			}
 		}
@@ -253,7 +245,7 @@ function exploreRecordedDataInCODAP() {
 	if (dataPairs.length && dataPairs[0].xData.data.length) {
 
 		// set collection attributes based on current input blocks
-		var attrs = [{name: 'seconds', type: 'numeric', precision: 2}];
+		var attrs = [{name: 'seconds', type: 'numeric', precision: 2}, {name: 'timestamp', type: 'categorical'}];
 		for (var i = 0; i < g_diagram.blocks.length; i++) {
 			var block = g_diagram.blocks[i];
 			if (block.inputCount === 0) {
@@ -337,6 +329,7 @@ function exploreRecordedDataInCODAP() {
 			// add to data set to send to CODAP
 			if (keepPoint) {
 				dataPoint['seconds'] = timestamp - startTimestamp;
+				dataPoint['timestamp'] = localTimestampToStr(timestamp, true);
 				data.push(dataPoint);
 			}
 
