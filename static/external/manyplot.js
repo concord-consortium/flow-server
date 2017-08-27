@@ -891,6 +891,7 @@ function createFrame( ctx ) {
 	frame.labelY = "";
 	frame.minLabelY = "";
 	frame.maxLabelY = "";
+	frame.labelYUnit = "";
 	frame.rotateLabelY = false;
 
 	// ================ coordinates / transforms ================
@@ -923,7 +924,9 @@ function createFrame( ctx ) {
 	frame.setCaptions = function( labelX, minLabelX, maxLabelX, labelY, labelYUnit, minLabelY, maxLabelY, rotateLabelY ) {
 		this.labelX = labelX;
 		this.labelY = labelY;
-		this.labelYUnit = "[" + labelYUnit + "]";
+		if (labelYUnit) {
+			this.labelYUnit = '(' + labelYUnit + ')';
+		}
 		if (typeof rotateLabelY !== 'undefined')
 			this.rotateLabelY = rotateLabelY;
 		this.minLabelX = minLabelX;
@@ -1028,7 +1031,9 @@ function createFrame( ctx ) {
 			ctx.restore();
 		} else {
 			ctx.fillText( this.labelY, boxMinX - 8, (boxMinY + boxMaxY) * 0.5 );
-			ctx.fillText( this.labelYUnit, boxMinX - 8, (boxMinY + boxMaxY) * 0.5 + 20);
+			if (this.labelYUnit) {
+				ctx.fillText(this.labelYUnit, boxMinX - 8, (boxMinY + boxMaxY) * 0.5 + 20);
+			}
 		}
 		//if (yUnits) ctx.fillText( unitsY, boxMinX - 8, (boxMinY + boxMaxY) * 0.5 + 7 );
 	};
