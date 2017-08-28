@@ -284,9 +284,6 @@ function displayBlock(block) {
 	//if (block.hasSeq) {
 	//	menuData.add('View Recorded Data', viewRecordedData, {id: block.id});
 	//}
-	if (block.type === 'plot' && g_useCodap) {
-		menuData.add('Explore Data in CODAP', exploreData, {id: block.id});
-	}
 	var menuHolderDiv = $('<div>', {class: 'flowBlockMenuHolder'});
 	var menuDiv = $('<div>', {class: 'dropdown flowBlockMenu'}).appendTo(menuHolderDiv);
 	var menuInnerDiv = $('<div>', {
