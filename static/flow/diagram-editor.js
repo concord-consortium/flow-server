@@ -502,7 +502,7 @@ function displayBlockValue(block) {
 	if (block.type === 'number_entry') {
 		// do nothing
 	} else if (block.type === 'plot') {
-		if (block.value !== null) {
+		if (block.value !== null && !isNaN(block.value)) {
 			var timestamp = moment().valueOf() * 0.001 - g_startTimestamp;
 			block.view.xData.data.push(timestamp);
 			block.view.yData.data.push(block.value);
@@ -558,7 +558,7 @@ function initDiagramEditor() {
 				var value = parseFloat(values[blockId]);
 				var block = g_diagram.findBlockById(parseInt(blockId));  // fix(later): why aren't blockIds coming through as integers?
 				if (block) {
-					block.updateValue(value); // will be null if no defined value (disconnected)
+					block.updateValue(value); // will be null or NaN if no defined value (disconnected)
 					displayBlockValue(block);
 				}
 			}

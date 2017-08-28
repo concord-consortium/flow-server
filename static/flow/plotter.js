@@ -245,7 +245,7 @@ function exploreRecordedDataInCODAP() {
 	if (dataPairs.length && dataPairs[0].xData.data.length) {
 
 		// set collection attributes based on current input blocks
-		var attrs = [{name: 'seconds', type: 'numeric', precision: 2}, {name: 'timestamp', type: 'categorical'}];
+		var attrs = [{name: 'seconds', type: 'numeric', precision: 2}, {name: 'timestamp', type: 'date'}];
 		for (var i = 0; i < g_diagram.blocks.length; i++) {
 			var block = g_diagram.blocks[i];
 			if (block.inputCount === 0) {
@@ -329,7 +329,7 @@ function exploreRecordedDataInCODAP() {
 			// add to data set to send to CODAP
 			if (keepPoint) {
 				dataPoint['seconds'] = timestamp - startTimestamp;
-				dataPoint['timestamp'] = localTimestampToStr(timestamp, true);
+				dataPoint['timestamp'] = moment(timestamp * 1000).format('M/D/YYYY H:mm:ss');
 				data.push(dataPoint);
 			}
 
