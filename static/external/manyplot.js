@@ -1,3 +1,23 @@
+/**
+ * Given an array, find index with value closest to given value.
+ * This is used for snap feature in interval selection etc.
+ */
+function getNearest(arr,value) {
+    //console.log("value="+value);
+    var diff = null;
+    var index= 0;
+    $.each(arr,function(i,item) {
+        var current = Math.abs(item - value);
+        if (diff == null) diff = current;
+        if (current< diff) {
+            index=i;
+            diff = current;
+            //console.log("current="+current+"; item="+item+";index="+index);
+        }
+    });
+    return index;
+}
+
 function createPlotHandler( canvas, multiFrame ) {
 
 	var plotHandler = {};
@@ -665,7 +685,7 @@ function createPlotter( canvas, multiFrame ) {
 	plotter.setIntervalFirstBound = function(xMouse){
 		var xMouseData = this.frames[ 0 ].screenToDataX( xMouse );
 		for (var i = 0; i < this.frames.length; i++) {
-			this.frames[i].intervalFirstBoundX = xMouseData;
+			this.frames[i].snapIntervalFirstBound(xMouseData, this.dataPairs[i].xData.data);
 		}
 	}
 
@@ -673,7 +693,7 @@ function createPlotter( canvas, multiFrame ) {
 		var xMouseData = this.frames[ 0 ].screenToDataX( xMouse );
 		for (var i = 0; i < this.frames.length; i++) {
 			var frame = this.frames[i];
-			frame.intervalSecondBoundX = xMouseData;
+			frame.snapIntervalSecondBound(xMouseData, this.dataPairs[i].xData.data);
 
 			if (frame.intervalFirstBoundX && frame.intervalSecondBoundX) {
 				var lowerX, upperX;
@@ -751,6 +771,7 @@ function createPlotter( canvas, multiFrame ) {
 		bounds.left = 0;
 		bounds.right = 0;
 
+        // TODO: replace with more generic global function getNearest
 		function getNearestIndex(xScreen){
 			var xPosData = plotter.frames[ 0 ].screenToDataX( xScreen );
 			var nearestIndex = -1;
@@ -1376,6 +1397,24 @@ function createFrame( ctx ) {
 		}
 	};
 
+	/**
+	 * Snap first x coordinate to nearest time point of xData measurements
+	*/
+	frame.snapIntervalFirstBound = function(xcoord, xData) {
+		var index = getNearest(xData, xcoord);
+		this.intervalFirstBoundX = xData[index];
+	}
+
+	/**
+	 * Snap second x coordinate to nearest time point of xData measurements
+	*/
+	frame.snapIntervalSecondBound = function(xcoord, xData) {
+		var index = getNearest(xData, xcoord);
+		this.intervalSecondBoundX = xData[index];
+	}
+
+
+
 	frame.selectInterval = function( xData, yData, xMouseData ) {
 		console.log('selectInterval');
 		console.log(xData);
@@ -1424,7 +1463,6 @@ function createFrame( ctx ) {
 					lower = frame.intervalSecondBound;
 					upper = frame.intervalFirstBound;
 				}
-
 				frame.intervalLowerIndex = lower;
 				frame.intervalUpperIndex = upper;
 				console.log('interval set:')
