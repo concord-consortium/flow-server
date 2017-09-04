@@ -243,6 +243,7 @@ function viewRecordedData(e) {
         }
     } else {
             showPlotter();
+            CodapTest.logTopic('Dataflow/ViewRecordedData');
     }
 }
 
