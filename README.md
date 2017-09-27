@@ -1,8 +1,29 @@
 # Flow-Server
 
 The Manylabs flow system lets people create data flow diagrams that interface with sensors and actuators.
+This repository contains the user interface for viewing and editing data flow diagrams and for viewing
+recorded data. The flow diagrams are executed on a remote computer (e.g. Raspberry Pi) using the 
+[flow](https://github.com/manylabs/flow) program.
 
-The system is currently under construction. We'll provide more documentation as we progress on the project.
+The flow web app (flow user interface) sends messages to the flow program using a websocket connection.
+The server runs the [rhizo-server](https://github.com/rhizolab/rhizo-server), which receives the messages
+and passes them along to the flow program (which receives the messages via the 
+[rhizo](https://github.com/rhizolab/rhizo) client library).
+
+The web app consists of four screens/pages (currently part of a single-page app to allow embedding within
+CODAP):
+
+*   a screen for selecting a controller computer (Raspberry Pi)
+*   a screen for displaying the list of diagrams currently on that controller or creating a new diagram on
+    the controller
+*   a diagram editor/viewer
+*   a historical data viewer
+
+The python code included with the web app is an extension to the rhizo-server framework that manages a few
+server-side flow-specific tasks, such as getting a list of available controllers and letting students select
+controllers by name.
+
+The web app itself is stored in the `static` and `templates` folders witin this repo.
 
 ## Installation
 
