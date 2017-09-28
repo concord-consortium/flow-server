@@ -803,7 +803,7 @@ function addFilterBlock(e) {
 		input_type: 'n',
 		output_type: 'n',
 	}
-	if (type === 'not') {
+	if (type === 'not' || type == 'absolute value') {
 		blockSpec.input_count = 1;
 	}
 	if (type === 'simple moving average'|| type === 'exponential moving average') {
@@ -857,7 +857,7 @@ function showFilterBlockSelector() {
 		"not", "and", "or", "xor", "nand",
 		"plus", "minus", "times", "divided by", "absolute value",
 		"equals", "not equals", "less than", "greater than",
-		"blur", "brightness", "simple moving average", "exponential moving average"
+		"simple moving average", "exponential moving average"
 	];
 	for (var i = 0; i < filterTypes.length; i++) {
 		var type = filterTypes[i];
