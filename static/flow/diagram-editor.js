@@ -556,10 +556,13 @@ function initDiagramEditor() {
 		var values = params.values;
 		for (var blockId in values) {
 			if (values.hasOwnProperty(blockId)) {
-				var value = parseFloat(values[blockId]);
+				var value = values[blockId];
+				if (value !== null) {  // don't convert nulls to NaNs
+					value = parseFloat(value);
+				}
 				var block = g_diagram.findBlockById(parseInt(blockId));  // fix(later): why aren't blockIds coming through as integers?
 				if (block) {
-					block.updateValue(value); // will be null or NaN if no defined value (disconnected)
+					block.updateValue(value);  // will be null if no defined value (disconnected)
 					displayBlockValue(block);
 				}
 			}
