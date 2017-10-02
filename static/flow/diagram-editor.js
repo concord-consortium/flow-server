@@ -885,7 +885,7 @@ function addPlotBlock() {
 
 
 // save the diagram to the controller
-function saveDiagram(promptForName, closeWhenDone) {
+function saveDiagram(promptForName, closeWhenDone, chainDialog) {
 	if (g_modified) {
 
 		// prompt for name
@@ -906,7 +906,9 @@ function saveDiagram(promptForName, closeWhenDone) {
 					// update diagram list
 					diagramSpec.name = g_diagramName;  // fix(clean): this is a bit messy; sometime diagram spec has name, sometimes not
 					updateDiagramSpec(diagramSpec);
-
+                    if (chainDialog) {
+                        chainDialog();
+                    }
 					if (closeWhenDone) {
 						showControllerViewer();
 					}
@@ -924,12 +926,18 @@ function saveDiagram(promptForName, closeWhenDone) {
 			// update diagram list
 			diagramSpec.name = g_diagramName;  // fix(clean): this is a bit messy; sometime diagram spec has name, sometimes not
 			updateDiagramSpec(diagramSpec);
+            if (chainDialog) {
+                chainDialog();
+            }
 
 			if (closeWhenDone) {
 				showControllerViewer();
 			}
 		}
 	} else {
+        if (chainDialog) {
+            chainDialog();
+        }
 		if (closeWhenDone) {
 			showControllerViewer();
 		}
@@ -953,6 +961,8 @@ function closeDiagramEditor() {
 
 // instruct the controller to start data recording (not just data displaying)
 function startRecordingData() {
+
+    // g_modified check for existing diagrams?
 	var modal = createBasicModal('recordingSettings', 'Start Recording Data');
 	modal.appendTo($('body'));
 	var modalBody = $('#recordingSettings-body');

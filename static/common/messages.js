@@ -106,6 +106,7 @@ function createWebSocketHolder() {
 		this.webSocket.onmessage = function(evt) {
 			var message = JSON.parse(evt.data);
 			var type = message['type'];
+			//console.log('webSocket.onmessage:' + type + ":" + JSON.stringify(message['parameters']))
 			if (type == 'error') {
 				if (message.parameters.message == 'invalid session') {
 					console.log('invalid session');
