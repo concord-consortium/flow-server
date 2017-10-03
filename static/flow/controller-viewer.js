@@ -129,9 +129,6 @@ function initControllerViewer() {
 
         console.log("INFO already inited g_controllerViewerInitialized", g_controller.name);
 
-		// addMessageHandler('diagram_list', diagram_list_handler);
-		// addMessageHandler('status', status_handler);
-
 		sendMessage('list_diagrams');
 		sendMessage('request_status');
 
