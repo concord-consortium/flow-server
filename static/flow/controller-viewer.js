@@ -69,9 +69,25 @@ function diagram_list_handler(timestamp, params) {
 	}
 }
 
+//
+//
+//
 function diagramSetRecordingInterval(interval) {
-	var recording_interval_text = interval ? interval + ' second(s)' : 'none';
-	$('#diagramInfo').html("<b>Recording Interval:</b> " + recording_interval_text)
+    var recording_interval_text = interval ? interval + ' second(s)' : 'none';
+
+    var nameEl  = $('<b>', {});
+    var brEl    = $('<br>', {});
+    var infoEl  = $('<div>', {});
+
+    nameEl.text(g_controller.name);
+    infoEl.html("<b>Recording Interval:</b> " + recording_interval_text);
+
+    var controllerInfo = $('#diagramInfo');
+    controllerInfo.html('');
+
+    nameEl.appendTo(controllerInfo);
+    brEl.appendTo(controllerInfo);
+    infoEl.appendTo(controllerInfo);
 }
 
 /**
@@ -99,11 +115,14 @@ function status_handler(timestamp, params) {
 
 }
 
+//
 // prepare an interface for viewing the diagrams contained within a controller
+//
 function initControllerViewer() {
 
     var controllerName = $('#controllerName');
-    console.log("INFO setting controller name", g_controller.name);
+    console.log("INFO initControllerViewer setting controller name", 
+                    g_controller.name);
     controllerName.text(g_controller.name);
 
     var connectMsg = $('#diagramList');
@@ -114,7 +133,6 @@ function initControllerViewer() {
     //
     clearSubscriptions();
     subscribeToFolder(g_controller.path);
-    sendSubscriptions();
 
     //
     // Set outgoing messages to go to this controller.
@@ -125,39 +143,47 @@ function initControllerViewer() {
     // if we've already initialized the view but are returning to it again, 
     // we should request the list of diagrams and status again
     //
-	if (g_controllerViewerInitialized) {
+    if (g_controllerViewerInitialized) {
 
         console.log("INFO already inited g_controllerViewerInitialized", g_controller.name);
 
-		sendMessage('list_diagrams');
-		sendMessage('request_status');
+        //
+        // Update new subscriptions (in case we changed controllers on this 
+        // websocket connection.)
+        //
+        sendSubscriptions();
 
-		return;
-	}
+        sendMessage('list_diagrams');
+        sendMessage('request_status');
+
+        return;
+    }
 
 
     console.log("INFO connecting websocket", g_controller.name);
 
-	// open websocket connect to server
-	connectWebSocket(function() {
+    //
+    // open websocket connect to server
+    //
+    connectWebSocket(function() {
         console.log("INFO connecting websocket func", g_controller.name);
-		sendMessage('list_diagrams');
-		sendMessage('request_status');
-	});
+        sendMessage('list_diagrams');
+        sendMessage('request_status');
+    });
 
     console.log("INFO connected websocket", g_controller.name);
 
-	if (g_useBle) {
-		bleaddMessageHandler('diagram_list', diagram_list_handler);
-		bleaddMessageHandler('status', status_handler);
-	} else {
+    if (g_useBle) {
+        bleaddMessageHandler('diagram_list', diagram_list_handler);
+        bleaddMessageHandler('status', status_handler);
+    } else {
         console.log("INFO adding message handlers diagram_list and status");
-		addMessageHandler('diagram_list', diagram_list_handler);
-		addMessageHandler('status', status_handler);
-	}
+        addMessageHandler('diagram_list', diagram_list_handler);
+        addMessageHandler('status', status_handler);
+    }
 
     console.log("INFO Setting g_controllerViewerInitialized", g_controller.name);
-	g_controllerViewerInitialized = true;
+    g_controllerViewerInitialized = true;
 }
 
 
