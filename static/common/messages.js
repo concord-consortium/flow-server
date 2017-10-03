@@ -40,6 +40,21 @@ function subscribeToFolder(folderPath, includeSelf) {
 	}
 }
 
+//
+// Remove all existing subscriptions
+//
+function clearSubscriptions() {
+	g_wsh.subscriptions = [];
+}
+
+//
+// Send subscriptions to server so that the connection is updated to
+// include the current set of subscriptions
+//
+function sendSubscriptions() {
+    g_wsh.sendMessage('subscribe', {'subscriptions': g_wsh.subscriptions});
+}
+
 
 // add a handler for a particular type of message;
 // when a message of this type is received the server, the function will be called;
@@ -54,6 +69,9 @@ function addMessageHandler(type, func) {
 function sendMessage(messageType, params, targetFolderPath) {
 	if (!params)
 		params = {};
+
+    // debug("sendMessage", messageType, params, targetFolderPath);
+
 	g_wsh.sendMessage(messageType, params, targetFolderPath);
 }
 
@@ -89,6 +107,8 @@ function createWebSocketHolder() {
 		wsh.connectStarted = true; // fix(soon): could have race condition
 		console.log('connecting');
 
+        // debug("Connecting");
+
 		// compute url
 		var protocol = 'ws://';
 		if (window.location.protocol.slice(0, 5) == 'https')
@@ -102,8 +122,13 @@ function createWebSocketHolder() {
 			alert('This app requires a browser with WebSocket support.');
 		}
 
+        //
 		// handle message from websocket
+        //
 		this.webSocket.onmessage = function(evt) {
+
+            // debug("MESSAGE RECEIVED", evt);
+
 			var message = JSON.parse(evt.data);
 			var type = message['type'];
 			if (type == 'error') {
@@ -114,9 +139,16 @@ function createWebSocketHolder() {
 			}
 			var func = wsh.handlers[type];
 			if (func) {
-				//console.log(type + ":" + JSON.stringify(message['parameters']))
+
+				// console.log(type + ":" + JSON.stringify(message['parameters']))
+				// debug("MESSAGE HANDLER", type + ":" + JSON.stringify(message['parameters']))
 				func(moment(message['timestamp']), message['parameters']);
-			}
+
+			} else {
+
+				debug("MESSAGE", "No handler for " + type);
+            }
+
 			for (var i = 0; i < wsh.genericHandlers.length; i++) {
 				var func = wsh.genericHandlers[i];
 				func(moment(message['timestamp']), type, message['parameters']);
@@ -179,6 +211,9 @@ function createWebSocketHolder() {
 	// send a message to the server;
 	// messages should be addressed to a particular folder
 	wsh.sendMessage = function(type, parameters, folderPath) {
+
+        // debug("wsh.sendMessage", type, parameters, folderPath);
+
 		if (this.connected === false) {// fix(soon): queue message to send after reconnect?
 			return;
 		}
@@ -247,3 +282,10 @@ function reconnect() {
 	console.log('attempting to reconnect');
 	g_wsh.connect();
 }
+
+function debug() {
+    var args = Array.prototype.slice.call(arguments);
+    args.unshift("[DEBUG]");
+    console.log(...args);
+}
+

@@ -8,6 +8,10 @@ var g_recordingInterval = null;  // current recording interval
  * @param params
  */
 function diagram_list_handler(timestamp, params) {
+
+    console.log("INFO diagram_list_handler", timestamp, params);
+    console.log("INFO diagram_list_handler g_controller", g_controller.name);
+
 	var diagramListDiv = $('#diagramList');
 	diagramListDiv.empty();
 	g_diagramSpecs = params.diagrams;
@@ -98,35 +102,64 @@ function status_handler(timestamp, params) {
 // prepare an interface for viewing the diagrams contained within a controller
 function initControllerViewer() {
 
-	// if we've already initialized the view but are returning to it again, we should request the list of diagrams again
+    var controllerName = $('#controllerName');
+    console.log("INFO setting controller name", g_controller.name);
+    controllerName.text(g_controller.name);
+
+    var connectMsg = $('#diagramList');
+    connectMsg.text('Connecting to controller...');
+
+    //
+    // Subscribe to messages for this controller.
+    //
+    clearSubscriptions();
+    subscribeToFolder(g_controller.path);
+    sendSubscriptions();
+
+    //
+    // Set outgoing messages to go to this controller.
+    //
+    setTargetFolder(g_controller.path);
+
+    //
+    // if we've already initialized the view but are returning to it again, 
+    // we should request the list of diagrams and status again
+    //
 	if (g_controllerViewerInitialized) {
+
+        console.log("INFO already inited g_controllerViewerInitialized", g_controller.name);
+
+		// addMessageHandler('diagram_list', diagram_list_handler);
+		// addMessageHandler('status', status_handler);
+
 		sendMessage('list_diagrams');
-		//sendMessage('list_diagrams_names');
 		sendMessage('request_status');
+
 		return;
 	}
 
-	// subscribe to message for this controller
-	subscribeToFolder(g_controller.path);
 
-	// set outgoing messages to go to this controller
-	setTargetFolder(g_controller.path);
+    console.log("INFO connecting websocket", g_controller.name);
 
 	// open websocket connect to server
 	connectWebSocket(function() {
+        console.log("INFO connecting websocket func", g_controller.name);
 		sendMessage('list_diagrams');
-		//sendMessage('list_diagrams_names');
 		sendMessage('request_status');
 	});
+
+    console.log("INFO connected websocket", g_controller.name);
 
 	if (g_useBle) {
 		bleaddMessageHandler('diagram_list', diagram_list_handler);
 		bleaddMessageHandler('status', status_handler);
 	} else {
+        console.log("INFO adding message handlers diagram_list and status");
 		addMessageHandler('diagram_list', diagram_list_handler);
 		addMessageHandler('status', status_handler);
 	}
 
+    console.log("INFO Setting g_controllerViewerInitialized", g_controller.name);
 	g_controllerViewerInitialized = true;
 }
 
