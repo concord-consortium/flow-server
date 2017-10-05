@@ -383,6 +383,7 @@ function createBasicModal(id, title, params) {
 	var outerDiv = $('#' + id);
 	if (outerDiv.length) {// fix(later): what if want to change the label?
 		console.log('re-use existing modal');
+		$('#' + id + '-title').html(title);
 		$('#' + id + '-body').html(''); // clear out old body HTML if re-using
 		var okButton = $('#' + id + '-ok');
 		okButton.unbind('click'); // fix(clean): rough hack
@@ -396,7 +397,7 @@ function createBasicModal(id, title, params) {
 		var headerDiv = $('<div>', {class: 'modal-header'}).appendTo(contentDiv);
 		var button = $('<button>', {type: "button", class: "close", 'data-dismiss': "modal", 'aria-label': "Close"}).appendTo(headerDiv);
 		$('<span>', {'aria-hidden': "true", html: '&times;'}).appendTo(button);
-		$('<h4>', {class: "modal-title", html: title}).appendTo(headerDiv);
+		$('<h4>', {class: "modal-title", html: title, id: id + '-title'}).appendTo(headerDiv);
 		var body = $('<div>', {class: 'modal-body', id: id + '-body'}).appendTo(contentDiv);
 		if (params && params.longBody) {
 			body.addClass('long-modal-body');
