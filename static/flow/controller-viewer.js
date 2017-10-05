@@ -3,7 +3,8 @@ var g_diagramSpecs = [];  // a collection of all diagrams on the controller
 var g_recordingInterval = null;  // current recording interval
 
 /**
- Handle diagram list message from controller
+ *
+ * Handle diagram list message from controller
  * @param timestamp
  * @param params
  */
@@ -58,11 +59,14 @@ function diagram_list_handler(timestamp, params) {
 		var diagramDiv = $('<div>', {class: 'listButton'});
 		var btnGroup = $('<div>', {class: 'btn-group'});
 		var diagramName = $('<button>', {class: 'btn btn-lg diagram-name', html: diagram.name, id: 'd_' + diagram.name}).appendTo(btnGroup);
-		diagramName.click(i, function(e) {
-			showDiagramEditor();
-			sendMessage('start_diagram', g_diagramSpecs[e.data]);
-			loadDiagram(g_diagramSpecs[e.data]);
-		});
+
+        diagramName.click(i, function(e) {
+            setDiagramInfo( { diagramName: g_diagramSpecs[e.data].name } );
+            showDiagramEditor();
+            sendMessage('start_diagram', g_diagramSpecs[e.data]);
+            loadDiagram(g_diagramSpecs[e.data]);
+        });
+
 		createMenu(btnGroup, i, 'dm_' + diagram.name);
 		btnGroup.appendTo(diagramDiv);
 		diagramDiv.appendTo(diagramListDiv);
@@ -70,32 +74,42 @@ function diagram_list_handler(timestamp, params) {
 }
 
 //
+// Set diagram info
 //
-//
-function diagramSetRecordingInterval(interval) {
+function setDiagramInfo(info) {
+
+    var controllerName  = info['controllerName'];
+    var diagramName     = info['diagramName'];
+    var interval        = info['interval'];
+
     var recording_interval_text = interval ? interval + ' second(s)' : 'none';
 
-    var nameEl  = $('<b>', {});
-    var brEl    = $('<br>', {});
-    var infoEl  = $('<div>', {});
+    if (controllerName) {
+        $('#diagramControllerName').text(controllerName);
+    }
 
-    nameEl.text(g_controller.name);
-    infoEl.html("<b>Recording Interval:</b> " + recording_interval_text);
+    if (diagramName) {
+        $('#diagramName').text(diagramName);
+    }
 
-    var controllerInfo = $('#diagramInfo');
-    controllerInfo.html('');
+    //
+    // Use 'in' to check for presence of interval in param map, 
+    // since this can be present but null.
+    //
+    if ('interval' in info) {
+        $('#diagramInterval').html("<b>Recording Interval:</b> " + recording_interval_text);
+    }
 
-    nameEl.appendTo(controllerInfo);
-    brEl.appendTo(controllerInfo);
-    infoEl.appendTo(controllerInfo);
 }
 
 /**
- Handle status message from the controller
+ *
+ * Handle status message from the controller
  * @param timestamp
  * @param params
  */
 function status_handler(timestamp, params) {
+
 	console.log('status', params);
 	var statusDiv = $('#controllerStatus');
 	statusDiv.empty();
@@ -159,7 +173,9 @@ function status_handler(timestamp, params) {
 
     adminList.appendTo(adminStatusDiv);
 
-    diagramSetRecordingInterval(params.recording_interval);
+    setDiagramInfo( {   controllerName: g_controller.name,
+                        interval:       params.recording_interval } );
+
 
 }
 

@@ -959,61 +959,72 @@ function closeDiagramEditor() {
 }
 
 
-// instruct the controller to start data recording (not just data displaying)
+//
+// Instruct the controller to start data recording (not just data displaying)
+//
 function startRecordingData() {
 
     // g_modified check for existing diagrams?
-	var modal = createBasicModal('recordingSettings', 'Start Recording Data');
-	modal.appendTo($('body'));
-	var modalBody = $('#recordingSettings-body');
-	var fg = createFormGroup({id: 'rate', label: 'Update Rate (seconds)'}).appendTo(modalBody);
-	createTextInput({id: 'rate', value: '60'}).appendTo(fg);
-	// disable showing run_name
-	var showRunName = false;
-	if (showRunName) {
+    var modal = createBasicModal('recordingSettings', 'Start Recording Data');
+    modal.appendTo($('body'));
+    var modalBody = $('#recordingSettings-body');
+    var fg = createFormGroup({id: 'rate', label: 'Update Rate (seconds)'}).appendTo(modalBody);
+    createTextInput({id: 'rate', value: '60'}).appendTo(fg);
+    // disable showing run_name
+    var showRunName = false;
+    if (showRunName) {
         var fg2 = createFormGroup({id: 'run_name', label: 'Run name'}).appendTo(modalBody);
         createTextInput({id: 'run_name', value: 'Noname'}).appendTo(fg2);
-	}
-	$('#recordingSettings-ok').click(function() {
-		var rate = parseInt($('#rate').val());
-		var run_name = $('#run_name').val();
-		if (rate < 1) {
-			$('#recordingSettings').modal('hide');
-		    alert("Recording interval must be an integer >= 1.");
-		} else {
-			g_recordingInterval = rate;
-			var params;
-           	if (showRunName) {
+    }
+    $('#recordingSettings-ok').click(function() {
+        var rate = parseInt($('#rate').val());
+        var run_name = $('#run_name').val();
+        if (rate < 1) {
+            $('#recordingSettings').modal('hide');
+            alert("Recording interval must be an integer >= 1.");
+        } else {
+            g_recordingInterval = rate;
+            var params;
+               if (showRunName) {
                 params = {
                     'rate': rate,
                     'run_name': run_name
                 };
-			} else {
+            } else {
                 params = {
                     'rate': rate
                 };
-			}
-			sendMessage('start_recording', params);
-            diagramSetRecordingInterval(g_recordingInterval);
-			$('#startRecording').hide();
-			$('#stopRecording').show();
-			$('#recordingSettings').modal('hide');
+            }
+            sendMessage('start_recording', params);
+
+            setDiagramInfo( {   controllerName: g_controller.name,
+                                diagramName:    g_diagramName,
+                                interval:       g_recordingInterval } );
+
+            $('#startRecording').hide();
+            $('#stopRecording').show();
+            $('#recordingSettings').modal('hide');
             CodapTest.logTopic('Dataflow/SetUpdateRate');
-		}
-	});
-	$('#recordingSettings').modal('show');
+        }
+    });
+    $('#recordingSettings').modal('show');
     CodapTest.logTopic('Dataflow/StartRecordingData');
 }
 
-
-// instruct the controller to stop data recording
+//
+// Instruct the controller to stop data recording
+//
 function stopRecordingData() {
-	sendMessage('stop_recording');
-	$('#stopRecording').hide();
-	$('#startRecording').show();
-	g_recordingInterval = 0;
+    sendMessage('stop_recording');
+    $('#stopRecording').hide();
+    $('#startRecording').show();
+    g_recordingInterval = 0;
     CodapTest.logTopic('Dataflow/StopRecordingData');
-    diagramSetRecordingInterval(g_recordingInterval)
+
+    setDiagramInfo( {   controllerName: g_controller.name,
+                        diagramName:    g_diagramName,
+                        interval:       g_recordingInterval } );
+
 }
 
 
