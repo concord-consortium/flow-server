@@ -51,16 +51,41 @@
 	</div>
 </div>
 
+<!--
+   -
+   - This panel displays the status for a single controller
+   - and lists diagrams belonging to that controller.
+   -
+   -->
 <div id="controllerViewerPanel" class="flowPanel center-block">
     <div class="row">
         <div class="col-md-3"></div>
         <div class="col-md-6">
-            <h2>Flow Diagrams</h2> (<span id="controllerName"></span>) <span class="controllerStatus"><a data-toggle="collapse" href="#controllerStatus" aria-expanded="false" aria-controls="controllerStatus">Status</a></span>
+            <h2>Flow Diagrams</h2> (<span id="controllerName"></span>) 
+            
+            <span class="controllerStatus">
+                <a  data-toggle="collapse"
+                    href="#controllerStatus"
+                    aria-expanded="false"
+                    aria-controls="controllerStatus">Status</a>
+            </span>
+
+            <span class="controllerStatus">
+                <a  data-toggle="collapse"
+                    href="#controllerAdminStatus"
+                    aria-expanded="false"
+                    aria-controls="controllerAdminStatus">Admin</a>
+            </span>
+
             <div class="collapse" id="controllerStatus">
               <div class="well">
                 ...
               </div>
             </div>
+
+            <div class="collapse" id="controllerAdminStatus">
+            </div>
+
             <div id="diagramList">Connecting to controller...</div>
             <button class="btn btn-primary" onclick="newDiagram()">New Diagram</button>
             <button class="btn btn-primary" onclick="closeControllerViewer()">Close Controller</button>
