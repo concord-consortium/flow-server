@@ -111,6 +111,54 @@ function status_handler(timestamp, params) {
 			button.html(params.current_diagram + ' (running' + (g_recordingInterval ? ' and recording' : '') + ')');
 		}
 	}
+
+
+    //
+    // Add admin status
+    //
+    var adminStatusDiv = $('#controllerAdminStatus');
+    adminStatusDiv.empty();
+
+    var adminList   = $('<div>');
+    var table       = $('<table>');
+
+    table.appendTo(adminList);
+
+    //
+    // Add a row to the admin table
+    //
+    var addAdminRow = function(_table, nameText, valueText) {
+        var row     = $('<tr>')
+        var name    = $('<td>');
+        var value   = $('<td>', { css: { 'paddingLeft': '5px' } } );
+
+        row.appendTo(_table);
+
+        name.text(nameText);
+        name.appendTo(row);
+
+        value.text(valueText);
+        value.appendTo(row);
+    }
+
+    //
+    // Add IP addresses to admin table. (Useful when trying to connect to
+    // a device via ssh.)
+    //
+    if( params.ip_addresses != null ) {
+        for (var key in params.ip_addresses) {
+            addAdminRow(table, key, params.ip_addresses[key]);
+        }
+    }
+
+    //
+    // Add version info. (Useful when trying to track what version of 
+    // software is installed.)
+    //
+    addAdminRow(table, "Version", params.flow_version);
+
+    adminList.appendTo(adminStatusDiv);
+
     diagramSetRecordingInterval(params.recording_interval);
 
 }
@@ -127,6 +175,13 @@ function initControllerViewer() {
 
     var connectMsg = $('#diagramList');
     connectMsg.text('Connecting to controller...');
+
+    //
+    // Clear out old status messages (potentially from some other controller
+    // previously selected...)
+    //
+    $('#controllerStatus').empty();
+    $('#controllerAdminStatus').empty();
 
     //
     // Subscribe to messages for this controller.
