@@ -60,14 +60,12 @@ function diagram_list_handler(timestamp, params) {
 		var btnGroup = $('<div>', {class: 'btn-group'});
 		var diagramName = $('<button>', {class: 'btn btn-lg diagram-name', html: diagram.name, id: 'd_' + diagram.name}).appendTo(btnGroup);
 
-        (function(_name) {
-            diagramName.click(i, function(e) {
-                setDiagramInfo( { diagramName: _name } );
-                showDiagramEditor();
-                sendMessage('start_diagram', g_diagramSpecs[e.data]);
-                loadDiagram(g_diagramSpecs[e.data]);
-            });
-        })(diagram.name);
+        diagramName.click(i, function(e) {
+            setDiagramInfo( { diagramName: g_diagramSpecs[e.data].name } );
+            showDiagramEditor();
+            sendMessage('start_diagram', g_diagramSpecs[e.data]);
+            loadDiagram(g_diagramSpecs[e.data]);
+        });
 
 		createMenu(btnGroup, i, 'dm_' + diagram.name);
 		btnGroup.appendTo(diagramDiv);
