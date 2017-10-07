@@ -1,7 +1,8 @@
 // This file is used to send data to Concord's CODAP system; it is preliminary code based on a sample from Concord.
 
-
-// initialize a codapInterface object
+//
+// Initialize a codapInterface object
+//
 function initCodapBridge() {
 
     CodapTest.debug("initCodapBridge()");
@@ -85,6 +86,8 @@ var CodapTest = {
 
         this.debug("prepCollection()");
 
+        this.setCursorStyle('progress');
+
         _this = this;
 
         //
@@ -165,7 +168,7 @@ var CodapTest = {
     },
 
     //
-    // shortcut for log() that sets formatStr based on topic
+    // Shortcut for log() that sets formatStr based on topic
     //
     logTopic: function (topic) {
         this.log({
@@ -175,53 +178,83 @@ var CodapTest = {
         });
     },
 
-	// send data to the CODAP; data should be a list of dictionaries: [{field_a: 1, field_b: 2}, {field_a: 3, field_b: 4}]
-	sendData: function(data) {
-		console.log('sending', data.length, 'points to CODAP');
+    //
+    // Send data to the CODAP; data should be a list of dictionaries:
+    // [{field_a: 1, field_b: 2}, {field_a: 3, field_b: 4}]
+    //
+    sendData: function(data) {
 
-		// we assume the connection should have been made by the time a button is
-		// pressed.
-		if(codapInterface.connectionState !== 'active') {
-			alert("not running in codap");
-			return;
-		}
+        debug('Sending', data.length, 'points to CODAP');
 
-		// This function is called once the parent case is opened
-		var sendData = function(iResult) {
-			var tID = iResult.values[0].id;
-			var values = [];
-			for (var i = 0; i < data.length; i++) {
-				values.push({
-					parent: tID,
-					values: data[i],
-				});
-			}
+        _this = this;
+
+        //
+        // We assume the connection should have been made by the time
+        // a button is pressed.
+        //
+        if(codapInterface.connectionState !== 'active') {
+            alert("Not running in codap");
+            return;
+        }
+
+        // This function is called once the parent case is opened
+        var sendData = function(iResult) {
+            var tID = iResult.values[0].id;
+            var values = [];
+            for (var i = 0; i < data.length; i++) {
+                values.push({
+                    parent: tID,
+                    values: data[i],
+                });
+            }
             console.log("codapInterface.sendRequest() points");
-			codapInterface.sendRequest({
-				action: 'create',
-				resource: 'collection[points].case',
-				values: values,
-			});
-		};
+            codapInterface.sendRequest({
+                action: 'create',
+                resource: 'collection[points].case',
+                values: values,
+            }).then(
 
-		// We keep track of the sampleNumber in interactiveState. If it doesn't exist
-		// yet, create it.
-		if (this.state.sampleNumber === undefined || this.state.sampleNumber === null) {
-			this.state.sampleNumber = 0;
-		}
+                //
+                // Set cursor style back to default
+                //
+                function() {
+                    _this.setCursorStyle('default');
+                }
 
-		// increment sample number.
-		this.state.sampleNumber++;
+            );
+        };
+
+        //
+        // We keep track of the sampleNumber in interactiveState.
+        // If it doesn't exist yet, create it.
+        //
+        if (this.state.sampleNumber === undefined || this.state.sampleNumber === null) {
+            this.state.sampleNumber = 0;
+        }
+
+        //
+        // increment sample number.
+        //
+        this.state.sampleNumber++;
 
         console.log("Calling codapInterface.sendRequest()");
 
-		// Tell CODAP to open a parent case and call sendData when done
-		codapInterface.sendRequest({
-			action: 'create',
-			resource: 'collection[samples].case',
-			values: {values: {sample: this.state.sampleNumber}}
-		}).then(sendData);
-	},
+        // Tell CODAP to open a parent case and call sendData when done
+        codapInterface.sendRequest({
+            action: 'create',
+            resource: 'collection[samples].case',
+            values: {values: {sample: this.state.sampleNumber}}
+        }).then(sendData);
+    },
+
+    //
+    // Set css cursor style.
+    // E.g. caller might pass 'progress' or 'default'
+    //
+    setCursorStyle: function(style) {
+        //  document.body.style.cursor = style;
+        $("body").css("cursor", style);
+    },
 
     //
     // Debug
