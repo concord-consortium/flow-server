@@ -3,71 +3,159 @@
 
 // initialize a codapInterface object
 function initCodapBridge() {
+
+    CodapTest.debug("initCodapBridge()");
+
 	codapInterface.init({
 		name: 'DataFlow',
 		title: 'Data Flow',
 		dimensions: {width: 900, height: 600},
 		version: '0.1'
-	}).then(function () {
-		// Determine if CODAP already has the Data Context we need.
-		// If not, create it.
-		return codapInterface.sendRequest({
-			action:'get',
-			resource: 'dataContext[Flow_Data]'
-		}, function (iResult, iRequest) {
-			if (iResult && !iResult.success) {
-				codapInterface.sendRequest({
-					action: 'create',
-					resource: 'dataContext',
-					values: {
-						name: "Flow_Data",
-					}});
-				}
-			}
-		);
 	});
-}
 
+    CodapTest.debug("initCodapBridge() completed.");
+};
 
+//
 // This object handles the semantics of the page.
+//
 var CodapTest = {
+
 	state: codapInterface.getInteractiveState(),
 
-	// set the format of the collection; attributes should be a list of fields: [{name: 'field_a', ...}, {name: 'field_b', ...}];
-	// see CODAP docs for more info about attributes
-	prepCollection: function(attrs) {
-		console.log('adding', attrs.length, 'fields to CODAP collection');
-		codapInterface.sendRequest({
-			action: 'create',
-			resource: 'collection',
-			values: [  // There are two collections: a parent and a child
-				{
-					name: 'samples',
-					// The parent collection has just one attribute
-					attrs: [{name: "sample", type: 'categorical'}],
-					childAttrName: "sample"
-				},
-				{
-					name: 'points',
-					parent: 'samples',
-					labels: {
-						pluralCase: "points",
-						setOfCasesWithArticle: "a sample"
-					},
-					attrs: attrs,
-				}
-			]
-		});
-	},
+    //
+    // Create the CODAP dataContext
+    //
+    createContext: function(callback) {
+    
+        this.debug("Checking for CODAP dataContext...");
 
-    // send a log message to CODAP, values should be a dictionary: {topic: <string>, formatStr: <string>, replaceArgs: <array>}
-    // where topic is optional and formatStr can contain %@ placeholders that are replaced with the values in replaceArgs.
-    // example: {formatStr: "Launched rocket with %@ engine toward %@", replaceArgs: ["red", "satellite"]}
+        //
+        // Determine if CODAP already has the Data Context we need.
+        // If not, create it.
+        //
+        return codapInterface.sendRequest(
+            {
+
+                action:     'get',
+                resource:   'dataContext[Flow_Data]'
+
+            }, function (iResult, iRequest) {
+
+                if (iResult && !iResult.success) {
+                
+                    this.debug("Creating CODAP dataContext...");
+
+                    codapInterface.sendRequest(
+
+                        {   action:     'create',
+                            resource:   'dataContext',
+                            values: {
+                                name:   "Flow_Data",
+                            }
+                        }, 
+    
+                        function (iResult, iRequest) {
+                            if (iResult && iResult.success) {
+                                this.debug(
+                                    "Created dataContext. Calling callback.");
+                                callback();
+                            } else {
+                                this.debug(
+                                    "Failed to create dataContext.", iResult);
+                            }
+                        }
+                    );
+
+                } else {
+                    //
+                    // Context already exists.
+                    //
+                    this.debug("Using existing context...");
+                    callback();
+                }
+            }
+        );
+    },
+
+    //
+    // Prepare collection
+    //
+    prepCollection: function(attrs, callback) {
+
+        this.debug("prepCollection()");
+
+        _this = this;
+
+        //
+        // Check that a dataContext exists and if not create one.
+        // then call prepCollectionImpl()
+        //
+        this.createContext(
+            function() {
+                _this.prepCollectionImpl(attrs, callback);
+            }
+        );
+    },
+
+    //
+    // Set the format of the collection; attributes should be a list 
+    // of fields: [{name: 'field_a', ...}, {name: 'field_b', ...}];
+    //
+    // See CODAP docs for more info about attributes.
+    //
+    prepCollectionImpl: function(attrs, callback) {
+
+        this.debug("prepCollectionImpl()");
+
+        this.debug('Adding', attrs.length, 'fields to CODAP collection');
+
+        codapInterface.sendRequest({
+            action:     'create',
+            resource:   'collection',
+            values: [   // There are two collections: a parent and a child
+                {
+                    name: 'samples',
+                    //
+                    // The parent collection has just one attribute
+                    //
+                    attrs: [{name: "sample", type: 'categorical'}],
+                    childAttrName: "sample"
+                },
+                {
+                    name: 'points',
+                    parent: 'samples',
+                    labels: {
+                        pluralCase: "points",
+                        setOfCasesWithArticle: "a sample"
+                    },
+                    attrs: attrs,
+                }
+            ]
+        }, 
+        function (iResult, iRequest) {
+            this.debug("Create collection result", iResult, iRequest);
+            if (iResult && iResult.success) {
+                this.debug("Collection prepared. Calling callback.");
+                callback();
+            }
+        });
+    },
+
+    //
+    // Send a log message to CODAP, values should be a dictionary: 
+    // {topic: <string>, formatStr: <string>, replaceArgs: <array>}
+    // where topic is optional and formatStr can contain %@ placeholders 
+    // that are replaced with the values in replaceArgs.
+    // example: {   formatStr: "Launched rocket with %@ engine toward %@", 
+    //              replaceArgs: ["red", "satellite"]}
+    //
     log: function (values) {
+
         // ignore logging if not running in CODAP
-		if(codapInterface.connectionState !== 'active') {
-			return;
-		}
+        if(codapInterface.connectionState !== 'active') {
+            return;
+        }
 
         codapInterface.sendRequest({
             action: 'notify',
@@ -76,7 +164,9 @@ var CodapTest = {
         });
     },
 
+    //
     // shortcut for log() that sets formatStr based on topic
+    //
     logTopic: function (topic) {
         this.log({
             topic: topic,
@@ -106,6 +196,7 @@ var CodapTest = {
 					values: data[i],
 				});
 			}
+            console.log("codapInterface.sendRequest() points");
 			codapInterface.sendRequest({
 				action: 'create',
 				resource: 'collection[points].case',
@@ -122,11 +213,24 @@ var CodapTest = {
 		// increment sample number.
 		this.state.sampleNumber++;
 
+        console.log("Calling codapInterface.sendRequest()");
+
 		// Tell CODAP to open a parent case and call sendData when done
 		codapInterface.sendRequest({
 			action: 'create',
 			resource: 'collection[samples].case',
 			values: {values: {sample: this.state.sampleNumber}}
 		}).then(sendData);
-	}
+	},
+
+    //
+    // Debug
+    //
+    debug: function() {
+        var args = Array.prototype.slice.call(arguments);
+        args.unshift("[CODAP-BRIDGE]");
+        console.log(...args);
+    }
+
 };
+
