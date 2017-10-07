@@ -256,93 +256,123 @@ function exploreRecordedDataInCODAP() {
 				});
 			}
 		}
-		CodapTest.prepCollection(attrs);
 
-		// get data for quick reference
-		var xs = [];
-		var ys = [];
-		for (var j = 0; j < dataPairs.length; j++) {
-			xs.push(dataPairs[j].xData.data);
-			ys.push(dataPairs[j].yData.data);
-		}
+		CodapTest.prepCollection(
+            attrs, 
+            function() {
+                // get data for quick reference
+                var xs = [];
+                var ys = [];
+                for (var j = 0; j < dataPairs.length; j++) {
+                    xs.push(dataPairs[j].xData.data);
+                    ys.push(dataPairs[j].yData.data);
+                }
 
-		// get timestamp bounds
-		var frame = g_plotHandler.plotter.frames[0];
-		var minTimestamp = frame.intervalLowerX;
-		var maxTimestamp = frame.intervalUpperX;
-		var ind = [];
-		for (var j = 0; j < dataPairs.length; j++) {
-			if (xs[j].length) {
-				ind[j] = 0;  // start at beginning
-			} else {
-				ind[j] = -1;  // no data; done with this pair
-			}
-		}
+                // get timestamp bounds
+                var frame = g_plotHandler.plotter.frames[0];
+                var minTimestamp = frame.intervalLowerX;
+                var maxTimestamp = frame.intervalUpperX;
+                var ind = [];
+                for (var j = 0; j < dataPairs.length; j++) {
+                    if (xs[j].length) {
+                        ind[j] = 0;  // start at beginning
+                    } else {
+                        ind[j] = -1;  // no data; done with this pair
+                    }
+                }
 
-		// merge the sequences
-		var data = [];
-		var startTimestamp = null;
-		var step = 0;
-		while (1) {
+                // merge the sequences
+                var data = [];
+                var startTimestamp = null;
+                var step = 0;
+                while (1) {
 
-			// get current timestamp: min across sequences at current position
-			var timestamp = null;
-			for (var j = 0; j < dataPairs.length; j++) {
-				if (ind[j] >= 0) {
-					var t = xs[j][ind[j]];
-					if (timestamp === null || t < timestamp) {
-						timestamp = t;
-					}
-				}
-			}
+                    // get current timestamp: min across sequences at current position
+                    var timestamp = null;
+                    for (var j = 0; j < dataPairs.length; j++) {
+                        if (ind[j] >= 0) {
+                            var t = xs[j][ind[j]];
+                            if (timestamp === null || t < timestamp) {
+                                timestamp = t;
+                            }
+                        }
+                    }
 
-			// if no timestamp, then we've reached the end of all sequences, stop here
-			if (timestamp === null) {
-				break;
-			}
+                    // if no timestamp, then we've reached the end of all sequences, stop here
+                    if (timestamp === null) {
+                        break;
+                    }
 
-			// check whether to keep this point
-			var keepPoint = ((minTimestamp === null || timestamp >= minTimestamp - timeThresh) && (maxTimestamp === null || timestamp <= maxTimestamp + timeThresh));
+                    // check whether to keep this point
+                    var keepPoint = ((minTimestamp === null || timestamp >= minTimestamp - timeThresh) && (maxTimestamp === null || timestamp <= maxTimestamp + timeThresh));
 
-			// first timestamp will be start timestamp
-			if (keepPoint && startTimestamp === null) {
-				startTimestamp = timestamp;
-			}
+                    // first timestamp will be start timestamp
+                    if (keepPoint && startTimestamp === null) {
+                        startTimestamp = timestamp;
+                    }
 
-			// grab the data for this timestamp and move indices forward
-			var dataPoint = {};
-			for (var j = 0; j < dataPairs.length; j++) {
-				if (ind[j] >= 0) {
-					var t = xs[j][ind[j]];
-					if (Math.abs(t - timestamp) < timeThresh) {
-						if (keepPoint) {
-							dataPoint[dataPairs[j].yData.name] = ys[j][ind[j]];
-						}
-						ind[j]++;  // move to next point for this sequence; we'll assume for now that each data point within a sequence has a distinct timestamp
-						if (ind[j] >= xs[j].length) {
-							ind[j] = -1;  // at end of this sequence
-						}
-					}
-				}
-			}
+                    // grab the data for this timestamp and move indices forward
+                    var dataPoint = {};
+                    for (var j = 0; j < dataPairs.length; j++) {
+                        if (ind[j] >= 0) {
+                            var t = xs[j][ind[j]];
+                            if (Math.abs(t - timestamp) < timeThresh) {
+                                if (keepPoint) {
+                                    dataPoint[dataPairs[j].yData.name] = ys[j][ind[j]];
+                                }
+                                ind[j]++;  // move to next point for this sequence; we'll assume for now that each data point within a sequence has a distinct timestamp
+                                if (ind[j] >= xs[j].length) {
+                                    ind[j] = -1;  // at end of this sequence
+                                }
+                            }
+                        }
+                    }
 
-			// add to data set to send to CODAP
-			if (keepPoint) {
-				dataPoint['seconds'] = timestamp - startTimestamp;
-				dataPoint['timestamp'] = moment(timestamp * 1000).format('M/D/YYYY H:mm:ss');
-				data.push(dataPoint);
-			}
+                    // add to data set to send to CODAP
+                    if (keepPoint) {
+                        dataPoint['seconds'] = timestamp - startTimestamp;
+                        dataPoint['timestamp'] = moment(timestamp * 1000).format('M/D/YYYY H:mm:ss');
+                        data.push(dataPoint);
+                    }
 
-			// sanity check
-			step++;
-			if (step > 3000) {
-				break;
-			}
-		}
+                    // sanity check
+                    step++;
+                    if (step > 3000) {
+                        break;
+                    }
+                }
 
-		// send data to CODAP
-		CodapTest.sendData(data);
-        CodapTest.logTopic('Dataflow/ExportDataToCODAP');
+                //
+                // Send data to CODAP
+                //
+                CodapTest.sendData(data);
+                CodapTest.logTopic('Dataflow/ExportDataToCODAP');
+
+                debug("Attempting to open case table.");
+
+                //
+                // Open case table for the user so they don't 
+                // have to select it from the menu after clicking the
+                // export button.
+                //
+                codapInterface.sendRequest(
+                    {   
+                        action:     "create", 
+                        resource:   "component", 
+                        values:     {   type:           "caseTable", 
+                                        name:           "explore_flow_data",
+                                        title:          "Explore Data in CODAP",
+                                        dimensions:     {   width:  700,
+                                                            height: 500 },
+                                        dataContext:    "Flow_Data" 
+                                    } 
+                    },
+                    function(iResult, iRequest) {
+                        debug("Opened case table", iResult);
+                    }
+                );
+            }
+        );
 	}
 }
 
