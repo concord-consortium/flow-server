@@ -364,7 +364,6 @@ function exploreRecordedDataInCODAP() {
                                         title:          "Explore Data in CODAP",
                                         dimensions:     {   width:  700,
                                                             height: 500 },
-                                        position:       "bottom",
                                         dataContext:    "Flow_Data" 
                                     } 
                     },
