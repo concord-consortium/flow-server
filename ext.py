@@ -1,5 +1,6 @@
 # standard python imports
 import json
+import datetime
 
 
 # external imports
@@ -11,7 +12,7 @@ from sqlalchemy.orm.exc import NoResultFound
 # internal imports
 from main.app import app
 from main.users.models import User, OrganizationUser
-from main.resources.models import Resource
+from main.resources.models import Resource, ControllerStatus
 from main.extension import Extension
 
 
@@ -53,11 +54,21 @@ def flow_app():
             org_id = org_users[0].organization
             controllers = Resource.query.filter(Resource.parent_id == org_user.organization_id, Resource.deleted == False, Resource.type == Resource.CONTROLLER_FOLDER)
             for controller in controllers:
-                controller_infos.append({
-                    'id': controller.id,
-                    'name': controller.name,
-                    'path': controller.path(),
-                })
+                try:
+                    controller_status = ControllerStatus.query.filter(ControllerStatus.id == controller.id).one()
+                    if controller_status.last_watchdog_timestamp:
+                        online = controller_status.last_watchdog_timestamp > datetime.datetime.utcnow() - datetime.timedelta(seconds=120)
+                    else:
+                        online = False
+                    controller_infos.append({
+                        'id': controller.id,
+                        'name': controller.name,
+                        'path': controller.path(),
+                        'online': online,
+                        'status': json.loads(controller_status.attributes) if controller_status.attributes else {},
+                    })
+                except NoResultFound:
+                    pass
     default_dev_enabled = current_app.config.get('FLOW_DEV', False)
     return flow_extension.render_template('flow-app.html',
         controllers_json = json.dumps(controller_infos),
