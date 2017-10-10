@@ -900,11 +900,12 @@ function saveDiagram(promptForName, closeWhenDone, chainDialog) {
 					// send diagram to controller
 					var diagramSpec = diagramToSpec(g_diagram);
 					sendMessage('save_diagram', {'name': name, 'diagram': diagramSpec});  // fix(soon): should check for success
+					diagramSpec.name = name;  // fix(clean): this is a bit messy; sometime diagram spec has name, sometimes not
+					sendMessage('set_diagram', {'diagram': diagramSpec});
 					g_diagramName = name;
 					g_modified = false;
 
 					// update diagram list
-					diagramSpec.name = g_diagramName;  // fix(clean): this is a bit messy; sometime diagram spec has name, sometimes not
 					updateDiagramSpec(diagramSpec);
                     if (chainDialog) {
                         chainDialog();
@@ -920,11 +921,12 @@ function saveDiagram(promptForName, closeWhenDone, chainDialog) {
 
 			// send diagram to controller
 			var diagramSpec = diagramToSpec(g_diagram);
-			sendMessage('save_diagram', {'name': name, 'diagram': diagramSpec});  // fix(soon): should check for success
+			sendMessage('save_diagram', {'name': g_diagramName, 'diagram': diagramSpec});  // fix(soon): should check for success
+			diagramSpec.name = g_diagramName;  // fix(clean): this is a bit messy; sometime diagram spec has name, sometimes not
+			sendMessage('set_diagram', {'diagram': diagramSpec});
 			g_modified = false;
 
 			// update diagram list
-			diagramSpec.name = g_diagramName;  // fix(clean): this is a bit messy; sometime diagram spec has name, sometimes not
 			updateDiagramSpec(diagramSpec);
             if (chainDialog) {
                 chainDialog();
