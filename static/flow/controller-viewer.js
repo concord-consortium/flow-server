@@ -44,16 +44,21 @@ function diagram_list_handler(timestamp, params) {
 				}});
 		});
 
-		deleteAction.click(diagramIndex, function(e){
-			var diagramSpec = g_diagramSpecs[e.data];
-			// TODO: add validator similar to diagram save prompt
-			modalConfirm({title: 'Delete Diagram', prompt: 'Are you sure you want to delete this diagram?', yesFunc: function() {
-				sendMessage('delete_diagram', {'name': diagramSpec.name });
-				deleteDiagramSpec(diagramSpec.name);
-				btnGroup.remove();
-			}});
-		});
-		diagramMenu.appendTo(btnGroup);
+        deleteAction.click(diagramIndex, function(e){
+            var diagramSpec = g_diagramSpecs[e.data];
+            // TODO: add validator similar to diagram save prompt
+            modalConfirm({title: 'Delete Diagram', prompt: 'Are you sure you want to delete this diagram?', yesFunc: function() {
+                sendMessage('delete_diagram', {'name': diagramSpec.name });
+                deleteDiagramSpec(diagramSpec.name);
+                btnGroup.remove();
+                //
+                // Reload list after deletion.
+                //
+                sendMessage('list_diagrams');
+            }});
+        });
+        diagramMenu.appendTo(btnGroup);
+
 	};
 
     g_diagramIdMap = {};
