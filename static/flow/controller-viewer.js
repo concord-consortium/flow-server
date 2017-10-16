@@ -2,6 +2,9 @@ var g_controllerViewerInitialized = false;
 var g_diagramSpecs = [];  // a collection of all diagrams on the controller
 var g_recordingInterval = null;  // current recording interval
 
+var g_diagramIdMap = {};    // Map diagram name to an id so that we aren't
+                            // using spaces in dom ids.
+
 /**
  *
  * Handle diagram list message from controller
@@ -53,12 +56,16 @@ function diagram_list_handler(timestamp, params) {
 		diagramMenu.appendTo(btnGroup);
 	};
 
+    g_diagramIdMap = {};
 
 	for (var i = 0; i < g_diagramSpecs.length; i++) {
 		var diagram = g_diagramSpecs[i];
+
+        g_diagramIdMap[diagram.name] = i;
+
 		var diagramDiv = $('<div>', {class: 'listButton'});
 		var btnGroup = $('<div>', {class: 'btn-group'});
-		var diagramName = $('<button>', {class: 'btn btn-lg diagram-name', html: diagram.name, id: 'd_' + diagram.name}).appendTo(btnGroup);
+		var diagramName = $('<button>', {class: 'btn btn-lg diagram-name', html: diagram.name, id: 'd_' + i}).appendTo(btnGroup);
 
         diagramName.click(i, function(e) {
             setDiagramInfo( { diagramName: g_diagramSpecs[e.data].name } );
@@ -67,7 +74,7 @@ function diagram_list_handler(timestamp, params) {
             loadDiagram(g_diagramSpecs[e.data]);
         });
 
-		createMenu(btnGroup, i, 'dm_' + diagram.name);
+		createMenu(btnGroup, i, 'dm_' + i);
 		btnGroup.appendTo(diagramDiv);
 		diagramDiv.appendTo(diagramListDiv);
 	}
@@ -110,21 +117,30 @@ function setDiagramInfo(info) {
  */
 function status_handler(timestamp, params) {
 
-	console.log('status', params);
-	var statusDiv = $('#controllerStatus');
-	statusDiv.empty();
-	$('<div>', {html: 'Number of devices: ' + params.device_count}).appendTo(statusDiv);
-	var recording_interval_text = params.recording_interval ? params.recording_interval + ' second(s)' : 'none';
-	$('<div>', {html: 'Recording interval: ' + recording_interval_text }).appendTo(statusDiv);
-	g_recordingInterval = params.recording_interval;
-	if (params.current_diagram) {
-		var button = $('#d_' + params.current_diagram);
-		if (button) {
-			button.addClass('btn-success');
-			$('#dm_' + params.current_diagram).addClass('btn-success');
-			button.html(params.current_diagram + ' (running' + (g_recordingInterval ? ' and recording' : '') + ')');
-		}
-	}
+    console.log('status', params);
+    var statusDiv = $('#controllerStatus');
+    statusDiv.empty();
+    $('<div>', {html: 'Number of devices: ' + params.device_count}).appendTo(statusDiv);
+    var recording_interval_text = params.recording_interval ? params.recording_interval + ' second(s)' : 'none';
+    $('<div>', {html: 'Recording interval: ' + recording_interval_text }).appendTo(statusDiv);
+    g_recordingInterval = params.recording_interval;
+
+    if (params.current_diagram) {
+
+        var id = g_diagramIdMap[params.current_diagram];
+
+        var button = $('#d_' + id);
+
+        console.log("[DEBUG] Setting running button", button);
+
+        if (button) {
+            button.addClass('btn-success');
+            $('#dm_' + id).addClass('btn-success');
+            button.html(params.current_diagram + ' (running' + (g_recordingInterval ? ' and recording' : '') + ')');
+
+            console.log("[DEBUG] Running button set.");
+        }
+    }
 
 
     //
