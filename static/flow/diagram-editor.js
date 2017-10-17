@@ -959,6 +959,7 @@ function closeDiagramEditor() {
             // Add handler called after diagram is saved.
             //
             addMessageHandler('save_diagram_result', function(ts, result) {
+                console.log("[DEBUG] Checking save_diagram_result", result);
                 removeMessageHandler('save_diagram_result');
                 if(result.success) {
                     console.log("[DEBUG] Saved diagram. Starting saved diagram.");
@@ -969,6 +970,7 @@ function closeDiagramEditor() {
                     // present in our list as running.
                     //
                     addMessageHandler('start_diagram_result', function(ts, result) {
+                        console.log("[DEBUG] Checking start_diagram_result", result);
                         removeMessageHandler('start_diagram_result');
                         if(result.success) {
                             console.log("[DEBUG] Diagram started. Returning to controller view.");
