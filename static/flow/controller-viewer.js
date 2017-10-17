@@ -130,9 +130,15 @@ function status_handler(timestamp, params) {
     console.log('status', params);
     var statusDiv = $('#controllerStatus');
     statusDiv.empty();
+
     $('<div>', {html: 'Number of devices: ' + params.device_count}).appendTo(statusDiv);
+
     var recording_interval_text = params.recording_interval ? params.recording_interval + ' second(s)' : 'none';
-    $('<div>', {html: 'Recording interval: ' + recording_interval_text }).appendTo(statusDiv);
+
+    $('<div>', {    css: { 'paddingBottom': '5px' },
+                    html: 'Recording interval: ' + recording_interval_text 
+                }).appendTo(statusDiv);
+
     g_recordingInterval = params.recording_interval;
 
     if (params.current_diagram) {
@@ -159,7 +165,7 @@ function status_handler(timestamp, params) {
     var adminStatusDiv = $('#controllerAdminStatus');
     adminStatusDiv.empty();
 
-    var adminList   = $('<div>');
+    var adminList   = $('<div>', { css: { 'paddingBottom': '5px' } } );
     var table       = $('<table>');
 
     table.appendTo(adminList);
@@ -196,6 +202,16 @@ function status_handler(timestamp, params) {
     // software is installed.)
     //
     addAdminRow(table, "Version", params.flow_version);
+
+    //
+    // Add current_diagram to admin view. (Useful when trying to figure
+    // out why no diagrams in the list appear as running.)
+    //
+    var curDiagram = "N/A";
+    if(params.current_diagram) {
+        curDiagram = params.current_diagram;
+    }
+    addAdminRow(table, "Current Diagram", curDiagram);
 
     adminList.appendTo(adminStatusDiv);
 
