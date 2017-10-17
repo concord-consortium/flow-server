@@ -958,23 +958,25 @@ function closeDiagramEditor() {
             //
             // Add handler called after diagram is saved.
             //
-            addMessageHandler('save_diagram', function() {
-                removeMessageHandler('save_diagram');
-                console.log("[DEBUG] Saved diagram. Starting saved diagram.");
+            addMessageHandler('save_diagram_result', function(ts, result) {
+                removeMessageHandler('save_diagram_result');
+                if(result.success) {
+                    console.log("[DEBUG] Saved diagram. Starting saved diagram.");
 
-                //
-                // Now start the diagram we just saved, so that the _temp_
-                // diagram isn't running and we can instead set a diagram
-                // present in our list as running.
-                //
-                addMessageHandler('start_diagram', function() {
-                    removeMessageHandler('start_diagram');
-                    console.log("[DEBUG] Saved diagram started. Returning to controller view.");
-                    showControllerViewer();
-
-                });
-                sendMessage('start_diagram', { name: g_diagramName } );
-
+                    //
+                    // Now start the diagram we just saved, so that the _temp_
+                    // diagram isn't running and we can instead set a diagram
+                    // present in our list as running.
+                    //
+                    addMessageHandler('start_diagram_result', function(ts, result) {
+                        removeMessageHandler('start_diagram_result');
+                        if(result.success) {
+                            console.log("[DEBUG] Diagram started. Returning to controller view.");
+                            showControllerViewer();
+                        }
+                    });
+                    sendMessage('start_diagram', { name: g_diagramName } );
+                }
             });
             saveDiagram(true, false);
 
@@ -985,10 +987,13 @@ function closeDiagramEditor() {
             // running diagram so that we do not leave a modified _temp_
             // diagram running on the controller.
             //
-            addMessageHandler('start_diagram', function() {
-                removeMessageHandler('start_diagram');
-                console.log("[DEBUG] Returning to controller view.");
-                showControllerViewer();
+            addMessageHandler('start_diagram_result', function(ts, result) {
+                console.log("[DEBUG] Checking start_diagram_result", result);
+                removeMessageHandler('start_diagram_result');
+                if(result.success) {
+                    console.log("[DEBUG] Returning to controller view.");
+                    showControllerViewer();
+                }
             });
 
             console.log("[DEBUG] Restart unmodified diagram: " + g_diagramName);

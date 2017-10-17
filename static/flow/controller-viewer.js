@@ -13,7 +13,7 @@ var g_diagramIdMap = {};    // Map diagram name to an id so that we aren't
  */
 function diagram_list_handler(timestamp, params) {
 
-    console.log("INFO diagram_list_handler", timestamp, params);
+    console.log("INFO diagram_list_handler", params);
     console.log("INFO diagram_list_handler g_controller", g_controller.name);
 
 	var diagramListDiv = $('#diagramList');
@@ -219,7 +219,7 @@ function status_handler(timestamp, params) {
     if(params.current_diagram) {
         curDiagram = params.current_diagram;
     }
-    addTableRow(adminTable, "Current Diagram: ", curDiagram);
+    addTableRow(adminTable, "Current diagram: ", curDiagram);
 
     setDiagramInfo( {   controllerName: g_controller.name,
                         interval:       params.recording_interval } );
