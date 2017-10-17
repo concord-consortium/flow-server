@@ -128,18 +128,43 @@ function setDiagramInfo(info) {
 function status_handler(timestamp, params) {
 
     console.log('status', params);
+
+    //
+    // Add a row to a table
+    //
+    var addTableRow = function(_table, nameText, valueText) {
+        var row     = $('<tr>')
+        var name    = $('<td>');
+        var value   = $('<td>', { css: { 'paddingLeft': '5px' } } );
+
+        row.appendTo(_table);
+
+        name.text(nameText);
+        name.appendTo(row);
+
+        value.text(valueText);
+        value.appendTo(row);
+    }
+
+    //
+    // Add status table
+    //
     var statusDiv = $('#controllerStatus');
     statusDiv.empty();
 
-    $('<div>', {html: 'Number of devices: ' + params.device_count}).appendTo(statusDiv);
+    var statusList  = $('<div>', { css: { 'paddingBottom': '5px' } } );
+    var statusTable = $('<table>');
+
+    statusList.appendTo(statusDiv);
+    statusTable.appendTo(statusList);
 
     var recording_interval_text = params.recording_interval ? params.recording_interval + ' second(s)' : 'none';
 
-    $('<div>', {    css: { 'paddingBottom': '5px' },
-                    html: 'Recording interval: ' + recording_interval_text 
-                }).appendTo(statusDiv);
-
     g_recordingInterval = params.recording_interval;
+
+    addTableRow(statusTable, 'Number of devices: ', params.device_count);
+
+    addTableRow(statusTable, 'Recording interval: ', recording_interval_text);
 
     if (params.current_diagram) {
 
@@ -158,7 +183,6 @@ function status_handler(timestamp, params) {
         }
     }
 
-
     //
     // Add admin status
     //
@@ -166,26 +190,10 @@ function status_handler(timestamp, params) {
     adminStatusDiv.empty();
 
     var adminList   = $('<div>', { css: { 'paddingBottom': '5px' } } );
-    var table       = $('<table>');
+    var adminTable  = $('<table>');
 
-    table.appendTo(adminList);
-
-    //
-    // Add a row to the admin table
-    //
-    var addAdminRow = function(_table, nameText, valueText) {
-        var row     = $('<tr>')
-        var name    = $('<td>');
-        var value   = $('<td>', { css: { 'paddingLeft': '5px' } } );
-
-        row.appendTo(_table);
-
-        name.text(nameText);
-        name.appendTo(row);
-
-        value.text(valueText);
-        value.appendTo(row);
-    }
+    adminList.appendTo(adminStatusDiv);
+    adminTable.appendTo(adminList);
 
     //
     // Add IP addresses to admin table. (Useful when trying to connect to
@@ -193,7 +201,7 @@ function status_handler(timestamp, params) {
     //
     if( params.ip_addresses != null ) {
         for (var key in params.ip_addresses) {
-            addAdminRow(table, key, params.ip_addresses[key]);
+            addTableRow(adminTable, key+": ", params.ip_addresses[key]);
         }
     }
 
@@ -201,7 +209,7 @@ function status_handler(timestamp, params) {
     // Add version info. (Useful when trying to track what version of 
     // software is installed.)
     //
-    addAdminRow(table, "Version", params.flow_version);
+    addTableRow(adminTable, "Version: ", params.flow_version);
 
     //
     // Add current_diagram to admin view. (Useful when trying to figure
@@ -211,9 +219,7 @@ function status_handler(timestamp, params) {
     if(params.current_diagram) {
         curDiagram = params.current_diagram;
     }
-    addAdminRow(table, "Current Diagram", curDiagram);
-
-    adminList.appendTo(adminStatusDiv);
+    addTableRow(adminTable, "Current Diagram: ", curDiagram);
 
     setDiagramInfo( {   controllerName: g_controller.name,
                         interval:       params.recording_interval } );
