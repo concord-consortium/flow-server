@@ -903,6 +903,11 @@ function saveDiagram(promptForName, closeWhenDone, chainDialog) {
 					g_diagramName = name;
 					g_modified = false;
 
+                    //
+                    // Set new name in diagram view.
+                    //
+                    setDiagramInfo( { diagramName: g_diagramName } );
+
 					// update diagram list
 					diagramSpec.name = g_diagramName;  // fix(clean): this is a bit messy; sometime diagram spec has name, sometimes not
 					updateDiagramSpec(diagramSpec);
