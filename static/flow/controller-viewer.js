@@ -93,6 +93,7 @@ function setDiagramInfo(info) {
     var controllerName  = info['controllerName'];
     var diagramName     = info['diagramName'];
     var interval        = info['interval'];
+    var newDiagram      = info['newDiagram'];
 
     var recording_interval_text = interval ? interval + ' second(s)' : 'none';
 
@@ -102,6 +103,10 @@ function setDiagramInfo(info) {
 
     if (diagramName) {
         $('#diagramName').text(diagramName);
+    }
+
+    if (newDiagram) {
+        $('#diagramName').text('');
     }
 
     //
@@ -303,11 +308,14 @@ function closeControllerViewer() {
 	showControllerSelector();
 }
 
-
-// open a new flow diagram in the diagram editor
+//
+// Open a new flow diagram in the diagram editor
+//
 function newDiagram() {
-	showDiagramEditor();
-	loadDiagram({'blocks': []});  // load an empty diagram
-	sendMessage('set_diagram', {diagram: diagramToSpec(g_diagram)});  // send empty diagram to controller
+    console.log("[DEBUG] Setting new diagram with empty name.");
+    setDiagramInfo( { newDiagram: true } );
+    showDiagramEditor();
+    loadDiagram({'blocks': []});  // load an empty diagram
+    sendMessage('set_diagram', {diagram: diagramToSpec(g_diagram)});  // send empty diagram to controller
     CodapTest.logTopic('Dataflow/CreateDiagram');
 }

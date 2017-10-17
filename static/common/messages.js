@@ -56,12 +56,23 @@ function sendSubscriptions() {
 }
 
 
-// add a handler for a particular type of message;
-// when a message of this type is received the server, the function will be called;
-// the function will be passed three arguments: timestamp, message type, and message parameters (dictionary)
+//
+// Add a handler for a particular type of message;
+// when a message of this type is received the server, the function will
+// be called; the function will be passed three arguments:
+// timestamp, message type, and message parameters (dictionary)
+//
 function addMessageHandler(type, func) {
-	g_wsh.addHandler(type, func);
+    g_wsh.addHandler(type, func);
 }
+
+//
+// Remove a message handler
+//
+function removeMessageHandler(type) {
+    g_wsh.removeHandler(type);
+}
+
 
 
 // top-level function for sending messages;
@@ -245,6 +256,14 @@ function createWebSocketHolder() {
 	wsh.addHandler = function(type, func) {
 		wsh.handlers[type] = func;
 	};
+
+    //
+    // Remove a message handler
+    //
+    wsh.removeHandler = function(type) {
+        delete wsh.handlers[type];
+    };
+
 
 	// fix(clean): remove this; instead append '*' handler (make handlers for each type be a list)
 	wsh.addGenericHandler = function(func) {

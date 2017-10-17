@@ -918,9 +918,12 @@ function saveDiagram(promptForName, closeWhenDone, chainDialog) {
 		// or save using existing name
 		} else {
 
+            // console.log("[DEBUG] Save diagram name '"+ name + 
+            //            "' g_diagramName '" + g_diagramName + "'");
+
 			// send diagram to controller
 			var diagramSpec = diagramToSpec(g_diagram);
-			sendMessage('save_diagram', {'name': name, 'diagram': diagramSpec});  // fix(soon): should check for success
+			sendMessage('save_diagram', {'name': g_diagramName, 'diagram': diagramSpec});  // fix(soon): should check for success
 			g_modified = false;
 
 			// update diagram list
@@ -944,18 +947,57 @@ function saveDiagram(promptForName, closeWhenDone, chainDialog) {
 	}
 }
 
-
-// close the diagram editor (optionally saving diagram changes) and go back to the controller viewer
+//
+// Close the diagram editor (optionally saving diagram changes)
+// and go back to the controller viewer
+//
 function closeDiagramEditor() {
-	if (g_modified) {
-		modalConfirm({title: 'Save Diagram?', prompt: 'Do you want to save this diagram?', yesFunc: function() {
-			saveDiagram(true, true);
-		}, noFunc: function() {
-			showControllerViewer();
-		}});
-	} else {
-		showControllerViewer();
-	}
+    if (g_modified) {
+        modalConfirm({title: 'Save Diagram?', prompt: 'Do you want to save this diagram?', yesFunc: function() {
+
+            //
+            // Add handler called after diagram is saved.
+            //
+            addMessageHandler('save_diagram', function() {
+                removeMessageHandler('save_diagram');
+                console.log("[DEBUG] Saved diagram. Starting saved diagram.");
+
+                //
+                // Now start the diagram we just saved, so that the _temp_
+                // diagram isn't running and we can instead set a diagram
+                // present in our list as running.
+                //
+                addMessageHandler('start_diagram', function() {
+                    removeMessageHandler('start_diagram');
+                    console.log("[DEBUG] Saved diagram started. Returning to controller view.");
+                    showControllerViewer();
+
+                });
+                sendMessage('start_diagram', { name: g_diagramName } );
+
+            });
+            saveDiagram(true, false);
+
+        }, noFunc: function() {
+
+            //
+            // If they do not save changes, then reload the previously
+            // running diagram so that we do not leave a modified _temp_
+            // diagram running on the controller.
+            //
+            addMessageHandler('start_diagram', function() {
+                removeMessageHandler('start_diagram');
+                console.log("[DEBUG] Returning to controller view.");
+                showControllerViewer();
+            });
+
+            console.log("[DEBUG] Restart unmodified diagram: " + g_diagramName);
+            sendMessage('start_diagram', { name: g_diagramName } );
+
+        }});
+    } else {
+        showControllerViewer();
+    }
 }
 
 
