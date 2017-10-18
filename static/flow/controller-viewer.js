@@ -20,6 +20,11 @@ function diagram_list_handler(timestamp, params) {
 	diagramListDiv.empty();
 	g_diagramSpecs = params.diagrams;
 
+    //
+    // Sort diagrams by name alphabetically
+    //
+    g_diagramSpecs.sort(Util.sortByName);
+
 	var createMenu = function(btnGroup, diagramIndex, id){
 		var diagramActions = $('<button>', {class: 'btn btn-lg dropdown-toggle', html: '<span class="caret"></span>', id: id});
 		diagramActions
@@ -61,6 +66,9 @@ function diagram_list_handler(timestamp, params) {
 
 	};
 
+    //
+    // Create new mapping of name to id.
+    //
     g_diagramIdMap = {};
 
 	for (var i = 0; i < g_diagramSpecs.length; i++) {
@@ -209,7 +217,8 @@ function status_handler(timestamp, params) {
     // Add version info. (Useful when trying to track what version of 
     // software is installed.)
     //
-    addTableRow(adminTable, "Version: ", params.flow_version);
+    addTableRow(adminTable, "Flow Client Version: ", params.flow_version);
+    addTableRow(adminTable, "Rhizo Client Version: ", params.lib_version);
 
     //
     // Add current_diagram to admin view. (Useful when trying to figure

@@ -985,7 +985,7 @@ function saveDiagramAndStart(promptForName, closeWhenDone, chainDialog) {
             sendMessage('start_diagram', { name: g_diagramName } );
         }
     });
-    saveDiagram(true, false);
+    saveDiagram(promptForName, false);
 }
 
 //

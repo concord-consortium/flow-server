@@ -13,3 +13,15 @@ Util.diagramValidator = function(diagramName){
   });
   return !hasForbidden;
 };
+
+
+//
+// Sort objects that have a "name" property.
+//
+Util.sortByName = function(a, b) {
+    var aName = a.name.toUpperCase();
+    var bName = b.name.toUpperCase();
+    return ((aName > bName) - (bName > aName));
+};
+ 
+
