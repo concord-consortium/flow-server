@@ -953,6 +953,42 @@ function saveDiagram(promptForName, closeWhenDone, chainDialog) {
 }
 
 //
+// Call saveDiagram and ensure that the saved diagram is
+// started so that we do not leave a _temp_ diagram in the running state.
+//
+function saveDiagramAndStart(promptForName, closeWhenDone, chainDialog) {
+
+    //
+    // Add handler called after diagram is saved.
+    //
+    addMessageHandler('save_diagram_result', function(ts, result) {
+        console.log("[DEBUG] Checking save_diagram_result", result);
+        removeMessageHandler('save_diagram_result');
+        if(result.success) {
+            console.log("[DEBUG] Saved diagram. Starting saved diagram.");
+
+            //
+            // Now start the diagram we just saved, so that the _temp_
+            // diagram isn't running and we can instead set a diagram
+            // present in our list as running.
+            //
+            addMessageHandler('start_diagram_result', function(ts, result) {
+                console.log("[DEBUG] Checking start_diagram_result", result);
+                removeMessageHandler('start_diagram_result');
+                if(result.success) {
+                    console.log("[DEBUG] Diagram started. Returning to controller view.");
+                    if(closeWhenDone) {
+                        showControllerViewer();
+                    }
+                }
+            });
+            sendMessage('start_diagram', { name: g_diagramName } );
+        }
+    });
+    saveDiagram(true, false);
+}
+
+//
 // Close the diagram editor (optionally saving diagram changes)
 // and go back to the controller viewer
 //
@@ -960,32 +996,7 @@ function closeDiagramEditor() {
     if (g_modified) {
         modalConfirm({title: 'Save Diagram?', prompt: 'Do you want to save this diagram?', yesFunc: function() {
 
-            //
-            // Add handler called after diagram is saved.
-            //
-            addMessageHandler('save_diagram_result', function(ts, result) {
-                console.log("[DEBUG] Checking save_diagram_result", result);
-                removeMessageHandler('save_diagram_result');
-                if(result.success) {
-                    console.log("[DEBUG] Saved diagram. Starting saved diagram.");
-
-                    //
-                    // Now start the diagram we just saved, so that the _temp_
-                    // diagram isn't running and we can instead set a diagram
-                    // present in our list as running.
-                    //
-                    addMessageHandler('start_diagram_result', function(ts, result) {
-                        console.log("[DEBUG] Checking start_diagram_result", result);
-                        removeMessageHandler('start_diagram_result');
-                        if(result.success) {
-                            console.log("[DEBUG] Diagram started. Returning to controller view.");
-                            showControllerViewer();
-                        }
-                    });
-                    sendMessage('start_diagram', { name: g_diagramName } );
-                }
-            });
-            saveDiagram(true, false);
+            saveDiagramAndStart(true, true);
 
         }, noFunc: function() {
 
