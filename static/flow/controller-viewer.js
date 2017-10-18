@@ -5,6 +5,9 @@ var g_recordingInterval = null;  // current recording interval
 var g_diagramIdMap = {};    // Map diagram name to an id so that we aren't
                             // using spaces in dom ids.
 
+var g_status = {};          // Keep this to check for things like 
+                            // currently running diagram.
+
 /**
  *
  * Handle diagram list message from controller
@@ -43,9 +46,30 @@ function diagram_list_handler(timestamp, params) {
 				validator: Util.diagramValidator,
 				resultFunc: function(newName) {
 					sendMessage('rename_diagram', {'old_name': diagramSpec.name, 'new_name': newName});
-					diagramSpec.name = newName;
-					updateDiagramSpec(diagramSpec);
-					btnGroup.find('.diagram-name').html(newName);
+
+                    //
+                    // If we renamed the currently running diagram, we need
+                    // to not leave the old diagram name running on the
+                    // controller. Start the renamed diagram and request
+                    // status to ensure that current_diagram reflects
+                    // the newly renamed diagram as running.
+                    //
+                    if( g_status.current_diagram &&
+                        g_status.current_diagram == diagramSpec.name ) {
+
+                        console.log("[DEBUG] Starting newly named diagram.");
+                        sendMessage('start_diagram', { name: newName });
+
+                    } else {
+                        console.log("[DEBUG] Renamed non-running diagram.", g_status);
+                    }
+
+                    //
+                    // Reload list after rename.
+                    //
+                    sendMessage('list_diagrams');
+                    sendMessage('request_status');
+
 				}});
 		});
 
@@ -57,9 +81,10 @@ function diagram_list_handler(timestamp, params) {
                 deleteDiagramSpec(diagramSpec.name);
                 btnGroup.remove();
                 //
-                // Reload list after deletion.
+                // Reload list after deletion and set running diagram.
                 //
                 sendMessage('list_diagrams');
+                sendMessage('request_status');
             }});
         });
         diagramMenu.appendTo(btnGroup);
@@ -136,6 +161,8 @@ function setDiagramInfo(info) {
 function status_handler(timestamp, params) {
 
     console.log('status', params);
+
+    g_status = params;
 
     //
     // Add a row to a table
