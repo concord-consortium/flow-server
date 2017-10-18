@@ -245,7 +245,9 @@ function status_handler(timestamp, params) {
     // software is installed.)
     //
     addTableRow(adminTable, "Flow Client Version: ", params.flow_version);
+    addTableRow(adminTable, "Flow Server Version: ", g_flow_server_version);
     addTableRow(adminTable, "Rhizo Client Version: ", params.lib_version);
+    addTableRow(adminTable, "Rhizo Server Version: ", g_rhizo_server_version);
 
     //
     // Add current_diagram to admin view. (Useful when trying to figure

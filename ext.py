@@ -1,6 +1,7 @@
 # standard python imports
 import json
-
+import os
+import subprocess
 
 # external imports
 from flask import request, abort, current_app
@@ -58,11 +59,34 @@ def flow_app():
                     'name': controller.name,
                     'path': controller.path(),
                 })
+
     default_dev_enabled = current_app.config.get('FLOW_DEV', False)
+
+
+    #
+    # cwd = os.getcwd()
+    # Default working dir is root of "rhizo-server"
+    # E.g. /home/ubuntu/rhizo-server
+    #
+    rhizo_server_version = subprocess.check_output(['git',
+                                                    'describe',
+                                                    '--always'  ]).rstrip()
+
+    flow_dir = os.path.dirname(os.path.realpath(__file__))
+
+    flow_server_version = subprocess.check_output([ 'git',
+                                                    '-C',
+                                                    '%s' % (flow_dir),
+                                                    'describe',
+                                                    '--always'  ]).rstrip()
+
+
     return flow_extension.render_template('flow-app.html',
         controllers_json = json.dumps(controller_infos),
         use_codap = (request.args.get('use_codap', 0) or request.args.get('codap', 0)),
-        dev_enabled = int(request.args.get('dev', default_dev_enabled))
+        dev_enabled = int(request.args.get('dev', default_dev_enabled)),
+        rhizo_server_version = rhizo_server_version,
+        flow_server_version = flow_server_version
     )
 
 
