@@ -64,9 +64,8 @@ def flow_app():
 
 
     #
-    # cwd = os.getcwd()
     # Default working dir is root of "rhizo-server"
-    # E.g. /home/ubuntu/rhizo-server
+    # E.g. /home/user/rhizo-server
     #
     rhizo_server_version = subprocess.check_output(['git',
                                                     'describe',
