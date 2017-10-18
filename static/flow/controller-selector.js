@@ -3,6 +3,8 @@ function initControllerSelector() {
 	var controllerListDiv = $('#controllerList');
 	controllerListDiv.empty();
 
+    g_controllers.sort(Util.sortByName);
+
 	// if we have a list of controllers, the user is logged in and can pick one of them
 	if (g_controllers.length) {
 		$('#controllerSelectorLabel').html('Select your controller:');

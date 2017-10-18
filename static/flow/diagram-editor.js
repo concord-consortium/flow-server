@@ -905,6 +905,11 @@ function saveDiagram(promptForName, closeWhenDone, chainDialog) {
 					g_diagramName = name;
 					g_modified = false;
 
+                    //
+                    // Set new name in diagram view.
+                    //
+                    setDiagramInfo( { diagramName: g_diagramName } );
+
 					// update diagram list
 					updateDiagramSpec(diagramSpec);
                     if (chainDialog) {
@@ -919,11 +924,16 @@ function saveDiagram(promptForName, closeWhenDone, chainDialog) {
 		// or save using existing name
 		} else {
 
+            // console.log("[DEBUG] Save diagram name '"+ name + 
+            //            "' g_diagramName '" + g_diagramName + "'");
+
 			// send diagram to controller
 			var diagramSpec = diagramToSpec(g_diagram);
 			sendMessage('save_diagram', {'name': g_diagramName, 'diagram': diagramSpec});  // fix(soon): should check for success
+
 			diagramSpec.name = g_diagramName;  // fix(clean): this is a bit messy; sometime diagram spec has name, sometimes not
 			sendMessage('set_diagram', {'diagram': diagramSpec});
+
 			g_modified = false;
 
 			// update diagram list
@@ -946,18 +956,75 @@ function saveDiagram(promptForName, closeWhenDone, chainDialog) {
 	}
 }
 
+//
+// Call saveDiagram and ensure that the saved diagram is
+// started so that we do not leave a _temp_ diagram in the running state.
+//
+function saveDiagramAndStart(promptForName, closeWhenDone, chainDialog) {
 
-// close the diagram editor (optionally saving diagram changes) and go back to the controller viewer
+    //
+    // Add handler called after diagram is saved.
+    //
+    addMessageHandler('save_diagram_result', function(ts, result) {
+        console.log("[DEBUG] Checking save_diagram_result", result);
+        removeMessageHandler('save_diagram_result');
+        if(result.success) {
+            console.log("[DEBUG] Saved diagram. Starting saved diagram.");
+
+            //
+            // Now start the diagram we just saved, so that the _temp_
+            // diagram isn't running and we can instead set a diagram
+            // present in our list as running.
+            //
+            addMessageHandler('start_diagram_result', function(ts, result) {
+                console.log("[DEBUG] Checking start_diagram_result", result);
+                removeMessageHandler('start_diagram_result');
+                if(result.success) {
+                    console.log("[DEBUG] Diagram started. Returning to controller view.");
+                    if(closeWhenDone) {
+                        showControllerViewer();
+                    }
+                }
+            });
+            sendMessage('start_diagram', { name: g_diagramName } );
+        }
+    });
+    saveDiagram(promptForName, false);
+}
+
+//
+// Close the diagram editor (optionally saving diagram changes)
+// and go back to the controller viewer
+//
 function closeDiagramEditor() {
-	if (g_modified) {
-		modalConfirm({title: 'Save Diagram?', prompt: 'Do you want to save this diagram?', yesFunc: function() {
-			saveDiagram(true, true);
-		}, noFunc: function() {
-			showControllerViewer();
-		}});
-	} else {
-		showControllerViewer();
-	}
+    if (g_modified) {
+        modalConfirm({title: 'Save Diagram?', prompt: 'Do you want to save this diagram?', yesFunc: function() {
+
+            saveDiagramAndStart(true, true);
+
+        }, noFunc: function() {
+
+            //
+            // If they do not save changes, then reload the previously
+            // running diagram so that we do not leave a modified _temp_
+            // diagram running on the controller.
+            //
+            addMessageHandler('start_diagram_result', function(ts, result) {
+                console.log("[DEBUG] Checking start_diagram_result", result);
+                removeMessageHandler('start_diagram_result');
+                if(result.success) {
+                    console.log("[DEBUG] Returning to controller view.");
+                    showControllerViewer();
+                }
+            });
+
+            console.log("[DEBUG] Restart unmodified diagram: " + g_diagramName);
+            sendMessage('start_diagram', { name: g_diagramName } );
+
+        }});
+    } else {
+        showControllerViewer();
+    }
 }
 
 

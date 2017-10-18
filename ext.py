@@ -1,5 +1,7 @@
 # standard python imports
 import json
+import os
+import subprocess
 import datetime
 
 
@@ -53,7 +55,9 @@ def flow_app():
         for org_user in org_users:
             org_id = org_users[0].organization
             controllers = Resource.query.filter(Resource.parent_id == org_user.organization_id, Resource.deleted == False, Resource.type == Resource.CONTROLLER_FOLDER)
+
             for controller in controllers:
+
                 try:
                     controller_status = ControllerStatus.query.filter(ControllerStatus.id == controller.id).one()
                     if controller_status.last_watchdog_timestamp:
@@ -69,11 +73,33 @@ def flow_app():
                     })
                 except NoResultFound:
                     pass
+
     default_dev_enabled = current_app.config.get('FLOW_DEV', False)
+
+
+    #
+    # Default working dir is root of "rhizo-server"
+    # E.g. /home/user/rhizo-server
+    #
+    rhizo_server_version = subprocess.check_output(['git',
+                                                    'describe',
+                                                    '--always'  ]).rstrip()
+
+    flow_dir = os.path.dirname(os.path.realpath(__file__))
+
+    flow_server_version = subprocess.check_output([ 'git',
+                                                    '-C',
+                                                    '%s' % (flow_dir),
+                                                    'describe',
+                                                    '--always'  ]).rstrip()
+
+
     return flow_extension.render_template('flow-app.html',
         controllers_json = json.dumps(controller_infos),
         use_codap = (request.args.get('use_codap', 0) or request.args.get('codap', 0)),
-        dev_enabled = int(request.args.get('dev', default_dev_enabled))
+        dev_enabled = int(request.args.get('dev', default_dev_enabled)),
+        rhizo_server_version = rhizo_server_version,
+        flow_server_version = flow_server_version
     )
 
 

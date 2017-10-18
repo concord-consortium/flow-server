@@ -2,6 +2,12 @@ var g_controllerViewerInitialized = false;
 var g_diagramSpecs = [];  // a collection of all diagrams on the controller
 var g_recordingInterval = null;  // current recording interval
 
+var g_diagramIdMap = {};    // Map diagram name to an id so that we aren't
+                            // using spaces in dom ids.
+
+var g_status = {};          // Keep this to check for things like 
+                            // currently running diagram.
+
 /**
  *
  * Handle diagram list message from controller
@@ -10,12 +16,17 @@ var g_recordingInterval = null;  // current recording interval
  */
 function diagram_list_handler(timestamp, params) {
 
-    console.log("INFO diagram_list_handler", timestamp, params);
+    console.log("INFO diagram_list_handler", params);
     console.log("INFO diagram_list_handler g_controller", g_controller.name);
 
 	var diagramListDiv = $('#diagramList');
 	diagramListDiv.empty();
 	g_diagramSpecs = params.diagrams;
+
+    //
+    // Sort diagrams by name alphabetically
+    //
+    g_diagramSpecs.sort(Util.sortByName);
 
 	var createMenu = function(btnGroup, diagramIndex, id){
 		var diagramActions = $('<button>', {class: 'btn btn-lg dropdown-toggle', html: '<span class="caret"></span>', id: id});
@@ -35,30 +46,64 @@ function diagram_list_handler(timestamp, params) {
 				validator: Util.diagramValidator,
 				resultFunc: function(newName) {
 					sendMessage('rename_diagram', {'old_name': diagramSpec.name, 'new_name': newName});
-					diagramSpec.name = newName;
-					updateDiagramSpec(diagramSpec);
-					btnGroup.find('.diagram-name').html(newName);
+
+                    //
+                    // If we renamed the currently running diagram, we need
+                    // to not leave the old diagram name running on the
+                    // controller. Start the renamed diagram and request
+                    // status to ensure that current_diagram reflects
+                    // the newly renamed diagram as running.
+                    //
+                    if( g_status.current_diagram &&
+                        g_status.current_diagram == diagramSpec.name ) {
+
+                        console.log("[DEBUG] Starting newly named diagram.");
+                        sendMessage('start_diagram', { name: newName });
+
+                    } else {
+                        console.log("[DEBUG] Renamed non-running diagram.", g_status);
+                    }
+
+                    //
+                    // Reload list after rename.
+                    //
+                    sendMessage('list_diagrams');
+                    sendMessage('request_status');
+
 				}});
 		});
 
-		deleteAction.click(diagramIndex, function(e){
-			var diagramSpec = g_diagramSpecs[e.data];
-			// TODO: add validator similar to diagram save prompt
-			modalConfirm({title: 'Delete Diagram', prompt: 'Are you sure you want to delete this diagram?', yesFunc: function() {
-				sendMessage('delete_diagram', {'name': diagramSpec.name });
-				deleteDiagramSpec(diagramSpec.name);
-				btnGroup.remove();
-			}});
-		});
-		diagramMenu.appendTo(btnGroup);
+        deleteAction.click(diagramIndex, function(e){
+            var diagramSpec = g_diagramSpecs[e.data];
+            // TODO: add validator similar to diagram save prompt
+            modalConfirm({title: 'Delete Diagram', prompt: 'Are you sure you want to delete this diagram?', yesFunc: function() {
+                sendMessage('delete_diagram', {'name': diagramSpec.name });
+                deleteDiagramSpec(diagramSpec.name);
+                btnGroup.remove();
+                //
+                // Reload list after deletion and set running diagram.
+                //
+                sendMessage('list_diagrams');
+                sendMessage('request_status');
+            }});
+        });
+        diagramMenu.appendTo(btnGroup);
+
 	};
 
+    //
+    // Create new mapping of name to id.
+    //
+    g_diagramIdMap = {};
 
 	for (var i = 0; i < g_diagramSpecs.length; i++) {
 		var diagram = g_diagramSpecs[i];
+
+        g_diagramIdMap[diagram.name] = i;
+
 		var diagramDiv = $('<div>', {class: 'listButton'});
 		var btnGroup = $('<div>', {class: 'btn-group'});
-		var diagramName = $('<button>', {class: 'btn btn-lg diagram-name', html: diagram.name, id: 'd_' + diagram.name}).appendTo(btnGroup);
+		var diagramName = $('<button>', {class: 'btn btn-lg diagram-name', html: diagram.name, id: 'd_' + i}).appendTo(btnGroup);
 
         diagramName.click(i, function(e) {
             setDiagramInfo( { diagramName: g_diagramSpecs[e.data].name } );
@@ -67,7 +112,7 @@ function diagram_list_handler(timestamp, params) {
             loadDiagram(g_diagramSpecs[e.data]);
         });
 
-		createMenu(btnGroup, i, 'dm_' + diagram.name);
+		createMenu(btnGroup, i, 'dm_' + i);
 		btnGroup.appendTo(diagramDiv);
 		diagramDiv.appendTo(diagramListDiv);
 	}
@@ -81,6 +126,7 @@ function setDiagramInfo(info) {
     var controllerName  = info['controllerName'];
     var diagramName     = info['diagramName'];
     var interval        = info['interval'];
+    var newDiagram      = info['newDiagram'];
 
     var recording_interval_text = interval ? interval + ' second(s)' : 'none';
 
@@ -90,6 +136,10 @@ function setDiagramInfo(info) {
 
     if (diagramName) {
         $('#diagramName').text(diagramName);
+    }
+
+    if (newDiagram) {
+        $('#diagramName').text('');
     }
 
     //
@@ -110,38 +160,14 @@ function setDiagramInfo(info) {
  */
 function status_handler(timestamp, params) {
 
-	console.log('status', params);
-	var statusDiv = $('#controllerStatus');
-	statusDiv.empty();
-	$('<div>', {html: 'Number of devices: ' + params.device_count}).appendTo(statusDiv);
-	var recording_interval_text = params.recording_interval ? params.recording_interval + ' second(s)' : 'none';
-	$('<div>', {html: 'Recording interval: ' + recording_interval_text }).appendTo(statusDiv);
-	g_recordingInterval = params.recording_interval;
-	if (params.current_diagram) {
-		var button = $('#d_' + params.current_diagram);
-		if (button) {
-			button.addClass('btn-success');
-			$('#dm_' + params.current_diagram).addClass('btn-success');
-			button.html(params.current_diagram + ' (running' + (g_recordingInterval ? ' and recording' : '') + ')');
-		}
-	}
+    console.log('status', params);
 
+    g_status = params;
 
     //
-    // Add admin status
+    // Add a row to a table
     //
-    var adminStatusDiv = $('#controllerAdminStatus');
-    adminStatusDiv.empty();
-
-    var adminList   = $('<div>');
-    var table       = $('<table>');
-
-    table.appendTo(adminList);
-
-    //
-    // Add a row to the admin table
-    //
-    var addAdminRow = function(_table, nameText, valueText) {
+    var addTableRow = function(_table, nameText, valueText) {
         var row     = $('<tr>')
         var name    = $('<td>');
         var value   = $('<td>', { css: { 'paddingLeft': '5px' } } );
@@ -156,12 +182,61 @@ function status_handler(timestamp, params) {
     }
 
     //
+    // Add status table
+    //
+    var statusDiv = $('#controllerStatus');
+    statusDiv.empty();
+
+    var statusList  = $('<div>', { css: { 'paddingBottom': '5px' } } );
+    var statusTable = $('<table>');
+
+    statusList.appendTo(statusDiv);
+    statusTable.appendTo(statusList);
+
+    var recording_interval_text = params.recording_interval ? params.recording_interval + ' second(s)' : 'none';
+
+    g_recordingInterval = params.recording_interval;
+
+    addTableRow(statusTable, 'Number of devices: ', params.device_count);
+
+    addTableRow(statusTable, 'Recording interval: ', recording_interval_text);
+
+    if (params.current_diagram) {
+
+        var id = g_diagramIdMap[params.current_diagram];
+
+        var button = $('#d_' + id);
+
+        console.log("[DEBUG] Setting running button", button);
+
+        if (button) {
+            button.addClass('btn-success');
+            $('#dm_' + id).addClass('btn-success');
+            button.html(params.current_diagram + ' (running' + (g_recordingInterval ? ' and recording' : '') + ')');
+
+            console.log("[DEBUG] Running button set.");
+        }
+    }
+
+    //
+    // Add admin status
+    //
+    var adminStatusDiv = $('#controllerAdminStatus');
+    adminStatusDiv.empty();
+
+    var adminList   = $('<div>', { css: { 'paddingBottom': '5px' } } );
+    var adminTable  = $('<table>');
+
+    adminList.appendTo(adminStatusDiv);
+    adminTable.appendTo(adminList);
+
+    //
     // Add IP addresses to admin table. (Useful when trying to connect to
     // a device via ssh.)
     //
     if( params.ip_addresses != null ) {
         for (var key in params.ip_addresses) {
-            addAdminRow(table, key, params.ip_addresses[key]);
+            addTableRow(adminTable, key+": ", params.ip_addresses[key]);
         }
     }
 
@@ -169,9 +244,20 @@ function status_handler(timestamp, params) {
     // Add version info. (Useful when trying to track what version of 
     // software is installed.)
     //
-    addAdminRow(table, "Version", params.flow_version);
+    addTableRow(adminTable, "Flow Client Version: ", params.flow_version);
+    addTableRow(adminTable, "Flow Server Version: ", g_flow_server_version);
+    addTableRow(adminTable, "Rhizo Client Version: ", params.lib_version);
+    addTableRow(adminTable, "Rhizo Server Version: ", g_rhizo_server_version);
 
-    adminList.appendTo(adminStatusDiv);
+    //
+    // Add current_diagram to admin view. (Useful when trying to figure
+    // out why no diagrams in the list appear as running.)
+    //
+    var curDiagram = "N/A";
+    if(params.current_diagram) {
+        curDiagram = params.current_diagram;
+    }
+    addTableRow(adminTable, "Current diagram: ", curDiagram);
 
     setDiagramInfo( {   controllerName: g_controller.name,
                         interval:       params.recording_interval } );
@@ -282,11 +368,14 @@ function closeControllerViewer() {
 	showControllerSelector();
 }
 
-
-// open a new flow diagram in the diagram editor
+//
+// Open a new flow diagram in the diagram editor
+//
 function newDiagram() {
-	showDiagramEditor();
-	loadDiagram({'blocks': []});  // load an empty diagram
-	sendMessage('set_diagram', {diagram: diagramToSpec(g_diagram)});  // send empty diagram to controller
+    console.log("[DEBUG] Setting new diagram with empty name.");
+    setDiagramInfo( { newDiagram: true } );
+    showDiagramEditor();
+    loadDiagram({'blocks': []});  // load an empty diagram
+    sendMessage('set_diagram', {diagram: diagramToSpec(g_diagram)});  // send empty diagram to controller
     CodapTest.logTopic('Dataflow/CreateDiagram');
 }
