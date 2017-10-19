@@ -49,30 +49,7 @@ def create():
 # display the data flow app (a single page app)
 @app.route('/ext/flow')
 def flow_app():
-    controller_infos = []
-    if current_user.is_authenticated:
-        org_users = OrganizationUser.query.filter(OrganizationUser.user_id == current_user.id)
-        for org_user in org_users:
-            org_id = org_users[0].organization
-            controllers = Resource.query.filter(Resource.parent_id == org_user.organization_id, Resource.deleted == False, Resource.type == Resource.CONTROLLER_FOLDER)
-
-            for controller in controllers:
-
-                try:
-                    controller_status = ControllerStatus.query.filter(ControllerStatus.id == controller.id).one()
-                    if controller_status.last_watchdog_timestamp:
-                        online = controller_status.last_watchdog_timestamp > datetime.datetime.utcnow() - datetime.timedelta(seconds=120)
-                    else:
-                        online = False
-                    controller_infos.append({
-                        'id': controller.id,
-                        'name': controller.name,
-                        'path': controller.path(),
-                        'online': online,
-                        'status': json.loads(controller_status.attributes) if controller_status.attributes else {},
-                    })
-                except NoResultFound:
-                    pass
+    controller_infos = get_controller_info()
 
     default_dev_enabled = current_app.config.get('FLOW_DEV', False)
 
@@ -97,9 +74,10 @@ def flow_app():
     return flow_extension.render_template('flow-app.html',
         controllers_json = json.dumps(controller_infos),
         use_codap = (request.args.get('use_codap', 0) or request.args.get('codap', 0)),
-        dev_enabled = int(request.args.get('dev', default_dev_enabled)),
-        rhizo_server_version = rhizo_server_version,
-        flow_server_version = flow_server_version
+        dev_enabled     = int(request.args.get('dev', default_dev_enabled)),
+        admin_enabled   = int(request.args.get('admin', 0)),
+        rhizo_server_version    = rhizo_server_version,
+        flow_server_version     = flow_server_version
     )
 
 
@@ -123,3 +101,48 @@ def select_controller():
         })
     except NoResultFound:
         abort(403)
+
+
+#
+# API for obtaining controller info
+#
+@app.route('/ext/flow/controllers', methods=['POST', 'GET'])
+def controller_info():
+    info = get_controller_info()
+    return json.dumps(info)
+
+
+#
+# Obtain an array of controllers
+#
+def get_controller_info():
+    controller_infos = []
+    if current_user.is_authenticated:
+        org_users = OrganizationUser.query.filter(OrganizationUser.user_id == current_user.id)
+        for org_user in org_users:
+            org_id = org_users[0].organization
+            controllers = Resource.query.filter(Resource.parent_id == org_user.organization_id, Resource.deleted == False, Resource.type == Resource.CONTROLLER_FOLDER)
+
+            for controller in controllers:
+
+                try:
+                    controller_status = ControllerStatus.query.filter(ControllerStatus.id == controller.id).one()
+                    if controller_status.last_watchdog_timestamp:
+                        online = controller_status.last_watchdog_timestamp > datetime.datetime.utcnow() - datetime.timedelta(seconds=120)
+                    else:
+                        online = False
+
+                    controller_infos.append({
+                        'id': controller.id,
+                        'name': controller.name,
+                        'path': controller.path(),
+                        'online': online,
+                        'last_online': '%s' % (controller_status.last_watchdog_timestamp),
+                        'status': json.loads(controller_status.attributes) if controller_status.attributes else {},
+                    })
+                except NoResultFound:
+                    pass
+
+    return controller_infos
+
+

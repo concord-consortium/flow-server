@@ -116,3 +116,20 @@ button.filter {
 	margin-left: 20px;
 	margin-top: 20px;
 }
+
+.circle { 
+	width:				1%;
+    padding:			10px 11px;
+    margin:				0 auto;
+    border-radius:		25px;
+}
+
+.green { 
+    background-color:	lightgreen;
+}
+
+.red { 
+    background-color:	red;
+}
+
+

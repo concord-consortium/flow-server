@@ -17,6 +17,7 @@
 	<script src="/ext/flow-server/static/flow/diagram.js"></script>
 	<script src="/ext/flow-server/static/flow/controller-selector.js"></script>
 	<script src="/ext/flow-server/static/flow/controller-viewer.js"></script>
+	<script src="/ext/flow-server/static/flow/admin-view.js"></script>
 	<script src="/ext/flow-server/static/flow/diagram-editor.js"></script>
 	<script src="/ext/flow-server/static/flow/plotter.js"></script>
     <script src="/ext/flow-server/static/external/jquery.hotkeys.js"></script>
@@ -41,14 +42,34 @@
 	<div class="row">
 		<div class="col-md-3"></div>
 		<div class="col-md-6">
+             
+
 			<h2 id="controllerSelectorLabel"></h2>
+
 			<div id="controllerList"></div>
+
 {% if dev_enabled %}
 			<button id="bleButton" class="btn btn-primary" onclick="bleStartConnect()">Select Bluetooth Device</button>
 {% endif %}
+
 		</div>
 		<div class="col-md-3"></div>
 	</div>
+</div>
+
+<!--
+   -
+   - Controller admin panel
+   -
+   -->
+<div id="controllerAdminPanel" class="flowPanel">
+
+    <div class="col-md-3"></div>
+
+    <h2 id="controllerAdminLabel">Controller Administration</h2>
+
+    <div id="controllerAdminList">
+    </div>
 </div>
 
 <!--
@@ -169,6 +190,7 @@ var g_csrfToken = '{{ csrf_token() }}';
 var g_jsSim = false;
 var g_useCodap = {{ use_codap }};
 var g_devEnabled = {{ dev_enabled }};
+var g_adminEnabled = {{ admin_enabled }};
 
 var g_rhizo_server_version  = '{{ rhizo_server_version }}';
 var g_flow_server_version   = '{{ flow_server_version }}';

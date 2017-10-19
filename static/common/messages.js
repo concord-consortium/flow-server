@@ -2,6 +2,10 @@
 // It maintains a list of message subscriptions and a set of message handlers.
 // It manages pinging the server and reconnecting when disconnected.
 
+//
+// True if WebSocket has been connected.
+//
+g_webSocketInited = false;
 
 // global instance of WebSocketHolder; creating the holder does not connect; use connectWebSocket when ready to connect
 var g_wsh = createWebSocketHolder();
@@ -19,6 +23,7 @@ function connectWebSocket(afterOpen) {
 	if (g_wsh.connectStarted) // fix(later): move inside connect? need to be sure that reconnects still work
 		return;
 	g_wsh.connect();
+    g_webSocketInited = true;
 }
 
 
