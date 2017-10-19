@@ -70,12 +70,21 @@ def flow_app():
                                                     'describe',
                                                     '--always'  ]).rstrip()
 
+    user = None
+    if current_user.is_authenticated:
+        user = json.dumps({ 
+                'user_name':        current_user.user_name,
+                'full_name':        current_user.full_name,
+                'email_address':    current_user.email_address,
+                'role':             current_user.role,
+                'isAdmin':          (current_user.role == User.SYSTEM_ADMIN) })
 
     return flow_extension.render_template('flow-app.html',
         controllers_json = json.dumps(controller_infos),
         use_codap = (request.args.get('use_codap', 0) or request.args.get('codap', 0)),
         dev_enabled     = int(request.args.get('dev', default_dev_enabled)),
         admin_enabled   = int(request.args.get('admin', 0)),
+        current_user            = user,
         rhizo_server_version    = rhizo_server_version,
         flow_server_version     = flow_server_version
     )

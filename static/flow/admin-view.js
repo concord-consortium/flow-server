@@ -6,9 +6,16 @@ function initAdminView() {
     var panel = $('#controllerAdminLabel');
     panel.html('Controller Administration  ');
 
-    var button = $('<button>', { html: 'Exit' });
+    var button = $('<button>', {    css: {  position: 'relative',
+                                            bottom: '5px' },
+                                    html: 'Exit' });
+
     button.css('font-size','10px');
     button.appendTo(panel);
+
+    button.click(function() {
+        showControllerSelector();
+    });
 
     loadAdminViewData();
 }

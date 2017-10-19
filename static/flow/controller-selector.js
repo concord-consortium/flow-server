@@ -11,11 +11,15 @@ function initControllerSelector() {
 
         $('#controllerSelectorLabel').html('Select your controller. ');
 
-        if(g_adminEnabled) {
+        console.log("[DEBUG] user ", g_user);
+
+        if(g_adminEnabled && g_user.isAdmin) {
 
             var panel = $('#controllerSelectorLabel');
 
-            var button = $('<button>', { html: 'Admin' } );
+            var button = $('<button>', {    css: {  position: 'relative',
+                                                    bottom: '5px' },
+                                            html: 'Admin' } );
 
             button.css('font-size','10px');
 
