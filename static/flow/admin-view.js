@@ -78,7 +78,7 @@ function renderAdminViewData(data) {
     serverInfo.appendTo(controllerAdminContent);
     $('<br>').appendTo(controllerAdminContent);
 
-    var table = $('<table>', {   css: { width: '50%' } } );
+    var table = $('<table>', {   css: { width: '60%' } } );
     table.appendTo(controllerAdminContent);
 
     var header = function() {
@@ -88,6 +88,7 @@ function renderAdminViewData(data) {
 
     var cell = function() {
         return  $('<div>', { css: { textAlign: 'center',
+                                    whiteSpace: 'nowrap',
                                     paddingBottom: '5px' } });
     }
 
@@ -151,11 +152,11 @@ function renderAdminViewData(data) {
             verTable.appendTo(versionDiv)
             Util.addTableRow(verTable, [
                     $('<div>').text("Flow:"),
-                    $('<div>').text(controller.status.flow_version) ] );
+                    $('<div>', { css: { whiteSpace: 'nowrap' } } ).text(controller.status.flow_version) ] );
                 
             Util.addTableRow(verTable, [
                     $('<div>').text("Rhizo:"),
-                    $('<div>').text(controller.status.lib_version) ] );
+                    $('<div>', { css: { whiteSpace: 'nowrap' } } ).text(controller.status.lib_version) ] );
 
             Util.addTableRow(table, [   onlineDiv, 
                                         recordingDiv,
