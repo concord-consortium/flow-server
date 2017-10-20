@@ -91,12 +91,14 @@
                     aria-controls="controllerStatus">Status</a>
             </span>
 
+{% if admin_enabled %}
             <span class="controllerStatus">
                 <a  data-toggle="collapse"
                     href="#controllerAdminStatus"
                     aria-expanded="false"
                     aria-controls="controllerAdminStatus">Admin</a>
             </span>
+{% endif %}
 
             <div class="collapse" id="controllerStatus">
               <div class="well">
@@ -192,7 +194,7 @@ var g_useCodap = {{ use_codap }};
 var g_devEnabled = {{ dev_enabled }};
 var g_adminEnabled = {{ admin_enabled }};
 
-var g_user                  = {{ current_user|safe }};
+var g_user                  = {{ flow_user|safe }};
 var g_rhizo_server_version  = '{{ rhizo_server_version }}';
 var g_flow_server_version   = '{{ flow_server_version }}';
 

@@ -13,7 +13,7 @@ function initControllerSelector() {
 
         console.log("[DEBUG] user ", g_user);
 
-        if(g_adminEnabled && g_user.isAdmin) {
+        if(g_adminEnabled) {
 
             var panel = $('#controllerSelectorLabel');
 

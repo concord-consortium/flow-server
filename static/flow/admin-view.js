@@ -66,10 +66,11 @@ function renderAdminViewData(data) {
                                     paddingBottom: '5px' } });
     }
 
-    Util.addTableRow(table, [   header().text('Status'), 
-                                header().text('Last Online'),
-                                header().text('Name'),
-                                header().text('Version')    ]);
+    Util.addTableRow(table, [   header().html('<b>Status</b>'), 
+                                header().html('<b>Recording</b>'),
+                                header().html('<b>Last Online</b>'),
+                                header().html('<b>Name</b>'),
+                                header().html('<b>Version</b>')    ]);
 
     if (controllers.length) {
         controllers.sort(Util.sortByName);
@@ -86,15 +87,20 @@ function renderAdminViewData(data) {
             //
             var onlineDiv = cell();
             var isOnline = controller.online;
-            var css = "circle red";
+            var cls = "circle red";
             if(isOnline) {
-                css = "circle green";
+                cls = "circle green";
             }
-            var onlineCircle = $('<div>', { class: css } );
+            var onlineCircle = $('<div>', { class: cls } );
             var onlineText = $('<div>');
             onlineCircle.appendTo(onlineDiv);
             onlineText.text(isOnline ? "online" : "offline");
             onlineText.appendTo(onlineDiv);
+
+            //
+            // Recording
+            //
+            var recordingDiv = cell();
 
             //
             // Last online time
@@ -115,6 +121,7 @@ function renderAdminViewData(data) {
             version.text(controller.status.flow_version);
 
             Util.addTableRow(table, [   onlineDiv, 
+                                        recordingDiv,
                                         lastOnline,
                                         name, 
                                         version ]);
