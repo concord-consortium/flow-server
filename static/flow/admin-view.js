@@ -38,7 +38,9 @@ function loadAdminViewData() {
 
     var controllerAdminContent = $('#controllerAdminContent');
     controllerAdminContent.empty();
-    controllerAdminContent.text("Loading...");
+    controllerAdminContent.append(
+        $('<div>', { css: { paddingLeft: '10px' } } ).text("Loading...")
+    );
 
     $.ajax({
         url: '/ext/flow/controllers',
