@@ -6,16 +6,27 @@ function initAdminView() {
     var panel = $('#controllerAdminLabel');
     panel.html('Controller Administration  ');
 
-    var button = $('<button>', {    css: {  position: 'relative',
-                                            bottom: '5px' },
-                                    html: 'Exit' });
+    var addButton = function(text, func) {
 
-    button.css('font-size','10px');
-    button.appendTo(panel);
+        var button = $('<button>', {    css: {  position: 'relative',
+                                                bottom: '5px' },
+                                        html: text });
 
-    button.click(function() {
-        showControllerSelector();
-    });
+        button.css('font-size','10px');
+        button.appendTo(panel);
+
+        button.click(func);
+    }
+
+    addButton("Refresh",   
+        function() {
+            loadAdminViewData();
+        });
+
+    addButton("Exit",   
+        function() {
+            showControllerSelector();
+        });
 
     loadAdminViewData();
 }
@@ -25,8 +36,9 @@ function initAdminView() {
 //
 function loadAdminViewData() {
 
-    var controllerListDiv = $('#controllerAdminList');
-    controllerListDiv.empty();
+    var controllerAdminContent = $('#controllerAdminContent');
+    controllerAdminContent.empty();
+    controllerAdminContent.text("Loading...");
 
     $.ajax({
         url: '/ext/flow/controllers',
@@ -48,13 +60,24 @@ function renderAdminViewData(data) {
 
     console.log("[DEBUG] renderAdminViewData", data);
 
-    var controllerListDiv = $('#controllerAdminList');
-    controllerListDiv.empty();
+    var controllerAdminContent = $('#controllerAdminContent');
+    controllerAdminContent.empty();
 
     var controllers = JSON.parse(data);
 
-    var table= $('<table>', {   css: { width: '50%' } } );
-    table.appendTo(controllerListDiv);
+    var serverInfo = $('<table>', {} );
+    Util.addTableRow(serverInfo, [
+                                    $('<div>').text("Flow Server Version: "), 
+                                    $('<div>').text(g_flow_server_version)  ]);
+    Util.addTableRow(serverInfo, [
+                                    $('<div>').text("Rhizo Server Version: "),
+                                    $('<div>').text(g_rhizo_server_version) ]);
+    
+    serverInfo.appendTo(controllerAdminContent);
+    $('<br>').appendTo(controllerAdminContent);
+
+    var table = $('<table>', {   css: { width: '50%' } } );
+    table.appendTo(controllerAdminContent);
 
     var header = function() {
         return  $('<div>', { css: { textAlign: 'center',
@@ -101,6 +124,10 @@ function renderAdminViewData(data) {
             // Recording
             //
             var recordingDiv = cell();
+            if(controller.status.recording_interval != null) {
+                // Add check mark
+                recordingDiv.html("&#10004;");
+            }
 
             //
             // Last online time
@@ -117,14 +144,22 @@ function renderAdminViewData(data) {
             //
             // Version
             //
-            var version = cell();
-            version.text(controller.status.flow_version);
+            var versionDiv = cell();
+            var verTable = $('<table>');
+            verTable.appendTo(versionDiv)
+            Util.addTableRow(verTable, [
+                    $('<div>').text("Flow:"),
+                    $('<div>').text(controller.status.flow_version) ] );
+                
+            Util.addTableRow(verTable, [
+                    $('<div>').text("Rhizo:"),
+                    $('<div>').text(controller.status.lib_version) ] );
 
             Util.addTableRow(table, [   onlineDiv, 
                                         recordingDiv,
                                         lastOnline,
                                         name, 
-                                        version ]);
+                                        versionDiv ]);
         }
 
     } 

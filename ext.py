@@ -60,6 +60,7 @@ def flow_app():
     #
     rhizo_server_version = subprocess.check_output(['git',
                                                     'describe',
+                                                    '--tags',
                                                     '--always'  ]).rstrip()
 
     flow_dir = os.path.dirname(os.path.realpath(__file__))
@@ -68,6 +69,7 @@ def flow_app():
                                                     '-C',
                                                     '%s' % (flow_dir),
                                                     'describe',
+                                                    '--tags',
                                                     '--always'  ]).rstrip()
 
     flow_user = None

@@ -168,17 +168,9 @@ function status_handler(timestamp, params) {
     // Add a row to a table
     //
     var addTableRow = function(_table, nameText, valueText) {
-        var row     = $('<tr>')
-        var name    = $('<td>');
-        var value   = $('<td>', { css: { 'paddingLeft': '5px' } } );
-
-        row.appendTo(_table);
-
-        name.text(nameText);
-        name.appendTo(row);
-
-        value.text(valueText);
-        value.appendTo(row);
+        Util.addTableRow(_table, [
+            $('<td>').text(nameText),
+            $('<td>', { css: { 'paddingLeft': '5px' } } ).text(valueText) ]);
     }
 
     //
@@ -218,46 +210,49 @@ function status_handler(timestamp, params) {
         }
     }
 
-    //
-    // Add admin status
-    //
-    var adminStatusDiv = $('#controllerAdminStatus');
-    adminStatusDiv.empty();
+    if(g_adminEnabled) {
 
-    var adminList   = $('<div>', { css: { 'paddingBottom': '5px' } } );
-    var adminTable  = $('<table>');
+        //
+        // Add admin status
+        //
+        var adminStatusDiv = $('#controllerAdminStatus');
+        adminStatusDiv.empty();
 
-    adminList.appendTo(adminStatusDiv);
-    adminTable.appendTo(adminList);
+        var adminList   = $('<div>', { css: { 'paddingBottom': '5px' } } );
+        var adminTable  = $('<table>');
 
-    //
-    // Add IP addresses to admin table. (Useful when trying to connect to
-    // a device via ssh.)
-    //
-    if( params.ip_addresses != null ) {
-        for (var key in params.ip_addresses) {
-            addTableRow(adminTable, key+": ", params.ip_addresses[key]);
+        adminList.appendTo(adminStatusDiv);
+        adminTable.appendTo(adminList);
+
+        //
+        // Add IP addresses to admin table. (Useful when trying to connect to
+        // a device via ssh.)
+        //
+        if( params.ip_addresses != null ) {
+            for (var key in params.ip_addresses) {
+                addTableRow(adminTable, key+": ", params.ip_addresses[key]);
+            }
         }
-    }
 
-    //
-    // Add version info. (Useful when trying to track what version of 
-    // software is installed.)
-    //
-    addTableRow(adminTable, "Flow Client Version: ", params.flow_version);
-    addTableRow(adminTable, "Flow Server Version: ", g_flow_server_version);
-    addTableRow(adminTable, "Rhizo Client Version: ", params.lib_version);
-    addTableRow(adminTable, "Rhizo Server Version: ", g_rhizo_server_version);
+        //
+        // Add version info. (Useful when trying to track what version of 
+        // software is installed.)
+        //
+        addTableRow(adminTable, "Flow Client Version: ", params.flow_version);
+        addTableRow(adminTable, "Flow Server Version: ", g_flow_server_version);
+        addTableRow(adminTable, "Rhizo Client Version: ", params.lib_version);
+        addTableRow(adminTable, "Rhizo Server Version: ", g_rhizo_server_version);
 
-    //
-    // Add current_diagram to admin view. (Useful when trying to figure
-    // out why no diagrams in the list appear as running.)
-    //
-    var curDiagram = "N/A";
-    if(params.current_diagram) {
-        curDiagram = params.current_diagram;
+        //
+        // Add current_diagram to admin view. (Useful when trying to figure
+        // out why no diagrams in the list appear as running.)
+        //
+        var curDiagram = "N/A";
+        if(params.current_diagram) {
+            curDiagram = params.current_diagram;
+        }
+        addTableRow(adminTable, "Current diagram: ", curDiagram);
     }
-    addTableRow(adminTable, "Current diagram: ", curDiagram);
 
     setDiagramInfo( {   controllerName: g_controller.name,
                         interval:       params.recording_interval } );
