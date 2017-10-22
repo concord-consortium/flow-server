@@ -24,4 +24,23 @@ Util.sortByName = function(a, b) {
     return ((aName > bName) - (bName > aName));
 };
  
+//
+// Add td elements to a table row
+// @param table     The table to add to.
+// @param data      An array of elements to add.
+//
+Util.addTableRow = function(table, data) {
+
+    var row = $('<tr>');
+
+    for(var i = 0; i < data.length; i++) {
+        var td = $('<td>', { css: { 'paddingLeft': '5px' } } );
+
+        data[i].appendTo(td);
+        td.appendTo(row);
+    }
+
+    row.appendTo(table);
+
+};
 
