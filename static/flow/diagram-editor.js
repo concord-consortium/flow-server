@@ -965,9 +965,9 @@ function saveDiagramAndStart(promptForName, closeWhenDone, chainDialog) {
     //
     // Add handler called after diagram is saved.
     //
-    addMessageHandler('save_diagram_result', function(ts, result) {
-        console.log("[DEBUG] Checking save_diagram_result", result);
-        removeMessageHandler('save_diagram_result');
+    addMessageHandler('save_diagram_response', function(ts, result) {
+        console.log("[DEBUG] Checking save_diagram_response", result);
+        removeMessageHandler('save_diagram_response');
         if(result.success) {
             console.log("[DEBUG] Saved diagram. Starting saved diagram.");
 
@@ -976,9 +976,9 @@ function saveDiagramAndStart(promptForName, closeWhenDone, chainDialog) {
             // diagram isn't running and we can instead set a diagram
             // present in our list as running.
             //
-            addMessageHandler('start_diagram_result', function(ts, result) {
-                console.log("[DEBUG] Checking start_diagram_result", result);
-                removeMessageHandler('start_diagram_result');
+            addMessageHandler('start_diagram_response', function(ts, result) {
+                console.log("[DEBUG] Checking start_diagram_response", result);
+                removeMessageHandler('start_diagram_response');
                 if(result.success) {
                     console.log("[DEBUG] Diagram started. Returning to controller view.");
                     if(closeWhenDone) {
@@ -1009,9 +1009,9 @@ function closeDiagramEditor() {
             // running diagram so that we do not leave a modified _temp_
             // diagram running on the controller.
             //
-            addMessageHandler('start_diagram_result', function(ts, result) {
-                console.log("[DEBUG] Checking start_diagram_result", result);
-                removeMessageHandler('start_diagram_result');
+            addMessageHandler('start_diagram_response', function(ts, result) {
+                console.log("[DEBUG] Checking start_diagram_response", result);
+                removeMessageHandler('start_diagram_response');
                 if(result.success) {
                     console.log("[DEBUG] Returning to controller view.");
                     showControllerViewer();
