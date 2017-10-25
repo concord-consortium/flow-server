@@ -174,6 +174,9 @@ function renderAdminViewData(data) {
                                             versionDiv,
                                             swUpdateDiv ]);
 
+                //
+                // Update table row cells with controller info.
+                //
                 set_admin_online_status(    _i, controller.online);
                 set_admin_recording_status( _i, controller.status);
                 set_admin_last_online(      _i, controller.last_online);
@@ -304,17 +307,12 @@ function set_admin_available_versions(i, version_list, path) {
         return button;
     }
 
-    downloadButton  = softwareButton('Download Latest',
+    downloadButton  = softwareButton('Check for Updates',
                         function() {
                             download_software_updates(path);
                         });
     
-    refreshButton   = softwareButton('Refresh List',
-                        function() {
-                            list_software_versions(path);
-                        });
-            
-    applyButton     = softwareButton('Apply Version',
+    applyButton     = softwareButton('Apply Update',
                         function() {
                             update_software_version(path);
                         });
@@ -324,8 +322,6 @@ function set_admin_available_versions(i, version_list, path) {
     Util.addTableRow(swUpdateTable, 
                         [ availableVersionsDiv, downloadButton ] );
     Util.addTableRow(swUpdateTable, 
-                        [ admin_cell(), refreshButton ] );
-    Util.addTableRow(swUpdateTable, 
                         [ admin_cell(), applyButton ] );
 
 }
@@ -333,7 +329,7 @@ function set_admin_available_versions(i, version_list, path) {
 //
 // Send a message to a controller.
 //
-function sendAdminMessage(path, type, response_func) {
+function sendAdminMessage(path, type, params, response_func) {
 
     addMessageHandler( type + "_response", response_func );
 
@@ -341,12 +337,12 @@ function sendAdminMessage(path, type, response_func) {
     setTargetFolder(path);
     if(g_webSocketInited) {
         sendSubscriptions();
-        sendMessage(type);
+        sendMessage(type, params);
         return;
     }
     connectWebSocket(function() {
         console.log("INFO connecting websocket");
-        sendMessage(type);
+        sendMessage(type, params);
     });
 }
 
@@ -356,8 +352,14 @@ function sendAdminMessage(path, type, response_func) {
 function download_software_updates(path) {
     console.log("[DEBUG] download_software_updates", path);
 
-    sendAdminMessage(   path, 
+    var id = g_adminControllerIdMap[path];
+    var swUpdateDiv = $('#software_update_'+id)
+    swUpdateDiv.text('Downloading updates...');
+
+
+    sendAdminMessage(   path,
                         'download_software_updates',
+                        {},
                         download_software_updates_response );
 }
 
@@ -369,7 +371,13 @@ function download_software_updates_response(ts, params) {
 
     if(!params.success) {
         alert("Error downloading software update for " + params.src_folder);
+        return;
     }
+
+    //
+    // Now list the latest versions on this controller.
+    //
+    list_software_versions(params.src_folder)
 }
 
 //
@@ -383,8 +391,9 @@ function list_software_versions(path) {
     var div = $('#software_versions_'+domId);
     div.empty();
 
-    sendAdminMessage(   path, 
-                        'list_software_versions', 
+    sendAdminMessage(   path,
+                        'list_software_versions',
+                        {},
                         list_software_versions_response );
 
 }
@@ -408,10 +417,21 @@ function list_software_versions_response(ts, params) {
 // Perform software update
 //
 function update_software_version(path) {
-    
-    sendAdminMessage(   path, 
-                        'update_software_version', 
+
+    console.log("[DEBUG] update_software_version", path);
+
+    var id = g_adminControllerIdMap[path];
+    var value = $('#sw_version_select_'+id).val();
+
+    console.log("[DEBUG] Update to: " + value);
+
+    sendAdminMessage(   path,
+                        'update_software_version',
+                        { release: value },
                         update_software_version_response );
+    
+    var div = $('#software_update_'+id);
+    div.text('Updating...');
 }
 
 //
