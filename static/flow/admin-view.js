@@ -58,7 +58,26 @@ function loadAdminViewData() {
 }
 
 //
-// Render admin controller data returned by ajax call.
+// Util function to create table headers.
+//
+function admin_header() {
+    return  $('<div>', { css: { textAlign: 'center',
+                                paddingBottom: '10px' } });
+}
+
+//
+// Util function to create table cells.
+//
+function admin_cell(id) {
+    return  $('<div>', {    id: id,
+                            css: {  textAlign: 'center',
+                                    whiteSpace: 'nowrap',
+                                    paddingBottom: '5px' } });
+}
+
+
+//
+// Render admin controller data returned by ajax API call.
 //
 function renderAdminViewData(data) {
 
@@ -68,6 +87,7 @@ function renderAdminViewData(data) {
     controllerAdminContent.empty();
 
     var controllers = JSON.parse(data);
+    g_adminControllerIdMap = {};
 
     var serverInfo = $('<table>', {} );
     Util.addTableRow(serverInfo, [
@@ -83,153 +103,230 @@ function renderAdminViewData(data) {
     var table = $('<table>', {   css: { width: '80%' } } );
     table.appendTo(controllerAdminContent);
 
-    var header = function() {
-        return  $('<div>', { css: { textAlign: 'center',
-                                    paddingBottom: '10px' } });
-    }
-
-    var cell = function(id) {
-        return  $('<div>', {    id: id,
-                                css: {  textAlign: 'center',
-                                        whiteSpace: 'nowrap',
-                                        paddingBottom: '5px' } });
-    }
-
-    Util.addTableRow(table, [   header().html('<b>Status</b>'), 
-                                header().html('<b>Recording</b>'),
-                                header().html('<b>Last Online</b>'),
-                                header().html('<b>Name</b>'),
-                                header().html('<b>Version</b>'),
-                                header().html('<b>Updates</b>')    ]);
+    //
+    // Add table headers
+    //
+    Util.addTableRow(table, [   admin_header().html('<b>Status</b>'), 
+                                admin_header().html('<b>Recording</b>'),
+                                admin_header().html('<b>Last Online</b>'),
+                                admin_header().html('<b>Name</b>'),
+                                admin_header().html('<b>Version</b>'),
+                                admin_header().html('<b>Updates</b>')    ]);
 
     if (controllers.length) {
         controllers.sort(Util.sortByName);
 
         console.log("[DEBUG] Admin view controllers", controllers);
 
-        g_adminControllerIdMap = {};
-
         for (var i = 0; i < controllers.length; i++) {
 
-            var controller = controllers[i];
-            g_adminControllerIdMap[controller.path] = i;
+            (function(_i) {
 
-            console.log("[DEBUG] Admin view controller", controller);
+                var controller = controllers[_i];
+                g_adminControllerIdMap[controller.path] = _i;
 
-            //
-            // Online status
-            //
-            var onlineDiv = cell();
-            var isOnline = controller.online;
-            var cls = "circle red";
-            if(isOnline) {
-                cls = "circle green";
-            }
-            var onlineCircle = $('<div>', { class: cls } );
-            var onlineText = $('<div>');
-            onlineCircle.appendTo(onlineDiv);
-            onlineText.text(isOnline ? "online" : "offline");
-            onlineText.appendTo(onlineDiv);
+                console.log("[DEBUG] Admin view controller", controller);
 
-            //
-            // Recording
-            //
-            var recordingDiv = cell();
-            if(controller.status.recording_interval != null) {
-                // Add check mark
-                recordingDiv.html("&#10004;");
-            }
+                //
+                // Online status
+                //
+                var onlineDiv = admin_cell('admin_online_status_'+_i);
 
-            //
-            // Last online time
-            //
-            var lastOnline = cell();
-            lastOnline.text(controller.last_online);
+                //
+                // Recording
+                //
+                var recordingDiv = admin_cell('admin_recording_status_'+_i);
+ 
+                //
+                // Last online time
+                //
+                var lastOnlineDiv = admin_cell('admin_last_online_'+_i);
 
-            //
-            // Name
-            //
-            var name = cell();
-            name.text(controller.name);
+                //
+                // Controller name
+                //
+                var nameDiv = admin_cell('admin_controller_name_'+_i);
 
-            //
-            // Version
-            //
-            var versionDiv = cell();
-            var verTable = $('<table>');
-            verTable.appendTo(versionDiv)
-            Util.addTableRow(verTable, [
-                    $('<div>').text("Flow:"),
-                    $('<div>', { css: { whiteSpace: 'nowrap' } } ).text(controller.status.flow_version) ] );
-                
-            Util.addTableRow(verTable, [
-                    $('<div>').text("Rhizo:"),
-                    $('<div>', { css: { whiteSpace: 'nowrap' } } ).text(controller.status.lib_version) ] );
-
-            //
-            // Available versions
-            //
-            var swUpdateDiv = $('<div>', {
+                //
+                // Version
+                //
+                var versionDiv = admin_cell('admin_version_div_'+_i);
+            
+                //
+                // Available versions (Updates column)
+                //
+                var swUpdateDiv = $('<div>', {
                                             id: 'software_update_'+i,
                                             css: {  float: 'right',
                                                     width: '100%',
                                                     paddingBottom: '10px',
                                                     textAlign: 'right' } } );
-            
-            var swUpdateTable = $('<table>', { css: { float: 'right' } } );
 
-            var availableVersionsDiv = cell('software_versions_'+i);
-            var select = $('<select>', { css: { fontSize: '10px' } } );
-            select.appendTo(availableVersionsDiv);
 
-            //
-            // Create buttons used for sw update.
-            //
-            var softwareButton = function(text, func) {
 
-                var button = $('<button>', {    css: {  position: 'relative',
-                                                        width: '100%',
-                                                        bottom: '5px' },
-                                                html: text });
+                //
+                // Now build a complete table row for this controller.
+                //
+                Util.addTableRow(table, [   onlineDiv, 
+                                            recordingDiv,
+                                            lastOnlineDiv,
+                                            nameDiv, 
+                                            versionDiv,
+                                            swUpdateDiv ]);
 
-                button.css('font-size','10px');
-                button.click(func);
-                return button;
-            }
+                set_admin_online_status(    _i, controller.online);
+                set_admin_recording_status( _i, controller.status);
+                set_admin_last_online(      _i, controller.last_online);
+                set_admin_controller_name(  _i, controller.name);
+                set_admin_version_info(     _i, controller.status);
 
-            downloadButton = softwareButton('Download Latest',
-                function() {
-                    download_software_updates(controller.path);
-                });
+                set_admin_available_versions(   
+                                    _i, 
+                                    controller.status.available_versions, 
+                                    controller.path);
 
-            refreshButton = softwareButton('Refresh List',
-                function() {
-                    list_software_versions(controller.path);
-                });
-           
-            applyButton = softwareButton('Apply Version');
-
-            swUpdateTable.appendTo(swUpdateDiv);
-
-            Util.addTableRow(swUpdateTable, 
-                                [ availableVersionsDiv, downloadButton ] );
-            Util.addTableRow(swUpdateTable, 
-                                [ cell(), refreshButton ] );
-            Util.addTableRow(swUpdateTable, 
-                                [ cell(), applyButton ] );
-
-            //
-            // Now build a complete table row for this controller.
-            //
-            Util.addTableRow(table, [   onlineDiv, 
-                                        recordingDiv,
-                                        lastOnline,
-                                        name, 
-                                        versionDiv,
-                                        swUpdateDiv ]);
+            })(i);
+ 
         }
-
     }
+}
+
+//
+// Set online status (note this comes from the REST API, not the
+// status message.
+//
+function set_admin_online_status(i, isOnline) {
+
+    // console.log("[DEBUG] set_admin_online_status", i, isOnline);
+
+    var onlineDiv = $('#admin_online_status_'+i);
+    onlineDiv.empty();
+
+    var cls = "circle red";
+    if(isOnline) {
+        cls = "circle green";
+    }
+    var onlineCircle = $('<div>', { class: cls } );
+    var onlineText = $('<div>');
+    onlineCircle.appendTo(onlineDiv);
+    onlineText.text(isOnline ? "online" : "offline");
+    onlineText.appendTo(onlineDiv);
+}
+
+//
+// Set recording status
+//
+function set_admin_recording_status(i, status) {
+
+    var recordingDiv = $('#admin_recording_status_'+i);
+    recordingDiv.empty();
+
+    if(status.recording_interval != null) {
+        // Add check mark
+        recordingDiv.html("&#10004;");
+    }
+
+}
+
+//
+// Set last online status.
+// Note this comes from the REST API, not the status message
+//
+function set_admin_last_online(i, last_online) {
+    var lastOnlineDiv = $('#admin_last_online_'+i);
+    lastOnlineDiv.text(last_online);
+}
+
+//
+// Set admin controller name
+//
+function set_admin_controller_name(i, name) {
+    var nameDiv = $('#admin_controller_name_'+i);
+    nameDiv.text(name);
+}
+
+//
+// Set controller version info
+//
+function set_admin_version_info(i, status) {
+
+    var versionDiv = $('#admin_version_div_'+i);
+    versionDiv.empty();
+
+    var verTable = $('<table>');
+    verTable.appendTo(versionDiv)
+    Util.addTableRow(verTable, [
+                    $('<div>').text("Flow:"),
+                    $('<div>', { css: { whiteSpace: 'nowrap' } } ).text(status.flow_version) ] );
+                
+    Util.addTableRow(verTable, [
+                    $('<div>').text("Rhizo:"),
+                    $('<div>', { css: { whiteSpace: 'nowrap' } } ).text(status.lib_version) ] );
+
+}
+
+//
+// Set available versions and software update buttons
+//
+function set_admin_available_versions(i, version_list, path) {
+
+    var swUpdateDiv = $('#software_update_'+i)
+    swUpdateDiv.empty();
+
+    var swUpdateTable = $('<table>', { css: { float: 'right' } } );
+
+    var availableVersionsDiv = admin_cell('software_versions_'+i);
+    var select = $('<select>', {    id: 'sw_version_select_'+i,
+                                    css: { fontSize: '10px' } } );
+    select.appendTo(availableVersionsDiv);
+
+    if(version_list && version_list.length) {
+        for(var i = 0; i < version_list.length; i++) {
+            var opt = $('<option>', {   text:   version_list[i], 
+                                        value:  version_list[i]     });
+            opt.appendTo(select);
+        }
+    }
+
+    //
+    // Create buttons used for sw update.
+    //
+    var softwareButton = function(text, func) {
+    
+        var button = $('<button>', 
+                                    {   css: {  position: 'relative',
+                                                width: '100%',
+                                                bottom: '5px' },
+                                        html: text });
+    
+        button.css('font-size','10px');
+        button.click(func);
+        return button;
+    }
+
+    downloadButton  = softwareButton('Download Latest',
+                        function() {
+                            download_software_updates(path);
+                        });
+    
+    refreshButton   = softwareButton('Refresh List',
+                        function() {
+                            list_software_versions(path);
+                        });
+            
+    applyButton     = softwareButton('Apply Version',
+                        function() {
+                            update_software_version(path);
+                        });
+
+    swUpdateTable.appendTo(swUpdateDiv);
+
+    Util.addTableRow(swUpdateTable, 
+                        [ availableVersionsDiv, downloadButton ] );
+    Util.addTableRow(swUpdateTable, 
+                        [ admin_cell(), refreshButton ] );
+    Util.addTableRow(swUpdateTable, 
+                        [ admin_cell(), applyButton ] );
 
 }
 
@@ -301,19 +398,29 @@ function list_software_versions_response(ts, params) {
 
     var path = params['src_folder'];
     var domId = g_adminControllerIdMap[path];
+
+    set_admin_available_versions(domId, params['version_list'], path);
+
+}
+
+
+//
+// Perform software update
+//
+function update_software_version(path) {
+    
+    sendAdminMessage(   path, 
+                        'update_software_version', 
+                        update_software_version_response );
+}
+
+//
+// update_software_version response
+//
+function update_software_version_response(ts, params) {
+    var domId = g_adminControllerIdMap[params['src_folder']];
     var div = $('#software_versions_'+domId);
     div.empty();
-
-    var select = $('<select>', { css: { fontSize: '10px' } } );
-    select.appendTo(div);
-
-    var list = params['version_list'];
-    if(list.length) {
-        for(var i = 0; i < list.length; i++) {
-            var opt = $('<option>', { text: list[i], value: list[i] })
-            opt.appendTo(select);
-        }
-    }
-
+    div.text('Updating...');
 }
 
