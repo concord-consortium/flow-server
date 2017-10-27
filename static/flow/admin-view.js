@@ -60,7 +60,7 @@ function loadAdminViewData() {
 //
 // Util function to create table headers.
 //
-function admin_header() {
+function createAdminHeader() {
     return  $('<div>', { css: { textAlign: 'center',
                                 paddingBottom: '10px' } });
 }
@@ -68,7 +68,7 @@ function admin_header() {
 //
 // Util function to create table cells.
 //
-function admin_cell(id) {
+function createAdminCell(id) {
     return  $('<div>', {    id: id,
                             css: {  textAlign: 'center',
                                     whiteSpace: 'nowrap',
@@ -106,12 +106,12 @@ function renderAdminViewData(data) {
     //
     // Add table headers
     //
-    Util.addTableRow(table, [   admin_header().html('<b>Status</b>'), 
-                                admin_header().html('<b>Recording</b>'),
-                                admin_header().html('<b>Last Online</b>'),
-                                admin_header().html('<b>Name</b>'),
-                                admin_header().html('<b>Version</b>'),
-                                admin_header().html('<b>Updates</b>')    ]);
+    Util.addTableRow(table, [   createAdminHeader().html('<b>Status</b>'), 
+                                createAdminHeader().html('<b>Recording</b>'),
+                                createAdminHeader().html('<b>Last Online</b>'),
+                                createAdminHeader().html('<b>Name</b>'),
+                                createAdminHeader().html('<b>Version</b>'),
+                                createAdminHeader().html('<b>Updates</b>')    ]);
 
     if (controllers.length) {
         controllers.sort(Util.sortByName);
@@ -130,27 +130,27 @@ function renderAdminViewData(data) {
                 //
                 // Online status
                 //
-                var onlineDiv = admin_cell('admin_online_status_'+_i);
+                var onlineDiv = createAdminCell('admin_online_status_'+_i);
 
                 //
                 // Recording
                 //
-                var recordingDiv = admin_cell('admin_recording_status_'+_i);
+                var recordingDiv = createAdminCell('admin_recording_status_'+_i);
  
                 //
                 // Last online time
                 //
-                var lastOnlineDiv = admin_cell('admin_last_online_'+_i);
+                var lastOnlineDiv = createAdminCell('admin_last_online_'+_i);
 
                 //
                 // Controller name
                 //
-                var nameDiv = admin_cell('admin_controller_name_'+_i);
+                var nameDiv = createAdminCell('admin_controller_name_'+_i);
 
                 //
                 // Version
                 //
-                var versionDiv = admin_cell('admin_version_div_'+_i);
+                var versionDiv = createAdminCell('admin_version_div_'+_i);
             
                 //
                 // Available versions (Updates column)
@@ -177,16 +177,20 @@ function renderAdminViewData(data) {
                 //
                 // Update table row cells with controller info.
                 //
-                set_admin_online_status(    _i, controller.online);
-                set_admin_recording_status( _i, controller.status);
-                set_admin_last_online(      _i, controller.last_online);
-                set_admin_controller_name(  _i, controller.name);
-                set_admin_version_info(     _i, controller.status);
+                setAdminOnlineStatus(    _i, controller.online);
+                setAdminRecordingStatus( _i, controller.status);
+                setAdminLastOnline(      _i, controller.last_online);
+                setAdminControllerName(  _i, controller.name);
+                setAdminVersionInfo(     _i, controller.status);
 
-                set_admin_available_versions(   
-                                    _i, 
-                                    controller.status.available_versions, 
-                                    controller.path);
+                if(controller.status.operational_status == "UPDATING") {
+                    swUpdateDiv.text("Updating...");
+                } else {
+                    setAdminAvailableVersions(   
+                                        _i, 
+                                        controller.status.available_versions, 
+                                        controller.path);
+                }
 
             })(i);
  
@@ -198,9 +202,9 @@ function renderAdminViewData(data) {
 // Set online status (note this comes from the REST API, not the
 // status message.
 //
-function set_admin_online_status(i, isOnline) {
+function setAdminOnlineStatus(i, isOnline) {
 
-    // console.log("[DEBUG] set_admin_online_status", i, isOnline);
+    // console.log("[DEBUG] setAdminOnlineStatus", i, isOnline);
 
     var onlineDiv = $('#admin_online_status_'+i);
     onlineDiv.empty();
@@ -219,7 +223,7 @@ function set_admin_online_status(i, isOnline) {
 //
 // Set recording status
 //
-function set_admin_recording_status(i, status) {
+function setAdminRecordingStatus(i, status) {
 
     var recordingDiv = $('#admin_recording_status_'+i);
     recordingDiv.empty();
@@ -235,7 +239,7 @@ function set_admin_recording_status(i, status) {
 // Set last online status.
 // Note this comes from the REST API, not the status message
 //
-function set_admin_last_online(i, last_online) {
+function setAdminLastOnline(i, last_online) {
     var lastOnlineDiv = $('#admin_last_online_'+i);
     lastOnlineDiv.text(last_online);
 }
@@ -243,7 +247,7 @@ function set_admin_last_online(i, last_online) {
 //
 // Set admin controller name
 //
-function set_admin_controller_name(i, name) {
+function setAdminControllerName(i, name) {
     var nameDiv = $('#admin_controller_name_'+i);
     nameDiv.text(name);
 }
@@ -251,7 +255,7 @@ function set_admin_controller_name(i, name) {
 //
 // Set controller version info
 //
-function set_admin_version_info(i, status) {
+function setAdminVersionInfo(i, status) {
 
     var versionDiv = $('#admin_version_div_'+i);
     versionDiv.empty();
@@ -271,14 +275,14 @@ function set_admin_version_info(i, status) {
 //
 // Set available versions and software update buttons
 //
-function set_admin_available_versions(i, version_list, path) {
+function setAdminAvailableVersions(i, version_list, path) {
 
     var swUpdateDiv = $('#software_update_'+i)
     swUpdateDiv.empty();
 
     var swUpdateTable = $('<table>', { css: { float: 'right' } } );
 
-    var availableVersionsDiv = admin_cell('software_versions_'+i);
+    var availableVersionsDiv = createAdminCell('software_versions_'+i);
     var select = $('<select>', {    id: 'sw_version_select_'+i,
                                     css: { fontSize: '10px' } } );
     select.appendTo(availableVersionsDiv);
@@ -309,12 +313,12 @@ function set_admin_available_versions(i, version_list, path) {
 
     downloadButton  = softwareButton('Check for Updates',
                         function() {
-                            download_software_updates(path);
+                            downloadSoftwareUpdates(path);
                         });
     
     applyButton     = softwareButton('Apply Update',
                         function() {
-                            update_software_version(path);
+                            updateSoftwareVersion(path);
                         });
 
     swUpdateTable.appendTo(swUpdateDiv);
@@ -322,7 +326,7 @@ function set_admin_available_versions(i, version_list, path) {
     Util.addTableRow(swUpdateTable, 
                         [ availableVersionsDiv, downloadButton ] );
     Util.addTableRow(swUpdateTable, 
-                        [ admin_cell(), applyButton ] );
+                        [ createAdminCell(), applyButton ] );
 
 }
 
@@ -349,8 +353,8 @@ function sendAdminMessage(path, type, params, response_func) {
 //
 // Download latest versions onto a controller.
 //
-function download_software_updates(path) {
-    console.log("[DEBUG] download_software_updates", path);
+function downloadSoftwareUpdates(path) {
+    console.log("[DEBUG] downloadSoftwareUpdates", path);
 
     var id = g_adminControllerIdMap[path];
     var swUpdateDiv = $('#software_update_'+id)
@@ -360,14 +364,14 @@ function download_software_updates(path) {
     sendAdminMessage(   path,
                         'download_software_updates',
                         {},
-                        download_software_updates_response );
+                        downloadSoftwareUpdatesResponse );
 }
 
 //
 // Handle response from download_software_updates
 //
-function download_software_updates_response(ts, params) {
-    console.log("[DEBUG] download_software_updates_response", params);
+function downloadSoftwareUpdatesResponse(ts, params) {
+    console.log("[DEBUG] downloadSoftwareUpdatesResponse", params);
 
     if(!params.success) {
         alert("Error downloading software update for " + params.src_folder);
@@ -377,15 +381,15 @@ function download_software_updates_response(ts, params) {
     //
     // Now list the latest versions on this controller.
     //
-    list_software_versions(params.src_folder)
+    listSoftwareVersions(params.src_folder)
 }
 
 //
 // List available software versions on a controller.
 //
-function list_software_versions(path) {
+function listSoftwareVersions(path) {
 
-    console.log("[DEBUG] list_software_versions", path);
+    console.log("[DEBUG] listSoftwareVersions", path);
 
     var domId = g_adminControllerIdMap[path];
     var div = $('#software_versions_'+domId);
@@ -394,21 +398,21 @@ function list_software_versions(path) {
     sendAdminMessage(   path,
                         'list_software_versions',
                         {},
-                        list_software_versions_response );
+                        listSoftwareVersionsResponse );
 
 }
 
 //
 // Handle response from list_software_versions
 //
-function list_software_versions_response(ts, params) {
+function listSoftwareVersionsResponse(ts, params) {
 
-    console.log("[DEBUG] list_software_versions_response", params);
+    console.log("[DEBUG] listSoftwareVersionsResponse", params);
 
     var path = params['src_folder'];
     var domId = g_adminControllerIdMap[path];
 
-    set_admin_available_versions(domId, params['version_list'], path);
+    setAdminAvailableVersions(domId, params['version_list'], path);
 
 }
 
@@ -416,9 +420,9 @@ function list_software_versions_response(ts, params) {
 //
 // Perform software update
 //
-function update_software_version(path) {
+function updateSoftwareVersion(path) {
 
-    console.log("[DEBUG] update_software_version", path);
+    console.log("[DEBUG] updateSoftwareVersion", path);
 
     var id = g_adminControllerIdMap[path];
     var value = $('#sw_version_select_'+id).val();
@@ -428,16 +432,16 @@ function update_software_version(path) {
     sendAdminMessage(   path,
                         'update_software_version',
                         { release: value },
-                        update_software_version_response );
+                        updateSoftwareVersionResponse );
     
     var div = $('#software_update_'+id);
     div.text('Updating...');
 }
 
 //
-// update_software_version response
+// Handle update_software_version response message
 //
-function update_software_version_response(ts, params) {
+function updateSoftwareVersionResponse(ts, params) {
     var domId = g_adminControllerIdMap[params['src_folder']];
     var div = $('#software_versions_'+domId);
     div.empty();
