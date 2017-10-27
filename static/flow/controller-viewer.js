@@ -120,7 +120,7 @@ function diagram_list_handler(timestamp, params) {
                     loadDiagram(g_diagramSpecs[e.data]);
                     return;
                 } else {
-                    alert("Cannot open " + g_diagramSpecs[e.data].name + ". Another diagram is currently running.")
+                    alert("Cannot open " + g_diagramSpecs[e.data].name + ". Another diagram is currently running and recording.")
                     return;
                 }
             }
