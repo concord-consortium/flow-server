@@ -6,6 +6,10 @@ Util.diagramValidator = function(diagramName){
     return false;
   }
 
+  if(diagramName == '_temp_') {
+    return false;
+  }
+
   var forbidden = ['/', '\\', '*', '?']; // Might be easier to just ensure alphanumeracy?
 
   var hasForbidden = forbidden.some(function(c){

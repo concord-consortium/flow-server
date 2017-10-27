@@ -632,11 +632,14 @@ function initDiagramEditor() {
 
 	var controllerConnected = false;
 
+    //
 	// if currently recording update recording button
+    //
 	if (g_recordingInterval) {
-		$('#startRecording').hide();
-		$('#stopRecording').show();
-	}
+        setRecordingButtonState(true);
+	} else {
+        setRecordingButtonState(false);
+    }
 
 	// request list of devices currently connected to controller
 	// fix(soon): if we're loading a diagram, should we do this after we've loaded it?
@@ -751,7 +754,9 @@ function scaleClasses() {
 
 }
 
-// load a diagram from a spec dictionary into the editor
+//
+// Load a diagram from a spec dictionary into the UI editor
+//
 function loadDiagram(diagramSpec) {
     // bind zoom menu/function to keyboard keys
     $(document).bind('keydown', 'ctrl+i', zoominBlock);
@@ -924,8 +929,8 @@ function saveDiagram(promptForName, closeWhenDone, chainDialog) {
 		// or save using existing name
 		} else {
 
-            // console.log("[DEBUG] Save diagram name '"+ name + 
-            //            "' g_diagramName '" + g_diagramName + "'");
+            console.log("[DEBUG] Save diagram name '"+ name + 
+                        "' g_diagramName '" + g_diagramName + "'");
 
 			// send diagram to controller
 			var diagramSpec = diagramToSpec(g_diagram);
@@ -965,9 +970,9 @@ function saveDiagramAndStart(promptForName, closeWhenDone, chainDialog) {
     //
     // Add handler called after diagram is saved.
     //
-    addMessageHandler('save_diagram_result', function(ts, result) {
-        console.log("[DEBUG] Checking save_diagram_result", result);
-        removeMessageHandler('save_diagram_result');
+    addMessageHandler('save_diagram_response', function(ts, result) {
+        console.log("[DEBUG] Checking save_diagram_response", result);
+        removeMessageHandler('save_diagram_response');
         if(result.success) {
             console.log("[DEBUG] Saved diagram. Starting saved diagram.");
 
@@ -976,14 +981,16 @@ function saveDiagramAndStart(promptForName, closeWhenDone, chainDialog) {
             // diagram isn't running and we can instead set a diagram
             // present in our list as running.
             //
-            addMessageHandler('start_diagram_result', function(ts, result) {
-                console.log("[DEBUG] Checking start_diagram_result", result);
-                removeMessageHandler('start_diagram_result');
+            addMessageHandler('start_diagram_response', function(ts, result) {
+                console.log("[DEBUG] Checking start_diagram_response", result);
+                removeMessageHandler('start_diagram_response');
                 if(result.success) {
                     console.log("[DEBUG] Diagram started. Returning to controller view.");
                     if(closeWhenDone) {
                         showControllerViewer();
                     }
+                } else {
+                    console.log("[ERROR] " + result.message, result);
                 }
             });
             sendMessage('start_diagram', { name: g_diagramName } );
@@ -997,6 +1004,14 @@ function saveDiagramAndStart(promptForName, closeWhenDone, chainDialog) {
 // and go back to the controller viewer
 //
 function closeDiagramEditor() {
+    
+    if(g_recordingInterval) {
+        // If we are recording, ignore any changes and exit. 
+        // Do not prompt to save.
+        showControllerViewer();
+        return;
+    }
+
     if (g_modified) {
         modalConfirm({title: 'Save Diagram?', prompt: 'Do you want to save this diagram?', yesFunc: function() {
 
@@ -1009,11 +1024,14 @@ function closeDiagramEditor() {
             // running diagram so that we do not leave a modified _temp_
             // diagram running on the controller.
             //
-            addMessageHandler('start_diagram_result', function(ts, result) {
-                console.log("[DEBUG] Checking start_diagram_result", result);
-                removeMessageHandler('start_diagram_result');
+            addMessageHandler('start_diagram_response', function(ts, result) {
+                console.log("[DEBUG] Checking start_diagram_response", result);
+                removeMessageHandler('start_diagram_response');
                 if(result.success) {
                     console.log("[DEBUG] Returning to controller view.");
+                    showControllerViewer();
+                } else {
+                    console.log("[ERROR] " + result.message, result);
                     showControllerViewer();
                 }
             });
@@ -1070,8 +1088,7 @@ function startRecordingData() {
                                 diagramName:    g_diagramName,
                                 interval:       g_recordingInterval } );
 
-            $('#startRecording').hide();
-            $('#stopRecording').show();
+            setRecordingButtonState(true);
             $('#recordingSettings').modal('hide');
             CodapTest.logTopic('Dataflow/SetUpdateRate');
         }
@@ -1085,9 +1102,11 @@ function startRecordingData() {
 //
 function stopRecordingData() {
     sendMessage('stop_recording');
-    $('#stopRecording').hide();
-    $('#startRecording').show();
+
+    setRecordingButtonState(false);
+
     g_recordingInterval = 0;
+
     CodapTest.logTopic('Dataflow/StopRecordingData');
 
     setDiagramInfo( {   controllerName: g_controller.name,
@@ -1117,3 +1136,29 @@ window.addEventListener('beforeunload', function(){
 		return 'Your changes have not been saved. Are you sure you want to close the page?';
 	}
 })
+
+//
+// Enable or disable buttons based on recording state.
+// @param recording     if true, set button state for recording mode.
+//                      Otherwise set buttons for non-recording mode.
+//
+function setRecordingButtonState(recording) {
+    if(recording) {
+		$('#startRecording').hide();
+		$('#stopRecording').show();
+
+        $('#addNumericBlockButton').hide();
+        $('#addFilterButton').hide();
+        $('#addPlotButton').hide();
+        $('#saveDiagramButton').hide();
+
+    } else {
+		$('#startRecording').show();
+		$('#stopRecording').hide();
+
+        $('#addNumericBlockButton').show();
+        $('#addFilterButton').show();
+        $('#addPlotButton').show();
+        $('#saveDiagramButton').show();
+    }
+}
