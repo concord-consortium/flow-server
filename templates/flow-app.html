@@ -135,13 +135,25 @@
 	<div class="menuBar">
 		<button id="startRecording" class="btn btn-success" onclick="saveDiagram(false, false, startRecordingData);">Start Recording Data</button>
 		<button id="stopRecording" class="btn btn-warning" onclick="stopRecordingData()">Stop Recording Data</button>
-		<button class="btn btn-primary" onclick="addNumericBlock()">Add Numeric Entry</button>
+
+        <button id="addNumericBlockButton" 
+                class="btn btn-primary" 
+                onclick="addNumericBlock()">Add Numeric Entry</button>
+
 		<button class="btn btn-primary" onclick="viewRecordedData()">View Recorded Data</button>
 		<!--button class="btn btn-primary" onclick="zoominBlock()">Zoom In</button-->
 		<!--button class="btn btn-primary" onclick="zoomoutBlock()">Zoom Out</button-->
-		<button class="btn btn-primary" onclick="showFilterBlockSelector()">Add Filter</button>
-		<button class="btn btn-primary" onclick="addPlotBlock()">Add Plot</button>
-        <button class="btn btn-primary"
+
+        <button id="addFilterButton" 
+                class="btn btn-primary" 
+                onclick="showFilterBlockSelector()">Add Filter</button>
+
+        <button id="addPlotButton"  
+                class="btn btn-primary" 
+                onclick="addPlotBlock()">Add Plot</button>
+
+        <button id="saveDiagramButton"
+                class="btn btn-primary"
                 onclick="saveDiagramAndStart(false, false)">Save</button>
 
         <button class="btn btn-primary"

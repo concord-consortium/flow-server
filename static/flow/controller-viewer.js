@@ -42,9 +42,21 @@ function diagram_list_handler(timestamp, params) {
 
 		renameAction.click(diagramIndex, function(e){
 			var diagramSpec = g_diagramSpecs[e.data];
+
+            //
+            // Do not allow rename while recording.
+            //
+            if( g_recordingInterval != null ) {
+                if(g_status.current_diagram == g_diagramSpecs[e.data].name) {
+                    alert("Cannot rename diagram while recording.")
+                    return;
+                }
+            }
+
 			modalPrompt({title: 'Rename Diagram', prompt: 'Name', default: diagramSpec.name,
 				validator: Util.diagramValidator,
 				resultFunc: function(newName) {
+
 					sendMessage('rename_diagram', {'old_name': diagramSpec.name, 'new_name': newName});
 
                     //
@@ -75,6 +87,17 @@ function diagram_list_handler(timestamp, params) {
 
         deleteAction.click(diagramIndex, function(e){
             var diagramSpec = g_diagramSpecs[e.data];
+
+            //
+            // Do not allow delete while recording.
+            //
+            if( g_recordingInterval != null ) {
+                if(g_status.current_diagram == g_diagramSpecs[e.data].name) {
+                    alert("Cannot delete diagram while recording.")
+                    return;
+                }
+            }
+
             // TODO: add validator similar to diagram save prompt
             modalConfirm({title: 'Delete Diagram', prompt: 'Are you sure you want to delete this diagram?', yesFunc: function() {
                 sendMessage('delete_diagram', {'name': diagramSpec.name });
@@ -96,26 +119,58 @@ function diagram_list_handler(timestamp, params) {
     //
     g_diagramIdMap = {};
 
-	for (var i = 0; i < g_diagramSpecs.length; i++) {
-		var diagram = g_diagramSpecs[i];
+    for (var i = 0; i < g_diagramSpecs.length; i++) {
+        var diagram = g_diagramSpecs[i];
 
         g_diagramIdMap[diagram.name] = i;
 
-		var diagramDiv = $('<div>', {class: 'listButton'});
-		var btnGroup = $('<div>', {class: 'btn-group'});
-		var diagramName = $('<button>', {class: 'btn btn-lg diagram-name', html: diagram.name, id: 'd_' + i}).appendTo(btnGroup);
+        var diagramDiv = $('<div>', {class: 'listButton'});
+        var btnGroup = $('<div>', {class: 'btn-group'});
+        var diagramName = $('<button>', {class: 'btn btn-lg diagram-name', html: diagram.name, id: 'd_' + i}).appendTo(btnGroup);
 
         diagramName.click(i, function(e) {
-            setDiagramInfo( { diagramName: g_diagramSpecs[e.data].name } );
-            showDiagramEditor();
+
+            //
+            // If we are recording, we shouldn't need to send a
+            // message to the controller. The diagram should
+            // already be running.
+            //
+            if( g_recordingInterval != null ) {
+                if(g_status.current_diagram == g_diagramSpecs[e.data].name) {
+                    setDiagramInfo( 
+                        { diagramName: g_diagramSpecs[e.data].name } );
+                    showDiagramEditor();
+                    loadDiagram(g_diagramSpecs[e.data]);
+                    return;
+                } else {
+                    alert("Cannot open " + g_diagramSpecs[e.data].name + ". Another diagram is currently running and recording.")
+                    return;
+                }
+            }
+
+            //
+            // If we are not recording, send a message to the controller
+            // to start the new diagram and show the editor UI.
+            //
+            addMessageHandler('start_diagram_response', function(ts, result) {
+                removeMessageHandler('start_diagram_response');
+                if(result.success) {
+                    setDiagramInfo( 
+                        { diagramName: g_diagramSpecs[e.data].name } );
+                    showDiagramEditor();
+                    loadDiagram(g_diagramSpecs[e.data]);
+                } else {
+                    alert(result.message);
+                }
+            });
             sendMessage('start_diagram', g_diagramSpecs[e.data]);
-            loadDiagram(g_diagramSpecs[e.data]);
+
         });
 
-		createMenu(btnGroup, i, 'dm_' + i);
-		btnGroup.appendTo(diagramDiv);
-		diagramDiv.appendTo(diagramListDiv);
-	}
+        createMenu(btnGroup, i, 'dm_' + i);
+        btnGroup.appendTo(diagramDiv);
+        diagramDiv.appendTo(diagramListDiv);
+    }
 }
 
 //
@@ -367,6 +422,12 @@ function closeControllerViewer() {
 // Open a new flow diagram in the diagram editor
 //
 function newDiagram() {
+
+    if(g_recordingInterval) {
+        alert("Cannot create new diagram while recording."); 
+        return;
+    }
+
     console.log("[DEBUG] Setting new diagram with empty name.");
     setDiagramInfo( { newDiagram: true } );
     showDiagramEditor();
