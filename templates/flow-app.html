@@ -13,6 +13,14 @@
 	<script src="/ext/flow-server/static/external/manyplot.js"></script>
 	<script src="/ext/flow-server/static/flow/flow-util.js"></script>
 	<script src="/ext/flow-server/static/flow/flow-app.js"></script>
+
+    <script src="/ext/flow-server/static/flow/views/base-view.js">
+    </script>
+    <script src="/ext/flow-server/static/flow/views/landing-page-view.js">
+    </script>
+    <script src="/ext/flow-server/static/flow/views/program-editor-view.js">
+    </script>
+
 	<script src="/ext/flow-server/static/flow/ble-app.js"></script>
 	<script src="/ext/flow-server/static/flow/diagram.js"></script>
 	<script src="/ext/flow-server/static/flow/controller-selector.js"></script>
@@ -21,6 +29,7 @@
 	<script src="/ext/flow-server/static/flow/diagram-editor.js"></script>
 	<script src="/ext/flow-server/static/flow/plotter.js"></script>
     <script src="/ext/flow-server/static/external/jquery.hotkeys.js"></script>
+
 {% if use_codap %}
 	<script src="/ext/flow-server/static/external/iframe-phone.js"></script>
 	<script src="/ext/flow-server/static/external/CodapInterface.js"></script>
@@ -171,6 +180,7 @@
     </div>
 
 </div>
+
 <div id="plotterPanel" class="flowPanel">
 	<div>
 		<canvas id="canvas"></canvas>
@@ -196,6 +206,17 @@
 	</div>
 </div>
 
+<!--
+  -
+  - New DF2.0 views. 
+  -
+  -->
+<div    id="landing-page-view"
+        class="top-level-padding" />
+<div    id="program-editor-view"
+        class="top-level-padding" />
+
+
 <script>
 
 var g_controllers = {{ controllers_json|safe }};  // list of available controllers
@@ -205,6 +226,7 @@ var g_jsSim = false;
 var g_useCodap = {{ use_codap }};
 var g_devEnabled = {{ dev_enabled }};
 var g_adminEnabled = {{ admin_enabled }};
+var g_featuresEnabled = {{ features_enabled }};
 
 var g_user                  = {{ flow_user|safe }};
 var g_rhizo_server_version  = '{{ rhizo_server_version }}';

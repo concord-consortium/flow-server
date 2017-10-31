@@ -1,11 +1,48 @@
 // This file provide top-level control for the data flow app.
 
-
+//
 // initialize the app
+//
 function initFlowApp() {
-	showControllerSelector();
+    if(g_featuresEnabled) {
+        registerTopLevelView(LandingPageView({id: 'landing-page-view'}));
+        registerTopLevelView(ProgramEditorView({id: 'program-editor-view'}));
+
+        showTopLevelView('landing-page-view');
+
+    } else {
+        //
+        // Legacy flow. Delete this when DF2.0 UI is ready.
+        //
+	    showControllerSelector();
+    }
 }
 
+//
+// Store top level views here.
+//
+var topLevelViews = {};
+
+//
+// Register a top level view
+//
+function registerTopLevelView(instance) {
+    topLevelViews[instance.getDivId()] = instance;
+}
+
+//
+// Display the specified top level view and hide all others
+//
+function showTopLevelView(id) {
+    for(var key in topLevelViews) {
+        view = topLevelViews[key];
+        if(key == id) {
+            view.show();
+        } else {
+            view.hide();
+        }
+    }
+}
 
 //
 // Change screens within the app:

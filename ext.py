@@ -85,11 +85,21 @@ def flow_app():
     if int(request.args.get('admin', 0)) == 1 and flow_user['isAdmin']:
         admin_enabled = 1
 
+    #
+    # Enable DataFlow2.0 features. When new features are complete,
+    # remove this property and use the new features by default.
+    # Remove the old views and flows.
+    #
+    features_enabled = 0
+    if int(request.args.get('features', 0)) == 1:
+        features_enabled = 1
+
     return flow_extension.render_template('flow-app.html',
         controllers_json = json.dumps(controller_infos),
         use_codap = (request.args.get('use_codap', 0) or request.args.get('codap', 0)),
         dev_enabled     = int(request.args.get('dev', default_dev_enabled)),
         admin_enabled           = admin_enabled,
+        features_enabled        = features_enabled,
         flow_user               = json.dumps(flow_user),
         rhizo_server_version    = rhizo_server_version,
         flow_server_version     = flow_server_version
