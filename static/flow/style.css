@@ -138,6 +138,13 @@ button.filter {
     cursor:             pointer;
 }
 
+.square-button {
+    width:              100px;
+    height:             100px;
+    padding:            2%;
+    cursor:             pointer;
+}
+
 .red { 
     background-color:   red;
 }
