@@ -45,13 +45,40 @@ var LandingPageView = function(options) {
         showTopLevelView('program-editor-view');
     });
 
+    var welcomeMessage = jQuery('<div>', { css: { position: 'absolute',
+                                                    paddingRight: '5px',
+                                                    top: '0px',
+                                                    right: '0px' } } );
+    welcomeMessage.text('Welcome ' + g_user.full_name);
+    welcomeMessage.appendTo(content);
+
     base.loadPrograms = function(div) {
 
+        var url = '/ext/flow/list_programs';
+
+        $.ajax({
+            url: url,
+            method: 'GET',
+            // data: data,
+            success: function(data) {
+                var response = JSON.parse(data);
+                console.log("[DEBUG] List programs", response);
+                if(response.success) {
+                } else {
+                }
+            },
+            error: function(data) {
+                console.log("[DEBUG] List programs error", data);
+            },
+        });
+        
     };
 
     base.loadRecordedData = function(div) {
 
     };
+
+    base.loadPrograms(right);
 
     return base;
 }

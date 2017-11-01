@@ -12,10 +12,11 @@ from sqlalchemy.orm.exc import NoResultFound
 
 
 # internal imports
-from main.app import app
-from main.users.models import User, OrganizationUser
-from main.resources.models import Resource, ControllerStatus
-from main.extension import Extension
+from main.app                       import app
+from main.users.models              import User, OrganizationUser
+from main.resources.models          import Resource, ControllerStatus
+from main.resources.resource_util   import _create_file, find_resource, read_resource
+from main.extension                 import Extension
 
 
 # current global instance of this extension
@@ -172,5 +173,78 @@ def get_controller_info():
                     pass
 
     return controller_infos
+
+
+#
+# API for listing programs saved on the rhizo-server
+#
+@app.route('/ext/flow/list_programs', methods=['POST', 'GET'])
+def list_programs():
+
+    if not current_user.is_authenticated:
+        return json.dumps({
+            'success': False,
+            'message': 'User not authenticated'
+        })
+    
+    username    = current_user.user_name
+    org_user    = OrganizationUser.query.filter(OrganizationUser.user_id == current_user.id).first()
+
+    if org_user is None:
+        return json.dumps({
+            'success': False,
+            'message': 'Cannot find user organization.'
+        })
+
+    org_name    = org_user.organization.name
+    path        = '%s/%s/%s' % (org_name, 'student-folders', username)
+    resource    = find_resource(path)
+    children    = Resource.query.filter(Resource.parent_id == resource.id, Resource.deleted == False)
+
+    files = []
+    for child in children:
+        files.append(child.name)
+
+    return json.dumps({
+            'success':  True,
+            'message':  'Read %s' % (path),
+            'files':    files
+        })
+
+
+#
+# API for saving a program to the rhizo-server
+#
+@app.route('/ext/flow/save_program', methods=['POST', 'GET'])
+def save_program():
+
+    if not current_user.is_authenticated:
+        return json.dumps({
+            'success': False,
+            'message': 'User not authenticated'
+        })
+    
+    filename    = request.values.get('filename')
+    content     = request.values.get('content')
+    username    = current_user.user_name
+    org_user    = OrganizationUser.query.filter(OrganizationUser.user_id == current_user.id).first()
+
+    if org_user is None:
+        return json.dumps({
+            'success': False,
+            'message': 'Cannot find user organization.'
+        })
+
+    org_name = org_user.organization.name
+    # organization = current_user.organization
+    path = '%s/%s/%s/%s' % (org_name, 'student-folders', username, filename)
+
+    now = datetime.datetime.now()
+    resource = _create_file(path, now, now, content)
+
+    return json.dumps({
+            'success': True,
+            'message': 'Saved file %s.' % (filename)
+        })
 
 

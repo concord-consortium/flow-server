@@ -8,10 +8,10 @@
 
 from optparse                       import OptionParser
 
+from main.app                       import db
 from main.users.auth                import create_user
 from main.users.models              import User, OrganizationUser
 from main.resources.resource_util   import find_resource, _create_folders
-from main.app                       import db
 
 if __name__ == '__main__':
 
@@ -65,7 +65,7 @@ if __name__ == '__main__':
         #
         student_folder = 'testing/student-folders/%s' % (username)
         print("Creating student folder %s." % (student_folder))
-        _create_folders(student_folder)
+        main.resources.resource_util._create_folders(student_folder)
 
         print('Created flow user: %s' % (email))
 
