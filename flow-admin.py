@@ -65,7 +65,7 @@ if __name__ == '__main__':
         #
         student_folder = 'testing/student-folders/%s' % (username)
         print("Creating student folder %s." % (student_folder))
-        main.resources.resource_util._create_folders(student_folder)
+        _create_folders(student_folder)
 
         print('Created flow user: %s' % (email))
 
