@@ -22,34 +22,17 @@ var ProgramEditorView = function(options) {
     //
     // Create the "My Data" / "connect to pi" panel.
     //
-    var dataTable   = jQuery('<table>');
-
-    var dataTitle   = jQuery('<div>', { css: { paddingTop: '5px' } });
-    dataTitle.text('My Data');
-
-    var piList      = jQuery('<div>', { css: {
-                            width:      '100%',
-                            height:     '200px'  } });
-
-    var choosePiBtn = jQuery('<button>', { css: {
-                            // position:   'relative',
-                            left:      '0px',
-                            bottom:     '0px'   }});
-    choosePiBtn.text('Connect to Pi');
-
-
-    Util.addTableRow(dataTable, [dataTitle]);
-    Util.addTableRow(dataTable, [piList]);
-    Util.addTableRow(dataTable, [choosePiBtn]);
+    var piPanel     = jQuery('<div>', { css: { width: '25%' } });
+    var piSelector  = PiSelector( { container: piPanel } );
 
     //
     // Create main table and add all of our components
     //
-    var table = jQuery('<table>', { css: { width: '100%' } });
+    var mainTable = jQuery('<table>', { css: { width: '100%' } });
 
-    Util.addTableRow(table, [editorPanel, dataTable] );
+    Util.addTableRow(table, [editorPanel, piPanel] );
 
-    table.appendTo(content);
+    content.append(mainTable);
 
     var textarea = jQuery('<textarea>', {   id: 'program-content', 
                                             width: 600, 

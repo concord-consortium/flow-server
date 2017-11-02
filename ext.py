@@ -140,9 +140,6 @@ def select_controller():
 #
 @app.route('/ext/flow/controllers', methods=['POST', 'GET'])
 def controller_info():
-    if current_user.role != User.SYSTEM_ADMIN:
-        abort(403)
-
     info = get_controller_info()
     return json.dumps(info)
 
