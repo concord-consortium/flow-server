@@ -32,6 +32,13 @@ function registerTopLevelView(instance) {
 }
 
 //
+// Get a top level view
+//
+function getTopLevelView(id) {
+    return topLevelViews[id];
+}
+
+//
 // Display the specified top level view and hide all others
 //
 function showTopLevelView(id) {

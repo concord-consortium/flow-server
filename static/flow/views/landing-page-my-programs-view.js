@@ -49,17 +49,8 @@ var LandingPageMyProgramsView = function(options) {
                                         { css: {    testAlign: 'center',
                                                     padding: '10px' } });
 
-                        var box = jQuery('<div>', 
-                                    { class: 'square-button color-my-programs',
-                                        css: { margin: '0 auto' } } );
-
-                        var text = jQuery('<div>', 
-                                    { css: {    left: '5px',
-                                                top: '5px'}  } );
-
-                        text.text(files[i]);
-                        text.appendTo(box);
-                        box.appendTo(wrapper);
+                        var icon = ProgramIcon( {   container:  wrapper,
+                                                    filename:   files[i] } );
 
                         row.push(wrapper);
 
@@ -73,10 +64,6 @@ var LandingPageMyProgramsView = function(options) {
                         Util.addTableRow(table, row);
                     }
                     table.appendTo(div);
-
-
-                    console.log("[DEBUG] loadPrograms Adding 'Create New' button...");
-
 
                 } else {
                     console.log("[ERROR] Error listing programs", response);

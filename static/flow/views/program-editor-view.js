@@ -35,8 +35,8 @@ var ProgramEditorView = function(options) {
                             var url = '/ext/flow/save_program'
                             var data = {    filename:   filename,
                                             content:    content         };
-
                                             // csrf_token: g_csrfToken     };
+
                             $.ajax({
                                 url: url,
                                 method: 'GET',
@@ -53,7 +53,7 @@ var ProgramEditorView = function(options) {
                                 },
                                 error: function(data) {
                                     console.log("[DEBUG] Save error", data);
-                                    alert('Error saving file.')
+                                    alert('Error saving program.')
                                 },
                             });
 
@@ -114,6 +114,69 @@ var ProgramEditorView = function(options) {
                                             width: 600, 
                                             height: 200 } );
     textarea.appendTo(editor);
+
+    //
+    // Load program from server
+    //
+    base.loadProgram = function(params) {
+    
+        console.log("[DEBUG] ProgramEditorView loadProgram()", params);
+
+        jQuery('program-editor-filename').empty();
+        jQuery('program-content').empty();
+
+        //
+        // If no program to load, create a new program
+        //
+        if(!params) {
+            return
+        }
+
+        if(params && params.filename) {
+
+            var filename    = params.filename;
+ 
+            var url = '/ext/flow/load_program'
+            var data = {    filename:   filename            };
+                            // csrf_token: g_csrfToken      };
+
+            jQuery('program-content').text("Loading program...");
+            jQuery('program-content').attr("disabled", true);
+
+            $.ajax({
+                url: url,
+                method: 'GET',
+                data: data,
+                success: function(data) {
+                    var response = JSON.parse(data);
+                    console.log("[DEBUG] Load success", response);
+
+                    if(response.success) {
+                                        
+                        // alert("Program loaded");
+
+                        var content = response.content;
+                        jQuery('program-editor-filename').text(filename);
+                        jQuery('program-content').text(content);
+                        jQuery('program-content').attr("disabled", false);
+
+                        //
+                        // Call into base class to display this component
+                        //
+                        base.show();
+
+                    } else {
+                        alert("Error: " + response.message);
+                    }
+                },
+                error: function(data) {
+                    console.log("[DEBUG] Load error", data);
+                    alert('Error loading program.')
+                },
+            });
+
+        }
+    }
 
     return base;
 }

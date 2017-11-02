@@ -236,7 +236,10 @@ def save_program():
         })
 
     org_name = org_user.organization.name
-    # organization = current_user.organization
+
+    #
+    # Construct path
+    #
     path = '%s/%s/%s/%s' % (org_name, 'student-folders', username, filename)
 
     now = datetime.datetime.now()
@@ -245,6 +248,44 @@ def save_program():
     return json.dumps({
             'success': True,
             'message': 'Saved file %s.' % (filename)
+        })
+
+#
+# API for loading (retrieving the contents of) a program 
+# from the rhizo-server
+#
+@app.route('/ext/flow/load_program', methods=['POST', 'GET'])
+def load_program():
+
+    if not current_user.is_authenticated:
+        return json.dumps({
+            'success': False,
+            'message': 'User not authenticated'
+        })
+    
+    filename    = request.values.get('filename')
+    username    = current_user.user_name
+    org_user    = OrganizationUser.query.filter(OrganizationUser.user_id == current_user.id).first()
+
+    if org_user is None:
+        return json.dumps({
+            'success': False,
+            'message': 'Cannot find user organization.'
+        })
+
+    org_name = org_user.organization.name
+
+    #
+    # Construct path
+    #
+    path = '%s/%s/%s/%s' % (org_name, 'student-folders', username, filename)
+
+    resource = find_resource(path)
+
+    return json.dumps({
+            'success': True,
+            'message': 'Loaded file %s.' % (resource),
+            'content': resource
         })
 
 
