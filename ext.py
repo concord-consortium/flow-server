@@ -276,6 +276,13 @@ def program_file_operation(operation):
     #
     def _delete():
         resource    = find_resource(path)
+
+        if resource is None:
+            return json.dumps({
+                        'success': False,
+                        'message': 'Cannot find file %s.' % (filename)
+                    })
+
         db.session.delete(resource)
         db.session.commit()
         return json.dumps({

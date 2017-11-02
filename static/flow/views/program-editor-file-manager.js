@@ -10,7 +10,7 @@ var ProgramEditorFileManager = function(options) {
     //
     // Create save widget
     //
-    var saveWidget  = jQuery('<div>');
+    var fileWidget  = jQuery('<div>');
 
     //
     // Label
@@ -26,101 +26,105 @@ var ProgramEditorFileManager = function(options) {
     //
     // Save button with handler and callback
     //
-    var saveButton  = jQuery('<button>').text('Save')
-                        .click( function() {
+    var saveButton  = jQuery('<button>').text('Save');
+
+    saveButton.click( function() {
                            
-                            var filename = jQuery('#program-editor-filename').val();
-                            var content = jQuery('#program-content').val();
+        var filename = jQuery('#program-editor-filename').val();
+        var content = jQuery('#program-content').val();
 
-                            //
-                            // After one use of the CSRF token in a POST
-                            // request, it is no longer accepted.
-                            // How to fix this? Pass a new one back 
-                            // to the client and then reset the
-                            // g_csrfToken value here? :(
-                            //
-                            var url = '/ext/flow/save_program'
-                            var data = {    filename:   filename,
-                                            content:    content         };
-                                            // csrf_token: g_csrfToken     };
+        //
+        // After one use of the CSRF token in a POST
+        // request, it is no longer accepted.
+        // How to fix this? Pass a new one back 
+        // to the client and then reset the
+        // g_csrfToken value here? :(
+        //
+        var url = '/ext/flow/save_program'
+        var data = {    filename:   filename,
+                        content:    content         };
+                        // csrf_token: g_csrfToken     };
 
-                            $.ajax({
-                                url: url,
-                                method: 'GET',
-                                data: data,
-                                success: function(data) {
-                                    var response = JSON.parse(data);
+        $.ajax({
+            url:        url,
+            method:     'GET',
+            data:       data,
+            success:    function(data) {
+                var response = JSON.parse(data);
 
-                                    console.log(
-                                        "[DEBUG] Save program response", 
-                                        response);
+                console.log(
+                    "[DEBUG] Save program response", 
+                    response);
 
-                                    if(response.success) {
-                                        alert("Program saved");
-                                    } else {
-                                        alert("Error: " + response.message);
-                                    }
-                                },
-                                error: function(data) {
-                                    console.log("[ERROR] Save error", data);
-                                    alert('Error saving program.')
-                                },
-                            });
+                if(response.success) {
+                    alert("Program saved");
+                } else {
+                    alert("Error: " + response.message);
+                }
+            },
+            error: function(data) {
+                console.log("[ERROR] Save error", data);
+                alert('Error saving program.')
+            },
+        });
 
-                        });
+    });
 
 
     //
     // Delete button with handler and callback
     //
-    var deleteButton = jQuery('<button>').text('Delete')
-                        .click( function() {
+    var deleteButton = jQuery('<button>').text('Delete');
+
+    deleteButton.click( function() {
     
-                            var filename = jQuery('#program-editor-filename').val();
-                            var conf = confirm("Are you sure you want to delete " + filename + "?");
-                            if(!conf) {
-                                return;
-                            }
+        var filename = jQuery('#program-editor-filename').val();
 
-                            //
-                            // After one use of the CSRF token in a POST
-                            // request, it is no longer accepted.
-                            // How to fix this? Pass a new one back 
-                            // to the client and then reset the
-                            // g_csrfToken value here? :(
-                            //
-                            var url = '/ext/flow/delete_program'
-                            var data = { filename: filename };
-                                            // csrf_token: g_csrfToken     };
+        var conf = confirm("Are you sure you want to delete " + filename + "?");
 
-                            $.ajax({
-                                url:    url,
-                                method: 'GET',
-                                data:   data,
-                                success: function(data) {
-                                    var response = JSON.parse(data);
+        if(!conf) {
+            return;
+        }
 
-                                    console.log(
-                                        "[DEBUG] Delete program response", 
-                                        response);
+        //
+        // After one use of the CSRF token in a POST
+        // request, it is no longer accepted.
+        // How to fix this? Pass a new one back 
+        // to the client and then reset the
+        // g_csrfToken value here? :(
+        //
+        var url = '/ext/flow/delete_program'
+        var data = { filename: filename };
+                        // csrf_token: g_csrfToken     };
 
-                                    if(response.success) {
+        $.ajax({
+            url:        url,
+            method:     'GET',
+            data:       data,
+            success:    function(data) {
+                var response = JSON.parse(data);
 
-                                        alert("Program deleted");
-                                        editor.resetEditor();
-                                        showTopLevelView('landing-page-view');
+                console.log(
+                    "[DEBUG] Delete program response", 
+                    response);
 
-                                    } else {
-                                        alert("Error: " + response.message);
-                                    }
-                                },
-                                error: function(data) {
-                                    console.log("[ERROR] Delete error", data);
-                                    alert('Error deleting program.')
-                                },
-                            });
+                if(response.success) {
 
-                        });
+                    alert("Program deleted");
+                    editor.resetEditor();
+                    showTopLevelView('landing-page-view');
+
+                } else {
+                    alert("Error: " + response.message);
+                }
+            },
+            error: function(data) {
+                console.log("[ERROR] Delete error", data);
+                alert('Error deleting program.')
+            },
+        });
+
+    });
 
  
     //
@@ -131,12 +135,13 @@ var ProgramEditorFileManager = function(options) {
                             showTopLevelView('landing-page-view');
                         });
 
-    nameLabel.appendTo(saveWidget);
-    nameField.appendTo(saveWidget);
-    saveButton.appendTo(saveWidget);
-    deleteButton.appendTo(saveWidget);
-    exitButton.appendTo(saveWidget);
+    fileWidget.append(nameLabel);
+    fileWidget.append(nameField);
+    fileWidget.append(saveButton);
+    fileWidget.append(deleteButton);
+    fileWidget.append(exitButton);
 
-    saveWidget.appendTo(container);
+    container.append(fileWidget);
+
 
 }
