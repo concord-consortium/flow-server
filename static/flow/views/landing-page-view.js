@@ -11,125 +11,104 @@ var LandingPageView = function(options) {
 
     var table       = jQuery('<table>', { width: '100%' } );
 
-    var lMargin     = jQuery('<div>', { css: { width: '50px' } } );
+    //
+    // Left margin
+    //
+    var leftMargin  = jQuery('<div>', { css: { width: '100px' } } );
 
-    var left        = jQuery('<div>', { css: {  
-                                                position: 'relative', 
-                                                top: '-50px',
+    //
+    // Left side landing page
+    //
+    var left        = jQuery('<div>', { id: 'landing-page-recording-view',
+                                        css: {  
+                                                // height: '500px',
+                                                float:  'right',
                                                 textAlign: 'center' } } );
 
+    //
+    // Landing page center separator
+    //
     var middle      = jQuery('<div>', { css: { textAlign: 'center' } } );
-
-    var right       = jQuery('<div>', { css: {  
-                                                position: 'relative', 
-                                                top: '-50px',
-                                                textAlign: 'center' } } );
-
-    var rMargin     = jQuery('<div>', { css: { width: '50px' } } );
-
     var separator   = jQuery('<div>', { class: 'vertical-line',
                                         css:    {   width: '2px',
                                                     height: '400px' } } );
+    separator.appendTo(middle);
+
+    //
+    // Right side landing page
+    //
+    var right       = jQuery('<div>', { id: 'landing-page-my-programs-view',
+                                        css: {  
+                                                // height: '500px',
+                                                textAlign: 'center' } } );
+
+    //
+    // Right margin
+    //
+    var rightMargin = jQuery('<div>', { css: {  width:      '100px',
+                                                position:   'relative' } } );
 
     left.text('Recording Now');
-    left.css('width','300px');
+    left.css('width','200px');
 
-    separator.appendTo(middle);
-    right.text('My Programs');
-    right.css('width','300px');
+    Util.addTableRow(   table, 
+                        [ leftMargin, left, middle, right, rightMargin ], 
+                        { verticalAlign: 'top'} );
 
-    Util.addTableRow(table, [ lMargin, left, middle, right, rMargin ] );
     table.appendTo(content);
 
-    var createButton = jQuery('<div>', { class: 'circle-button green' } );
+    var createButton = jQuery('<div>', { class: 'circle-button green',
+                                            css: { 
+                                                    position: 'absolute',
+                                                    top: '30px'
+                                                 }
+                                            } );
     createButton.text('Create New');
-    createButton.appendTo(rMargin);
+    createButton.appendTo(rightMargin);
     createButton.click(function() {
         showTopLevelView('program-editor-view');
     });
 
-    var welcomeMessage = jQuery('<div>', { css: { position: 'absolute',
+    //
+    // Show welcome message
+    //
+    var welcomeMessage = jQuery('<div>', { css: {   position: 'absolute',
                                                     paddingRight: '5px',
                                                     top: '0px',
                                                     right: '0px' } } );
-    welcomeMessage.text('Welcome ' + g_user.full_name);
+    var welcomeText = jQuery('<div>');
+    welcomeText.text('Welcome ' + g_user.full_name);
+    welcomeText.appendTo(welcomeMessage);
+
+    //
+    // Add admin button to welcome message
+    //
+    if(g_user.isAdmin) {
+        var adminButton = $('<button>', {   css: {  
+                                                    float: 'right',
+                                                    position: 'relative',
+                                                    bottom: '5px' },
+                                            html: 'Admin' } );
+        adminButton.css('font-size','10px');
+
+        adminButton.click(function(e) {
+            showAdminView();
+        });
+        adminButton.appendTo(welcomeMessage);
+    }
     welcomeMessage.appendTo(content);
 
-    //
-    // AJAX call and handler for updating "My Programs" div.
-    //
-    base.loadPrograms = function(div) {
-
-        var url = '/ext/flow/list_programs';
-
-        $.ajax({
-            url: url,
-            method: 'GET',
-            // data: data,
-            success: function(data) {
-                var response = JSON.parse(data);
-                console.log("[DEBUG] List programs", response);
-                if(response.success) {
-                   
-                    div.empty();
-                    div.css('width', '300px');
-
-                    var title = jQuery('<div>');
-                    title.text("My Programs");
-                    title.appendTo(div);
-
-                    var table = jQuery('<table>', 
-                                    { css: {  margin: '0 auto' } } );
-
-                    var files = response.files;
-                    var row = [];
-                    for(var i = 0; i < files.length; i++) {
-
-                        var wrapper = jQuery('<div>', 
-                                        { css: {    testAlign: 'center',
-                                                    padding: '10px' } });
-
-                        var box = jQuery('<div>', 
-                                    { class: 'square-button green',
-                                        css: { margin: '0 auto' } } );
-
-                        var text = jQuery('<div>', 
-                                    { css: {    left: '5px',
-                                                top: '5px'}  } );
-
-                        text.text(files[i]);
-                        text.appendTo(box);
-                        box.appendTo(wrapper);
-
-                        row.push(wrapper);
-
-                        if (i % 2 == 1) {
-                            Util.addTableRow(table, row);
-                            row = [];
-                        }
-                    }
-                    if (i % 2 == 1) {
-                        row.push(jQuery('<div>'));
-                        Util.addTableRow(table, row);
-                    }
-                    table.appendTo(div);
-
-                } else {
-                    console.log("[ERROR] Error listing programs", response);
-                }
-            },
-            error: function(data) {
-                console.log("[DEBUG] List programs error", data);
-            },
-        });
-        
-    };
+    var myPrograms = LandingPageMyProgramsView({id: 'landing-page-my-programs-view'});
 
     base.loadRecordedData = function(div) {
 
     };
 
-    base.loadPrograms(right);
+    base.show = function() {
+        // console.log("[DEBUG] LandingPageView show()");
+        jQuery('#'+base.getDivId()).show();
+        myPrograms.show();
+    }
 
     return base;
 }

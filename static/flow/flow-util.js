@@ -33,12 +33,17 @@ Util.sortByName = function(a, b) {
 // @param table     The table to add to.
 // @param data      An array of elements to add.
 //
-Util.addTableRow = function(table, data) {
+Util.addTableRow = function(table, data, tdCss) {
 
     var row = $('<tr>');
 
+    var _tdCss = { 'paddingLeft': '5px' };
+    if(tdCss) {
+        _tdCss = tdCss;
+    }
+
     for(var i = 0; i < data.length; i++) {
-        var td = $('<td>', { css: { 'paddingLeft': '5px' } } );
+        var td = $('<td>', { css: _tdCss } );
 
         data[i].appendTo(td);
         td.appendTo(row);
