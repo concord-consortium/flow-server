@@ -10,32 +10,42 @@ var AdminView = function(options) {
 
     this.adminControllerIdMap = {};
 
-    this.heading = $('<h2>', { css: { textAlign: 'center' } } );
-    this.heading.html('Controller Administration  ');
-    this.heading.appendTo(content);
+    //
+    // Create the view heading with title and nav buttons
+    //
+    this.createViewHeading = function() {
 
-    var addButton = function(text, func) {
+        var heading = $('<h2>', { css: { textAlign: 'center' } } );
+        heading.html('Controller Administration  ');
+        heading.appendTo(content);
 
-        var button = $('<button>', {    css: {  position: 'relative',
-                                                bottom: '5px' },
-                                        html: text });
+        var addButton = function(text, func) {
 
-        button.css('font-size','10px');
-        button.appendTo(this.heading);
+            var button = $('<button>', {    css: {  position: 'relative',
+                                                    bottom: '5px' },
+                                            html: text });
 
-        button.click(func);
+            button.css('font-size','10px');
+            button.appendTo(heading);
+
+            button.click(func);
+        }
+
+
+        addButton("Refresh",   
+            function() {
+                console.log("[DEBUG] refresh admin view");
+                _this.loadAdminViewData();
+            });
+
+        addButton("Exit",   
+            function() {
+                console.log("[DEBUG] exit admin view");
+                showTopLevelView('landing-page-view');
+            });
+
+        return heading;
     }
-
-
-    addButton("Refresh",   
-        function() {
-            _this.loadAdminViewData();
-        });
-
-    addButton("Exit",   
-        function() {
-            showTopLevelView('landing-page-view');
-        });
 
 
     //
@@ -46,7 +56,9 @@ var AdminView = function(options) {
         var controllerAdminContent = $('#'+base.getDivId());
         controllerAdminContent.empty();
 
-        this.heading.appendTo(controllerAdminContent);
+        var heading = _this.createViewHeading();
+        heading.appendTo(controllerAdminContent);
+
         controllerAdminContent.append(
             $('<div>', { css: { paddingLeft: '10px' } } ).text("Loading...")
         );
@@ -92,7 +104,9 @@ var AdminView = function(options) {
 
         var controllerAdminContent = $('#'+base.getDivId());
         controllerAdminContent.empty();
-        _this.heading.appendTo(controllerAdminContent);
+
+        var heading = _this.createViewHeading();
+        heading.appendTo(controllerAdminContent);
 
         var controllers = JSON.parse(data);
         _this.adminControllerIdMap = {};
@@ -168,18 +182,26 @@ var AdminView = function(options) {
 
                     var start = createRecordingControl('Start Recording',
                         function() {
-                            var path = _this.adminControllerIdMap[_i];
+                            var path = controller.path;
+                            console.log("[DEBUG] start_recording", path);
                             _this.sendAdminMessage( path, 
                                                     'start_recording',
+                                                    { rate: 60 } );
+                            _this.sendAdminMessage( path, 
+                                                    'request_status',
                                                     {} );
                         }
                     );
 
                     var stop = createRecordingControl('Stop Recording',
                         function() {
-                            var path = _this.adminControllerIdMap[_i];
+                            var path = controller.path;
+                            console.log("[DEBUG] stop recording", path);
                             _this.sendAdminMessage( path, 
                                                     'stop_recording',
+                                                    {} );
+                            _this.sendAdminMessage( path, 
+                                                    'request_status',
                                                     {} );
                         }
                     );
@@ -387,7 +409,9 @@ var AdminView = function(options) {
     //
     this.sendAdminMessage = function(path, type, params, response_func) {
 
-        addMessageHandler( type + "_response", response_func );
+        if(response_func) {
+            addMessageHandler( type + "_response", response_func );
+        }
 
         subscribeToFolder(path);
         setTargetFolder(path);
