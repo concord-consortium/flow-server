@@ -217,21 +217,20 @@ def list_programs():
             'files':    files
         })
 
-
 #
-# API for saving a program to the rhizo-server
+# Handle persistence operations for program files.
+# Contains common code used across different program file
+# persistence operations for API calls.
 #
-@app.route('/ext/flow/save_program', methods=['POST', 'GET'])
-def save_program():
+def program_file_operation(operation):
 
     if not current_user.is_authenticated:
         return json.dumps({
             'success': False,
             'message': 'User not authenticated'
         })
-    
+ 
     filename    = request.values.get('filename')
-    content     = request.values.get('content')
     username    = current_user.user_name
     org_user    = OrganizationUser.query.filter(OrganizationUser.user_id == current_user.id).first()
 
@@ -248,13 +247,56 @@ def save_program():
     #
     path = '%s/%s/%s/%s' % (org_name, 'student-folders', username, filename)
 
-    now = datetime.datetime.now()
-    resource = _create_file(path, now, now, content)
+    #
+    # Save op
+    #
+    def _save():
+        content     = request.values.get('content')
+        now         = datetime.datetime.now()
+        resource    = _create_file(path, now, now, content)
+        return json.dumps({
+                    'success': True,
+                    'message': 'Saved file %s.' % (filename)
+                })
 
-    return json.dumps({
-            'success': True,
-            'message': 'Saved file %s.' % (filename)
-        })
+    #
+    # Load op
+    #
+    def _load():
+        resource    = find_resource(path)
+        data        = read_resource(resource)
+        return json.dumps({
+                    'success': True,
+                    'message': 'Loaded file %s.' % (resource.name),
+                    'content': data
+                })
+
+    #
+    # Delete op
+    #
+    def _delete():
+        resource    = find_resource(path)
+        db.session.delete(resource)
+        db.session.commit()
+        return json.dumps({
+                    'success': True,
+                    'message': 'Deleted file %s.' % (resource.name)
+                })
+
+    ops = { 'save':     _save,
+            'load':     _load,
+            'delete':   _delete }
+
+    op = ops[operation]
+    return op()
+
+
+#
+# API for saving a program to the rhizo-server
+#
+@app.route('/ext/flow/save_program', methods=['POST', 'GET'])
+def save_program():
+    return program_file_operation('save')
 
 #
 # API for loading (retrieving the contents of) a program 
@@ -262,75 +304,13 @@ def save_program():
 #
 @app.route('/ext/flow/load_program', methods=['POST', 'GET'])
 def load_program():
-
-    if not current_user.is_authenticated:
-        return json.dumps({
-            'success': False,
-            'message': 'User not authenticated'
-        })
-    
-    filename    = request.values.get('filename')
-    username    = current_user.user_name
-    org_user    = OrganizationUser.query.filter(OrganizationUser.user_id == current_user.id).first()
-
-    if org_user is None:
-        return json.dumps({
-            'success': False,
-            'message': 'Cannot find user organization.'
-        })
-
-    org_name = org_user.organization.name
-
-    #
-    # Construct path
-    #
-    path = '%s/%s/%s/%s' % (org_name, 'student-folders', username, filename)
-
-    resource    = find_resource(path)
-    data        = read_resource(resource)
-
-    return json.dumps({
-            'success': True,
-            'message': 'Loaded file %s.' % (resource.name),
-            'content': data
-        })
+    return program_file_operation('load')
 
 #
 # API to delete a saved program from the rhizo-server
 #
 @app.route('/ext/flow/delete_program', methods=['POST', 'GET'])
 def delete_program():
-
-    if not current_user.is_authenticated:
-        return json.dumps({
-            'success': False,
-            'message': 'User not authenticated'
-        })
-    
-    filename    = request.values.get('filename')
-    username    = current_user.user_name
-    org_user    = OrganizationUser.query.filter(OrganizationUser.user_id == current_user.id).first()
-
-    if org_user is None:
-        return json.dumps({
-            'success': False,
-            'message': 'Cannot find user organization.'
-        })
-
-    org_name = org_user.organization.name
-
-    #
-    # Construct path
-    #
-    path = '%s/%s/%s/%s' % (org_name, 'student-folders', username, filename)
-
-    resource    = find_resource(path)
-    db.session.delete(resource)
-    db.session.commit()
-
-    return json.dumps({
-            'success': True,
-            'message': 'Deleted file %s.' % (resource.name)
-        })
+    return program_file_operation('delete')
 
 

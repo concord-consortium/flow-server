@@ -44,8 +44,8 @@ var ProgramEditorView = function(options) {
                                 success: function(data) {
                                     var response = JSON.parse(data);
 
-                                    // console.log(
-                                    //    "[DEBUG] Save success", response);
+                                    console.log(
+                                        "[DEBUG] Save response", response);
 
                                     if(response.success) {
                                         alert("Program saved");
@@ -92,8 +92,8 @@ var ProgramEditorView = function(options) {
                                 success: function(data) {
                                     var response = JSON.parse(data);
 
-                                    // console.log(
-                                    //    "[DEBUG] Delete success", response);
+                                    console.log(
+                                        "[DEBUG] Delete response", response);
 
                                     if(response.success) {
 
@@ -227,7 +227,7 @@ var ProgramEditorView = function(options) {
                 success: function(data) {
                     var response = JSON.parse(data);
 
-                    // console.log("[DEBUG] Load success", response);
+                    console.log("[DEBUG] Load response", response);
 
                     if(response.success) {
                                         
