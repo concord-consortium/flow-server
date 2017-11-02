@@ -6,7 +6,7 @@ var ProgramIcon = function(options) {
     var filename    = options.filename;
     var container   = options.container;
 
-    console.log("[DEBUG] ProgramIcon creating... ", filename);
+    // console.log("[DEBUG] ProgramIcon creating... ", filename);
 
     var box = jQuery('<div>', 
                         { class: 'square-button color-my-programs',
@@ -24,7 +24,7 @@ var ProgramIcon = function(options) {
     // Load this program when clicked.
     //
     box.click(function() {
-        console.log("[DEBUG] ProgramIcon click", filename);
+        // console.log("[DEBUG] ProgramIcon click", filename);
         var editor = getTopLevelView('program-editor-view');
         editor.loadProgram({filename: filename});
     });

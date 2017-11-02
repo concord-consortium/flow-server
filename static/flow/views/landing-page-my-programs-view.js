@@ -13,7 +13,7 @@ var LandingPageMyProgramsView = function(options) {
     //
     var loadPrograms = function(div) {
 
-        console.log("[DEBUG] loadPrograms loading My Programs...");
+        // console.log("[DEBUG] loadPrograms loading My Programs...");
 
         div.empty();
         div.text("Loading My Programs...");
@@ -26,7 +26,9 @@ var LandingPageMyProgramsView = function(options) {
             // data: data,
             success: function(data) {
                 var response = JSON.parse(data);
-                console.log("[DEBUG] List programs", response);
+
+                // console.log("[DEBUG] List programs", response);
+
                 if(response.success) {
                    
                     div.empty();
@@ -36,7 +38,7 @@ var LandingPageMyProgramsView = function(options) {
                     title.text("My Programs");
                     title.appendTo(div);
 
-                    console.log("[DEBUG] loadPrograms Creating My Programs table...");
+                    // console.log("[DEBUG] loadPrograms Creating My Programs table...");
 
                     var table = jQuery('<table>', 
                                     { css: {  margin: '0 auto' } } );
@@ -70,7 +72,7 @@ var LandingPageMyProgramsView = function(options) {
                 }
             },
             error: function(data) {
-                console.log("[DEBUG] List programs error", data);
+                console.log("[ERROR] List programs error", data);
             },
         });
         

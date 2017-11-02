@@ -43,22 +43,77 @@ var ProgramEditorView = function(options) {
                                 data: data,
                                 success: function(data) {
                                     var response = JSON.parse(data);
+
+                                    // console.log(
+                                    //    "[DEBUG] Save success", response);
+
                                     if(response.success) {
                                         alert("Program saved");
                                     } else {
                                         alert("Error: " + response.message);
                                     }
-                                    console.log(
-                                        "[DEBUG] Save success", response);
                                 },
                                 error: function(data) {
-                                    console.log("[DEBUG] Save error", data);
+                                    console.log("[ERROR] Save error", data);
                                     alert('Error saving program.')
                                 },
                             });
 
                         });
 
+
+    //
+    // Delete button with handler and callback
+    //
+    var deleteButton = jQuery('<button>').text('Delete')
+                        .click( function() {
+    
+                            var filename = jQuery('#program-editor-filename').val();
+                            var conf = confirm("Are you sure you want to delete " + filename + "?");
+                            if(!conf) {
+                                return;
+                            }
+
+                            //
+                            // After one use of the CSRF token in a POST
+                            // request, it is no longer accepted.
+                            // How to fix this? Pass a new one back 
+                            // to the client and then reset the
+                            // g_csrfToken value here? :(
+                            //
+                            var url = '/ext/flow/delete_program'
+                            var data = { filename: filename };
+                                            // csrf_token: g_csrfToken     };
+
+                            $.ajax({
+                                url:    url,
+                                method: 'GET',
+                                data:   data,
+                                success: function(data) {
+                                    var response = JSON.parse(data);
+
+                                    // console.log(
+                                    //    "[DEBUG] Delete success", response);
+
+                                    if(response.success) {
+
+                                        alert("Program deleted");
+                                        base.resetEditor();
+                                        showTopLevelView('landing-page-view');
+
+                                    } else {
+                                        alert("Error: " + response.message);
+                                    }
+                                },
+                                error: function(data) {
+                                    console.log("[ERROR] Delete error", data);
+                                    alert('Error deleting program.')
+                                },
+                            });
+
+                        });
+
+ 
     //
     // Exit button
     //
@@ -70,6 +125,7 @@ var ProgramEditorView = function(options) {
     nameLabel.appendTo(saveWidget);
     nameField.appendTo(saveWidget);
     saveButton.appendTo(saveWidget);
+    deleteButton.appendTo(saveWidget);
     exitButton.appendTo(saveWidget);
 
     //
@@ -116,19 +172,33 @@ var ProgramEditorView = function(options) {
     textarea.appendTo(editor);
 
     //
+    // Clear the content. Reset editor to initial state.
+    //
+    base.resetEditor = function() {
+        var nameWidget      = jQuery('#program-editor-filename');
+        var contentWidget   = jQuery('#program-content');
+        nameWidget.val('');
+        contentWidget.val('');
+    }
+
+    //
     // Load program from server
     //
     base.loadProgram = function(params) {
     
-        console.log("[DEBUG] ProgramEditorView loadProgram()", params);
+        // console.log("[DEBUG] ProgramEditorView loadProgram()", params);
 
-        jQuery('program-editor-filename').empty();
-        jQuery('program-content').empty();
+        var nameWidget      = jQuery('#program-editor-filename');
+        var contentWidget   = jQuery('#program-content');
+
+        nameWidget.val('');
+        contentWidget.val('');
 
         //
         // If no program to load, create a new program
         //
         if(!params) {
+            showTopLevelView('program-editor-view');
             return
         }
 
@@ -136,12 +206,19 @@ var ProgramEditorView = function(options) {
 
             var filename    = params.filename;
  
+            contentWidget.val("Loading program " + filename + " ...");
+            contentWidget.attr("disabled", true);
+
             var url = '/ext/flow/load_program'
+
             var data = {    filename:   filename            };
                             // csrf_token: g_csrfToken      };
 
-            jQuery('program-content').text("Loading program...");
-            jQuery('program-content').attr("disabled", true);
+
+            //
+            // Display editor
+            //
+            showTopLevelView('program-editor-view');
 
             $.ajax({
                 url: url,
@@ -149,28 +226,24 @@ var ProgramEditorView = function(options) {
                 data: data,
                 success: function(data) {
                     var response = JSON.parse(data);
-                    console.log("[DEBUG] Load success", response);
+
+                    // console.log("[DEBUG] Load success", response);
 
                     if(response.success) {
                                         
                         // alert("Program loaded");
 
                         var content = response.content;
-                        jQuery('program-editor-filename').text(filename);
-                        jQuery('program-content').text(content);
-                        jQuery('program-content').attr("disabled", false);
-
-                        //
-                        // Call into base class to display this component
-                        //
-                        base.show();
+                        nameWidget.val(filename);
+                        contentWidget.val(content);
+                        contentWidget.attr("disabled", false);
 
                     } else {
                         alert("Error: " + response.message);
                     }
                 },
                 error: function(data) {
-                    console.log("[DEBUG] Load error", data);
+                    console.log("[ERROR] Load error", data);
                     alert('Error loading program.')
                 },
             });

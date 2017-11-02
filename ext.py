@@ -1,25 +1,31 @@
+#
 # standard python imports
+#
 import json
 import os
 import subprocess
 import datetime
 
-
+#
 # external imports
+#
 from flask import request, abort, current_app
 from flask_login import current_user, login_user
 from sqlalchemy.orm.exc import NoResultFound
 
-
+#
 # internal imports
-from main.app                       import app
+#
+from main.app                       import app, db
 from main.users.models              import User, OrganizationUser
 from main.resources.models          import Resource, ControllerStatus
 from main.resources.resource_util   import _create_file, find_resource, read_resource
 from main.extension                 import Extension
 
 
+#
 # current global instance of this extension
+#
 flow_extension = None
 
 
@@ -280,12 +286,51 @@ def load_program():
     #
     path = '%s/%s/%s/%s' % (org_name, 'student-folders', username, filename)
 
-    resource = find_resource(path)
+    resource    = find_resource(path)
+    data        = read_resource(resource)
 
     return json.dumps({
             'success': True,
-            'message': 'Loaded file %s.' % (resource),
-            'content': resource
+            'message': 'Loaded file %s.' % (resource.name),
+            'content': data
+        })
+
+#
+# API to delete a saved program from the rhizo-server
+#
+@app.route('/ext/flow/delete_program', methods=['POST', 'GET'])
+def delete_program():
+
+    if not current_user.is_authenticated:
+        return json.dumps({
+            'success': False,
+            'message': 'User not authenticated'
+        })
+    
+    filename    = request.values.get('filename')
+    username    = current_user.user_name
+    org_user    = OrganizationUser.query.filter(OrganizationUser.user_id == current_user.id).first()
+
+    if org_user is None:
+        return json.dumps({
+            'success': False,
+            'message': 'Cannot find user organization.'
+        })
+
+    org_name = org_user.organization.name
+
+    #
+    # Construct path
+    #
+    path = '%s/%s/%s/%s' % (org_name, 'student-folders', username, filename)
+
+    resource    = find_resource(path)
+    db.session.delete(resource)
+    db.session.commit()
+
+    return json.dumps({
+            'success': True,
+            'message': 'Deleted file %s.' % (resource.name)
         })
 
 

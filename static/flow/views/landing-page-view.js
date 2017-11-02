@@ -67,7 +67,9 @@ var LandingPageView = function(options) {
     createButton.text('Create New');
     createButton.appendTo(rightMargin);
     createButton.click(function() {
-        showTopLevelView('program-editor-view');
+        var editor = getTopLevelView('program-editor-view');
+        editor.loadProgram();
+        // showTopLevelView('program-editor-view');
     });
 
     //

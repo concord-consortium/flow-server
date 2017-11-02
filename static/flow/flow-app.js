@@ -47,6 +47,7 @@ function showTopLevelView(id) {
         if(key == id) {
             view.show();
         } else {
+            // console.log("[DEBUG] hiding", id);
             view.hide();
         }
     }
