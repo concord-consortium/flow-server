@@ -9,130 +9,15 @@ var ProgramEditorView = function(options) {
     var content     = jQuery('#'+base.getDivId());
 
     //
-    // Create save widget
-    //
-    var saveWidget  = jQuery('<div>');
-    var nameLabel   = jQuery('<label>').text('Name').css('padding', '2px');;
-    var nameField   = jQuery('<input>').attr({  id: 'program-editor-filename', 
-                                                type: 'text' });
-
-    //
-    // Save button with handler and callback
-    //
-    var saveButton  = jQuery('<button>').text('Save')
-                        .click( function() {
-                           
-                            var filename = jQuery('#program-editor-filename').val();
-                            var content = jQuery('#program-content').val();
-
-                            //
-                            // After one use of the CSRF token in a POST
-                            // request, it is no longer accepted.
-                            // How to fix this? Pass a new one back 
-                            // to the client and then reset the
-                            // g_csrfToken value here? :(
-                            //
-                            var url = '/ext/flow/save_program'
-                            var data = {    filename:   filename,
-                                            content:    content         };
-                                            // csrf_token: g_csrfToken     };
-
-                            $.ajax({
-                                url: url,
-                                method: 'GET',
-                                data: data,
-                                success: function(data) {
-                                    var response = JSON.parse(data);
-
-                                    console.log(
-                                        "[DEBUG] Save response", response);
-
-                                    if(response.success) {
-                                        alert("Program saved");
-                                    } else {
-                                        alert("Error: " + response.message);
-                                    }
-                                },
-                                error: function(data) {
-                                    console.log("[ERROR] Save error", data);
-                                    alert('Error saving program.')
-                                },
-                            });
-
-                        });
-
-
-    //
-    // Delete button with handler and callback
-    //
-    var deleteButton = jQuery('<button>').text('Delete')
-                        .click( function() {
-    
-                            var filename = jQuery('#program-editor-filename').val();
-                            var conf = confirm("Are you sure you want to delete " + filename + "?");
-                            if(!conf) {
-                                return;
-                            }
-
-                            //
-                            // After one use of the CSRF token in a POST
-                            // request, it is no longer accepted.
-                            // How to fix this? Pass a new one back 
-                            // to the client and then reset the
-                            // g_csrfToken value here? :(
-                            //
-                            var url = '/ext/flow/delete_program'
-                            var data = { filename: filename };
-                                            // csrf_token: g_csrfToken     };
-
-                            $.ajax({
-                                url:    url,
-                                method: 'GET',
-                                data:   data,
-                                success: function(data) {
-                                    var response = JSON.parse(data);
-
-                                    console.log(
-                                        "[DEBUG] Delete response", response);
-
-                                    if(response.success) {
-
-                                        alert("Program deleted");
-                                        base.resetEditor();
-                                        showTopLevelView('landing-page-view');
-
-                                    } else {
-                                        alert("Error: " + response.message);
-                                    }
-                                },
-                                error: function(data) {
-                                    console.log("[ERROR] Delete error", data);
-                                    alert('Error deleting program.')
-                                },
-                            });
-
-                        });
-
- 
-    //
-    // Exit button
-    //
-    var exitButton  = jQuery('<button>').text('Exit')
-                        .click( function() {
-                            showTopLevelView('landing-page-view');
-                        });
-
-    nameLabel.appendTo(saveWidget);
-    nameField.appendTo(saveWidget);
-    saveButton.appendTo(saveWidget);
-    deleteButton.appendTo(saveWidget);
-    exitButton.appendTo(saveWidget);
-
-    //
     // Create the editor panel
     //
-    var editor      = jQuery('<div>', { css: { width: '75%' } });
-    saveWidget.appendTo(editor);
+    var editorPanel = jQuery('<div>', { css: { width: '75%' } });
+
+    //
+    // Create file manager widget
+    //
+    var fileManager = ProgramEditorFileManager({    container:  editorPanel,
+                                                    editor:     base} );
 
     //
     // Create the "My Data" / "connect to pi" panel.
@@ -162,14 +47,14 @@ var ProgramEditorView = function(options) {
     //
     var table = jQuery('<table>', { css: { width: '100%' } });
 
-    Util.addTableRow(table, [editor, dataTable] );
+    Util.addTableRow(table, [editorPanel, dataTable] );
 
     table.appendTo(content);
 
     var textarea = jQuery('<textarea>', {   id: 'program-content', 
                                             width: 600, 
                                             height: 200 } );
-    textarea.appendTo(editor);
+    textarea.appendTo(editorPanel);
 
     //
     // Clear the content. Reset editor to initial state.
@@ -227,7 +112,7 @@ var ProgramEditorView = function(options) {
                 success: function(data) {
                     var response = JSON.parse(data);
 
-                    console.log("[DEBUG] Load response", response);
+                    console.log("[DEBUG] Load program response", response);
 
                     if(response.success) {
                                         
