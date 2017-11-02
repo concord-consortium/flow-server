@@ -173,3 +173,20 @@ button.filter {
 
 }
 
+/**
+ *
+ * Colors from mockups
+ *
+ */
+.color-recording-now {
+    background-color: #51a04f;
+}
+
+.color-recorded-previous {
+    background-color: #83c4d7;
+}
+
+.color-my-programs {
+    background-color: #538ea9;
+}
+

@@ -7,6 +7,7 @@ function initFlowApp() {
     if(g_featuresEnabled) {
         registerTopLevelView(LandingPageView({id: 'landing-page-view'}));
         registerTopLevelView(ProgramEditorView({id: 'program-editor-view'}));
+        registerTopLevelView(AdminView({id: 'admin-view'}));
 
         showTopLevelView('landing-page-view');
 

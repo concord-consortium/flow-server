@@ -92,7 +92,7 @@ var LandingPageView = function(options) {
         adminButton.css('font-size','10px');
 
         adminButton.click(function(e) {
-            showAdminView();
+            showTopLevelView('admin-view');
         });
         adminButton.appendTo(welcomeMessage);
     }
