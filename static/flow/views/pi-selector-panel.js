@@ -1,33 +1,47 @@
 //
-// Widget shows available Pis and connects.
+// A widget that shows available Pis and record button.
 //
-var PiSelector = function(options) {
+var PiSelectorPanel = function(options) {
 
-	var container = options.container;
+    var container = options.container;
 
-    var piTable   = jQuery('<table>');
+    var panel = jQuery('<div>', { id: 'pi-selector-panel' } );
 
-    var piTitle   = jQuery('<div>', { css: { paddingTop: '5px' } });
-    dataTitle.text('Available Pis');
+    var piTable   = jQuery('<table>', { css: { 
+                                            width:  '99%',
+                                            height: '300px',
+                                            border: '1px solid black' } } );
+
+    var piTitle   = jQuery('<div>', { css: {    textAlign: 'center',
+                                                paddingTop: '5px'   } });
+    piTitle.text('Available Pis');
 
     var piList      = jQuery('<div>', 
-						{ 	id:	'pi-selector-list',
-							css: {
-                            	width:      '100%',
-                            	height:     '200px'  } });
+                        {     id:    'pi-selector-list',
+                            css: {
+                                width:      '100%',
+                                height:     '200px'  } });
 
-    var piButton = jQuery('<button>', 
-						{ 	css: {
-                            		left:      '0px',
-                            		bottom:     '0px'   }});
+    var recordButton = jQuery('<button>', 
+                        {       class: 'color-start-recording-button',
+                                css: {
+                                    width:      '100%',
+                                    padding:    '5px',
+                                    left:       '0px',
+                                    bottom:     '0px'   }});
 
-    piButton.text('Connect to Pi');
+    recordButton.text('Start Recording');
 
-	Util.addTableRow(piTable, [piTitle]);
+    Util.addTableRow(piTable, [piTitle], { verticalAlign: 'top' } );
     Util.addTableRow(piTable, [piList]);
-    Util.addTableRow(piTable, [piButton]);
+    Util.addTableRow(piTable, [recordButton], 
+                        {   padding: '2px',
+                            verticalAlign: 'bottom' } );
 
-	container.append(piTable);
+    panel.append(piTable);
+    panel.hide();
+    container.append(panel);
+
 
     //
     // AJAX call and handler for listing Pis.
@@ -98,5 +112,4 @@ var PiSelector = function(options) {
         
     };
 
-    return base;
 }

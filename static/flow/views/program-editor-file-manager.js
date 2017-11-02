@@ -132,6 +132,7 @@ var ProgramEditorFileManager = function(options) {
     //
     var exitButton  = jQuery('<button>').text('Exit')
                         .click( function() {
+                            editor.resetEditor();
                             showTopLevelView('landing-page-view');
                         });
 

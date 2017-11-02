@@ -11,42 +11,55 @@ var ProgramEditorView = function(options) {
     //
     // Create the editor panel
     //
-    var editorPanel = jQuery('<div>', { css: { width: '75%' } });
+    var leftPanel   = jQuery('<div>', 
+                            {   id: 'program-editor-left-panel',
+                                css: { width: '100%' } } );
 
     //
     // Create file manager widget
     //
-    var fileManager = ProgramEditorFileManager({    container:  editorPanel,
+    var fileManager = ProgramEditorFileManager({    container:  leftPanel,
                                                     editor:     base} );
 
     //
-    // Create the "My Data" / "connect to pi" panel.
+    // Create the "My Data" and "Pi Selector" panel.
     //
-    var piPanel     = jQuery('<div>', { css: { width: '25%' } });
-    var piSelector  = PiSelector( { container: piPanel } );
+    var rightPanel  = jQuery('<div>', 
+                            {   id: 'program-editor-right-panel',
+                                css: { width: '100%' } });
+
+    var piSelectorPanel = PiSelectorPanel( { container: rightPanel } );
+    var myDataPanel     = MyDataPanel( { container: rightPanel } );
 
     //
     // Create main table and add all of our components
     //
     var mainTable = jQuery('<table>', { css: { width: '100%' } });
 
-    Util.addTableRow(table, [editorPanel, piPanel] );
+    Util.addTableRow(   mainTable, 
+                        [leftPanel, rightPanel], 
+                        { verticalAlign: 'top'} );
 
     content.append(mainTable);
 
     var textarea = jQuery('<textarea>', {   id: 'program-content', 
                                             width: 600, 
                                             height: 200 } );
-    textarea.appendTo(editorPanel);
+    textarea.appendTo(leftPanel);
 
     //
     // Clear the content. Reset editor to initial state.
     //
     base.resetEditor = function() {
+
+        console.log("[DEBUG] Reset editor.");
         var nameWidget      = jQuery('#program-editor-filename');
         var contentWidget   = jQuery('#program-content');
         nameWidget.val('');
         contentWidget.val('');
+
+        $('#my-data-panel').show();
+        $('#pi-selector-panel').hide();
     }
 
     //

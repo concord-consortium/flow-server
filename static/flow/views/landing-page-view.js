@@ -58,7 +58,7 @@ var LandingPageView = function(options) {
     table.appendTo(content);
 
     var createButton = jQuery('<div>', 
-                            { class: 'circle-button color-my-programs',
+                            { class: 'circle-button color-my-programs-icon',
                                 css: {
                                         position: 'absolute',
                                         top: '30px'

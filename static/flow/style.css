@@ -178,15 +178,30 @@ button.filter {
  * Colors from mockups
  *
  */
-.color-recording-now {
+.color-recording-now-icon {
     background-color: #51a04f;
 }
 
-.color-recorded-previous {
+.color-recorded-previous-icon {
     background-color: #83c4d7;
 }
 
-.color-my-programs {
+.color-my-programs-icon {
     background-color: #538ea9;
+}
+
+.color-connect-to-pi-button {
+    color:              black;
+    background-color:   #83c4d7;
+}
+
+.color-start-recording-button {
+    color:              black;
+    background-color: #b6dee8;
+}
+
+.color-stop-recording-button {
+    color:              black;
+    background-color: #83c4d7;
 }
 

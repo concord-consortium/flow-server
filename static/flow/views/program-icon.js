@@ -9,7 +9,7 @@ var ProgramIcon = function(options) {
     // console.log("[DEBUG] ProgramIcon creating... ", filename);
 
     var box = jQuery('<div>', 
-                        { class: 'square-button color-my-programs',
+                        { class: 'square-button color-my-programs-icon',
                             css: { margin: '0 auto' } } );
 
     var text = jQuery('<div>', 
