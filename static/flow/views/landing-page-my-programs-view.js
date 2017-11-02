@@ -50,7 +50,7 @@ var LandingPageMyProgramsView = function(options) {
                                                     padding: '10px' } });
 
                         var box = jQuery('<div>', 
-                                    { class: 'square-button green',
+                                    { class: 'square-button color-my-programs',
                                         css: { margin: '0 auto' } } );
 
                         var text = jQuery('<div>', 

@@ -57,12 +57,13 @@ var LandingPageView = function(options) {
 
     table.appendTo(content);
 
-    var createButton = jQuery('<div>', { class: 'circle-button green',
-                                            css: { 
-                                                    position: 'absolute',
-                                                    top: '30px'
-                                                 }
-                                            } );
+    var createButton = jQuery('<div>', 
+                            { class: 'circle-button color-my-programs',
+                                css: {
+                                        position: 'absolute',
+                                        top: '30px'
+                                     }
+                            } );
     createButton.text('Create New');
     createButton.appendTo(rightMargin);
     createButton.click(function() {
