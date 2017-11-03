@@ -213,9 +213,24 @@ var AdminView = function(options) {
                         }
                     );
 
+                    var stopProgram = createRecordingControl('Stop Program',
+                        function() {
+                            var path = controller.path;
+                            console.log("[DEBUG] stop program", path);
+                            _this.sendAdminMessage( path, 
+                                                    'stop_program',
+                                                    {} );
+                            _this.sendAdminMessage( path, 
+                                                    'request_status',
+                                                    {} );
+                        }
+                    );
+
                     start.appendTo(recordingControlDiv);
                     $('<br>').appendTo(recordingControlDiv);
                     stop.appendTo(recordingControlDiv);
+                    $('<br>').appendTo(recordingControlDiv);
+                    stopProgram.appendTo(recordingControlDiv);
 
                     //
                     // Last online time
