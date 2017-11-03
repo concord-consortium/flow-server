@@ -14,7 +14,7 @@ var MyDataPanel = function(options) {
     var myDataTable = jQuery('<table>', { css: { 
                                             width:  '99%',
                                             height: '300px',
-                                            border: '1px solid black' } } );
+                                            border: '1px solid lightgrey' } } );
 
     //
     // Title

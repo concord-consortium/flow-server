@@ -6,12 +6,14 @@ var PiSelectorPanel = function(options) {
     var container   = options.container;
     var editor      = options.editor;
 
+    var _this = this;
+
     var panel = jQuery('<div>', { id: 'pi-selector-panel' } );
 
     var piTable   = jQuery('<table>', { css: { 
                                             width:  '99%',
                                             height: '300px',
-                                            border: '1px solid black' } } );
+                                            border: '1px solid lightgrey' } } );
 
     var piTitle   = jQuery('<div>', { css: {    position: 'relative',
                                                 textAlign: 'center',
@@ -57,7 +59,7 @@ var PiSelectorPanel = function(options) {
     // Refresh the list of Pis
     //
     refreshButton.click( function() {
-        this.loadPiList();
+        _this.loadPiList();
     });
 
     //
@@ -92,7 +94,9 @@ var PiSelectorPanel = function(options) {
                     var controllers = response.controllers;
                     controllers.sort(Util.sortByName);
                     for(var i = 0; i < controllers.length; i++) {
-                        var controller = $('<div>');
+                        var controller = $('<div>', 
+                                            { css: {    padding: '5px',
+                                                        cursor: 'pointer' } } );
                         controller.text(controllers[i].name);
                         Util.addTableRow(table, [controller] );
                     }
