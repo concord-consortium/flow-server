@@ -500,7 +500,11 @@ var AdminView = function(options) {
         var currentProgram = $('<div>', { css: {    float: 'left',
                                                     paddingLeft: '5px',
                                                     paddingBottom: '25px' } } );
-        currentProgram.text("Current Program: " + status.current_diagram);
+        if(status.current_diagram == null) {
+            currentProgram.text("No Current Program");
+        } else {
+            currentProgram.text("Current Program: " + status.current_diagram);
+        }
 
         detailsDiv.append(currentProgram);
     }
