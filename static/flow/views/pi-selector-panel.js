@@ -3,7 +3,8 @@
 //
 var PiSelectorPanel = function(options) {
 
-    var container = options.container;
+    var container   = options.container;
+    var editor      = options.editor;
 
     var panel = jQuery('<div>', { id: 'pi-selector-panel' } );
 
@@ -12,9 +13,19 @@ var PiSelectorPanel = function(options) {
                                             height: '300px',
                                             border: '1px solid black' } } );
 
-    var piTitle   = jQuery('<div>', { css: {    textAlign: 'center',
+    var piTitle   = jQuery('<div>', { css: {    position: 'relative',
+                                                textAlign: 'center',
                                                 paddingTop: '5px'   } });
     piTitle.text('Available Pis');
+
+    var refreshButton = $('<button>', { css: {  textAlign:  'center',
+                                                position:   'absolute',
+                                                padding:    '0px',
+                                                top:        '0px',
+                                                right:      '0px'    } });
+
+    refreshButton.html("&#128472;");
+    piTitle.append(refreshButton);
 
     var piList      = jQuery('<div>', 
                         {     id:    'pi-selector-list',
@@ -42,16 +53,22 @@ var PiSelectorPanel = function(options) {
     panel.hide();
     container.append(panel);
 
+    //
+    // Refresh the list of Pis
+    //
+    refreshButton.click( function() {
+        this.loadPiList();
+    });
 
     //
     // AJAX call and handler for listing Pis.
     //
-    var loadPis = function(div) {
+    this.loadPiList = function() {
 
-        // console.log("[DEBUG] loadPrograms loading My Programs...");
+        // console.log("[DEBUG] loadPiList loading...");
 
-        div.empty();
-        div.text("Loading My Programs...");
+        piList.empty();
+        piList.text("Loading My Programs...");
 
         var url = '/ext/flow/controllers';
 
@@ -61,55 +78,36 @@ var PiSelectorPanel = function(options) {
             success:    function(data) {
                 var response = JSON.parse(data);
 
-                // console.log("[DEBUG] List controllers response", response);
+                console.log("[DEBUG] List controllers response", response);
 
                 if(response.success) {
                    
-                    div.empty();
-                    div.css('width', '200px');
+                    piList.empty();
 
-                    var title = jQuery('<div>');
-                    title.text("My Programs");
-                    title.appendTo(div);
-
-                    // console.log("[DEBUG] loadPrograms Creating My Programs table...");
+                    console.log("[DEBUG] Creating Pi table...");
 
                     var table = jQuery('<table>', 
                                     { css: {  margin: '0 auto' } } );
 
-                    var files = response.files;
-                    var row = [];
-                    for(var i = 0; i < files.length; i++) {
-
-                        var wrapper = jQuery('<div>', 
-                                        { css: {    testAlign: 'center',
-                                                    padding: '10px' } });
-
-                        var icon = ProgramIcon( {   container:  wrapper,
-                                                    filename:   files[i] } );
-
-                        row.push(wrapper);
-
-                        if (i % 2 == 1) {
-                            Util.addTableRow(table, row);
-                            row = [];
-                        }
+                    var controllers = response.controllers;
+                    controllers.sort(Util.sortByName);
+                    for(var i = 0; i < controllers.length; i++) {
+                        var controller = $('<div>');
+                        controller.text(controllers[i].name);
+                        Util.addTableRow(table, [controller] );
                     }
-                    if (i % 2 == 1) {
-                        row.push(jQuery('<div>'));
-                        Util.addTableRow(table, row);
-                    }
-                    table.appendTo(div);
+                    piList.append(table);
 
                 } else {
-                    console.log("[ERROR] Error listing programs", response);
+                    console.log("[ERROR] Error listing controllers", response);
                 }
             },
             error: function(data) {
-                console.log("[ERROR] List programs error", data);
+                console.log("[ERROR] List controllers error", data);
             },
         });
         
     };
 
+    return this;
 }

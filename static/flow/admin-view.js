@@ -49,7 +49,14 @@ function loadAdminViewData() {
         method: 'GET',
         // data: {},
         success: function(data) {
-            renderAdminViewData(data);
+            var response = JSON.parse(data);
+            if(response.success) {
+                var controllers = response.controllers;
+                renderAdminViewData(controllers);
+            } else {
+                console.log("[ERROR] Error loading controller data.", response);
+                alert("Error loading controller data.");
+            }
         },
         error: function(data) {
             alert('Error loading admin data.')
@@ -79,14 +86,13 @@ function createAdminCell(id) {
 //
 // Render admin controller data returned by ajax API call.
 //
-function renderAdminViewData(data) {
+function renderAdminViewData(controllers) {
 
-    console.log("[DEBUG] renderAdminViewData", data);
+    console.log("[DEBUG] renderAdminViewData", controllers);
 
     var controllerAdminContent = $('#controllerAdminContent');
     controllerAdminContent.empty();
 
-    var controllers = JSON.parse(data);
     g_adminControllerIdMap = {};
 
     var serverInfo = $('<table>', {} );

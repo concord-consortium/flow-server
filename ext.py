@@ -141,7 +141,10 @@ def select_controller():
 @app.route('/ext/flow/controllers', methods=['POST', 'GET'])
 def controller_info():
     info = get_controller_info()
-    return json.dumps(info)
+    return json.dumps({
+            'success': True,
+            'controllers': info
+        })
 
 
 #
@@ -224,10 +227,17 @@ def program_file_operation(operation):
     if not current_user.is_authenticated:
         return json.dumps({
             'success': False,
-            'message': 'User not authenticated'
+            'message': 'User not authenticated.'
         })
  
     filename    = request.values.get('filename')
+
+    if filename is None or filename == '':
+        return json.dumps({
+            'success': False,
+            'message': 'No filename specified.'
+        })
+
     username    = current_user.user_name
     org_user    = OrganizationUser.query.filter(OrganizationUser.user_id == current_user.id).first()
 

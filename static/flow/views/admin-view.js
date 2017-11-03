@@ -68,7 +68,14 @@ var AdminView = function(options) {
             method: 'GET',
             // data: {},
             success: function(data) {
-                renderAdminViewData(data);
+                var response = JSON.parse(data);
+                if(response.success) {
+                    var controllers = response.controllers;
+                    renderAdminViewData(controllers);
+                } else {
+                    console.log("[ERROR] Error loading controller data.", response);
+                    alert("Error loading controller data.");
+                }
             },
             error: function(data) {
                 alert('Error loading admin data.')
@@ -90,6 +97,7 @@ var AdminView = function(options) {
     this.createAdminTableCell = function(id) {
         return  $('<div>', {    id: id,
                                 css: {  textAlign: 'center',
+                                        fontSize:   '12px',
                                         whiteSpace: 'nowrap',
                                         paddingBottom: '5px' } });
     }
@@ -98,9 +106,9 @@ var AdminView = function(options) {
     //
     // Render admin controller data returned by ajax API call.
     //
-    this.renderAdminViewData = function(data) {
+    this.renderAdminViewData = function(controllers) {
 
-        // console.log("[DEBUG] renderAdminViewData", data);
+        // console.log("[DEBUG] renderAdminViewData", controllers);
 
         var controllerAdminContent = $('#'+base.getDivId());
         controllerAdminContent.empty();
@@ -108,7 +116,6 @@ var AdminView = function(options) {
         var heading = _this.createViewHeading();
         heading.appendTo(controllerAdminContent);
 
-        var controllers = JSON.parse(data);
         _this.adminControllerIdMap = {};
 
         var serverInfo = $('<table>', {} );
@@ -125,7 +132,7 @@ var AdminView = function(options) {
         //
         // Main admin controller table
         //
-        var table = $('<table>', { css: { width: '90%' } } );
+        var table = $('<table>', { css: { width: '95%' } } );
         table.appendTo(controllerAdminContent);
 
         //
@@ -172,7 +179,7 @@ var AdminView = function(options) {
                     var createRecordingControl = function(text, func) {
                         var button = $('<button>', 
                                         {   css: {  
-                                                    
+                                                    width: '100%', 
                                                     bottom: '5px' },
                                             html: text });
                         button.css('font-size','10px');
@@ -314,8 +321,19 @@ var AdminView = function(options) {
     // Note this comes from the REST API, not the status message
     //
     this.setAdminLastOnline = function(i, last_online) {
+
+        //
+        // Get rid of decimal and convert to browser timezone.
+        //
+
+        if(last_online.indexOf('.') != -1) {
+            last_online = last_online.split('.')[0];
+        }
+        var date = new Date(last_online + " UTC");
+
         var lastOnlineDiv = $('#admin_last_online_'+i);
-        lastOnlineDiv.text(last_online);
+        lastOnlineDiv.html( date.toLocaleDateString() + "<br/>" +
+                            date.toLocaleTimeString() );
     }
 
     //
@@ -336,13 +354,27 @@ var AdminView = function(options) {
 
         var verTable = $('<table>');
         verTable.appendTo(versionDiv)
-        Util.addTableRow(verTable, [
-                        $('<div>').text("Flow:"),
-                        $('<div>', { css: { whiteSpace: 'nowrap' } } ).text(status.flow_version) ] );
-                    
-        Util.addTableRow(verTable, [
-                        $('<div>').text("Rhizo:"),
-                        $('<div>', { css: { whiteSpace: 'nowrap' } } ).text(status.lib_version) ] );
+        Util.addTableRow(
+                verTable,
+                [
+                    _this.createAdminTableCell()
+                        .css('text-align','left')
+                        .text("Flow:"),
+                    _this.createAdminTableCell()
+                        .css('text-align','left')
+                        .text(status.flow_version)
+                ] );
+
+        Util.addTableRow(
+                verTable,
+                [
+                    _this.createAdminTableCell()
+                        .css('text-align','left')
+                        .text("Rhizo:"),
+                    _this.createAdminTableCell()
+                        .css('text-align','left')
+                        .text(status.lib_version)
+                ] );
 
     }
 
@@ -357,8 +389,10 @@ var AdminView = function(options) {
         var swUpdateTable = $('<table>', { css: { float: 'right' } } );
 
         var availableVersionsDiv = _this.createAdminTableCell('software_versions_'+i);
+
         var select = $('<select>', {    id: 'sw_version_select_'+i,
-                                        css: { fontSize: '10px' } } );
+                                        css: {  fontSize: '10px' } });
+
         select.appendTo(availableVersionsDiv);
 
         if(version_list && version_list.length) {
@@ -375,7 +409,7 @@ var AdminView = function(options) {
         var softwareButton = function(text, func) {
         
             var button = $('<button>', 
-                                        {   css: {  position: 'relative',
+                                        {   css: {  whiteSpace: 'no-wrap',
                                                     width: '100%',
                                                     bottom: '5px' },
                                             html: text });
@@ -398,9 +432,13 @@ var AdminView = function(options) {
         swUpdateTable.appendTo(swUpdateDiv);
 
         Util.addTableRow(swUpdateTable, 
-                            [ availableVersionsDiv, downloadButton ] );
+                            [ availableVersionsDiv, downloadButton ],
+                            {   verticalAlign:  'top',
+                                paddingLeft:    '3px'   } );
         Util.addTableRow(swUpdateTable, 
-                            [ _this.createAdminTableCell(), applyButton ] );
+                            [ _this.createAdminTableCell(), applyButton ],
+                            {   verticalAlign:  'top',
+                                paddingLeft:    '3px'   } );
 
     }
 

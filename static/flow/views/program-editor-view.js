@@ -6,30 +6,33 @@ var ProgramEditorView = function(options) {
 
     var base = BaseView(options);
 
-    var content     = jQuery('#'+base.getDivId());
+    var content = jQuery('#'+base.getDivId());
 
     //
     // Create the editor panel
     //
-    var leftPanel   = jQuery('<div>', 
+    var leftPanel       = jQuery('<div>', 
                             {   id: 'program-editor-left-panel',
                                 css: { width: '100%' } } );
 
     //
     // Create file manager widget
     //
-    var fileManager = ProgramEditorFileManager({    container:  leftPanel,
-                                                    editor:     base} );
+    var fileManager    = ProgramEditorFileManager({ container:  leftPanel,
+                                                    editor:     base    } );
 
     //
-    // Create the "My Data" and "Pi Selector" panel.
+    // Create the panel for the "My Data" and "Pi Selector" components.
     //
-    var rightPanel  = jQuery('<div>', 
-                            {   id: 'program-editor-right-panel',
-                                css: { width: '100%' } });
+    var rightPanel      = jQuery('<div>', 
+                                {   id: 'program-editor-right-panel',
+                                    css: { width: '100%' } });
 
-    var piSelectorPanel = PiSelectorPanel( { container: rightPanel } );
-    var myDataPanel     = MyDataPanel( { container: rightPanel } );
+    var piSelectorPanel = PiSelectorPanel({ container:  rightPanel,
+                                            editor:     base        } );
+
+    var myDataPanel     = MyDataPanel({ container:  rightPanel,
+                                        editor:     base        } );
 
     //
     // Create main table and add all of our components
@@ -48,11 +51,19 @@ var ProgramEditorView = function(options) {
     textarea.appendTo(leftPanel);
 
     //
+    // Accessors for our subcomponents.
+    //
+    base.getFileManager     = function() { return fileManager; }
+    base.getPiSelectorPanel = function() { return piSelectorPanel; }
+    base.getMyDataPanel     = function() { return myDataPanel; }
+
+    //
     // Clear the content. Reset editor to initial state.
     //
     base.resetEditor = function() {
 
-        console.log("[DEBUG] Reset editor.");
+        // console.log("[DEBUG] Reset editor.");
+
         var nameWidget      = jQuery('#program-editor-filename');
         var contentWidget   = jQuery('#program-content');
         nameWidget.val('');

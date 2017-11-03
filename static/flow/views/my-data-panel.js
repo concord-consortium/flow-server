@@ -3,15 +3,22 @@
 //
 var MyDataPanel = function(options) {
 
-    var container = options.container;
+    var container   = options.container;
+    var editor      = options.editor;
 
-    var panel = jQuery('<div>', { id: 'my-data-panel' });
+    //
+    // Main panel
+    //
+    var panel       = jQuery('<div>', { id: 'my-data-panel' });
 
     var myDataTable = jQuery('<table>', { css: { 
                                             width:  '99%',
                                             height: '300px',
                                             border: '1px solid black' } } );
 
+    //
+    // Title
+    //
     var myDataTitle = jQuery('<div>', { css: {  textAlign: 'center',
                                                 paddingTop: '5px'   } });
     myDataTitle.text('My Data');
@@ -32,7 +39,8 @@ var MyDataPanel = function(options) {
 
     piButton.text('Connect to Pi');
     piButton.click( function() {
-        console.log("[DEBUG] Connect to Pi clicked.");
+        // console.log("[DEBUG] Connect to Pi click()");
+        editor.getPiSelectorPanel().loadPiList();
         $('#my-data-panel').hide(); 
         $('#pi-selector-panel').show(); 
     });
@@ -45,4 +53,5 @@ var MyDataPanel = function(options) {
     panel.append(myDataTable);
     container.append(panel);
 
+    return this;
 }

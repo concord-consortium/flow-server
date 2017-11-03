@@ -15,7 +15,7 @@ var ProgramEditorFileManager = function(options) {
     //
     // Label
     //
-    var nameLabel   = jQuery('<label>').text('Name').css('padding', '2px');;
+    var nameLabel   = jQuery('<label>').text('Program Name').css('padding', '2px');;
 
     //
     // File name field
@@ -144,5 +144,5 @@ var ProgramEditorFileManager = function(options) {
 
     container.append(fileWidget);
 
-
+    return this;
 }

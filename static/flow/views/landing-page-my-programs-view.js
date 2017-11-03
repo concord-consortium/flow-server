@@ -62,7 +62,10 @@ var LandingPageMyProgramsView = function(options) {
                         }
                     }
                     if (i % 2 == 1) {
-                        row.push(jQuery('<div>'));
+                        row.push(jQuery('<div>',
+                                        { css: {    width:  '100px',
+                                                    height: '100px',
+                                                    padding: '10px' } }) );
                         Util.addTableRow(table, row);
                     }
                     table.appendTo(div);
