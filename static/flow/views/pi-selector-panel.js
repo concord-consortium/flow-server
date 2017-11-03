@@ -8,32 +8,66 @@ var PiSelectorPanel = function(options) {
 
     var _this = this;
 
-    var panel = jQuery('<div>', { id: 'pi-selector-panel' } );
+    var panel = jQuery('<div>', { id: 'pi-selector-panel',
+                                    css: {  width: '200px',
+                                            float: 'right' } } );
 
     var piTable   = jQuery('<table>', { css: { 
                                             width:  '99%',
-                                            height: '300px',
                                             border: '1px solid lightgrey' } } );
 
-    var piTitle   = jQuery('<div>', { css: {    position: 'relative',
+    var piTitleBar = jQuery('<div>', { css: {   position:   'relative',
+                                                textAlign:  'center',
+                                                height:     '30px' } });
+
+    var piTitle   = jQuery('<div>', { css: {    // position: 'relative',
                                                 textAlign: 'center',
                                                 paddingTop: '5px'   } });
     piTitle.text('Available Pis');
+    piTitleBar.append(piTitle);
 
-    var refreshButton = $('<button>', { css: {  textAlign:  'center',
+    //
+    // A panel for refresh and close buttons
+    //
+    var buttonPanel = $('<div>', { css: {       textAlign:  'center',
                                                 position:   'absolute',
+                                                float:      'right',
                                                 padding:    '0px',
                                                 top:        '0px',
                                                 right:      '0px'    } });
 
-    refreshButton.html("&#128472;");
-    piTitle.append(refreshButton);
 
+    var refreshButton = $('<button>', { css: {  textAlign:  'center',
+                                                backgroundColor: 'white',
+                                                padding:    '2px',
+                                                paddingRight: '4px' } });
+
+    refreshButton.html("&#10226;");
+    buttonPanel.append(refreshButton);
+
+    var closeButton = $('<button>', { css: {    textAlign:  'center',
+                                                backgroundColor: 'white',
+                                                padding:        '2px' } });
+
+    closeButton.html("X");
+    buttonPanel.append(closeButton);
+
+    piTitleBar.append(buttonPanel);
+     
     var piList      = jQuery('<div>', 
-                        {     id:    'pi-selector-list',
+                        {   id:    'pi-selector-list',
                             css: {
+                                overflowY:  'scroll',
                                 width:      '100%',
-                                height:     '200px'  } });
+                                height:     '300px'  } });
+
+    var datasetNameLabel = jQuery('<div>').html('<i>Name Dataset</i>');
+    var datasetNameField = jQuery('<input>', {  
+                                                id: 'dataset-name-textfield',
+                                                type: 'text',
+                                                css: {  width: '99%'
+
+                                                        } });
 
     var recordButton = jQuery('<button>', 
                         {       class: 'color-start-recording-button',
@@ -45,8 +79,10 @@ var PiSelectorPanel = function(options) {
 
     recordButton.text('Start Recording');
 
-    Util.addTableRow(piTable, [piTitle], { verticalAlign: 'top' } );
+    Util.addTableRow(piTable, [piTitleBar], { verticalAlign: 'top' } );
     Util.addTableRow(piTable, [piList]);
+    Util.addTableRow(piTable, [datasetNameLabel]);
+    Util.addTableRow(piTable, [datasetNameField]);
     Util.addTableRow(piTable, [recordButton], 
                         {   padding: '2px',
                             verticalAlign: 'bottom' } );
@@ -54,6 +90,10 @@ var PiSelectorPanel = function(options) {
     panel.append(piTable);
     panel.hide();
     container.append(panel);
+
+
+    this.controllers = [];
+    this.selectedController = null;
 
     //
     // Refresh the list of Pis
@@ -63,14 +103,40 @@ var PiSelectorPanel = function(options) {
     });
 
     //
+    // Close button (return to My Data view.)
+    //
+    closeButton.click( function() {
+        $('#pi-selector-panel').hide();
+        $('#my-data-panel').show();
+    });
+
+    //
+    // Handle selection of pi
+    //
+    this.selectPi = function(index) {
+        for(var i = 0; i < this.controllers.length; i++) {
+            var div = $('#pi-selector-controller-'+i);
+            if(index == i) {
+                this.selectedController = this.controllers[i];
+                div.addClass('color-connect-to-pi-button');
+            } else {
+                div.removeClass('color-connect-to-pi-button');
+            }
+        }
+    }
+
+    //
     // AJAX call and handler for listing Pis.
     //
     this.loadPiList = function() {
 
         // console.log("[DEBUG] loadPiList loading...");
 
+        _this.controllers = [];
+        _this.selectedController = null;
+
         piList.empty();
-        piList.text("Loading My Programs...");
+        piList.text("Loading Pi list...");
 
         var url = '/ext/flow/controllers';
 
@@ -86,19 +152,37 @@ var PiSelectorPanel = function(options) {
                    
                     piList.empty();
 
-                    console.log("[DEBUG] Creating Pi table...");
-
                     var table = jQuery('<table>', 
-                                    { css: {  margin: '0 auto' } } );
+                                    { css: {  width: '100%' } } );
 
-                    var controllers = response.controllers;
+                    _this.controllers = response.controllers;
                     controllers.sort(Util.sortByName);
-                    for(var i = 0; i < controllers.length; i++) {
-                        var controller = $('<div>', 
-                                            { css: {    padding: '5px',
-                                                        cursor: 'pointer' } } );
-                        controller.text(controllers[i].name);
-                        Util.addTableRow(table, [controller] );
+
+                    console.log("[DEBUG] Creating Pi table...", controllers);
+
+                    //
+                    // Create divs for all pi not in recording state.
+                    //
+                    for(var i = 0; i < _this.controllers.length; i++) {
+                        var controller = _this.controllers[i];
+                        if(controller.status.recording_interval != null) {
+                            continue;
+                        }
+
+                        var controllerDiv = 
+                            $('<div>', 
+                                {   id: 'pi-selector-controller-'+i,
+                                    css: {  border: '1px solid lightgrey',
+                                            width: '100%',
+                                            padding: '5px',
+                                            cursor: 'pointer' } } );
+
+                        controllerDiv.text(controllers[i].name);
+                        controllerDiv.click(i, function(e) {
+                            _this.selectPi(e.data);
+                            // alert(e.data); 
+                        });
+                        Util.addTableRow(table, [controllerDiv] );
                     }
                     piList.append(table);
 

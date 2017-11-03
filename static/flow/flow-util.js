@@ -37,7 +37,7 @@ Util.addTableRow = function(table, data, tdCss) {
 
     var row = $('<tr>');
 
-    var _tdCss = { 'paddingLeft': '5px' };
+    var _tdCss = {}
     if(tdCss) {
         _tdCss = tdCss;
     }

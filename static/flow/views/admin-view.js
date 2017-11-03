@@ -121,10 +121,12 @@ var AdminView = function(options) {
         var serverInfo = $('<table>', {} );
         Util.addTableRow(serverInfo, [
                                         $('<div>').text("Flow Server Version: "), 
-                                        $('<div>').text(g_flow_server_version)  ]);
+                                        $('<div>').text(g_flow_server_version)  ],
+                                        { paddingLeft: '5px' } );
         Util.addTableRow(serverInfo, [
                                         $('<div>').text("Rhizo Server Version: "),
-                                        $('<div>').text(g_rhizo_server_version) ]);
+                                        $('<div>').text(g_rhizo_server_version) ],
+                                        { paddingLeft: '5px' } );
         
         serverInfo.appendTo(controllerAdminContent);
         $('<br>').appendTo(controllerAdminContent);
@@ -145,7 +147,8 @@ var AdminView = function(options) {
                     _this.createAdminTableHeader().html('<b>Last Online</b>'),
                     _this.createAdminTableHeader().html('<b>Name</b>'),
                     _this.createAdminTableHeader().html('<b>Version</b>'),
-                    _this.createAdminTableHeader().html('<b>Updates</b>')    ]);
+                    _this.createAdminTableHeader().html('<b>Updates</b>')    ],
+                    { paddingLeft: '5px' } );
 
         if (controllers.length) {
             controllers.sort(Util.sortByName);
@@ -268,7 +271,8 @@ var AdminView = function(options) {
                                                 lastOnlineDiv,
                                                 nameDiv, 
                                                 versionDiv,
-                                                swUpdateDiv ]);
+                                                swUpdateDiv ],
+                                                { paddingLeft: '5px' } );
 
                     var detailsDiv = _this.createAdminTableCell('admin_details_div_'+_i);
                     detailsDiv.css('display','inline-block');
@@ -407,7 +411,8 @@ var AdminView = function(options) {
                     _this.createAdminTableCell()
                         .css('text-align','left')
                         .text(status.flow_version)
-                ] );
+                ],
+                { paddingLeft: '5px' } );
 
         Util.addTableRow(
                 verTable,
@@ -418,7 +423,8 @@ var AdminView = function(options) {
                     _this.createAdminTableCell()
                         .css('text-align','left')
                         .text(status.lib_version)
-                ] );
+                ],
+                { paddingLeft: '5px' } );
 
     }
 
@@ -506,7 +512,8 @@ var AdminView = function(options) {
                         _this.createAdminTableCell()
                             .css('text-align', 'left')
                             .text(status.ip_addresses[key])
-                    ] );
+                    ],
+                    { paddingLeft: '5px' } );
             }
         }
         

@@ -9,7 +9,9 @@ var MyDataPanel = function(options) {
     //
     // Main panel
     //
-    var panel       = jQuery('<div>', { id: 'my-data-panel' });
+    var panel       = jQuery('<div>', { id: 'my-data-panel',
+                                        css: {  width: '200px',
+                                                float: 'right' } });
 
     var myDataTable = jQuery('<table>', { css: { 
                                             width:  '99%',
