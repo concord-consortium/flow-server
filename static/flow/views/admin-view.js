@@ -255,6 +255,20 @@ var AdminView = function(options) {
                                                 versionDiv,
                                                 swUpdateDiv ]);
 
+                    var detailsDiv = _this.createAdminTableCell('admin_details_div_'+_i);
+                    detailsDiv.css('display','none');
+
+                    
+                    //
+                    // Add the details row
+                    //
+                    var detailRow = $('<tr>');
+                    var detailCell = $('<td>', { colspan: 7 } );
+                    table.append(detailRow);
+                    detailRow.append(detailCell);
+                    detailCell.append(detailsDiv);
+
+
                     //
                     // Update table row cells with controller info.
                     //
@@ -272,6 +286,8 @@ var AdminView = function(options) {
                                             controller.status.available_versions, 
                                             controller.path);
                     }
+
+                    _this.setAdminDetailInfo(_i, controller.status);
 
                 })(i);
      
@@ -299,6 +315,19 @@ var AdminView = function(options) {
         onlineCircle.appendTo(onlineDiv);
         onlineText.text(isOnline ? "online" : "offline");
         onlineText.appendTo(onlineDiv);
+
+        //
+        // Add toggle for detail view
+        //
+        onlineDiv.click( function() {
+            var detailsDiv = $('#admin_details_div_'+i);
+            if(detailsDiv.is(":visible")) {
+                detailsDiv.hide();
+            } else {
+                detailsDiv.show();
+            }
+        });
+        onlineDiv.css('cursor','pointer');
     }
 
     //
@@ -440,6 +469,40 @@ var AdminView = function(options) {
                             {   verticalAlign:  'top',
                                 paddingLeft:    '3px'   } );
 
+    }
+
+    //
+    // Set controller detail info
+    //
+    this.setAdminDetailInfo = function(i, status) {
+
+        var detailsDiv = $('#admin_details_div_'+i);
+        detailsDiv.empty();
+
+        var ipTable = $('<table>');
+
+        if( status.ip_addresses != null ) {
+            for (var key in status.ip_addresses) {
+                Util.addTableRow(ipTable, 
+                    [
+                        _this.createAdminTableCell()
+                            .css('text-align', 'left')
+                            .text(key+": "),
+                        _this.createAdminTableCell()
+                            .css('text-align', 'left')
+                            .text(status.ip_addresses[key])
+                    ] );
+            }
+        }
+        
+        detailsDiv.append(ipTable);
+
+        var currentProgram = $('<div>', { css: {    float: 'left',
+                                                    paddingLeft: '5px',
+                                                    paddingBottom: '25px' } } );
+        currentProgram.text("Current Program: " + status.current_diagram);
+
+        detailsDiv.append(currentProgram);
     }
 
     //
