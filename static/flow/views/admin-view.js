@@ -271,8 +271,8 @@ var AdminView = function(options) {
                                                 swUpdateDiv ]);
 
                     var detailsDiv = _this.createAdminTableCell('admin_details_div_'+_i);
-                    detailsDiv.css('display','none');
-
+                    detailsDiv.css('display','inline-block');
+                    detailsDiv.hide();
                     
                     //
                     // Add the details row
@@ -512,9 +512,8 @@ var AdminView = function(options) {
         
         detailsDiv.append(ipTable);
 
-        var currentProgram = $('<div>', { css: {    float: 'left',
-                                                    paddingLeft: '5px',
-                                                    paddingBottom: '25px' } } );
+        var currentProgram = $('<span>', { css: {   float: 'left',
+                                                    paddingLeft: '5px' } } );
         if(status.current_diagram == null) {
             currentProgram.text("No Current Program");
         } else {
@@ -522,6 +521,20 @@ var AdminView = function(options) {
         }
 
         detailsDiv.append(currentProgram);
+
+        detailsDiv.append($('<br>'));
+
+        var currentUser = $('<span>', { css: {    float: 'left',
+                                                    paddingLeft: '5px',
+                                                    paddingBottom: '2px' } } );
+        if(status.username == null) {
+            currentUser.text("No Current User");
+        } else {
+            currentUser.text("Current User: " + status.username);
+        }
+
+        detailsDiv.append(currentUser);
+
     }
 
     //
