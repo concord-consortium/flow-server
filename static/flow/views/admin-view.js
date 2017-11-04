@@ -221,7 +221,7 @@ var AdminView = function(options) {
                             var path = controller.path;
                             console.log("[DEBUG] stop program", path);
                             _this.sendAdminMessage( path, 
-                                                    'stop_program',
+                                                    'stop_diagram',
                                                     {} );
                             _this.sendAdminMessage( path, 
                                                     'request_status',

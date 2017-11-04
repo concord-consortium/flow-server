@@ -91,8 +91,7 @@ var PiSelectorPanel = function(options) {
     panel.hide();
     container.append(panel);
 
-
-    this.controllers = [];
+    this.availableControllers = [];
     this.selectedController = null;
 
     //
@@ -111,13 +110,107 @@ var PiSelectorPanel = function(options) {
     });
 
     //
+    // Start recording
+    //
+    recordButton.click( function() {
+
+        var dsName = $('#dataset-name-textfield').val();
+        var controller = _this.selectedController;
+        var programString = editor.getProgramSpec();
+
+        if(dsName == null || dsName == '') {
+            alert("You must specify a dataset name.");
+            return;
+        }
+
+        if(controller == null) {
+            alert("No pi selected.");
+            return;
+        }
+       
+        if(programString == null || programString == '') {
+            alert("Cannot find program.");
+            return;
+        }
+
+        var programSpec = JSON.parse(programString);
+
+        //
+        // Set name on program (maybe just do this in editor when we get the
+        // program spec as a non-string object...)
+        //
+        var name = editor.getFileManager().getProgramName();
+        programSpec.name = name;
+        console.log("[DEBUG] Set name: " + programSpec.name);
+
+        if(!programSpec.name || programSpec.name == '') {
+            alert("No name set on program. " + programSpec.name);
+            return;
+        }
+
+        //
+        // Need to send message 'set_diagram' followed by 'start_recording'
+        //
+
+        //
+        // A common set of parameters we will use for sending
+        // both messages.
+        //
+        var execParams = {  
+                            target_folder:  controller.path,
+                            src_folder:     controller.path  }
+       
+        //
+        // Clone the common params.
+        //
+        var setDiagramParams = Object.assign({}, execParams);
+
+        //
+        // Add parameters specific to 'set_diagram'
+        //
+        setDiagramParams.message_type   = 'set_diagram';
+        setDiagramParams.message_params = { diagram:    programSpec,
+                                            username:   g_user.user_name };
+
+        setDiagramParams.response_func  = function(ts, params) {
+
+            //
+            // If successfully set_diagram then start_recording...
+            //
+            if(params.success) {
+
+                var startRecordingParams = Object.assign({}, execParams);
+                startRecordingParams.message_type   = 'start_recording';
+                startRecordingParams.message_params = { rate: 1 };
+                startRecordingParams.response_func  = function(ts, params) {
+                    if(params.success) {
+                        alert("Recording started.");
+                    } else {
+                        alert("Error starting recording: " + params.message);
+                    }
+                }
+
+                var startRecording = MessageExecutor(startRecordingParams);
+                startRecording.execute();
+                                
+            } else {
+                alert("Error transferring program to pi: " + params.message);
+            }
+        }
+
+        var setDiagram = MessageExecutor(setDiagramParams);
+        setDiagram.execute();
+
+    });
+
+    //
     // Handle selection of pi
     //
     this.selectPi = function(index) {
-        for(var i = 0; i < this.controllers.length; i++) {
+        for(var i = 0; i < this.availableControllers.length; i++) {
             var div = $('#pi-selector-controller-'+i);
             if(index == i) {
-                this.selectedController = this.controllers[i];
+                this.selectedController = this.availableControllers[i];
                 div.addClass('color-connect-to-pi-button');
             } else {
                 div.removeClass('color-connect-to-pi-button');
@@ -132,7 +225,7 @@ var PiSelectorPanel = function(options) {
 
         // console.log("[DEBUG] loadPiList loading...");
 
-        _this.controllers = [];
+        _this.availableControllers = [];
         _this.selectedController = null;
 
         piList.empty();
@@ -155,16 +248,17 @@ var PiSelectorPanel = function(options) {
                     var table = jQuery('<table>', 
                                     { css: {  width: '100%' } } );
 
-                    _this.controllers = response.controllers;
-                    controllers.sort(Util.sortByName);
+                    _this.availableControllers = response.controllers;
+                    _this.availableControllers.sort(Util.sortByName);
 
-                    console.log("[DEBUG] Creating Pi table...", controllers);
+                    console.log("[DEBUG] Creating Pi table...", 
+                                _this.availableControllers);
 
                     //
                     // Create divs for all pi not in recording state.
                     //
-                    for(var i = 0; i < _this.controllers.length; i++) {
-                        var controller = _this.controllers[i];
+                    for(var i = 0; i < _this.availableControllers.length; i++) {
+                        var controller = _this.availableControllers[i];
                         if(controller.status.recording_interval != null) {
                             continue;
                         }
@@ -177,7 +271,7 @@ var PiSelectorPanel = function(options) {
                                             padding: '5px',
                                             cursor: 'pointer' } } );
 
-                        controllerDiv.text(controllers[i].name);
+                        controllerDiv.text(controller.name);
                         controllerDiv.click(i, function(e) {
                             _this.selectPi(e.data);
                             // alert(e.data); 

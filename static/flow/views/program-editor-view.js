@@ -57,6 +57,8 @@ var ProgramEditorView = function(options) {
     base.getPiSelectorPanel = function() { return piSelectorPanel; }
     base.getMyDataPanel     = function() { return myDataPanel; }
 
+    base.getProgramSpec     = function() { return textarea.val(); }
+
     //
     // Clear the content. Reset editor to initial state.
     //

@@ -144,5 +144,13 @@ var ProgramEditorFileManager = function(options) {
 
     container.append(fileWidget);
 
+    //
+    // Get name of program
+    //
+    this.getProgramName = function() { 
+        console.log("[DEBUG] getProgramName() " + nameField.val());
+        return nameField.val(); 
+    }
+
     return this;
 }
