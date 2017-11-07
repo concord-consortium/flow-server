@@ -26,6 +26,7 @@
 	<script src="/ext/flow-server/static/external/CodapInterface.js"></script>
 	<script src="/ext/flow-server/static/flow/codap-bridge.js"></script>
 {% else %}
+	<script type="text/javascript" src="/static/js/download.js"></script>
     <script>
         window.CodapTest = {
             logTopic: function () {}
@@ -188,6 +189,8 @@
 		<button class="btn" id="selectInterval" onclick="selectInterval()">Select Interval</button>
 		{% if use_codap %}
 		<button class="btn" onclick="exploreRecordedDataInCODAP()">Explore Data in CODAP</button>
+		{% else %}
+		<button class="btn" onclick="downloadRecordedData()">Download Data</button>
 		{% endif %}
 		<button class="btn" onclick="g_plotHandler.zoomIn()">Zoom In</button>
 		<button class="btn" onclick="g_plotHandler.zoomOut()">Zoom Out</button>
