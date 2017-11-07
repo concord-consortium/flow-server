@@ -279,6 +279,8 @@ def file_operation(operation, type):
                 file = find_resource(path + "/" + child.name + "/metadata")
                 if file is not None:
                     metadata = read_resource(file)
+                    if metadata is not None:
+                        metadata = json.loads(metadata)
             items.append({  'name':     child.name,
                             'metadata': metadata    } )
 

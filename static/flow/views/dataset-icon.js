@@ -8,8 +8,14 @@ var DatasetIcon = function(options) {
 
     // console.log("[DEBUG] DatasetIcon dataset ... ", item);
 
+    
+    cls = "color-recorded-previous-icon";
+    if(item.metadata && item.metadata.recording) {
+        cls = "color-recording-now-icon";
+    }
+
     var box = jQuery('<div>', 
-                        { class: 'square-button color-recording-now-icon',
+                        { class: 'square-button ' + cls,
                             css: { margin: '0 auto' } } );
 
     var text = jQuery('<div>', 
