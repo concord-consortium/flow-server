@@ -17,11 +17,10 @@ var LandingPageView = function(options) {
     var leftMargin  = jQuery('<div>', { css: { width: '100px' } } );
 
     //
-    // Left side landing page
+    // Left side of landing page
     //
-    var left        = jQuery('<div>', { id: 'landing-page-recording-view',
+    var left        = jQuery('<div>', { id: 'landing-page-dataset-view',
                                         css: {  
-                                                // height: '500px',
                                                 float:  'right',
                                                 textAlign: 'center' } } );
 
@@ -35,7 +34,7 @@ var LandingPageView = function(options) {
     separator.appendTo(middle);
 
     //
-    // Right side landing page
+    // Right side of landing page
     //
     var right       = jQuery('<div>', { id: 'landing-page-my-programs-view',
                                         css: {  
@@ -107,15 +106,13 @@ var LandingPageView = function(options) {
     welcomeMessage.appendTo(content);
 
     var myPrograms = LandingPageMyProgramsView({id: 'landing-page-my-programs-view'});
-
-    base.loadRecordedData = function(div) {
-
-    };
+    var myDatasets = LandingPageDataSetView({id: 'landing-page-dataset-view'});
 
     base.show = function() {
         // console.log("[DEBUG] LandingPageView show()");
         jQuery('#'+base.getDivId()).show();
         myPrograms.show();
+        myDatasets.show();
     }
 
     return base;

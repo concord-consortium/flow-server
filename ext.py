@@ -272,14 +272,20 @@ def file_operation(operation, type):
         resource    = find_resource(path)
         children    = Resource.query.filter(Resource.parent_id == resource.id, Resource.deleted == False)
 
-        files = []
+        items = []
         for child in children:
-            files.append(child.name)
+            metadata = None
+            if type == 'datasets':
+                file = find_resource(path + "/" + child.name + "/metadata")
+                if file is not None:
+                    metadata = read_resource(file)
+            items.append({  'name':     child.name,
+                            'metadata': metadata    } )
 
         return json.dumps({
                 'success':  True,
-                'message':  'Read %s' % (path),
-                'files':    files
+                'message':  'Listed %s' % (path),
+                'items':    items
             })
 
     ops = { 'save':     _save,

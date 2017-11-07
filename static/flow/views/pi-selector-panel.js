@@ -40,7 +40,6 @@ var PiSelectorPanel = function(options) {
     var refreshButton = $('<button>', { css: {  textAlign:          'center',
                                                 backgroundColor:    'white',
                                                 verticalAlign: 'top',
-                                                // height: '30px',
                                                 padding:    '1px',
                                                 paddingRight: '4px' } });
 
@@ -50,7 +49,6 @@ var PiSelectorPanel = function(options) {
     var closeButton = $('<button>', { css: {    textAlign:  'center',
                                                 backgroundColor: 'white',
                                                 verticalAlign: 'top',
-                                                // height: '30px',
                                                 padding:        '4px',
                                                 paddingRight: '4px' } });
 

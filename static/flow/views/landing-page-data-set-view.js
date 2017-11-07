@@ -3,22 +3,23 @@
 // which can display "My Programs", "Recording Now" data
 // and "Previously Recorded" data
 //
-var LandingPageMyProgramsView = function(options) {
+var LandingPageDataSetView = function(options) {
 
     var base = BaseView(options);
-   
+
 
     //
-    // AJAX call and handler for updating "My Programs" div.
+    // AJAX call and handler for updating "Recording Now" and 
+    // "Previously Recorded" div.
     //
-    var loadPrograms = function(div) {
+    var loadDatasets = function(div) {
 
-        // console.log("[DEBUG] loadPrograms loading My Programs...");
+        // console.log("[DEBUG] loading recorded data...");
 
         div.empty();
-        div.text("Loading My Programs...");
+        div.text("Loading recorded data...");
 
-        var url = '/ext/flow/list_programs';
+        var url = '/ext/flow/list_datasets';
 
         $.ajax({
             url: url,
@@ -27,32 +28,43 @@ var LandingPageMyProgramsView = function(options) {
             success: function(data) {
                 var response = JSON.parse(data);
 
-                // console.log("[DEBUG] List programs", response);
+                // console.log("[DEBUG] List datasets", response);
 
                 if(response.success) {
                    
                     div.empty();
-                    div.css('width', '200px');
+                    // div.css('width', '200px');
 
-                    var title = jQuery('<div>');
-                    title.text("My Programs");
-                    title.appendTo(div);
+                    var recordingNow = jQuery('<div>');
+                    recordingNow.text("Recording Now");
+                    recordingNow.appendTo(div);
 
-                    // console.log("[DEBUG] loadPrograms Creating My Programs table...");
+                    //
+                    // A wrapper div around the table allows 
+                    // "float: right" to align properly without
+                    // overlapping the center divider.
+                    //
+                    var tableWrapper = jQuery('<div>', 
+                                { id: 'recording-now-table-wrapper', 
+                                    css: { float: 'right' } } );
 
-                    var table = jQuery('<table>', 
-                                    { css: {  margin: '0 auto' } } );
+                    // console.log("[DEBUG] Creating 'Recording Now' table...");
+
+                    var table = jQuery('<table>');
+                                    // , { css: {    margin: '0 auto' } } );
 
                     var items = response.items;
                     var row = [];
                     for(var i = 0; i < items.length; i++) {
+                        
+                        // console.log("[DEBUG] Creating dataset item", items[i]);
 
                         var wrapper = jQuery('<div>', 
                                         { css: {    testAlign: 'center',
                                                     padding: '10px' } });
 
-                        var icon = ProgramIcon( {   container:  wrapper,
-                                                    item:       items[i] } );
+                        var icon = DatasetIcon( {   container:  wrapper,
+                                                    item:       items[i]  } );
 
                         row.push(wrapper);
 
@@ -68,7 +80,9 @@ var LandingPageMyProgramsView = function(options) {
                                                     padding: '10px' } }) );
                         Util.addTableRow(table, row);
                     }
-                    table.appendTo(div);
+
+                    tableWrapper.appendTo(div);
+                    table.appendTo(tableWrapper);
 
                 } else {
                     console.log("[ERROR] Error listing programs", response);
@@ -83,7 +97,7 @@ var LandingPageMyProgramsView = function(options) {
 
     base.show = function() {
         var content = jQuery('#'+base.getDivId());
-        loadPrograms(content);
+        loadDatasets(content);
     }
 
     return base;
