@@ -58,19 +58,21 @@ def flow_app():
     # Default working dir is root of "rhizo-server"
     # E.g. /home/user/rhizo-server
     #
-    rhizo_server_version = subprocess.check_output(['git',
-                                                    'describe',
-                                                    '--tags',
-                                                    '--always'  ]).rstrip()
-
     flow_dir = os.path.dirname(os.path.realpath(__file__))
-
-    flow_server_version = subprocess.check_output([ 'git',
-                                                    '-C',
-                                                    '%s' % (flow_dir),
-                                                    'describe',
-                                                    '--tags',
-                                                    '--always'  ]).rstrip()
+    if app.config.get('FLOW_WINDOWS', False):  # allow testing on Windows, where commands below don't work by default
+        rhizo_server_version = 'X'
+        flow_server_version = 'X'
+    else:
+        rhizo_server_version = subprocess.check_output(['git',
+                                                        'describe',
+                                                        '--tags',
+                                                        '--always'  ]).rstrip()
+        flow_server_version = subprocess.check_output([ 'git',
+                                                        '-C',
+                                                        '%s' % (flow_dir),
+                                                        'describe',
+                                                        '--tags',
+                                                        '--always'  ]).rstrip()
 
     flow_user = None
     if current_user.is_authenticated:
