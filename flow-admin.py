@@ -62,10 +62,14 @@ if __name__ == '__main__':
 
         #
         # Create a folder for this user to store their programs
+        # and a folder for recorded datasets (sequences)
         #
-        student_folder = 'testing/student-folders/%s' % (username)
-        print("Creating student folder %s." % (student_folder))
-        _create_folders(student_folder)
+        folders = [ 'testing/student-folders/%s/programs' % (username),
+                    'testing/student-folders/%s/datasets' % (username) ]
+
+        for folder in folders:
+            print("Creating student folder %s." % (folder))
+            _create_folders(folder)
 
         print('Created flow user: %s' % (email))
 

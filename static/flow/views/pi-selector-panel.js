@@ -37,9 +37,11 @@ var PiSelectorPanel = function(options) {
                                                 right:      '0px'    } });
 
 
-    var refreshButton = $('<button>', { css: {  textAlign:  'center',
-                                                backgroundColor: 'white',
-                                                padding:    '2px',
+    var refreshButton = $('<button>', { css: {  textAlign:          'center',
+                                                backgroundColor:    'white',
+                                                verticalAlign: 'top',
+                                                // height: '30px',
+                                                padding:    '1px',
                                                 paddingRight: '4px' } });
 
     refreshButton.html("&#10226;");
@@ -47,9 +49,13 @@ var PiSelectorPanel = function(options) {
 
     var closeButton = $('<button>', { css: {    textAlign:  'center',
                                                 backgroundColor: 'white',
-                                                padding:        '2px' } });
+                                                verticalAlign: 'top',
+                                                // height: '30px',
+                                                padding:        '4px',
+                                                paddingRight: '4px' } });
 
-    closeButton.html("X");
+    // closeButton.html("X");
+    closeButton.html("&times;");
     buttonPanel.append(closeButton);
 
     piTitleBar.append(buttonPanel);
@@ -181,7 +187,9 @@ var PiSelectorPanel = function(options) {
 
                 var startRecordingParams = Object.assign({}, execParams);
                 startRecordingParams.message_type   = 'start_recording';
-                startRecordingParams.message_params = { rate: 1 };
+                startRecordingParams.message_params = { rate: 1,
+                                                        recording_location: '/testing/student-folders/' + g_user.user_name + '/datasets/' + dsName };
+
                 startRecordingParams.response_func  = function(ts, params) {
                     if(params.success) {
                         alert("Recording started.");

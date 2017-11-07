@@ -181,48 +181,13 @@ def get_controller_info():
     return controller_infos
 
 
-#
-# API for listing programs saved on the rhizo-server
-#
-@app.route('/ext/flow/list_programs', methods=['POST', 'GET'])
-def list_programs():
-
-    if not current_user.is_authenticated:
-        return json.dumps({
-            'success': False,
-            'message': 'User not authenticated'
-        })
-    
-    username    = current_user.user_name
-    org_user    = OrganizationUser.query.filter(OrganizationUser.user_id == current_user.id).first()
-
-    if org_user is None:
-        return json.dumps({
-            'success': False,
-            'message': 'Cannot find user organization.'
-        })
-
-    org_name    = org_user.organization.name
-    path        = '%s/%s/%s' % (org_name, 'student-folders', username)
-    resource    = find_resource(path)
-    children    = Resource.query.filter(Resource.parent_id == resource.id, Resource.deleted == False)
-
-    files = []
-    for child in children:
-        files.append(child.name)
-
-    return json.dumps({
-            'success':  True,
-            'message':  'Read %s' % (path),
-            'files':    files
-        })
 
 #
 # Handle persistence operations for program files.
 # Contains common code used across different program file
 # persistence operations for API calls.
 #
-def program_file_operation(operation):
+def file_operation(operation, type):
 
     if not current_user.is_authenticated:
         return json.dumps({
@@ -232,7 +197,7 @@ def program_file_operation(operation):
  
     filename    = request.values.get('filename')
 
-    if filename is None or filename == '':
+    if operation in ['save', 'load', 'delete'] and filename is None or filename == '':
         return json.dumps({
             'success': False,
             'message': 'No filename specified.'
@@ -252,8 +217,11 @@ def program_file_operation(operation):
     #
     # Construct path
     #
-    path = '%s/%s/%s/%s' % (org_name, 'student-folders', username, filename)
-
+    if operation != 'list':
+        path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, type, filename)
+    else:
+        path = '%s/%s/%s/%s' % (org_name, 'student-folders', username, type)
+        
     #
     # Save op
     #
@@ -297,9 +265,27 @@ def program_file_operation(operation):
                     'message': 'Deleted file %s.' % (resource.name)
                 })
 
+    #
+    # List operation
+    #
+    def _list():
+        resource    = find_resource(path)
+        children    = Resource.query.filter(Resource.parent_id == resource.id, Resource.deleted == False)
+
+        files = []
+        for child in children:
+            files.append(child.name)
+
+        return json.dumps({
+                'success':  True,
+                'message':  'Read %s' % (path),
+                'files':    files
+            })
+
     ops = { 'save':     _save,
             'load':     _load,
-            'delete':   _delete }
+            'delete':   _delete,
+            'list':     _list   }
 
     op = ops[operation]
     return op()
@@ -310,7 +296,7 @@ def program_file_operation(operation):
 #
 @app.route('/ext/flow/save_program', methods=['POST', 'GET'])
 def save_program():
-    return program_file_operation('save')
+    return file_operation('save', 'programs')
 
 #
 # API for loading (retrieving the contents of) a program 
@@ -318,13 +304,28 @@ def save_program():
 #
 @app.route('/ext/flow/load_program', methods=['POST', 'GET'])
 def load_program():
-    return program_file_operation('load')
+    return file_operation('load', 'programs')
 
 #
 # API to delete a saved program from the rhizo-server
 #
 @app.route('/ext/flow/delete_program', methods=['POST', 'GET'])
 def delete_program():
-    return program_file_operation('delete')
+    return file_operation('delete', 'programs')
 
+
+#
+# API for listing programs saved on the rhizo-server
+#
+@app.route('/ext/flow/list_programs', methods=['POST', 'GET'])
+def list_programs():
+    return file_operation('list', 'programs')
+
+#
+# API for listing named datasets saved on the rhizo-server
+#
+@app.route('/ext/flow/list_datasets', methods=['POST', 'GET'])
+def list_datasets():
+    return file_operation('list', 'datasets')
+ 
 

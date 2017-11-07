@@ -80,13 +80,18 @@ var LandingPageView = function(options) {
                                                     top: '0px',
                                                     right: '0px' } } );
     var welcomeText = jQuery('<div>');
-    welcomeText.text('Welcome ' + g_user.full_name);
-    welcomeText.appendTo(welcomeMessage);
+    if(g_user != null) {
+        welcomeText.text('Welcome ' + g_user.full_name);
+        welcomeText.appendTo(welcomeMessage);
+    } else {
+        welcomeText.text('You are not logged in.');
+        welcomeText.appendTo(welcomeMessage);
+    }
 
     //
     // Add admin button to welcome message
     //
-    if(g_user.isAdmin) {
+    if(g_user != null && g_user.isAdmin) {
         var adminButton = $('<button>', {   css: {  
                                                     float: 'right',
                                                     position: 'relative',
