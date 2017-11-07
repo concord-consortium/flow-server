@@ -37,7 +37,7 @@ var LandingPageDataSetView = function(options) {
                     var recorded = [];
                     for(var i = 0; i < items.length; i++) {
                         var item = items[i];
-                        console.log("[DEBUG] Checking metadata", item.metadata);
+                        // console.log("[DEBUG] Checking metadata", item.metadata);
                         if(item.metadata && item.metadata.recording == true) {
                             recording.push(item);
                         } else {

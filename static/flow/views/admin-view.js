@@ -377,7 +377,11 @@ var AdminView = function(options) {
         if(last_online.indexOf('.') != -1) {
             last_online = last_online.split('.')[0];
         }
-        var date = new Date(last_online + " UTC");
+        var dateStr = last_online + " UTC";
+        // Safari workaround
+        var dateStr = dateStr.replace(/-/g, '/');
+
+        var date = new Date(dateStr);
 
         var lastOnlineDiv = $('#admin_last_online_'+i);
         lastOnlineDiv.html( date.toLocaleDateString() + "<br/>" +
