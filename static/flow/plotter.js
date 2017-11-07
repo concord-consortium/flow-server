@@ -239,8 +239,95 @@ function selectInterval() {
 }
 
 
-function exploreRecordedDataInCODAP() {
+// get selected data (or all displayed data if no selection) as a list of dictionaries
+function selectedData(maxCount) {
 	var timeThresh = 0.4;  // seconds
+	var dataPairs = g_plotHandler.plotter.dataPairs;
+
+	// get data for quick reference
+	var xs = [];
+	var ys = [];
+	for (var j = 0; j < dataPairs.length; j++) {
+		xs.push(dataPairs[j].xData.data);
+		ys.push(dataPairs[j].yData.data);
+	}
+
+	// get timestamp bounds
+	var frame = g_plotHandler.plotter.frames[0];
+	var minTimestamp = frame.intervalLowerX;
+	var maxTimestamp = frame.intervalUpperX;
+	var ind = [];
+	for (var j = 0; j < dataPairs.length; j++) {
+		if (xs[j].length) {
+			ind[j] = 0;  // start at beginning
+		} else {
+			ind[j] = -1;  // no data; done with this pair
+		}
+	}
+
+	// merge the sequences
+	var data = [];
+	var startTimestamp = null;
+	while (1) {
+
+		// get current timestamp: min across sequences at current position
+		var timestamp = null;
+		for (var j = 0; j < dataPairs.length; j++) {
+			if (ind[j] >= 0) {
+				var t = xs[j][ind[j]];
+				if (timestamp === null || t < timestamp) {
+					timestamp = t;
+				}
+			}
+		}
+
+		// if no timestamp, then we've reached the end of all sequences, stop here
+		if (timestamp === null) {
+			break;
+		}
+
+		// check whether to keep this point
+		var keepPoint = ((minTimestamp === null || timestamp >= minTimestamp - timeThresh) && (maxTimestamp === null || timestamp <= maxTimestamp + timeThresh));
+
+		// first timestamp will be start timestamp
+		if (keepPoint && startTimestamp === null) {
+			startTimestamp = timestamp;
+		}
+
+		// grab the data for this timestamp and move indices forward
+		var dataPoint = {};
+		for (var j = 0; j < dataPairs.length; j++) {
+			if (ind[j] >= 0) {
+				var t = xs[j][ind[j]];
+				if (Math.abs(t - timestamp) < timeThresh) {
+					if (keepPoint) {
+						dataPoint[dataPairs[j].yData.name] = ys[j][ind[j]];
+					}
+					ind[j]++;  // move to next point for this sequence; we'll assume for now that each data point within a sequence has a distinct timestamp
+					if (ind[j] >= xs[j].length) {
+						ind[j] = -1;  // at end of this sequence
+					}
+				}
+			}
+		}
+
+		// add to data set to send to CODAP
+		if (keepPoint) {
+			dataPoint['timestamp'] = timestamp;
+			dataPoint['seconds'] = timestamp - startTimestamp;
+			data.push(dataPoint);
+		}
+
+		// limit amount of data
+		if (data.length > maxCount) {
+			break;
+		}
+	}
+	return data;
+}
+
+
+function exploreRecordedDataInCODAP() {
 	var dataPairs = g_plotHandler.plotter.dataPairs;
 	if (dataPairs.length && dataPairs[0].xData.data.length) {
 
@@ -260,87 +347,15 @@ function exploreRecordedDataInCODAP() {
 		CodapTest.prepCollection(
             attrs, 
             function() {
-                // get data for quick reference
-                var xs = [];
-                var ys = [];
-                for (var j = 0; j < dataPairs.length; j++) {
-                    xs.push(dataPairs[j].xData.data);
-                    ys.push(dataPairs[j].yData.data);
-                }
 
-                // get timestamp bounds
-                var frame = g_plotHandler.plotter.frames[0];
-                var minTimestamp = frame.intervalLowerX;
-                var maxTimestamp = frame.intervalUpperX;
-                var ind = [];
-                for (var j = 0; j < dataPairs.length; j++) {
-                    if (xs[j].length) {
-                        ind[j] = 0;  // start at beginning
-                    } else {
-                        ind[j] = -1;  // no data; done with this pair
-                    }
-                }
+				// get currently selected data (or all data if no selection)
+				var data = selectedData(3000);  // limit to 3000 points
 
-                // merge the sequences
-                var data = [];
-                var startTimestamp = null;
-                var step = 0;
-                while (1) {
-
-                    // get current timestamp: min across sequences at current position
-                    var timestamp = null;
-                    for (var j = 0; j < dataPairs.length; j++) {
-                        if (ind[j] >= 0) {
-                            var t = xs[j][ind[j]];
-                            if (timestamp === null || t < timestamp) {
-                                timestamp = t;
-                            }
-                        }
-                    }
-
-                    // if no timestamp, then we've reached the end of all sequences, stop here
-                    if (timestamp === null) {
-                        break;
-                    }
-
-                    // check whether to keep this point
-                    var keepPoint = ((minTimestamp === null || timestamp >= minTimestamp - timeThresh) && (maxTimestamp === null || timestamp <= maxTimestamp + timeThresh));
-
-                    // first timestamp will be start timestamp
-                    if (keepPoint && startTimestamp === null) {
-                        startTimestamp = timestamp;
-                    }
-
-                    // grab the data for this timestamp and move indices forward
-                    var dataPoint = {};
-                    for (var j = 0; j < dataPairs.length; j++) {
-                        if (ind[j] >= 0) {
-                            var t = xs[j][ind[j]];
-                            if (Math.abs(t - timestamp) < timeThresh) {
-                                if (keepPoint) {
-                                    dataPoint[dataPairs[j].yData.name] = ys[j][ind[j]];
-                                }
-                                ind[j]++;  // move to next point for this sequence; we'll assume for now that each data point within a sequence has a distinct timestamp
-                                if (ind[j] >= xs[j].length) {
-                                    ind[j] = -1;  // at end of this sequence
-                                }
-                            }
-                        }
-                    }
-
-                    // add to data set to send to CODAP
-                    if (keepPoint) {
-                        dataPoint['seconds'] = timestamp - startTimestamp;
-                        dataPoint['timestamp'] = moment(timestamp * 1000).format('M/D/YYYY H:mm:ss');
-                        data.push(dataPoint);
-                    }
-
-                    // sanity check
-                    step++;
-                    if (step > 3000) {
-                        break;
-                    }
-                }
+				// convert timestamp to format expected by codap
+				for (var i = 0; i < data.length; i++) {
+					var timestamp = data[i]['timestamp'];
+					data[i]['timestamp'] = moment(timestamp * 1000).format('M/D/YYYY H:mm:ss');
+				}
 
                 //
                 // Send data to CODAP
@@ -373,6 +388,53 @@ function exploreRecordedDataInCODAP() {
                 );
             }
         );
+	}
+}
+
+
+// download selected recorded data as a CSV file
+function downloadRecordedData() {
+	var dataPairs = g_plotHandler.plotter.dataPairs;
+	if (dataPairs.length && dataPairs[0].xData.data.length) {
+
+		// get names of fields to include in file
+		var dataFieldNames = [];
+		for (var i = 0; i < g_diagram.blocks.length; i++) {
+			var block = g_diagram.blocks[i];
+			if (block.inputCount === 0) {
+				dataFieldNames.push(block.name);
+			}
+		}
+
+		// get currently selected data (or all data if no selection)
+		var data = selectedData(10000);  // 10k max points
+
+		// convert data to a string
+		var dataStr = 'seconds,timestamp';
+		for (var j = 0; j < dataFieldNames.length; j++) {
+			dataStr += ',' + dataFieldNames[j];
+		}
+		dataStr += '\n';
+		for (var i = 0; i < data.length; i++) {
+			var dataPoint = data[i];
+			var line = dataPoint['seconds'].toFixed(2) + ','
+				+ moment(dataPoint['timestamp'] * 1000).format('YYYY/M/D H:mm:ss');
+			for (var j = 0; j < dataFieldNames.length; j++) {
+				var name = dataFieldNames[j];
+				line += ',';
+				if (dataPoint.hasOwnProperty(name)) {
+					var value = dataPoint[name];
+					if (!isNaN(value)) {
+						line += value.toFixed(2);  // TODO: use proper number of decimal places
+					}
+				}
+			}
+			line += '\n';
+			dataStr += line;
+		}
+
+		// convert string into a downloaded file
+		download(dataStr, 'data.csv', 'text/csv');
 	}
 }
 
