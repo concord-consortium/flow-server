@@ -12,7 +12,7 @@ var LandingPageDataSetView = function(options) {
     // AJAX call and handler for updating "Recording Now" and 
     // "Previously Recorded" div.
     //
-    var loadDatasets = function(div) {
+    var loadDataSets = function(div) {
 
         // console.log("[DEBUG] loading recorded data...");
 
@@ -70,21 +70,23 @@ var LandingPageDataSetView = function(options) {
                         // console.log("[DEBUG] Creating 'Recording Now' table...");
 
                         var table = jQuery('<table>');
-                                        // , { css: {    margin: '0 auto' } } );
 
                         var row = [];
                         for(var i = 0; i < list.length; i++) {
                             
                             // console.log("[DEBUG] Creating dataset item", items[i]);
 
+                            // (function(_i){
                             var wrapper = jQuery('<div>', 
                                             { css: {    testAlign: 'center',
                                                         padding: '10px' } });
 
-                            var icon = DatasetIcon( {   container:  wrapper,
-                                                        item:       list[i]  } );
-
+                            var icon = DataSetIcon( 
+                                                {   container:  wrapper,
+                                                    item:       list[i]  } );
                             row.push(wrapper);
+                            // })(i);
+
 
                             if (i % 2 == 1) {
                                 Util.addTableRow(table, row);
@@ -119,7 +121,7 @@ var LandingPageDataSetView = function(options) {
 
     base.show = function() {
         var content = jQuery('#'+base.getDivId());
-        loadDatasets(content);
+        loadDataSets(content);
     }
 
     return base;

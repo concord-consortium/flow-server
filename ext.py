@@ -275,12 +275,19 @@ def file_operation(operation, type):
         items = []
         for child in children:
             metadata = None
+
+            #
+            # For datasets, populate metadata.
+            #
             if type == 'datasets':
-                file = find_resource(path + "/" + child.name + "/metadata")
+                ds_path = path + "/" + child.name
+                file = find_resource(ds_path + "/metadata")
                 if file is not None:
                     metadata = read_resource(file)
                     if metadata is not None:
                         metadata = json.loads(metadata)
+                        metadata['recording_location'] = ds_path
+
             items.append({  'name':     child.name,
                             'metadata': metadata    } )
 

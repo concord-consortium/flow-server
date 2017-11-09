@@ -1,16 +1,15 @@
 //
 // Represents program metadata (filename, author)
 //
-var DatasetIcon = function(options) {
+var DataSetIcon = function(options) {
 
-    var item        = options.item;
-    var container   = options.container;
+    this.item       = options.item;
+    this.container  = options.container;
 
-    // console.log("[DEBUG] DatasetIcon dataset ... ", item);
-
+    // console.log("[DEBUG] DataSetIcon dataset ... ", this.item);
     
     cls = "color-recorded-previous-icon";
-    if(item.metadata && item.metadata.recording) {
+    if(this.item.metadata && this.item.metadata.recording) {
         cls = "color-recording-now-icon";
     }
 
@@ -22,17 +21,18 @@ var DatasetIcon = function(options) {
                         {   css: {  left: '5px',
                                     top: '5px'}  } );
 
-    text.text(item.name);
+    text.text(this.item.name);
     text.appendTo(box);
     box.appendTo(container);
 
     //
     // Load this dataset when clicked.
     //
-    box.click(function() {
-        // console.log("[DEBUG] ProgramIcon click", filename);
-        var editor = getTopLevelView('program-editor-view');
-        editor.loadProgram({filename: filename});
+    box.click(this.item, function(e) {
+        console.log("[DEBUG] DataSetIcon click", e.data);
+        var dataSetView = getTopLevelView('data-set-view');
+        dataSetView.loadDataSet(e.data);
+        showTopLevelView('data-set-view');
     });
 
     return this;

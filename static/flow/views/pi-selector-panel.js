@@ -49,7 +49,7 @@ var PiSelectorPanel = function(options) {
     var closeButton = $('<button>', { css: {    textAlign:  'center',
                                                 backgroundColor: 'white',
                                                 verticalAlign: 'top',
-                                                padding:        '4px',
+                                                padding:        '1px',
                                                 paddingRight: '4px' } });
 
     // closeButton.html("X");
@@ -109,6 +109,7 @@ var PiSelectorPanel = function(options) {
     // Close button (return to My Data view.)
     //
     closeButton.click( function() {
+        $('#dataset-name-textfield').val('');
         $('#pi-selector-panel').hide();
         $('#my-data-panel').show();
     });
@@ -190,6 +191,7 @@ var PiSelectorPanel = function(options) {
 
                 startRecordingParams.response_func  = function(ts, params) {
                     if(params.success) {
+                        $('#dataset-name-textfield').val('');
                         alert("Recording started.");
                     } else {
                         alert("Error starting recording: " + params.message);

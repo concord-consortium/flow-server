@@ -5,6 +5,8 @@ var BaseView = function(options) {
 
     var divId = options.id;
 
+    // console.log("[DEBUG] Creating BaseView", options);
+
     var ret = {
        
         _divId: divId,
