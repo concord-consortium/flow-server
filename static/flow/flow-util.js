@@ -53,3 +53,34 @@ Util.addTableRow = function(table, data, tdCss) {
 
 };
 
+//
+// Returns local date and time from a UTL string representation
+//
+Util.getLocalDateTime = function(d) {
+	if(d.indexOf('.') != -1) {
+    	d = d.split('.')[0];
+   	}
+    var dateStr = d + " UTC";
+    // Safari workaround
+    var dateStr = dateStr.replace(/-/g, '/');
+
+    var date = new Date(dateStr);
+
+    return [ date.toLocaleDateString(), date.toLocaleTimeString() ];
+};
+
+//
+// Util to get local browser date from a UTC string representation
+//
+Util.getLocalDate = function(d) {
+	return Util.getLocalDateTime(d)[0];
+};
+
+//
+// Util to get local browser date from a UTC string representation
+//
+Util.getLocalTime = function(d) {
+	return Util.getLocalDateTime(d)[1];
+};
+
+

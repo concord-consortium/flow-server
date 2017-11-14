@@ -43,21 +43,20 @@ var PiSelectorPanel = function(options) {
                                     textAlign:          'center',
                                     backgroundColor:    'white',
                                     verticalAlign:      'top',
-                                    display:            'inline-block',
-                                    padding:            '1px',
-                                    paddingRight:       '4px' } });
+                                    paddingRight:       '2px',
+                                    display:            'inline-block' }});
 
     refreshButton.html("&#10226;");
     buttonPanel.append(refreshButton);
 
     var closeButton = $('<div>', { css: {       
+                                    border:             '1px solid grey',
                                     cursor:             'pointer',
                                     textAlign:          'center',
                                     backgroundColor:    'white',
                                     verticalAlign:      'top',
-                                    display:            'inline-block',
-                                    paddingTop:         '5px',
-                                    paddingRight:       '4px' } });
+                                    padding:            '2px',
+                                    display:            'inline-block' }});
 
     closeButton.html("X");
     // closeButton.html("&times;");

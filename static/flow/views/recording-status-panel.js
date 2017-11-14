@@ -15,21 +15,19 @@ var RecordingStatusPanel = function(options) {
     var table       = jQuery('<table>');
 
     var buttonPanel = $('<div>', { css: {       textAlign:  'center',
-                                                position:   'absolute',
                                                 float:      'right',
-                                                margin:     '0 auto',
                                                 padding:    '0px',
                                                 top:        '0px',
                                                 right:      '0px'    } });
 
     var closeButton = $('<div>', { css: {
+                                    border:             '1px solid grey',
                                     cursor:             'pointer',
                                     textAlign:          'center',
                                     backgroundColor:    'white',
                                     verticalAlign:      'top',
-                                    display:            'inline-block',
-                                    paddingTop:         '5px',
-                                    paddingRight:       '4px' } });
+                                    padding:            '2px',
+                                    display:            'inline-block' }});
 
     closeButton.text('X');
     buttonPanel.append(closeButton);
@@ -41,20 +39,24 @@ var RecordingStatusPanel = function(options) {
     var stopButton  = jQuery('<button>', 
                         {       class: '.color-stop-recording-button',
                                 css: {
-                                    width:      '100%',
+                                    width:      '98%',
                                     padding:    '5px',
                                     left:       '0px',
                                     bottom:     '0px'   }});
     stopButton.text('Stop Recording');
 
     var recStatus   = $('<div>').html('<i>Unknown Status</i>');
-    var piName      = $('<div>').text('RPi00');
-    var startTime   = $('<div>').text('Started: 10/15/17');
+    var piName      = $('<div>').text('');
+    var startTime   = $('<div>').text('Started: N/A');
 
-    Util.addTableRow(table, [buttonPanel] );
-    Util.addTableRow(table, [recStatus] );
-    Util.addTableRow(table, [piName]);
-    Util.addTableRow(table, [startTime]);
+    Util.addTableRow(table, [buttonPanel],  {   varticalAlign: 'top' } );
+
+    Util.addTableRow(table, [recStatus],    {   textAlign:  'right',
+                                                padding:    '5px'      } );
+    Util.addTableRow(table, [piName],       {   textAlign:  'right',
+                                                padding:    '5px'      } );
+    Util.addTableRow(table, [startTime],    {   textAlign:  'right',
+                                                padding:    '5px'      } );
     Util.addTableRow(table, [stopButton] );
 
     panel.append(table);
@@ -64,12 +66,21 @@ var RecordingStatusPanel = function(options) {
     // Display panel with latest loaded data set metadata
     //
     this.show = function() {
-        var metadata = dataSetView.getDataSet().metadata;
-        recStatus.html(metadata.recording ? 
+        var metadata    = dataSetView.getDataSet().metadata;
+        var recording   = metadata.recording;
+        var start       = metadata.start_time;
+        recStatus.html(recording ? 
                         '<i>Currently Recording</i>' :
                         '<i>Not Recording</i>' );
         piName.text(metadata.controller_name);
-        startTime.text('Started: ' + metadata.start_time);
+        startTime.text('Started: ' + 
+                        Util.getLocalDate(start) + " " +
+                        Util.getLocalTime(start) );
+        if(recording) {
+            stopButton.show();
+        } else {
+            stopButton.hide();
+        }
     }
 
     //
@@ -82,7 +93,7 @@ var RecordingStatusPanel = function(options) {
         console.log("[DEBUG] Stopping recording", metadata.recording_location);
 
         //
-        // Send message over websocket
+        // Send message over websocket and handle response
         //
         var execParams = {  
                 message_type:   'stop_diagram',
@@ -93,6 +104,7 @@ var RecordingStatusPanel = function(options) {
                 response_func:  function(ts, params) {
                     if(params.success) {
                         alert("Recording stopped.");
+                        stopButton.hide();
                     } else {
                         alert("Error stopping recording: " + params.message);
                     }

@@ -52,7 +52,7 @@ var DataSetView = function(options) {
 
     Util.addTableRow(   mainTable, 
                         [ leftPanel, rightPanel ],
-                        {   paddingTop:     '10px',
+                        {   // paddingTop:     '10px',
                             verticalAlign:  'top' } );
 
     content.append(mainTable);
