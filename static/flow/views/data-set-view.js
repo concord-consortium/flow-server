@@ -9,23 +9,53 @@ var DataSetView = function(options) {
 
     var content = jQuery('#'+base.getDivId());
 
+    base.m_dataset              = null;
     base.m_program              = null;
     base.m_recordingLocation    = null;
     base.m_plotHandler          = null;
     base.m_canvas               = null;
 
-    PLOTTER_MARGIN_BOTTOM = 94; // px
+    PLOTTER_MARGIN_BOTTOM   = 94;   // px
+    RIGHT_PANEL_WIDTH       = 200;  // px
 
-    base.resizeCanvas = function() {
-        console.log("[DEBUG] resizeCanvas", 
-                        window.innerWidth, 
-                        window.innerHeight);
-        base.m_canvas.width = window.innerWidth;
-        base.m_canvas.height = window.innerHeight - PLOTTER_MARGIN_BOTTOM;
-        if (base.m_plotHandler){
-            base.m_plotHandler.drawPlot(null, null);
-        }
-    }
+    //
+    // Create the left panel 
+    //
+    var leftPanel       = jQuery('<div>',
+                            {   id: 'data-view-left-panel',
+                                css: { width: '100%' } } );
+
+    //
+    // Create the right panel
+    //
+    var rightPanel      = jQuery('<div>',
+                                {   id: 'data-view-right-panel',
+                                    css: { width: '100%' } });
+
+    //
+    // Create main table and add all of our components
+    //
+    var mainTable = jQuery('<table>', { css: { width: '100%' } });
+
+    var canvas = $('<canvas>', { id: 'data-set-canvas' } );
+    leftPanel.append(canvas);
+
+    var viewProgBtn = $('<button>').text('View Program');
+    var exportBtn   = $('<button>').text('Export to...');
+
+    //
+    // Panel on right (indicates status like "Currently Recording" etc.)
+    //
+    var recordingStatusPanel = RecordingStatusPanel(
+                                                {   container:      rightPanel,
+                                                    dataSetView:    base });
+
+    Util.addTableRow(   mainTable, 
+                        [ leftPanel, rightPanel ],
+                        {   paddingTop:     '10px',
+                            verticalAlign:  'top' } );
+
+    content.append(mainTable);
 
     //
     // Load a dataset and initialize view.
@@ -34,6 +64,7 @@ var DataSetView = function(options) {
        
         console.log("[DEBUG] loadDataSet", dataSet);
 
+        base.m_dataSet              = dataSet;
         base.m_program              = specToDiagram(dataSet.metadata.program);
         base.m_recordingLocation    = "/" + dataSet.metadata.recording_location;
        
@@ -53,6 +84,27 @@ var DataSetView = function(options) {
         base.m_plotHandler.plotter.resetReceived();
         // request sequence history data from server
         setTimeFrame('10m');
+
+        recordingStatusPanel.show();
+    }
+
+    //
+    // Return currently loaded dataset
+    //
+    base.getDataSet = function() { return base.m_dataSet; }
+
+    //
+    // Resize canvas
+    //
+    base.resizeCanvas = function() {
+        console.log("[DEBUG] resizeCanvas", 
+                        window.innerWidth, 
+                        window.innerHeight);
+        base.m_canvas.width = window.innerWidth - RIGHT_PANEL_WIDTH;;
+        base.m_canvas.height = window.innerHeight - PLOTTER_MARGIN_BOTTOM;
+        if (base.m_plotHandler){
+            base.m_plotHandler.drawPlot(null, null);
+        }
     }
 
 

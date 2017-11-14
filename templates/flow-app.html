@@ -66,6 +66,9 @@
     <script 
       src="/ext/flow-server/static/flow/views/data-set-view.js">
     </script>
+    <script 
+      src="/ext/flow-server/static/flow/views/recording-status-panel.js">
+    </script>
 
     <!--
       -
@@ -274,31 +277,7 @@
 
 <div    id="admin-view" ></div>
 <div    id="program-editor-view" ></div>
-
-<div    id="data-set-view" >
-    <div>
-        <canvas id="data-set-canvas"></canvas>
-        <div class="timeframe-label">Select timeframe:</div>
-        <div class="btn-group timeframe" role="group" aria-label="timeframe">
-          <button type="button" class="btn btn-default" onclick="setTimeFrame('1m')">1 min</button>
-            <button type="button" class="btn btn-default" onclick="setTimeFrame('10m')">10 mins</button>
-            <button type="button" class="btn btn-default" onclick="setTimeFrame('1h')">1 hr</button>
-            <button type="button" class="btn btn-default" onclick="setTimeFrame('24h')">24 hrs</button>
-            <button type="button" class="btn btn-default" onclick="setTimeFrame('7d')">7 days</button>
-            <button type="button" class="btn btn-default" onclick="setTimeFrame('30d')">30 days</button>
-        </div>
-    </div>
-    <div class="menuBar">
-        <button class="btn" id="data-set-select-interval" onclick="selectInterval()">Select Interval</button>
-        {% if use_codap %}
-        <button class="btn" onclick="exploreRecordedDataInCODAP()">Explore Data in CODAP</button>
-        {% endif %}
-        <button class="btn" onclick="g_plotHandler.zoomIn()">Zoom In</button>
-        <button class="btn" onclick="g_plotHandler.zoomOut()">Zoom Out</button>
-        <button class="btn btn-danger" onclick="deleteSequenceData()">Delete Data</button>
-        <button class="btn btn-primary" onclick="closePlotter()">Close History Viewer</button>
-    </div>
-</div>
+<div    id="data-set-view" ></div>
 
 
 
