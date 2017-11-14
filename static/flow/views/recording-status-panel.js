@@ -14,6 +14,30 @@ var RecordingStatusPanel = function(options) {
 
     var table       = jQuery('<table>');
 
+    var buttonPanel = $('<div>', { css: {       textAlign:  'center',
+                                                position:   'absolute',
+                                                float:      'right',
+                                                margin:     '0 auto',
+                                                padding:    '0px',
+                                                top:        '0px',
+                                                right:      '0px'    } });
+
+    var closeButton = $('<div>', { css: {
+                                    cursor:             'pointer',
+                                    textAlign:          'center',
+                                    backgroundColor:    'white',
+                                    verticalAlign:      'top',
+                                    display:            'inline-block',
+                                    paddingTop:         '5px',
+                                    paddingRight:       '4px' } });
+
+    closeButton.text('X');
+    buttonPanel.append(closeButton);
+
+    closeButton.click( function() {
+        showTopLevelView('landing-page-view');
+    });
+
     var stopButton  = jQuery('<button>', 
                         {       class: '.color-stop-recording-button',
                                 css: {
@@ -27,6 +51,7 @@ var RecordingStatusPanel = function(options) {
     var piName      = $('<div>').text('RPi00');
     var startTime   = $('<div>').text('Started: 10/15/17');
 
+    Util.addTableRow(table, [buttonPanel] );
     Util.addTableRow(table, [recStatus] );
     Util.addTableRow(table, [piName]);
     Util.addTableRow(table, [startTime]);
@@ -43,8 +68,8 @@ var RecordingStatusPanel = function(options) {
         recStatus.html(metadata.recording ? 
                         '<i>Currently Recording</i>' :
                         '<i>Not Recording</i>' );
-        piName.text('RPi16');
-        startTime.text('Started: 11/11/17');
+        piName.text(metadata.controller_name);
+        startTime.text('Started: ' + metadata.start_time);
     }
 
     //
@@ -52,95 +77,30 @@ var RecordingStatusPanel = function(options) {
     //
     stopButton.click( function() {
 
-        var dsName = $('#dataset-name-textfield').val();
-        var controller = _this.selectedController;
-        var programString = editor.getProgramSpec();
-
-        if(dsName == null || dsName == '') {
-            alert("You must specify a dataset name.");
-            return;
-        }
-
-        if(controller == null) {
-            alert("No pi selected.");
-            return;
-        }
-       
-        if(programString == null || programString == '') {
-            alert("Cannot find program.");
-            return;
-        }
-
-        var programSpec = JSON.parse(programString);
+        var metadata = dataSetView.getDataSet().metadata;
+        
+        console.log("[DEBUG] Stopping recording", metadata.recording_location);
 
         //
-        // Set name on program (maybe just do this in editor when we get the
-        // program spec as a non-string object...)
-        //
-        var name = editor.getFileManager().getProgramName();
-        programSpec.name = name;
-        console.log("[DEBUG] Set name: " + programSpec.name);
-
-        if(!programSpec.name || programSpec.name == '') {
-            alert("No name set on program. " + programSpec.name);
-            return;
-        }
-
-        //
-        // Need to send message 'set_diagram' followed by 'start_recording'
-        //
-
-        //
-        // A common set of parameters we will use for sending
-        // both messages.
+        // Send message over websocket
         //
         var execParams = {  
-                            target_folder:  controller.path,
-                            src_folder:     controller.path  }
-       
-        //
-        // Clone the common params.
-        //
-        var setDiagramParams = Object.assign({}, execParams);
-
-        //
-        // Add parameters specific to 'set_diagram'
-        //
-        setDiagramParams.message_type   = 'set_diagram';
-        setDiagramParams.message_params = { diagram:    programSpec,
-                                            username:   g_user.user_name };
-
-        setDiagramParams.response_func  = function(ts, params) {
-
-            //
-            // If successfully set_diagram then start_recording...
-            //
-            if(params.success) {
-
-                var startRecordingParams = Object.assign({}, execParams);
-                startRecordingParams.message_type   = 'start_recording';
-                startRecordingParams.message_params = { rate: 1,
-                                                        recording_location: '/testing/student-folders/' + g_user.user_name + '/datasets/' + dsName };
-
-                startRecordingParams.response_func  = function(ts, params) {
+                message_type:   'stop_diagram',
+                message_params: { 
+                    stop_location: metadata.recording_location },
+                target_folder:  metadata.controller_path,
+                src_folder:     metadata.controller_path,
+                response_func:  function(ts, params) {
                     if(params.success) {
-                        $('#dataset-name-textfield').val('');
-                        alert("Recording started.");
+                        alert("Recording stopped.");
                     } else {
-                        alert("Error starting recording: " + params.message);
+                        alert("Error stopping recording: " + params.message);
                     }
-                }
+                } 
+            };
 
-                var startRecording = MessageExecutor(startRecordingParams);
-                startRecording.execute();
-                                
-            } else {
-                alert("Error transferring program to pi: " + params.message);
-            }
-        }
-
-        var setDiagram = MessageExecutor(setDiagramParams);
-        setDiagram.execute();
+        var stopDiagram = MessageExecutor(execParams);
+        stopDiagram.execute();
 
     });
 

@@ -221,7 +221,10 @@ def file_operation(operation, type):
         path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, type, filename)
     else:
         path = '%s/%s/%s/%s' % (org_name, 'student-folders', username, type)
-        
+
+    if not path.startswith('/'):
+        path = '/' + path
+
     #
     # Save op
     #
