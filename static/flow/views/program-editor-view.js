@@ -71,8 +71,8 @@ var ProgramEditorView = function(options) {
         nameWidget.val('');
         contentWidget.val('');
 
-        $('#my-data-panel').show();
-        $('#pi-selector-panel').hide();
+        $('#my-data-panel').hide();
+        $('#pi-selector-panel').show();
     }
 
     //

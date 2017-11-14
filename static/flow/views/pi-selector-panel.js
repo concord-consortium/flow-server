@@ -32,28 +32,35 @@ var PiSelectorPanel = function(options) {
     var buttonPanel = $('<div>', { css: {       textAlign:  'center',
                                                 position:   'absolute',
                                                 float:      'right',
+                                                margin:     '0 auto',
                                                 padding:    '0px',
                                                 top:        '0px',
                                                 right:      '0px'    } });
 
 
-    var refreshButton = $('<button>', { css: {  textAlign:          'center',
-                                                backgroundColor:    'white',
-                                                verticalAlign: 'top',
-                                                padding:    '1px',
-                                                paddingRight: '4px' } });
+    var refreshButton = $('<div>', { css: {     
+                                    cursor:             'pointer',
+                                    textAlign:          'center',
+                                    backgroundColor:    'white',
+                                    verticalAlign:      'top',
+                                    display:            'inline-block',
+                                    padding:            '1px',
+                                    paddingRight:       '4px' } });
 
     refreshButton.html("&#10226;");
     buttonPanel.append(refreshButton);
 
-    var closeButton = $('<button>', { css: {    textAlign:  'center',
-                                                backgroundColor: 'white',
-                                                verticalAlign: 'top',
-                                                padding:        '1px',
-                                                paddingRight: '4px' } });
+    var closeButton = $('<div>', { css: {       
+                                    cursor:             'pointer',
+                                    textAlign:          'center',
+                                    backgroundColor:    'white',
+                                    verticalAlign:      'top',
+                                    display:            'inline-block',
+                                    paddingTop:         '5px',
+                                    paddingRight:       '4px' } });
 
-    // closeButton.html("X");
-    closeButton.html("&times;");
+    closeButton.html("X");
+    // closeButton.html("&times;");
     buttonPanel.append(closeButton);
 
     piTitleBar.append(buttonPanel);
@@ -92,7 +99,6 @@ var PiSelectorPanel = function(options) {
                             verticalAlign: 'bottom' } );
 
     panel.append(piTable);
-    panel.hide();
     container.append(panel);
 
     this.availableControllers = [];
@@ -298,6 +304,8 @@ var PiSelectorPanel = function(options) {
         });
         
     };
+
+    this.loadPiList();
 
     return this;
 }
