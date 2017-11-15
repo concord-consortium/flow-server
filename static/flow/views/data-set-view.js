@@ -91,7 +91,9 @@ var DataSetView = function(options) {
                         base.m_program, 
                         base.m_recordingLocation);
 
-        info.text("DataSet Name: " + base.m_dataSet.name);
+        info.empty();
+        info.append($('<div>').text("DataSet Name: " + base.m_dataSet.name));
+        info.append($('<div>').text("Program Name: " + base.m_dataSet.metadata.program.name));
 
         if (base.m_plotHandler === null) {
             base.m_canvas = document.getElementById('data-set-canvas');
@@ -104,7 +106,8 @@ var DataSetView = function(options) {
 
         base.m_plotHandler.plotter.resetReceived();
         // request sequence history data from server
-        setTimeFrame('10m');
+        // setTimeFrame('10m');
+        setTimeFrame('1h');
 
         recordingStatusPanel.show();
     }
