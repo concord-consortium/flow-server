@@ -370,22 +370,10 @@ var AdminView = function(options) {
     //
     this.setAdminLastOnline = function(i, last_online) {
 
-        //
-        // Get rid of decimal and convert to browser timezone.
-        //
-
-        if(last_online.indexOf('.') != -1) {
-            last_online = last_online.split('.')[0];
-        }
-        var dateStr = last_online + " UTC";
-        // Safari workaround
-        var dateStr = dateStr.replace(/-/g, '/');
-
-        var date = new Date(dateStr);
-
         var lastOnlineDiv = $('#admin_last_online_'+i);
-        lastOnlineDiv.html( date.toLocaleDateString() + "<br/>" +
-                            date.toLocaleTimeString() );
+        lastOnlineDiv.html( Util.getLocalDate(last_online) + 
+                            "<br/>" +
+                            Util.getLocalTime(last_online) );
     }
 
     //

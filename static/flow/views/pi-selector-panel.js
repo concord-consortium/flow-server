@@ -32,28 +32,34 @@ var PiSelectorPanel = function(options) {
     var buttonPanel = $('<div>', { css: {       textAlign:  'center',
                                                 position:   'absolute',
                                                 float:      'right',
+                                                margin:     '0 auto',
                                                 padding:    '0px',
                                                 top:        '0px',
                                                 right:      '0px'    } });
 
 
-    var refreshButton = $('<button>', { css: {  textAlign:          'center',
-                                                backgroundColor:    'white',
-                                                verticalAlign: 'top',
-                                                padding:    '1px',
-                                                paddingRight: '4px' } });
+    var refreshButton = $('<div>', { css: {     
+                                    cursor:             'pointer',
+                                    textAlign:          'center',
+                                    backgroundColor:    'white',
+                                    verticalAlign:      'top',
+                                    paddingRight:       '2px',
+                                    display:            'inline-block' }});
 
     refreshButton.html("&#10226;");
     buttonPanel.append(refreshButton);
 
-    var closeButton = $('<button>', { css: {    textAlign:  'center',
-                                                backgroundColor: 'white',
-                                                verticalAlign: 'top',
-                                                padding:        '4px',
-                                                paddingRight: '4px' } });
+    var closeButton = $('<div>', { css: {       
+                                    border:             '1px solid grey',
+                                    cursor:             'pointer',
+                                    textAlign:          'center',
+                                    backgroundColor:    'white',
+                                    verticalAlign:      'top',
+                                    padding:            '2px',
+                                    display:            'inline-block' }});
 
-    // closeButton.html("X");
-    closeButton.html("&times;");
+    closeButton.html("X");
+    // closeButton.html("&times;");
     buttonPanel.append(closeButton);
 
     piTitleBar.append(buttonPanel);
@@ -92,7 +98,6 @@ var PiSelectorPanel = function(options) {
                             verticalAlign: 'bottom' } );
 
     panel.append(piTable);
-    panel.hide();
     container.append(panel);
 
     this.availableControllers = [];
@@ -109,6 +114,7 @@ var PiSelectorPanel = function(options) {
     // Close button (return to My Data view.)
     //
     closeButton.click( function() {
+        $('#dataset-name-textfield').val('');
         $('#pi-selector-panel').hide();
         $('#my-data-panel').show();
     });
@@ -190,7 +196,9 @@ var PiSelectorPanel = function(options) {
 
                 startRecordingParams.response_func  = function(ts, params) {
                     if(params.success) {
+                        $('#dataset-name-textfield').val('');
                         alert("Recording started.");
+                        _this.loadPiList();
                     } else {
                         alert("Error starting recording: " + params.message);
                     }
@@ -296,6 +304,8 @@ var PiSelectorPanel = function(options) {
         });
         
     };
+
+    this.loadPiList();
 
     return this;
 }

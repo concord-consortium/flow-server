@@ -53,6 +53,7 @@ var MyDataPanel = function(options) {
                                                 verticalAlign: 'bottom' } );
 
     panel.append(myDataTable);
+    panel.hide();
     container.append(panel);
 
     return this;

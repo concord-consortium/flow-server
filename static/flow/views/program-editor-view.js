@@ -71,8 +71,8 @@ var ProgramEditorView = function(options) {
         nameWidget.val('');
         contentWidget.val('');
 
-        $('#my-data-panel').show();
-        $('#pi-selector-panel').hide();
+        $('#my-data-panel').hide();
+        $('#pi-selector-panel').show();
     }
 
     //
@@ -87,6 +87,8 @@ var ProgramEditorView = function(options) {
 
         nameWidget.val('');
         contentWidget.val('');
+        
+        piSelectorPanel.loadPiList();
 
         //
         // If no program to load, create a new program
@@ -139,7 +141,7 @@ var ProgramEditorView = function(options) {
                 error: function(data) {
                     console.log("[ERROR] Load error", data);
                     alert('Error loading program.')
-                },
+                }
             });
 
         }

@@ -8,6 +8,7 @@ function initFlowApp() {
         registerTopLevelView(LandingPageView({id: 'landing-page-view'}));
         registerTopLevelView(ProgramEditorView({id: 'program-editor-view'}));
         registerTopLevelView(AdminView({id: 'admin-view'}));
+        registerTopLevelView(DataSetView({id: 'data-set-view'}));
 
         showTopLevelView('landing-page-view');
 
