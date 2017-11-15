@@ -218,7 +218,10 @@ def file_operation(operation, type):
     # Construct path
     #
     if operation != 'list':
-        path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, type, filename)
+        if type != 'datasets':
+            path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, type, filename)
+        else:
+            path = '%s/%s/%s/%s/%s/metadata' % (org_name, 'student-folders', username, type, filename)
     else:
         path = '%s/%s/%s/%s' % (org_name, 'student-folders', username, type)
 
@@ -345,5 +348,12 @@ def list_programs():
 @app.route('/ext/flow/list_datasets', methods=['POST', 'GET'])
 def list_datasets():
     return file_operation('list', 'datasets')
+
+#
+# API for listing named datasets saved on the rhizo-server
+#
+@app.route('/ext/flow/load_dataset', methods=['POST', 'GET'])
+def load_dataset():
+    return file_operation('load', 'datasets')
  
 

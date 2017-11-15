@@ -103,8 +103,25 @@ var RecordingStatusPanel = function(options) {
                 src_folder:     metadata.controller_path,
                 response_func:  function(ts, params) {
                     if(params.success) {
-                        alert("Recording stopped.");
-                        stopButton.hide();
+                        name = dataSetView.getDataSet().name;
+
+                        $.ajax({
+                            url: '/ext/flow/load_dataset',
+                            data: { filename: name },
+                            method: 'GET',
+                            success: function(data) {
+                                var file = JSON.parse(data);
+                                dataSetView.loadDataSet( 
+                                    {   name: name,
+                                        metadata: JSON.parse(file.content) } );
+                                alert("Recording stopped.");
+                                _this.show();
+                            },
+                            error: function(data) {
+                                console.log("[ERROR] re-load error", data);
+                                alert('Error re-loading dataset.')
+                            }});
+
                     } else {
                         alert("Error stopping recording: " + params.message);
                     }

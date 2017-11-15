@@ -87,6 +87,8 @@ var ProgramEditorView = function(options) {
 
         nameWidget.val('');
         contentWidget.val('');
+        
+        piSelectorPanel.loadPiList();
 
         //
         // If no program to load, create a new program
@@ -139,7 +141,7 @@ var ProgramEditorView = function(options) {
                 error: function(data) {
                     console.log("[ERROR] Load error", data);
                     alert('Error loading program.')
-                },
+                }
             });
 
         }

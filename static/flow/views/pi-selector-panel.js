@@ -198,6 +198,7 @@ var PiSelectorPanel = function(options) {
                     if(params.success) {
                         $('#dataset-name-textfield').val('');
                         alert("Recording started.");
+                        _this.loadPiList();
                     } else {
                         alert("Error starting recording: " + params.message);
                     }

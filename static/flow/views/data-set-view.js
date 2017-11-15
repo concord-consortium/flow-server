@@ -15,7 +15,7 @@ var DataSetView = function(options) {
     base.m_plotHandler          = null;
     base.m_canvas               = null;
 
-    PLOTTER_MARGIN_BOTTOM   = 94;   // px
+    PLOTTER_MARGIN_BOTTOM   = 40;   // px
     RIGHT_PANEL_WIDTH       = 200;  // px
 
     //
@@ -23,7 +23,8 @@ var DataSetView = function(options) {
     //
     var leftPanel       = jQuery('<div>',
                             {   id: 'data-view-left-panel',
-                                css: { width: '100%' } } );
+                                css: {  // position: 'absolute',
+                                        width: '100%' } } );
 
     //
     // Create the right panel
@@ -40,8 +41,21 @@ var DataSetView = function(options) {
     var canvas = $('<canvas>', { id: 'data-set-canvas' } );
     leftPanel.append(canvas);
 
+    //
+    // View Program and Export buttons
+    //
+    var bTable      = $('<table>', { css: { width: '100%', padding: '2px' } });
+    var tr          = $('<tr>');
+    var leftTd      = $('<td>', { css: { textAlign: 'left', padding: '2px' } });
+    var rightTd     = $('<td>', { css: { textAlign: 'right', padding: '2px' } });
     var viewProgBtn = $('<button>').text('View Program');
     var exportBtn   = $('<button>').text('Export to...');
+    bTable.append(tr)
+    tr.append(leftTd);
+    leftTd.append(viewProgBtn);
+    tr.append(rightTd);
+    rightTd.append(exportBtn);
+    leftPanel.append(bTable);
 
     //
     // Panel on right (indicates status like "Currently Recording" etc.)
