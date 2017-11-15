@@ -15,8 +15,8 @@ var DataSetView = function(options) {
     base.m_plotHandler          = null;
     base.m_canvas               = null;
 
-    PLOTTER_MARGIN_BOTTOM   = 40;   // px
-    RIGHT_PANEL_WIDTH       = 200;  // px
+    PLOTTER_PADDING_VERTICAL    = 80;   // px
+    RIGHT_PANEL_WIDTH           = 200;  // px
 
     //
     // Create the left panel 
@@ -38,8 +38,13 @@ var DataSetView = function(options) {
     //
     var mainTable = jQuery('<table>', { css: { width: '100%' } });
 
+    var info = $('<div>', { id: 'data-set-info',
+                            css: { padding: '2px' } } );
+    leftPanel.append(info);
+
     var canvas = $('<canvas>', { id: 'data-set-canvas' } );
     leftPanel.append(canvas);
+
 
     //
     // View Program and Export buttons
@@ -85,6 +90,8 @@ var DataSetView = function(options) {
         console.log("[DEBUG] loadDataSet", 
                         base.m_program, 
                         base.m_recordingLocation);
+
+        info.text("DataSet Name: " + base.m_dataSet.name);
 
         if (base.m_plotHandler === null) {
             base.m_canvas = document.getElementById('data-set-canvas');

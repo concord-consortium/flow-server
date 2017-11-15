@@ -43,7 +43,7 @@ var PiSelectorPanel = function(options) {
                                     textAlign:          'center',
                                     backgroundColor:    'white',
                                     verticalAlign:      'top',
-                                    paddingRight:       '2px',
+                                    padding:            '2px',
                                     display:            'inline-block' }});
 
     refreshButton.html("&#10226;");
