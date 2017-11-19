@@ -49,13 +49,14 @@ var LandingPageDataSetView = function(options) {
 
                     var createDataSetList = function(displayName, list) {
 
-                        if(list.length == 0) {
-                            return;
-                        }
-
                         var recordingNow = jQuery('<div>');
                         recordingNow.text(displayName);
                         recordingNow.appendTo(div);
+
+                        if(list.length == 0) {
+                            div.append( jQuery('<div>', { css: { height: '100px' }} ) );
+                            return;
+                        }
 
                         //
                         // A wrapper div around the table allows 

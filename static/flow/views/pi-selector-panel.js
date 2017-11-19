@@ -43,11 +43,12 @@ var PiSelectorPanel = function(options) {
                                     textAlign:          'center',
                                     backgroundColor:    'white',
                                     verticalAlign:      'top',
-                                    paddingRight:       '2px',
+                                    padding:            '2px',
                                     display:            'inline-block' }});
 
     refreshButton.html("&#10226;");
-    buttonPanel.append(refreshButton);
+    // buttonPanel.append(refreshButton);
+    piTitle.append(refreshButton);
 
     var closeButton = $('<div>', { css: {       
                                     border:             '1px solid grey',
