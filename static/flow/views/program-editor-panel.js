@@ -89,8 +89,8 @@ var ProgramEditorPanel = function(options) {
         //var scale = 0.6;
         // add menu
         var menuData = createMenuData();
-        menuData.add('Rename', renameBlock, {id: block.id});
-        menuData.add('Delete', deleteBlock, {id: block.id});
+        menuData.add('Rename', this.renameBlock, {id: block.id});
+        menuData.add('Delete', this.deleteBlock, {id: block.id});
         //menuData.add('Zoom In (Ctrl+i)', zoominBlock, {id: block.id});
         //menuData.add('Zoom Out (Ctrl+o)', zoomoutBlock, {id: block.id});
 
@@ -351,16 +351,16 @@ var ProgramEditorPanel = function(options) {
         }
     }
 
-	//
-	// Move a connection between two blocks
-	//
-	this.moveConn = function(destPin) {
-		var x1 = destPin.sourcePin.view.x;
-		var y1 = destPin.sourcePin.view.y;
-		var x2 = destPin.view.x;
-		var y2 = destPin.view.y;
-		destPin.view.svgConn.plot(x1, y1, x2, y2);
-	}
+    //
+    // Move a connection between two blocks
+    //
+    this.moveConn = function(destPin) {
+        var x1 = destPin.sourcePin.view.x;
+        var y1 = destPin.sourcePin.view.y;
+        var x2 = destPin.view.x;
+        var y2 = destPin.view.y;
+        destPin.view.svgConn.plot(x1, y1, x2, y2);
+    }
 
     //
     // Handle mouse moves in SVG area; move blocks or connections
@@ -430,6 +430,36 @@ var ProgramEditorPanel = function(options) {
                 _this.m_dragBlockOffsetX = view.x - x;
                 _this.m_dragBlockOffsetY = view.y - y;
             }
+        }
+    }
+
+    //
+    // Rename a block (using the block menu)
+    //
+    this.renameBlock = function(e) {
+        var block = _this.m_diagram.findBlockById(e.data.id);
+        if (block) {
+            modalPrompt({
+                title: 'Rename Block',
+                prompt: 'New Name',
+                default: block.name,
+                validator: Util.diagramValidator,
+                resultFunc: function(newName) {
+                    block.name = newName;
+                    $('#bn_' + block.id).html(newName);
+                }
+            });
+        }
+    }
+
+    //
+    // Delete a block (using the block menu)
+    //
+    this.deleteBlock = function(e) {
+        var block = _this.m_diagram.findBlockById(e.data.id);
+        if (block) {
+            _this.undisplayBlock(block);        // remove UI elements
+            _this.m_diagram.removeBlock(block);
         }
     }
 
