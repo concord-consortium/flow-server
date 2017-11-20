@@ -24,14 +24,27 @@ var ProgramEditorPanel = function(options) {
     this.m_activeStartPin   = null;
     this.m_activeLineSvg    = null;
 
+    //
+    // Create block palette
+    //
+    var palDiv = $('<div>', {   id: 'block-palette', 
+                                css: {  
+                                        position: 'absolute',
+                                        border: '1px solid lightgrey',
+                                        width:  '150px' } } );
+                                        // height: '600px' } } );
+    var palette = ProgramEditorBlockPalette({container: palDiv});
+    this.container.append(palDiv);
 
     //
     // Create div for svg drawer.
     //
+    var svgWrapper = $('<div>', { css: { } });
     var svgDiv = $('<div>', {   id: 'program-holder', 
                                 css: {  width: '100%',
                                         height: '600px' } } );
-    this.container.append(svgDiv);
+    svgWrapper.append(svgDiv);
+    this.container.append(svgWrapper);
 
     //
     // Load a diagram from a spec dictionary into the UI editor
@@ -87,7 +100,10 @@ var ProgramEditorPanel = function(options) {
         block.view.div = blockDiv;
         //var scale = block.ctx.scale;
         //var scale = 0.6;
-        // add menu
+
+        //
+        // Add menu
+        //
         var menuData = createMenuData();
         menuData.add('Rename', this.renameBlock, {id: block.id});
         menuData.add('Delete', this.deleteBlock, {id: block.id});
@@ -179,19 +195,28 @@ var ProgramEditorPanel = function(options) {
             displayPlot(block);
         }
         this.scaleClasses();
-        // get dimensions of block div
+
+        //
+        // Get dimensions of block div
+        //
         var w = parseInt(blockDiv.outerWidth(true));  // true to include the margin in the width
         var h = parseInt(blockDiv.outerHeight());  // not passing true here because we don't want the bottom margin
-        //console.log("block w,h=" + w + ", " + h);
+
+        console.log("[DEBUG] block w,h=" + w + ", " + h);
+
         block.view.w = w;
         block.view.h = h;
+
         var pinRadius = 15 * this.m_scale;
         if (pinRadius > 15) {
             pinRadius = 15;
         } else if (pinRadius < 8) {
             pinRadius = 8;
         }
-        // position and draw pins
+
+        //
+        // Position and draw pins
+        //
         for (var i = 0; i < block.pins.length; i++) {
             var pin = block.pins[i];
             if (pin.isInput) {
@@ -204,7 +229,7 @@ var ProgramEditorPanel = function(options) {
                 }
             } else {
                 pin.view.offsetX = w + 5;
-                pin.view.offsetY = h / 2;
+                pin.view.offsetY = (h / 2);
             }
             pin.view.x = x + pin.view.offsetX;
             pin.view.y = y + pin.view.offsetY;
