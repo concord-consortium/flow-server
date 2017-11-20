@@ -29,11 +29,13 @@ var ProgramEditorPanel = function(options) {
     //
     var palDiv = $('<div>', {   id: 'block-palette', 
                                 css: {  
-                                        position: 'absolute',
-                                        border: '1px solid lightgrey',
-                                        width:  '150px' } } );
-                                        // height: '600px' } } );
-    var palette = ProgramEditorBlockPalette({container: palDiv});
+                                        position:   'absolute',
+                                        zIndex:     100,
+                                        border:     '1px solid lightgrey',
+                                        width:      '150px' } } );
+
+    var palette = ProgramEditorBlockPalette({   container: palDiv,
+                                                programEditorPanel: this });
     this.container.append(palDiv);
 
     //
@@ -41,8 +43,9 @@ var ProgramEditorPanel = function(options) {
     //
     var svgWrapper = $('<div>', { css: { } });
     var svgDiv = $('<div>', {   id: 'program-holder', 
-                                css: {  width: '100%',
-                                        height: '600px' } } );
+                                css: {  position:   'absolute',
+                                        width:      '100%',
+                                        height:     '600px' } } );
     svgWrapper.append(svgDiv);
     this.container.append(svgWrapper);
 
@@ -90,7 +93,7 @@ var ProgramEditorPanel = function(options) {
             }
         }
         m_modified = false;
-    }
+    };
 
     //
     // Create HTML/DOM elements for a block along with SVG pins.
@@ -241,7 +244,7 @@ var ProgramEditorPanel = function(options) {
             pinSvg.mouseout(pinMouseOut);
             pin.view.svg = pinSvg;
         }
-    }
+    };
 
     //
     // Remove the HTML/SVG elements associated with a block
@@ -263,7 +266,7 @@ var ProgramEditorPanel = function(options) {
         for (var i = 0; i < destPins.length; i++) {
             destPins[i].view.svgConn.remove();
         }
-    }
+    };
 
     //
     // Draw a connection between two blocks (as an SVG line)
@@ -283,7 +286,7 @@ var ProgramEditorPanel = function(options) {
         line.remember('destPin', destPin);
         line.click(connectionClick);
         destPin.view.svgConn = line;
-    }
+    };
 
     //
     //
@@ -297,7 +300,7 @@ var ProgramEditorPanel = function(options) {
             input.mousedown(function(e) {e.stopPropagation()});
             input.keyup(block.id, paramEntryChanged);
         }
-    }
+    };
 
     //
     // Scale css classes based on current scale value.
@@ -339,7 +342,7 @@ var ProgramEditorPanel = function(options) {
             }
           }
         }
-    }
+    };
 
     //
     // Move a block along with its pins and connections
@@ -374,7 +377,7 @@ var ProgramEditorPanel = function(options) {
         for (var i = 0; i < destPins.length; i++) {
             _this.moveConn(destPins[i]);
         }
-    }
+    };
 
     //
     // Move a connection between two blocks
@@ -385,7 +388,7 @@ var ProgramEditorPanel = function(options) {
         var x2 = destPin.view.x;
         var y2 = destPin.view.y;
         destPin.view.svgConn.plot(x1, y1, x2, y2);
-    }
+    };
 
     //
     // Handle mouse moves in SVG area; move blocks or connections
@@ -412,14 +415,14 @@ var ProgramEditorPanel = function(options) {
                             y + _this.m_dragBlockOffsetY );
             _this.layoutModified();
         }
-    }
+    };
 
     //
     // Call this when the visual appearance of the diagram is changed.
     //
     this.layoutModified = function() {
         _this.m_modified = true;
-    }
+    };
 
     //
     // Handle mouse button up in SVG area
@@ -434,7 +437,7 @@ var ProgramEditorPanel = function(options) {
             _this.m_activeLineSvg.remove();
             _this.m_activeLineSvg = null;
         }
-    }
+    };
 
     //
     // Drag a block div
@@ -456,7 +459,7 @@ var ProgramEditorPanel = function(options) {
                 _this.m_dragBlockOffsetY = view.y - y;
             }
         }
-    }
+    };
 
     //
     // Rename a block (using the block menu)
@@ -475,7 +478,7 @@ var ProgramEditorPanel = function(options) {
                 }
             });
         }
-    }
+    };
 
     //
     // Delete a block (using the block menu)
@@ -486,7 +489,87 @@ var ProgramEditorPanel = function(options) {
             _this.undisplayBlock(block);        // remove UI elements
             _this.m_diagram.removeBlock(block);
         }
-    }
+    };
+
+    //
+    // Display a dialog with a list of allowed filter types
+    //
+    this.showFilterBlockSelector = function() {
+        var modal = createBasicModal('filterModal', 'Select a Filter', {infoOnly: true});
+        modal.appendTo($('body'));
+        var modalBody = $('#filterModal-body');
+        var filterTypes = [
+            "not", "and", "or", "xor", "nand",
+            "plus", "minus", "times", "divided by", "absolute value",
+            "equals", "not equals", "less than", "greater than",
+            "simple moving average", "exponential moving average"
+        ];
+        for (var i = 0; i < filterTypes.length; i++) {
+            var type = filterTypes[i];
+            var button = $('<button>', {html: type, class: 'btn filter'});
+            button.click(type, this.addFilterBlock);
+            button.appendTo(modalBody);
+        }
+        $('#filterModal').modal('show');
+    };
+
+    //
+    // Add a filter block to the diagram
+    //
+    this.addFilterBlock = function(e) {
+        var type = e.data;
+        $('#filterModal').modal('hide');
+        var blockSpec = {
+            name: type,
+            type: type,
+            input_count: 2,
+            output_count: 1,
+            input_type: 'n',
+            output_type: 'n',
+        }
+        if (type === 'not' || type == 'absolute value') {
+            blockSpec.input_count = 1;
+        }
+        if (type === 'simple moving average'|| type === 'exponential moving average') {
+            blockSpec.input_count = 1;
+            blockSpec.type = "number_display_and_input"
+            blockSpec.params = [{
+                'name': 'period',
+                'type': 'n',
+                'min': 0,
+                'max': 9999,
+                'default': 10
+            }];
+        }
+        if (type === 'blur' || type === 'brightness') {  // fix(soon): get this from controller block type spec list
+            blockSpec.input_type = 'i';
+            blockSpec.output_type = 'i';
+            blockSpec.input_count = 1;
+            if (type === 'blur') {
+                blockSpec.params = [{
+                    'name': 'blur_amount',
+                    'type': 'n',
+                    'min': 0,
+                    'max': 50,
+                    'default': 5,
+                }];
+            } else {
+                blockSpec.params = [{
+                    'name': 'brightness_adjustment',
+                    'type': 'n',
+                    'min': -100,
+                    'max': 100,
+                    'default': 0,
+                }];
+            }
+        }
+        var block = createFlowBlock(blockSpec);  // fix(soon): generate unique name from type
+        _this.m_diagram.blocks.push(block);
+        block.view.x = 300;
+        block.view.y = 200;
+        _this.displayBlock(block);
+    };
+
 
     return this;
 }
