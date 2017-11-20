@@ -17,14 +17,20 @@ var ProgramEditorPanel = function(options) {
     //
     // Drag block state
     //
-    this.m_dragBlock         = null;
-    this.m_dragBlockOffsetX  = null;
-    this.m_dragBlockOffsetY  = null;
+    this.m_dragBlock        = null;
+    this.m_dragBlockOffsetX = null;
+    this.m_dragBlockOffsetY = null;
+
+    this.m_activeStartPin   = null;
+    this.m_activeLineSvg    = null;
+
 
     //
     // Create div for svg drawer.
     //
-    var svgDiv = $('<div>', { id: 'program-holder', css: { width: '100%' } } );
+    var svgDiv = $('<div>', {   id: 'program-holder', 
+                                css: {  width: '100%',
+                                        height: '600px' } } );
     this.container.append(svgDiv);
 
     //
@@ -34,6 +40,8 @@ var ProgramEditorPanel = function(options) {
 
         if(this.m_svgDrawer == null) {
             this.m_svgDrawer = SVG('program-holder');
+            $('#program-holder').mousemove(this.mouseMove);
+            $('#program-holder').mouseup(this.mouseUp);
         }
 
         // console.log("[DEBUG] loadProgram", programSpec);
@@ -116,9 +124,9 @@ var ProgramEditorPanel = function(options) {
             input.keyup(block.id, numberEntryChanged);
         } else if (block.type === 'plot') {
             var canvas = $('<canvas>', {class: 'flowBlockPlot', width: 300, height: 200, id: 'bc_' + block.id}).appendTo(blockDiv);
-                canvas.mousedown(this.blockMouseDown);
-                canvas.mousemove(mouseMove);
-                canvas.mouseup(mouseUp);
+            canvas.mousedown(this.blockMouseDown);
+            canvas.mousemove(this.mouseMove);
+            canvas.mouseup(this.mouseUp);
             blockDiv.addClass('flowBlockWithPlot');
         } else if (block.outputType === 'i') {  // image-valued blocks
             $('<img>', {class: 'flowBlockImage', width: 320, height: 240, id: 'bi_' + block.id}).appendTo(blockDiv);
@@ -127,7 +135,9 @@ var ProgramEditorPanel = function(options) {
         } else {
             var div = $('<div>', {class: 'flowBlockValueAndUnits noSelect'});
             $('<span>', {class: 'flowBlockValue', html: '...', id: 'bv_' + block.id}).appendTo(div);
-            console.log(block.units);
+
+            // console.log("[DEBUG] units:", block.units);
+
             if (block.units) {
                 var units = block.units;
                 units = units.replace('degrees ', '&deg;');  // note removing space
@@ -307,6 +317,101 @@ var ProgramEditorPanel = function(options) {
     }
 
     //
+    // Move a block along with its pins and connections
+    //
+    this.moveBlock = function(block, x, y) {
+
+        //
+        // Move block div
+        //
+        block.view.div.css('top', y + 'px');
+        block.view.div.css('left', x + 'px');
+        block.view.x = x;
+        block.view.y = y;
+
+        //
+        // Move pins
+        //
+        for (var i = 0; i < block.pins.length; i++) {
+            var pin = block.pins[i];
+            pin.view.x = x + pin.view.offsetX;
+            pin.view.y = y + pin.view.offsetY;
+            pin.view.svg.center(pin.view.x, pin.view.y);
+            if (pin.sourcePin) {
+                _this.moveConn(pin);
+            }
+        }
+
+        //
+        // move connections
+        //
+        var destPins = _this.m_diagram.findDestPins(block);
+        for (var i = 0; i < destPins.length; i++) {
+            _this.moveConn(destPins[i]);
+        }
+    }
+
+	//
+	// Move a connection between two blocks
+	//
+	this.moveConn = function(destPin) {
+		var x1 = destPin.sourcePin.view.x;
+		var y1 = destPin.sourcePin.view.y;
+		var x2 = destPin.view.x;
+		var y2 = destPin.view.y;
+		destPin.view.svgConn.plot(x1, y1, x2, y2);
+	}
+
+    //
+    // Handle mouse moves in SVG area; move blocks or connections
+    //
+    this.mouseMove = function(e) {
+        // console.log("[DEBUG] mouseMove");
+        if (_this.m_activeStartPin) {
+            var x1 = _this.m_activeStartPin.view.x;
+            var y1 = _this.m_activeStartPin.view.y;
+            var x2 = e.pageX;
+            var y2 = e.pageY;
+            if (_this.m_activeLineSvg) {
+                _this.m_activeLineSvg.plot(x1, y1, x2, y2);
+            } else {
+                _this.m_activeLineSvg = _this.m_svgDrawer.line(x1, y1, x2, y2).stroke({width: 10, color: '#555'}).back();
+            }
+        }
+        if (_this.m_dragBlock) {
+            // console.log("[DEBUG] Dragging block.");
+            var x = e.pageX;
+            var y = e.pageY;
+            _this.moveBlock(_this.m_dragBlock, 
+                            x + _this.m_dragBlockOffsetX, 
+                            y + _this.m_dragBlockOffsetY );
+            _this.layoutModified();
+        }
+    }
+
+    //
+    // Call this when the visual appearance of the diagram is changed.
+    //
+    this.layoutModified = function() {
+        _this.m_modified = true;
+    }
+
+    //
+    // Handle mouse button up in SVG area
+    //
+    this.mouseUp = function(e) {
+
+        // console.log("[DEBUG] mouseUp");
+
+        _this.m_activeStartPin = null;
+        _this.m_dragBlock = null;
+        if (_this.m_activeLineSvg) {
+            _this.m_activeLineSvg.remove();
+            _this.m_activeLineSvg = null;
+        }
+    }
+
+    //
     // Drag a block div
     //
     this.blockMouseDown = function(e) {
@@ -320,6 +425,7 @@ var ProgramEditorPanel = function(options) {
             var block = _this.m_diagram.blocks[i];
             var view = block.view;
             if (x >= view.x && x <= view.x + view.w && y >= view.y && y <= view.y + view.h) {
+                // console.log("[DEBUG] moving block", block);
                 _this.m_dragBlock = block;
                 _this.m_dragBlockOffsetX = view.x - x;
                 _this.m_dragBlockOffsetY = view.y - y;
