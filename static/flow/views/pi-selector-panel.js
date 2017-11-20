@@ -9,8 +9,12 @@ var PiSelectorPanel = function(options) {
     var _this = this;
 
     var panel = jQuery('<div>', { id: 'pi-selector-panel',
-                                    css: {  width: '200px',
-                                            float: 'right' } } );
+                                    css: {  position:   'absolute',
+                                            right:      '0px',
+                                            zIndex:     100,
+                                            backgroundColor: 'white',
+                                            width:      '200px',
+                                            float:      'right' } } );
 
     var piTable   = jQuery('<table>', { css: { 
                                             width:  '99%',

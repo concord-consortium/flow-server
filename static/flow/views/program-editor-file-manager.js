@@ -10,7 +10,9 @@ var ProgramEditorFileManager = function(options) {
     //
     // Create save widget
     //
-    var fileWidget  = jQuery('<div>');
+    var fileWidget  = jQuery('<div>', { css: {  zIndex: 100,
+                                                backgroundColor: 'white',
+                                                position: 'absolute' } });
 
     //
     // Label

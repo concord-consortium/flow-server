@@ -29,6 +29,7 @@ var ProgramEditorPanel = function(options) {
     //
     var palDiv = $('<div>', {   id: 'block-palette', 
                                 css: {  
+                                        top:        '50px',
                                         position:   'absolute',
                                         zIndex:     100,
                                         border:     '1px solid lightgrey',
@@ -205,7 +206,7 @@ var ProgramEditorPanel = function(options) {
         var w = parseInt(blockDiv.outerWidth(true));  // true to include the margin in the width
         var h = parseInt(blockDiv.outerHeight());  // not passing true here because we don't want the bottom margin
 
-        console.log("[DEBUG] block w,h=" + w + ", " + h);
+        // console.log("[DEBUG] block w,h=" + w + ", " + h);
 
         block.view.w = w;
         block.view.h = h;
@@ -238,10 +239,10 @@ var ProgramEditorPanel = function(options) {
             pin.view.y = y + pin.view.offsetY;
             var pinSvg = this.m_svgDrawer.circle(pinRadius * 2).center(pin.view.x, pin.view.y).attr({fill: '#4682b4'});
             pinSvg.remember('pin', pin);
-            pinSvg.mousedown(pinMouseDown);
-            pinSvg.mouseup(pinMouseUp);
-            pinSvg.mouseover(pinMouseOver);
-            pinSvg.mouseout(pinMouseOut);
+            pinSvg.mousedown(this.pinMouseDown);
+            pinSvg.mouseup(this.pinMouseUp);
+            pinSvg.mouseover(this.pinMouseOver);
+            pinSvg.mouseout(this.pinMouseOut);
             pin.view.svg = pinSvg;
         }
     };
@@ -570,6 +571,61 @@ var ProgramEditorPanel = function(options) {
         _this.displayBlock(block);
     };
 
+    //
+    // Handle mouse down in pin SVG element
+    //
+    this.pinMouseDown = function(e) {
+        // console.log("[DEBUG] pinMouseDown this", this);
+        _this.m_activeStartPin = this.remember('pin');
+    };
+
+    //
+    // Handle mouse up in pin SVG; create a new connection between blocks
+    //
+    this.pinMouseUp = function(e) {
+        // console.log("[DEBUG] pinMouseUp this", this);
+        var endPin = this.remember('pin');
+        var startPin = _this.m_activeStartPin;
+        if (startPin.isInput != endPin.isInput) {
+            var sourcePin = endPin.isInput ? startPin : endPin;
+            var destPin = endPin.isInput ? endPin : startPin;
+            if (!destPin.sourcePin) {  // fix(later): remove existing connection and create new one
+                destPin.sourcePin = sourcePin;
+                _this.displayConnection(destPin, _this.m_scale);
+            }
+            _this.m_activeStartPin = null;
+            _this.m_activeLineSvg.remove();
+            _this.m_activeLineSvg = null;
+
+            // CodapTest.logTopic('Dataflow/ConnectBlock');
+        }
+    };
+
+    //
+    // Highlight a pin when move mouse over it
+    //
+    this.pinMouseOver = function(e) {
+        // console.log("[DEBUG] pinMouseOver this", this);
+        this.fill({color: '#f06'})
+    };
+
+    //
+    // Unhighlight a pin
+    //
+    this.pinMouseOut = function(e) {
+        // console.log("[DEBUG] pinMouseOut this", this);
+        this.fill({color: '#4682b4'})
+    };
+
+    //
+    // Remove a connection by clicking on it; attached to connection SVG
+    //
+    this.connectionClick = function(e) {
+        console.log("[DEBUG] connectionClick this", this);
+        var destPin = this.remember('destPin');
+        destPin.sourcePin = null;
+        destPin.view.svgConn.remove();
+    };
 
     return this;
 }

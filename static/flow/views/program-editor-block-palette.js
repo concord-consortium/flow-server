@@ -6,7 +6,7 @@ var ProgramEditorBlockPalette = function(options) {
     var container = options.container;
     var programEditorPanel = options.programEditorPanel;
 
-    var blockPalette = $('<div>');
+    var blockPalette = $('<div>', { css: {  backgroundColor: 'white' } } );
 
     var createSection = function(name, content) {
 
