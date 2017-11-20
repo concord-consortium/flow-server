@@ -110,11 +110,11 @@ var LandingPageDataSetView = function(options) {
                     createDataSetList("Previously Recorded", recorded);
 
                 } else {
-                    console.log("[ERROR] Error listing programs", response);
+                    console.log("[ERROR] Error listing datasets", response);
                 }
             },
             error: function(data) {
-                console.log("[ERROR] List programs error", data);
+                console.log("[ERROR] List datasets error", data);
             },
         });
         

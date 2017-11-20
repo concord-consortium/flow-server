@@ -45,10 +45,11 @@ var ProgramEditorView = function(options) {
 
     content.append(mainTable);
 
-    var textarea = jQuery('<textarea>', {   id: 'program-content', 
-                                            width: 600, 
-                                            height: 200 } );
-    textarea.appendTo(leftPanel);
+    
+    var programEditorDiv    = $('<div>')
+    var programEditorPanel  = ProgramEditorPanel(
+                                {container: programEditorDiv} );
+    leftPanel.append(programEditorDiv);
 
     //
     // Accessors for our subcomponents.
@@ -67,9 +68,10 @@ var ProgramEditorView = function(options) {
         // console.log("[DEBUG] Reset editor.");
 
         var nameWidget      = jQuery('#program-editor-filename');
-        var contentWidget   = jQuery('#program-content');
+        // var contentWidget   = jQuery('#program-content');
+
         nameWidget.val('');
-        contentWidget.val('');
+        // contentWidget.val('');
 
         $('#my-data-panel').hide();
         $('#pi-selector-panel').show();
@@ -83,10 +85,12 @@ var ProgramEditorView = function(options) {
         // console.log("[DEBUG] ProgramEditorView loadProgram()", params);
 
         var nameWidget      = jQuery('#program-editor-filename');
-        var contentWidget   = jQuery('#program-content');
+
+        // var contentWidget   = jQuery('#program-content');
 
         nameWidget.val('');
-        contentWidget.val('');
+
+        // contentWidget.val('');
         
         piSelectorPanel.loadPiList();
 
@@ -102,8 +106,8 @@ var ProgramEditorView = function(options) {
 
             var filename    = params.filename;
  
-            contentWidget.val("Loading program " + filename + " ...");
-            contentWidget.attr("disabled", true);
+            // contentWidget.val("Loading program " + filename + " ...");
+            // contentWidget.attr("disabled", true);
 
             var url = '/ext/flow/load_program'
 
@@ -130,9 +134,12 @@ var ProgramEditorView = function(options) {
                         // alert("Program loaded");
 
                         var content = response.content;
+                        var programSpec = JSON.parse(content);
                         nameWidget.val(filename);
-                        contentWidget.val(content);
-                        contentWidget.attr("disabled", false);
+                        programEditorPanel.loadProgram(programSpec);
+
+                        // contentWidget.val(content);
+                        // contentWidget.attr("disabled", false);
 
                     } else {
                         alert("Error: " + response.message);
