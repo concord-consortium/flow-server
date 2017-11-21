@@ -10,7 +10,9 @@ var ProgramEditorFileManager = function(options) {
     //
     // Create save widget
     //
-    var fileWidget  = jQuery('<div>');
+    var fileWidget  = jQuery('<div>', { css: {  zIndex: 100,
+                                                backgroundColor: 'white',
+                                                position: 'absolute' } });
 
     //
     // Label
@@ -31,19 +33,17 @@ var ProgramEditorFileManager = function(options) {
     saveButton.click( function() {
                            
         var filename = jQuery('#program-editor-filename').val();
-        var content = jQuery('#program-content').val();
+        var programSpec = editor.getProgramSpec();
+        var programStr = JSON.stringify(programSpec);
+
+        console.log("Saving:", programStr);
 
         //
-        // After one use of the CSRF token in a POST
-        // request, it is no longer accepted.
-        // How to fix this? Pass a new one back 
-        // to the client and then reset the
-        // g_csrfToken value here? :(
+        // Call API to save program.
         //
         var url = '/ext/flow/save_program'
         var data = {    filename:   filename,
-                        content:    content         };
-                        // csrf_token: g_csrfToken     };
+                        content:    programStr  };
 
         $.ajax({
             url:        url,

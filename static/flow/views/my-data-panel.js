@@ -10,8 +10,12 @@ var MyDataPanel = function(options) {
     // Main panel
     //
     var panel       = jQuery('<div>', { id: 'my-data-panel',
-                                        css: {  width: '200px',
-                                                float: 'right' } });
+                                        css: {  position:   'absolute',
+                                                right:      '0px',
+                                                zIndex:     100,
+                                                backgroundColor: 'white',
+                                                width:      '200px',
+                                                float:      'right' } });
 
     var myDataTable = jQuery('<table>', { css: { 
                                             width:  '99%',
@@ -41,7 +45,7 @@ var MyDataPanel = function(options) {
 
     piButton.text('Connect to Pi');
     piButton.click( function() {
-        // console.log("[DEBUG] Connect to Pi click()");
+        console.log("[DEBUG] Connect to Pi click()");
         editor.getPiSelectorPanel().loadPiList();
         $('#my-data-panel').hide(); 
         $('#pi-selector-panel').show(); 
