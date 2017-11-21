@@ -60,7 +60,7 @@ var ProgramEditorBlockPalette = function(options) {
     var filterContent = $('<div>');
 
     var createFilterBtn = function(type) {
-        console.log("[DEBUG] programEditorPanel", programEditorPanel);
+        // console.log("[DEBUG] programEditorPanel", programEditorPanel);
         var btn = $('<button>', { text: type, css: { width: '100%' } } );
         btn.click(type, function(e) {
             programEditorPanel.addFilterBlock(e);

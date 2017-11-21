@@ -51,6 +51,11 @@ var ProgramEditorPanel = function(options) {
     this.container.append(svgWrapper);
 
     //
+    // Return current diagram
+    //
+    this.getDiagram = function() { return this.m_diagram; }
+
+    //
     // Load a diagram from a spec dictionary into the UI editor
     //
     this.loadProgram = function(programSpec) {
@@ -163,10 +168,10 @@ var ProgramEditorPanel = function(options) {
             var div = $('<div>', {class: 'flowBlockValueAndUnits noSelect'});
             $('<span>', {class: 'flowBlockValue', html: '...', id: 'bv_' + block.id}).appendTo(div);
 
-            console.log("[DEBUG] units:", block.units);
+            // console.log("[DEBUG] units:", block.units);
 
             if (block.units) {
-                console.log("[DEBUG] Fixing units:", block.units);
+                // console.log("[DEBUG] Fixing units:", block.units);
                 var units = block.units;
                 units = units.replace('degrees ', '&deg;');  // note removing space
                 units = units.replace('percent', '%');
@@ -572,10 +577,11 @@ var ProgramEditorPanel = function(options) {
                 }];
             }
         }
+        var offset = _this.m_diagram.blocks.length * 50;
         var block = createFlowBlock(blockSpec);  // fix(soon): generate unique name from type
         _this.m_diagram.blocks.push(block);
-        block.view.x = 300;
-        block.view.y = 200;
+        block.view.x = 200 + offset;
+        block.view.y = 50 + offset;
         _this.displayBlock(block);
     };
 
@@ -701,13 +707,13 @@ var ProgramEditorPanel = function(options) {
     //
     this.addNumericBlock = function() {
         var offset = _this.m_diagram.blocks.length * 50;
-        var count = _this.getUniqueSuffix("number");
 
         var block = createFlowBlock(
-                        {   name: 'number'+count, 
-                            type: 'number_entry', 
-                            output_count: 1, 
-                            output_type: 'n'    });
+                        {   name:           'number', 
+                            type:           'number_entry', 
+                            output_count:   1, 
+                            output_type:    'n'    });
+
         _this.m_diagram.blocks.push(block);
         block.view.x = 200 + offset;
         block.view.y = 50 + offset;

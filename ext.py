@@ -227,8 +227,11 @@ def file_operation(operation, type):
     else:
         path = '%s/%s/%s/%s' % (org_name, 'student-folders', username, type)
 
-    if not path.startswith('/'):
-        path = '/' + path
+    #
+    # In some cases this expects to start with "/" but not in others???
+    #
+    # if not path.startswith('/'):
+    #    path = '/' + path
 
     #
     # Save op

@@ -54,11 +54,16 @@ var ProgramEditorView = function(options) {
     //
     // Accessors for our subcomponents.
     //
-    base.getFileManager     = function() { return fileManager; }
-    base.getPiSelectorPanel = function() { return piSelectorPanel; }
-    base.getMyDataPanel     = function() { return myDataPanel; }
+    base.getFileManager         = function() { return fileManager; };
+    base.getPiSelectorPanel     = function() { return piSelectorPanel; };
+    base.getMyDataPanel         = function() { return myDataPanel; };
+    base.getProgramEditorPanel  = function() { return programEditorPanel; };
 
-    base.getProgramSpec     = function() { return textarea.val(); }
+    base.getProgramSpec = function() { 
+        var diagram     = programEditorPanel.getDiagram();
+        var diagramSpec = diagramToSpec(diagram);
+        return diagramSpec;
+    }
 
     //
     // Clear the content. Reset editor to initial state.

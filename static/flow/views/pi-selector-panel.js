@@ -131,7 +131,7 @@ var PiSelectorPanel = function(options) {
 
         var dsName = $('#dataset-name-textfield').val();
         var controller = _this.selectedController;
-        var programString = editor.getProgramSpec();
+        var programSpec = editor.getProgramSpec();
 
         if(dsName == null || dsName == '') {
             alert("You must specify a dataset name.");
@@ -143,12 +143,10 @@ var PiSelectorPanel = function(options) {
             return;
         }
        
-        if(programString == null || programString == '') {
+        if(!programSpec) {
             alert("Cannot find program.");
             return;
         }
-
-        var programSpec = JSON.parse(programString);
 
         //
         // Set name on program (maybe just do this in editor when we get the

@@ -47,16 +47,45 @@ var RecordingStatusPanel = function(options) {
 
     var recStatus   = $('<div>').html('<i>Unknown Status</i>');
     var piName      = $('<div>').text('');
-    var startTime   = $('<div>').text('Started: N/A');
 
-    Util.addTableRow(table, [buttonPanel],  {   varticalAlign: 'top' } );
+    //
+    // Start and end times (in a table)
+    //
+    var timeTable = $('<table>')
 
-    Util.addTableRow(table, [recStatus],    {   textAlign:  'right',
-                                                padding:    '5px'      } );
-    Util.addTableRow(table, [piName],       {   textAlign:  'right',
-                                                padding:    '5px'      } );
-    Util.addTableRow(table, [startTime],    {   textAlign:  'right',
-                                                padding:    '5px'      } );
+    var startLabel  = $('<div>').text('Started: ');
+    var startTime   = $('<div>').text('N/A');
+
+    var endLabel    = $('<div>').text('Ended: ');
+    var endTime     = $('<div>').text('N/A');
+
+    Util.addTableRow(timeTable, 
+                        [startLabel, startTime], 
+                        { textAlign: 'right' } );
+
+    Util.addTableRow(timeTable, 
+                        [endLabel, endTime], 
+                        { textAlign: 'right' } );
+
+    //
+    // Compose main table
+    //
+
+    Util.addTableRow(table, [buttonPanel],  
+                        {   varticalAlign: 'top' } );
+
+    Util.addTableRow(table, [recStatus],    
+                        {   textAlign:  'right',
+                            padding:    '5px'      } );
+
+    Util.addTableRow(table, [piName],       
+                        {   textAlign:  'right',
+                            padding:    '5px'      } );
+
+    Util.addTableRow(table, [timeTable],    
+                        {   textAlign:  'right',
+                            padding:    '5px'      } );
+
     Util.addTableRow(table, [stopButton] );
 
     panel.append(table);
@@ -69,13 +98,36 @@ var RecordingStatusPanel = function(options) {
         var metadata    = dataSetView.getDataSet().metadata;
         var recording   = metadata.recording;
         var start       = metadata.start_time;
+        var end         = metadata.end_time;
+
+        //
+        // Set currently recording status
+        //
         recStatus.html(recording ? 
                         '<i>Currently Recording</i>' :
                         '<i>Not Recording</i>' );
         piName.text(metadata.controller_name);
-        startTime.text('Started: ' + 
-                        Util.getLocalDate(start) + " " +
+
+        //
+        // Show start time
+        //
+        startTime.text( Util.getLocalDate(start) + " " +
                         Util.getLocalTime(start) );
+
+        //
+        // Show end time
+        //
+        var endStr = "N/A";
+        if(end) {
+            endStr = Util.getLocalDate(end) + " " +
+                     Util.getLocalTime(end);
+            
+        }
+        endTime.text(endStr);
+
+        //
+        // Set button visibility
+        //
         if(recording) {
             stopButton.show();
         } else {
