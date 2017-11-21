@@ -24,10 +24,15 @@ var PiSelectorPanel = function(options) {
                                                 textAlign:  'center',
                                                 height:     '30px' } });
 
-    var piTitle   = jQuery('<div>', { css: {    // position: 'relative',
-                                                textAlign: 'center',
-                                                paddingTop: '5px'   } });
-    piTitle.text('Available Pis');
+    var piTitle   = jQuery('<div>', { css: {    textAlign: 'center' }});
+
+    var piTitleText = jQuery('<span>', { css: { verticalAlign:  'middle', 
+                                                textAlign:      'center',
+                                                display:        'inline-block',
+                                                paddingTop:     '5px'   } });
+    piTitleText.text('Available Pis');
+    piTitle.append(piTitleText);
+
     piTitleBar.append(piTitle);
 
     //
@@ -42,16 +47,14 @@ var PiSelectorPanel = function(options) {
                                                 right:      '0px'    } });
 
 
-    var refreshButton = $('<div>', { css: {     
+    var refreshButton = $('<span>', { css: {     
                                     cursor:             'pointer',
                                     textAlign:          'center',
-                                    backgroundColor:    'white',
                                     verticalAlign:      'top',
-                                    padding:            '2px',
+                                    padding:            '1px',
                                     display:            'inline-block' }});
 
     refreshButton.html("&#10226;");
-    // buttonPanel.append(refreshButton);
     piTitle.append(refreshButton);
 
     var closeButton = $('<div>', { css: {       
@@ -64,7 +67,6 @@ var PiSelectorPanel = function(options) {
                                     display:            'inline-block' }});
 
     closeButton.html("X");
-    // closeButton.html("&times;");
     buttonPanel.append(closeButton);
 
     piTitleBar.append(buttonPanel);
