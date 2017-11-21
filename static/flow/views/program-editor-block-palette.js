@@ -28,15 +28,18 @@ var ProgramEditorBlockPalette = function(options) {
         return div;
     }
 
-    var createSensorBtn = function(name) {
+    var createSensorBtn = function(name, type) {
         var btn = $('<button>', { css: { width: '100%' } } );
         btn.text(name);
+        btn.click( function() {
+            programEditorPanel.addDeviceBlock(type);
+        });
         return btn;
     };
 
-    var temp        = createSensorBtn("Temperature");
-    var humidity    = createSensorBtn("Humidity");
-    var co2         = createSensorBtn("CO2");
+    var temp        = createSensorBtn("Temperature", "temperature");
+    var humidity    = createSensorBtn("Humidity", "humidity");
+    var co2         = createSensorBtn("CO2", "CO2");
 
     var sensorContent = $('<div>');
     sensorContent.append(temp);

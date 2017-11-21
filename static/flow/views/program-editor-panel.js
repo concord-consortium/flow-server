@@ -634,6 +634,61 @@ var ProgramEditorPanel = function(options) {
         destPin.view.svgConn.remove();
     };
 
+	//
+    // Mapping used by addDeviceBlock() for sensor type units.
+    //
+    this.unitsMap = {
+        humidity:         'precent',
+        termperature:     'degrees C',
+        CO2:             'PPM'
+    };
+
+    //
+    // Count map used by addDeviceBlock() to create unique names
+    //
+    this.typeCount = {};
+
+	//
+    // Add a block of the specified type to the program.
+    //
+    this.addDeviceBlock = function(type) {
+
+        var offset = _this.m_diagram.blocks.length * 50;
+
+        //
+        // Try to name these uniquely?
+        //
+        if(_this.typeCount[type] == undefined) {
+            _this.typeCount[type] = 1;
+        } else {
+            _this.typeCount[type]++;
+        }
+
+        var count = _this.typeCount[type];
+        if(count == 1) { 
+            count = ""; 
+        }
+
+        var blockSpec = {
+            name:           type + count,
+            type:           type,
+            units:          _this.unitsMap[type],
+            has_seq:        true, // assume all inputs have sequences (for now)?
+            input_type:     null,
+            input_count:    0,
+            output_type:    'n',
+            output_count:   1,
+            view: {
+                x: 200 + offset,  // fix(later): smarter positioning
+                y: 50 + offset,
+            }
+        };
+        var block = createFlowBlock(blockSpec);
+        _this.m_diagram.blocks.push(block);
+        _this.displayBlock(block);
+        CodapTest.logTopic('Dataflow/ConnectSensor');
+    };
+
     return this;
 }
 
