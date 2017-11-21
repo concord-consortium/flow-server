@@ -13,7 +13,7 @@ var ProgramEditorBlockPalette = function(options) {
         var div         = $('<div>', { css: {   width: '100%',
                                                 cursor: 'pointer' } } );
 
-        var title = $('<div>').text(name);
+        var title = $('<div>', { css: {paddingLeft: '2px' }} ).text(name);
         title.click( function(e) {
             if(content.is(":visible")) {
                 content.hide();

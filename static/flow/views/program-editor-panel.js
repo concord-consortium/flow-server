@@ -64,6 +64,13 @@ var ProgramEditorPanel = function(options) {
         // console.log("[DEBUG] loadProgram", programSpec);
 
         //
+        // Default empty program
+        //
+        if(!programSpec) {
+            programSpec = { blocks: [] };
+        }
+
+        //
         // bind zoom menu/function to keyboard keys
         //
         $(document).bind('keydown', 'ctrl+i', zoominBlock);
