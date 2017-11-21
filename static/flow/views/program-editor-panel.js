@@ -163,9 +163,10 @@ var ProgramEditorPanel = function(options) {
             var div = $('<div>', {class: 'flowBlockValueAndUnits noSelect'});
             $('<span>', {class: 'flowBlockValue', html: '...', id: 'bv_' + block.id}).appendTo(div);
 
-            // console.log("[DEBUG] units:", block.units);
+            console.log("[DEBUG] units:", block.units);
 
             if (block.units) {
+                console.log("[DEBUG] Fixing units:", block.units);
                 var units = block.units;
                 units = units.replace('degrees ', '&deg;');  // note removing space
                 units = units.replace('percent', '%');
@@ -638,9 +639,9 @@ var ProgramEditorPanel = function(options) {
     // Mapping used by addDeviceBlock() for sensor type units.
     //
     this.unitsMap = {
-        humidity:         'precent',
-        termperature:     'degrees C',
-        CO2:             'PPM'
+        humidity:       'percent',
+        temperature:    'degrees C',
+        CO2:            'PPM'
     };
 
     //
