@@ -37,6 +37,10 @@ var ProgramEditorBlockPalette = function(options) {
         return btn;
     };
 
+    //
+    // Sensors
+    //
+
     var temp        = createSensorBtn("Temperature", "temperature");
     var humidity    = createSensorBtn("Humidity", "humidity");
     var co2         = createSensorBtn("CO2", "CO2");
@@ -48,6 +52,10 @@ var ProgramEditorBlockPalette = function(options) {
 
     var sensors     = createSection("Sensors", sensorContent);
     blockPalette.append(sensors);
+
+    //
+    // Filters
+    //
 
     var filterContent = $('<div>');
 
@@ -78,6 +86,26 @@ var ProgramEditorBlockPalette = function(options) {
     var filters = createSection("Filters", filterContent);
 
     blockPalette.append(filters);
+
+    //
+    // Numeric
+    //
+
+    var numeric = $('<button>', { css: { width: '100%' } } );
+    numeric.text('Numeric');
+    numeric.click( function() {
+        programEditorPanel.addNumericBlock();
+    });
+
+    var numericContent = $('<div>');
+    numericContent.append(numeric);
+
+    var numerics = createSection("Numeric", numericContent);
+    blockPalette.append(numerics);
+
+    //
+    // Add all block palette content to the container.
+    //
 
     container.append(blockPalette);
 

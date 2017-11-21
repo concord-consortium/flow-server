@@ -635,7 +635,7 @@ var ProgramEditorPanel = function(options) {
         destPin.view.svgConn.remove();
     };
 
-	//
+    //
     // Mapping used by addDeviceBlock() for sensor type units.
     //
     this.unitsMap = {
@@ -649,13 +649,8 @@ var ProgramEditorPanel = function(options) {
     //
     this.typeCount = {};
 
-	//
-    // Add a block of the specified type to the program.
-    //
-    this.addDeviceBlock = function(type) {
-
-        var offset = _this.m_diagram.blocks.length * 50;
-
+    this.getUniqueSuffix = function(type) {
+    
         //
         // Try to name these uniquely?
         //
@@ -669,6 +664,17 @@ var ProgramEditorPanel = function(options) {
         if(count == 1) { 
             count = ""; 
         }
+        return count;
+    }
+
+    //
+    // Add a block of the specified type to the program.
+    //
+    this.addDeviceBlock = function(type) {
+
+        var offset = _this.m_diagram.blocks.length * 50;
+
+        var count = _this.getUniqueSuffix(type);
 
         var blockSpec = {
             name:           type + count,
@@ -689,6 +695,25 @@ var ProgramEditorPanel = function(options) {
         _this.displayBlock(block);
         CodapTest.logTopic('Dataflow/ConnectSensor');
     };
+
+    //
+    // Add a numeric data entry block to the diagram
+    //
+    this.addNumericBlock = function() {
+        var offset = _this.m_diagram.blocks.length * 50;
+        var count = _this.getUniqueSuffix("number");
+
+        var block = createFlowBlock(
+                        {   name: 'number'+count, 
+                            type: 'number_entry', 
+                            output_count: 1, 
+                            output_type: 'n'    });
+        _this.m_diagram.blocks.push(block);
+        block.view.x = 200 + offset;
+        block.view.y = 50 + offset;
+        _this.displayBlock(block);
+    }
+
 
     return this;
 }
