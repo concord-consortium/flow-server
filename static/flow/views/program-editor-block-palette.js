@@ -47,13 +47,33 @@ var ProgramEditorBlockPalette = function(options) {
     blockPalette.append(sensors);
 
     var filterContent = $('<div>');
+
+    var createFilterBtn = function(type) {
+        console.log("[DEBUG] programEditorPanel", programEditorPanel);
+        var btn = $('<button>', { text: type, css: { width: '100%' } } );
+        btn.click(type, function(e) {
+            programEditorPanel.addFilterBlock(e);
+        });
+        return btn;
+    }
+
+    var andButton   = createFilterBtn("and");
+    var orButton    = createFilterBtn("or");
+    var notButton   = createFilterBtn("not");
+
     var filterButton = $('<button>', { css: { width: '100%' } } );
-    filterButton.text('Filter');
+    filterButton.text('...');
     filterButton.click( function() {
         programEditorPanel.showFilterBlockSelector();
     });
+
+    filterContent.append(andButton);
+    filterContent.append(orButton);
+    filterContent.append(notButton);
     filterContent.append(filterButton);
+
     var filters = createSection("Filters", filterContent);
+
     blockPalette.append(filters);
 
     container.append(blockPalette);
