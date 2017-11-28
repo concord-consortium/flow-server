@@ -43,11 +43,12 @@ var ProgramEditorFileManager = function(options) {
         //
         var url = '/ext/flow/save_program'
         var data = {    filename:   filename,
-                        content:    programStr  };
+                        content:    programStr,
+                        csrf_token: g_csrfToken };
 
         $.ajax({
             url:        url,
-            method:     'GET',
+            method:     'POST',
             data:       data,
             success:    function(data) {
                 var response = JSON.parse(data);
@@ -94,12 +95,12 @@ var ProgramEditorFileManager = function(options) {
         // g_csrfToken value here? :(
         //
         var url = '/ext/flow/delete_program'
-        var data = { filename: filename };
-                        // csrf_token: g_csrfToken     };
+        var data = { filename:      filename,
+                     csrf_token:    g_csrfToken     };
 
         $.ajax({
             url:        url,
-            method:     'GET',
+            method:     'POST',
             data:       data,
             success:    function(data) {
                 var response = JSON.parse(data);

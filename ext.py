@@ -320,7 +320,7 @@ def file_operation(operation, type):
 #
 # API for saving a program to the rhizo-server
 #
-@app.route('/ext/flow/save_program', methods=['POST', 'GET'])
+@app.route('/ext/flow/save_program', methods=['POST'])
 def save_program():
     return file_operation('save', 'programs')
 
@@ -328,14 +328,14 @@ def save_program():
 # API for loading (retrieving the contents of) a program 
 # from the rhizo-server
 #
-@app.route('/ext/flow/load_program', methods=['POST', 'GET'])
+@app.route('/ext/flow/load_program', methods=['POST'])
 def load_program():
     return file_operation('load', 'programs')
 
 #
 # API to delete a saved program from the rhizo-server
 #
-@app.route('/ext/flow/delete_program', methods=['POST', 'GET'])
+@app.route('/ext/flow/delete_program', methods=['POST'])
 def delete_program():
     return file_operation('delete', 'programs')
 
@@ -343,21 +343,21 @@ def delete_program():
 #
 # API for listing programs saved on the rhizo-server
 #
-@app.route('/ext/flow/list_programs', methods=['POST', 'GET'])
+@app.route('/ext/flow/list_programs', methods=['POST'])
 def list_programs():
     return file_operation('list', 'programs')
 
 #
 # API for listing named datasets saved on the rhizo-server
 #
-@app.route('/ext/flow/list_datasets', methods=['POST', 'GET'])
+@app.route('/ext/flow/list_datasets', methods=['POST'])
 def list_datasets():
     return file_operation('list', 'datasets')
 
 #
 # API for listing named datasets saved on the rhizo-server
 #
-@app.route('/ext/flow/load_dataset', methods=['POST', 'GET'])
+@app.route('/ext/flow/load_dataset', methods=['POST'])
 def load_dataset():
     return file_operation('load', 'datasets')
  

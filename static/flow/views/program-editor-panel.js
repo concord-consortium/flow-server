@@ -104,7 +104,7 @@ var ProgramEditorPanel = function(options) {
             console.log("[DEBUG] display block", this.m_diagram.blocks[i]);
             var block = this.m_diagram.blocks[i];
             this.displayBlock(block);
-            this.nameHash[block.name] = true;
+            this.nameHash[block.name] = block;
         }
 
         //
@@ -169,7 +169,7 @@ var ProgramEditorPanel = function(options) {
                 input.val(block.value);
             }
             input.mousedown(function(e) {e.stopPropagation()});
-            input.keyup(block.id, numberEntryChanged);
+            input.keyup(block.id, _this.numberEntryChanged);
         } else if (block.type === 'plot') {
             var canvas = $('<canvas>', {class: 'flowBlockPlot', width: 300, height: 200, id: 'bc_' + block.id}).appendTo(blockDiv);
             canvas.mousedown(this.blockMouseDown);
@@ -613,7 +613,11 @@ var ProgramEditorPanel = function(options) {
     // Used by addDeviceBlock() to create unique names
     //
     this.nameHash = {};
-    this.isDeviceType = function(type) {
+
+    //
+    // Determine if a block represents a physical sensor device
+    //
+    this.isDeviceBlock = function(type) {
         return (type == "temperature" ||
                 type == "humidity" ||
                 type == "light" ||
@@ -626,8 +630,8 @@ var ProgramEditorPanel = function(options) {
     //
     this.getUniqueName = function(name) {
     
-        var used = this.nameHash[name];
-        if(!used) {
+        var block = this.nameHash[name];
+        if(!block) {
             return name;
         }
         var count = 2;
@@ -642,9 +646,9 @@ var ProgramEditorPanel = function(options) {
     //
     this.addDeviceBlock = function(type) {
 
-        var offset = this.m_diagram.blocks.length * 50;
+        var offset = _this.m_diagram.blocks.length * 50;
 
-        var name = this.getUniqueName(type);
+        var name = _this.getUniqueName(type);
 
         var blockSpec = {
             name:           name,
@@ -661,9 +665,9 @@ var ProgramEditorPanel = function(options) {
             }
         };
         var block = createFlowBlock(blockSpec);
-        this.m_diagram.blocks.push(block);
-        this.nameHash[name] = true;
-        this.displayBlock(block);
+        _this.m_diagram.blocks.push(block);
+        _this.nameHash[name] = block;
+        _this.displayBlock(block);
         CodapTest.logTopic('Dataflow/ConnectSensor');
     };
 
@@ -762,6 +766,93 @@ var ProgramEditorPanel = function(options) {
         _this.displayBlock(block);
         CodapTest.logTopic('Dataflow/AddPlot');
     };
+
+    //
+    // Triggered when a numeric entry field is edited
+    //
+    this.numberEntryChanged = function(e) {
+        var block = _this.m_diagram.findBlockById(e.data);
+        var val = parseFloat($('#bv_' + block.id).val());
+        if (isNaN(val)) {
+            block.updateValue(null);
+        } else {
+            block.updateValue(val);
+        }
+        // fix(faster): only trigger if value has changed
+    }
+
+    //
+    // Handle sensor data messages
+    //
+    this.handleSensorData = function(timestamp, params) {
+        console.log("[DEBUG] handleSensorData", params);
+        if(params.data) {
+            console.log("[DEBUG] handleSensorData updating blocks.");
+            var receivedData = {};
+            for(var i = 0; i < params.data.length; i++) {
+                var sensor  = params.data[i];
+                var name    = sensor.name;
+                var value   = sensor.value;
+                var block   = _this.nameHash[name];
+                if (block) {
+                    block.updateValue(value);
+                    _this.displayBlockValue(block);
+                }
+                receivedData[name] = true;
+            }
+
+            //
+            // Check for device blocks for which we did not receive any data
+            // and set their values to null.
+            //
+            for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
+                var block = _this.m_diagram.blocks[i];
+                if(_this.isDeviceBlock(block.type)) {
+                    if(!receivedData[block.name]) {
+                        block.updateValue(null);
+                        _this.displayBlockValue(block);
+                    }
+                }
+            }
+        }
+    }
+
+    //
+    // Display the current value of a block in the UI
+    //
+    this.displayBlockValue = function(block) {
+        if (block.type === 'number_entry') {
+            // do nothing
+        } else if (block.type === 'plot') {
+            if (block.value !== null && !isNaN(block.value)) {
+                var timestamp = moment().valueOf() * 0.001 - g_startTimestamp;
+                block.view.xData.data.push(timestamp);
+                block.view.yData.data.push(block.value);
+                if (block.view.xData.data.length > 30) {
+                    block.view.xData.data.shift();
+                    block.view.yData.data.shift();
+                }
+            } else {
+                block.view.xData.data = [];
+                block.view.yData.data = [];
+            }
+            block.view.plotHandler.plotter.autoBounds();
+            block.view.plotHandler.drawPlot(null, null);
+        } else if (block.outputType === 'i') {  // image-valued blocks
+            if (block.value === null) {
+                // fix(soon): display something to let user know camera is offline
+            } else {
+                console.log('set image ' + block.value.length);
+                $('#bi_' + block.id).attr('src', 'data:image/jpeg;base64,' + block.value);
+            }
+        } else {
+            if (block.value === null) {
+                $('#bv_' + block.id).html('...');
+            } else {
+                $('#bv_' + block.id).html(block.value);  // fix(faster): check whether value has changed
+            }
+        }
+    }
 
     return this;
 }

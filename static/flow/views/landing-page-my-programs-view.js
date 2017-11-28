@@ -19,11 +19,12 @@ var LandingPageMyProgramsView = function(options) {
         div.text("Loading My Programs...");
 
         var url = '/ext/flow/list_programs';
+        var data = { csrf_token: g_csrfToken };
 
         $.ajax({
             url: url,
-            method: 'GET',
-            // data: data,
+            method: 'POST',
+            data: data,
             success: function(data) {
                 var response = JSON.parse(data);
 
