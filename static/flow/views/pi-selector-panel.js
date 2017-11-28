@@ -168,46 +168,40 @@ var PiSelectorPanel = function(options) {
         //
 
         //
-        // A common set of parameters we will use for sending
-        // both messages.
-        //
-        var execParams = {  
-                            target_folder:  controller.path,
-                            src_folder:     controller.path  }
-       
-        //
-        // Clone the common params.
-        //
-        var setDiagramParams = Object.assign({}, execParams);
-
-        //
         // Add parameters specific to 'set_diagram'
         //
+        var setDiagramParams = {};
         setDiagramParams.message_type   = 'set_diagram';
+        setDiagramParams.target_folder  = controller.path;
+        setDiagramParams.src_folder     = controller.path;
         setDiagramParams.message_params = { diagram:    programSpec,
                                             username:   g_user.user_name };
 
-        setDiagramParams.response_func  = function(ts, params) {
+        function handle_set_diagram_response(ts, params) {
 
             //
             // If successfully set_diagram then start_recording...
             //
             if(params.success) {
 
-                var startRecordingParams = Object.assign({}, execParams);
+                var startRecordingParams = {};
+                startRecordingParams.target_folder  = controller.path;
+                startRecordingParams.src_folder     = controller.path;
                 startRecordingParams.message_type   = 'start_recording';
                 startRecordingParams.message_params = { rate: 1,
                                                         recording_location: '/testing/student-folders/' + g_user.user_name + '/datasets/' + dsName };
 
-                startRecordingParams.response_func  = function(ts, params) {
+                function handle_start_recording_response(ts, prarms) {
                     if(params.success) {
                         $('#dataset-name-textfield').val('');
                         alert("Recording started.");
+                        console.log("Recording started.", params);
                         _this.loadPiList();
                     } else {
                         alert("Error starting recording: " + params.message);
                     }
                 }
+                startRecordingParams.response_func = handle_start_recording_response;
 
                 var startRecording = MessageExecutor(startRecordingParams);
                 startRecording.execute();
@@ -216,6 +210,7 @@ var PiSelectorPanel = function(options) {
                 alert("Error transferring program to pi: " + params.message);
             }
         }
+        setDiagramParams.response_func = handle_set_diagram_response;
 
         var setDiagram = MessageExecutor(setDiagramParams);
         setDiagram.execute();
@@ -231,6 +226,25 @@ var PiSelectorPanel = function(options) {
             if(index == i) {
                 this.selectedController = this.availableControllers[i];
                 div.addClass('color-connect-to-pi-button');
+
+
+                //
+                // Send message over websocket to request sensor data
+                //
+                var controller = this.selectedController;
+                var execParams = {
+                        message_type:   'send_sensor_data',
+                        message_params: {},
+                        target_folder:  controller.path,
+                        src_folder:     controller.path,
+                        remove_handler: false,
+                        response_func:  editor.getProgramEditorPanel().handleSensorData
+                }; 
+
+                console.log("[DEBUG] Requesting sensor data");
+                var sendSensorData = MessageExecutor(execParams);
+                sendSensorData.execute();
+
             } else {
                 div.removeClass('color-connect-to-pi-button');
             }
@@ -254,7 +268,8 @@ var PiSelectorPanel = function(options) {
 
         $.ajax({
             url:        url,
-            method:     'GET',
+            method:     'POST',
+            data:       { csrf_token: g_csrfToken },
             success:    function(data) {
                 var response = JSON.parse(data);
 

@@ -159,8 +159,9 @@ var RecordingStatusPanel = function(options) {
 
                         $.ajax({
                             url: '/ext/flow/load_dataset',
-                            data: { filename: name },
-                            method: 'GET',
+                            data: { filename:   name,
+                                    csrf_token: g_csrfToken },
+                            method: 'POST',
                             success: function(data) {
                                 var file = JSON.parse(data);
                                 dataSetView.loadDataSet( 

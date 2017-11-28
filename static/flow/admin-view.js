@@ -46,8 +46,8 @@ function loadAdminViewData() {
 
     $.ajax({
         url: '/ext/flow/controllers',
-        method: 'GET',
-        // data: {},
+        method: 'POST',
+        data: { csrf_token: g_csrfToken },
         success: function(data) {
             var response = JSON.parse(data);
             if(response.success) {

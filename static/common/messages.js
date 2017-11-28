@@ -68,7 +68,9 @@ function sendSubscriptions() {
 // timestamp, message type, and message parameters (dictionary)
 //
 function addMessageHandler(type, func) {
+    // console.log("[DEBUG] addMessageHandler", type);
     g_wsh.addHandler(type, func);
+    // console.log("[DEBUG] addMessageHandler new handlers", g_wsh.getHandlers());
 }
 
 //
@@ -77,6 +79,14 @@ function addMessageHandler(type, func) {
 function removeMessageHandler(type) {
     g_wsh.removeHandler(type);
 }
+
+//
+// Remove all message handlers
+//
+function removeMessageHandlers() {
+    g_wsh.removeHandlers();
+}
+
 
 
 
@@ -154,11 +164,14 @@ function createWebSocketHolder() {
 					window.location.reload();
 				}
 			}
+            console.log("All handlers", wsh.handlers);
+            console.log("Message type", type);
 			var func = wsh.handlers[type];
+            console.log("Message func", func);
 			if (func) {
 
 				// console.log(type + ":" + JSON.stringify(message['parameters']))
-				// debug("MESSAGE HANDLER", type + ":" + JSON.stringify(message['parameters']))
+				debug("MESSAGE HANDLER", type + ":" + JSON.stringify(message['parameters']))
 				func(moment(message['timestamp']), message['parameters']);
 
 			} else {
@@ -262,12 +275,22 @@ function createWebSocketHolder() {
 		wsh.handlers[type] = func;
 	};
 
+    wsh.getHandlers = function() { return wsh.handlers; }
+
     //
     // Remove a message handler
     //
     wsh.removeHandler = function(type) {
         delete wsh.handlers[type];
     };
+
+    //
+    // Remove all message handlers
+    //
+    wsh.removeHandlers = function() {
+        wsh.handlers = {};
+    };
+
 
 
 	// fix(clean): remove this; instead append '*' handler (make handlers for each type be a list)

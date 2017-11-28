@@ -20,6 +20,10 @@
 //                      This function will be passed a timestamp and
 //                      a params json object. This has the form
 //                      function(timestamp, params)
+//                  remove_handler - (optional) If true, remove the handler 
+//                      after handling the response. If false, do not remove 
+//                      the handler after handling the response. The default is
+//                      true.
 //
 var MessageExecutor = function(config) {
    
@@ -28,7 +32,8 @@ var MessageExecutor = function(config) {
     this.target_folder  = config.target_folder;
     this.response_type  = this.message_type + "_response";
     this.src_folder     = null;
-    this.response_func  = config.response_func
+    this.response_func  = config.response_func;
+    this.remove_handler = true;
 
     var _this = this;
 
@@ -41,6 +46,11 @@ var MessageExecutor = function(config) {
     if(config.src_folder) {
         this.src_folder = config.src_folder;
     }
+    if('remove_handler' in config) {
+        this.remove_handler = config.remove_handler;
+    } else {
+        this.remove_handler = true;
+    }
 
     //
     // Send the message and set the response handler.
@@ -49,7 +59,34 @@ var MessageExecutor = function(config) {
 
         // console.log("[DEBUG] MessageExecutor execute()");
 
-        addMessageHandler(this.response_type, this.handleResponse);
+        console.log("[DEBUG] MessageExecutor call addMessageHandler", 
+                        this.response_type );
+
+        //
+        // Some kind of bug here does not allow multiple message types
+        // to be handled simultaneously.
+        //
+        removeMessageHandlers();
+
+        addMessageHandler(  
+            this.response_type, 
+            function(timestamp, params) {
+                console.log("[DEBUG] MessageExecutor handleResponse()", 
+                            _this.response_type, 
+                            _this.response_func,
+                            params);
+
+                if( _this.src_folder != null &&
+                    _this.src_folder != params.src_folder) {
+                    console.log("[DEBUG] MessageExecutor ignoring message from " + 
+                                params.src_folder);
+                    return;
+                }
+                if(_this.remove_handler) {
+                    removeMessageHandler(_this.response_type);
+                }
+                _this.response_func(timestamp, params);
+            });
 
         // console.log("[DEBUG] MessageExecutor setting subscription and " +
         //            "target folder: " + this.target_folder);
@@ -59,7 +96,7 @@ var MessageExecutor = function(config) {
 
         if(g_webSocketInited) {
 
-            // console.log("[INFO] MessageExecutor sending message on connected websocket. " + this.message_type + " " + this.message_params);
+            console.log("[INFO] MessageExecutor sending message on connected websocket. " + this.message_type + " " + this.message_params);
 
             sendSubscriptions();
         	sendMessage(this.message_type, this.message_params);
@@ -72,21 +109,6 @@ var MessageExecutor = function(config) {
         	sendMessage(_this.message_type, _this.message_params);
         });
 
-    }
-
-    //
-    // Call the response handler.
-    //
-    this.handleResponse = function(timestamp, params) {
-        console.log("[DEBUG] MessageExecutor handleResponse()", params);
-        if( this.src_folder != null &&
-            this.src_folder != params.src_folder) {
-            console.log("[DEBUG] MessageExecutor ignoring message from " + 
-                        params.src_folder);
-            return;
-        }
-        removeMessageHandler(this.response_type);
-        this.response_func(timestamp, params);
     }
 
     return this;

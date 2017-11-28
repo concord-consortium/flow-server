@@ -22,9 +22,9 @@ var LandingPageDataSetView = function(options) {
         var url = '/ext/flow/list_datasets';
 
         $.ajax({
-            url: url,
-            method: 'GET',
-            // data: data,
+            url:    url,
+            method: 'POST',
+            data:   { csrf_token: g_csrfToken },
             success: function(data) {
                 var response = JSON.parse(data);
 

@@ -117,8 +117,8 @@ var ProgramEditorView = function(options) {
 
             var url = '/ext/flow/load_program'
 
-            var data = {    filename:   filename            };
-                            // csrf_token: g_csrfToken      };
+            var data = {    filename:   filename,
+                            csrf_token: g_csrfToken      };
 
 
             //
@@ -128,7 +128,7 @@ var ProgramEditorView = function(options) {
 
             $.ajax({
                 url: url,
-                method: 'GET',
+                method: 'POST',
                 data: data,
                 success: function(data) {
                     var response = JSON.parse(data);

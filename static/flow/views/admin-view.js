@@ -64,9 +64,9 @@ var AdminView = function(options) {
         );
 
         $.ajax({
-            url: '/ext/flow/controllers',
-            method: 'GET',
-            // data: {},
+            url:    '/ext/flow/controllers',
+            method: 'POST',
+            data:   { csrf_token: g_csrfToken },
             success: function(data) {
                 var response = JSON.parse(data);
                 if(response.success) {
