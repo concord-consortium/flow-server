@@ -231,6 +231,29 @@ var PiSelectorPanel = function(options) {
             if(index == i) {
                 this.selectedController = this.availableControllers[i];
                 div.addClass('color-connect-to-pi-button');
+
+
+                //
+                // Send message over websocket to request sensor data
+                //
+                var controller = this.selectedController;
+                var execParams = {
+                        message_type:   'send_sensor_data',
+                        message_params: {},
+                        target_folder:  controller.path,
+                        src_folder:     controller.path,
+                        remove_handler: false,
+                        response_func:  function(ts, params) {
+                            console.log("[DEBUG] Sensor data", params);
+                            if(params.data) {
+                            }
+                        }
+                }; 
+
+                console.log("[DEBUG] Requesting sensor data");
+                var sendSensorData = MessageExecutor(execParams);
+                sendSensorData.execute();
+
             } else {
                 div.removeClass('color-connect-to-pi-button');
             }

@@ -20,6 +20,10 @@
 //                      This function will be passed a timestamp and
 //                      a params json object. This has the form
 //                      function(timestamp, params)
+//                  remove_handler - (optional) If true, remove the handler 
+//                      after handling the response. If false, do not remove 
+//                      the handler after handling the response. The default is
+//                      true.
 //
 var MessageExecutor = function(config) {
    
@@ -29,6 +33,7 @@ var MessageExecutor = function(config) {
     this.response_type  = this.message_type + "_response";
     this.src_folder     = null;
     this.response_func  = config.response_func
+    this.remove_handler = true;
 
     var _this = this;
 
@@ -41,6 +46,9 @@ var MessageExecutor = function(config) {
     if(config.src_folder) {
         this.src_folder = config.src_folder;
     }
+    if('remove_handler' in config) {
+        this.remove_handler = config.remove_handler;
+    }
 
     //
     // Send the message and set the response handler.
@@ -48,6 +56,9 @@ var MessageExecutor = function(config) {
     this.execute = function() {
 
         // console.log("[DEBUG] MessageExecutor execute()");
+
+        console.log("[DEBUG] MessageExecutor add response handler", 
+                        this.response_type );
 
         addMessageHandler(this.response_type, this.handleResponse);
 
@@ -85,7 +96,9 @@ var MessageExecutor = function(config) {
                         params.src_folder);
             return;
         }
-        removeMessageHandler(this.response_type);
+        if(this.remove_handler) {
+            removeMessageHandler(this.response_type);
+        }
         this.response_func(timestamp, params);
     }
 

@@ -44,11 +44,15 @@ var ProgramEditorBlockPalette = function(options) {
     var temp        = createSensorBtn("Temperature", "temperature");
     var humidity    = createSensorBtn("Humidity", "humidity");
     var co2         = createSensorBtn("CO2", "CO2");
+    var light       = createSensorBtn("Light", "light");
+    var soil        = createSensorBtn("Soil Moisture", "soilmoisture");
 
     var sensorContent = $('<div>');
     sensorContent.append(temp);
     sensorContent.append(humidity);
     sensorContent.append(co2);
+    sensorContent.append(light);
+    sensorContent.append(soil);
 
     var sensors     = createSection("Sensors", sensorContent);
     blockPalette.append(sensors);
@@ -97,8 +101,20 @@ var ProgramEditorBlockPalette = function(options) {
         programEditorPanel.addNumericBlock();
     });
 
+    //
+    // Plot
+    //
+
+    var plot = $('<button>', { css: { width: '100%' } } );
+    plot.text('Plot');
+    plot.click( function() {
+        programEditorPanel.addPlotBlock();
+    });
+
+
     var numericContent = $('<div>');
     numericContent.append(numeric);
+    numericContent.append(plot);
 
     var numerics = createSection("Numeric", numericContent);
     blockPalette.append(numerics);
