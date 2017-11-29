@@ -219,19 +219,16 @@ def file_operation(operation, type):
     #
     # Construct path
     #
-    if operation != 'list':
-        if type != 'datasets':
-            path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, type, filename)
-        else:
-            path = '%s/%s/%s/%s/%s/metadata' % (org_name, 'student-folders', username, type, filename)
-    else:
+    if operation == 'list':
         path = '%s/%s/%s/%s' % (org_name, 'student-folders', username, type)
-
-    #
-    # In some cases this expects to start with "/" but not in others???
-    #
-    # if not path.startswith('/'):
-    #    path = '/' + path
+    else:
+        if type == 'datasets':
+            if operation == 'load':
+                path = '%s/%s/%s/%s/%s/metadata' % (org_name, 'student-folders', username, type, filename)
+            else:
+                path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, type, filename)
+        else:
+            path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, type, filename)
 
     #
     # Save op
@@ -360,5 +357,12 @@ def list_datasets():
 @app.route('/ext/flow/load_dataset', methods=['POST'])
 def load_dataset():
     return file_operation('load', 'datasets')
+ 
+#
+# API for deleting a named dataset
+#
+@app.route('/ext/flow/delete_dataset', methods=['POST'])
+def delete_dataset():
+    return file_operation('delete', 'datasets')
  
 
