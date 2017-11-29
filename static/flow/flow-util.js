@@ -54,7 +54,7 @@ Util.addTableRow = function(table, data, tdCss) {
 };
 
 //
-// Returns local date and time from a UTL string representation
+// Returns local date and time from a UTC string representation
 //
 Util.getLocalDateTime = function(d) {
 	if(d.indexOf('.') != -1) {
