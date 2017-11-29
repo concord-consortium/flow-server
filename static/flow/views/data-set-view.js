@@ -95,14 +95,12 @@ var DataSetView = function(options) {
         info.append($('<div>').text("DataSet Name: " + base.m_dataSet.name));
         info.append($('<div>').text("Program Name: " + base.m_dataSet.metadata.program.name));
 
-        if (base.m_plotHandler === null) {
-            base.m_canvas = document.getElementById('data-set-canvas');
-            base.m_plotHandler = createPlotHandler(base.m_canvas);
+        base.m_canvas = document.getElementById('data-set-canvas');
+        base.m_plotHandler = createPlotHandler(base.m_canvas);
 
-            context = base.m_canvas.getContext('2d');
-            window.addEventListener('resize', base.resizeCanvas, false);
-            base.resizeCanvas();
-        }
+        context = base.m_canvas.getContext('2d');
+        window.addEventListener('resize', base.resizeCanvas, false);
+        base.resizeCanvas();
 
         base.m_plotHandler.plotter.resetReceived();
 
