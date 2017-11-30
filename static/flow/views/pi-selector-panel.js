@@ -166,6 +166,12 @@ var PiSelectorPanel = function(options) {
         //
         // Need to send message 'set_diagram' followed by 'start_recording'
         //
+        // TODO make this a single atomic operation. Allow user to send
+        // diagram as part of the 'start_recording' message, so that only
+        // one message needs to be sent from here. The implementation on the
+        // pi should then call into the set_diagram path first, and then
+        // start recording.
+        //
 
         //
         // Add parameters specific to 'set_diagram'
@@ -196,6 +202,14 @@ var PiSelectorPanel = function(options) {
                         $('#dataset-name-textfield').val('');
                         alert("Recording started.");
                         console.log("Recording started.", params);
+
+                        //
+                        // Clear any sensor values being displayed, since
+                        // we will no longer be listening for the
+                        // sensor messages.
+                        //
+                        editor.getProgramEditorPanel().handleSensorData(null, { data: [] });
+
                         _this.loadPiList();
                     } else {
                         alert("Error starting recording: " + params.message);
@@ -241,7 +255,14 @@ var PiSelectorPanel = function(options) {
                         response_func:  editor.getProgramEditorPanel().handleSensorData
                 }; 
 
-                console.log("[DEBUG] Requesting sensor data");
+                console.log("[DEBUG] Requesting sensor data from ", controller.path);
+                //
+                // Clear any old sensor data being displayed.
+                // Do this by calling the handler with an empty array of
+                // data.
+                //
+                editor.getProgramEditorPanel().handleSensorData(null, { data: [] });
+
                 var sendSensorData = MessageExecutor(execParams);
                 sendSensorData.execute();
 

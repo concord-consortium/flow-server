@@ -45,6 +45,16 @@ var RecordingStatusPanel = function(options) {
                                     bottom:     '0px'   }});
     stopButton.text('Stop Recording');
 
+    var deleteButton = jQuery('<button>', 
+                        {       class: '.color-stop-recording-button',
+                                css: {
+                                    width:      '98%',
+                                    padding:    '5px',
+                                    left:       '0px',
+                                    bottom:     '0px'   }});
+    deleteButton.text('Delete DataSet');
+
+
     var recStatus   = $('<div>').html('<i>Unknown Status</i>');
     var piName      = $('<div>').text('');
 
@@ -87,12 +97,13 @@ var RecordingStatusPanel = function(options) {
                             padding:    '5px'      } );
 
     Util.addTableRow(table, [stopButton] );
+    Util.addTableRow(table, [deleteButton] );
 
     panel.append(table);
     container.append(panel);
 
     //
-    // Display panel with latest loaded data set metadata
+    // Display panel with latest loaded dataset metadata
     //
     this.show = function() {
         var metadata    = dataSetView.getDataSet().metadata;
@@ -130,8 +141,10 @@ var RecordingStatusPanel = function(options) {
         //
         if(recording) {
             stopButton.show();
+            deleteButton.hide();
         } else {
             stopButton.hide();
+            deleteButton.show();
         }
     }
 
@@ -184,6 +197,26 @@ var RecordingStatusPanel = function(options) {
         var stopDiagram = MessageExecutor(execParams);
         stopDiagram.execute();
 
+    });
+
+    //
+    // Delete dataset
+    //
+    deleteButton.click( function() {
+        name = dataSetView.getDataSet().name;
+        $.ajax({
+            url: '/ext/flow/delete_dataset',
+            data: { filename:   name,
+                    csrf_token: g_csrfToken },
+            method: 'POST',
+            success: function(data) {
+                alert("Deleted DataSet " + name);
+                showTopLevelView('landing-page-view');
+            },
+            error: function(data) {
+                console.log("[ERROR] Error deleting dataset " + name);
+                alert("Error deleting dataset " + name)
+            }});
     });
 
     return this;

@@ -606,7 +606,9 @@ var ProgramEditorPanel = function(options) {
     this.unitsMap = {
         humidity:       'percent',
         temperature:    'degrees C',
-        CO2:            'PPM'
+        CO2:            'PPM',
+        light:          'lux',
+        soilmoisture:   ''
     };
 
     //

@@ -95,19 +95,20 @@ var DataSetView = function(options) {
         info.append($('<div>').text("DataSet Name: " + base.m_dataSet.name));
         info.append($('<div>').text("Program Name: " + base.m_dataSet.metadata.program.name));
 
-        if (base.m_plotHandler === null) {
-            base.m_canvas = document.getElementById('data-set-canvas');
-            base.m_plotHandler = createPlotHandler(base.m_canvas);
+        base.m_canvas = document.getElementById('data-set-canvas');
+        base.m_plotHandler = createPlotHandler(base.m_canvas);
 
-            context = base.m_canvas.getContext('2d');
-            window.addEventListener('resize', base.resizeCanvas, false);
-            base.resizeCanvas();
-        }
+        context = base.m_canvas.getContext('2d');
+        window.addEventListener('resize', base.resizeCanvas, false);
+        base.resizeCanvas();
 
         base.m_plotHandler.plotter.resetReceived();
-        // request sequence history data from server
-        // setTimeFrame('10m');
-        setTimeFrame('1h');
+
+        //
+        // Set time frame on graph to start and end time of recording.
+        //
+        setTimeFrame(   base.m_dataSet.metadata.start_time, 
+                        base.m_dataSet.metadata.end_time );
 
         recordingStatusPanel.show();
     }
@@ -241,35 +242,49 @@ var DataSetView = function(options) {
     }
 
 
-    function setTimeFrame(timeStr) {
+    //
+    // Set the start and end time on the graph.
+    //
+    // startTime    - UTC date string as stored in metadata
+    //                  e.g. "2017-11-29 17:03:30.137684"
+    // endTime      - UTC date string as stored in metadata. If undefined, use
+    //                  the current date (now)
+    //
+    function setTimeFrame(startStr, endStr) {
 
-        // compute time bounds
-        var frameSeconds = 0;
-        if (timeStr === '1m'){
-            frameSeconds = 60;
-        } else if (timeStr === '10m'){
-            frameSeconds = 60 * 10;
-        } else if (timeStr === '1h'){
-            frameSeconds = 60 * 60;
-        } else if (timeStr === '24h'){
-            frameSeconds = 60 * 60 * 24;
-        } else if (timeStr === '7d'){
-            frameSeconds = 60 * 60 * 24 * 7;
-        } else if (timeStr === '30d'){
-            frameSeconds = 60 * 60 * 24 * 30;
+        //
+        // Parse the date string into a javascript Date object.
+        //
+        function parseDate(d) {
+            if(d == undefined) {
+                return new Date();
+            }
+
+            if(d.indexOf('.') != -1) {
+                d = d.split('.')[0];
+            }
+            var dateStr = d + " UTC";
+
+            // Safari workaround
+            var dateStr = dateStr.replace(/-/g, '/');
+        
+            return new Date(dateStr);
         }
+
+        var startDate   = parseDate(startStr);
+        var endDate     = parseDate(endStr);
+        console.log("[DEBUG] setTimeFrame startDate endDate", 
+                                startDate, endDate);
+
         base.m_plotHandler.plotter.resetReceived();
 
-        // get current time
-        var now = moment().valueOf();
-        // round up to next whole second
-        now = Math.round((now + 999) / 1000) * 1000;
-        var start = moment(now - (frameSeconds * 1000)).toISOString();
-        var end = moment(now).toISOString();
+        var start   = moment(startDate.getTime()).toISOString();
+        var end     = moment(endDate.getTime()).toISOString();
 
         var diagram = base.m_program;
 
         console.log("[DEBUG] Requesting block data", diagram.blocks);
+        console.log("[DEBUG] date range", start, end);
 
         //
         // request all current input blocks from server
