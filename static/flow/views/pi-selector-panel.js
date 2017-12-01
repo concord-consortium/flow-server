@@ -164,70 +164,42 @@ var PiSelectorPanel = function(options) {
         }
 
         //
-        // Need to send message 'set_diagram' followed by 'start_recording'
+        // Send message to start recording.
         //
-        // TODO make this a single atomic operation. Allow user to send
-        // diagram as part of the 'start_recording' message, so that only
-        // one message needs to be sent from here. The implementation on the
-        // pi should then call into the set_diagram path first, and then
-        // start recording.
-        //
+        var startRecordingParams = {};
 
-        //
-        // Add parameters specific to 'set_diagram'
-        //
-        var setDiagramParams = {};
-        setDiagramParams.message_type   = 'set_diagram';
-        setDiagramParams.target_folder  = controller.path;
-        setDiagramParams.src_folder     = controller.path;
-        setDiagramParams.message_params = { diagram:    programSpec,
-                                            username:   g_user.user_name };
+        startRecordingParams.target_folder  = controller.path;
+        startRecordingParams.src_folder     = controller.path;
+        startRecordingParams.message_type   = 'start_recording';
+        startRecordingParams.message_params = 
+                    {   rate: 1,
+                        recording_location: '/testing/student-folders/' + g_user.user_name + '/datasets/' + dsName,
+                        diagram:    programSpec,
+                        username:   g_user.user_name };
 
-        function handle_set_diagram_response(ts, params) {
-
-            //
-            // If successfully set_diagram then start_recording...
-            //
+        startRecordingParams.response_func = function(ts, params) {
             if(params.success) {
+                $('#dataset-name-textfield').val('');
+                alert("Recording started.");
+                console.log("Recording started.", params);
 
-                var startRecordingParams = {};
-                startRecordingParams.target_folder  = controller.path;
-                startRecordingParams.src_folder     = controller.path;
-                startRecordingParams.message_type   = 'start_recording';
-                startRecordingParams.message_params = { rate: 1,
-                                                        recording_location: '/testing/student-folders/' + g_user.user_name + '/datasets/' + dsName };
+                //
+                // Clear any sensor values being displayed, since
+                // we will no longer be listening for the
+                // sensor messages.
+                //
+                editor.getProgramEditorPanel().handleSensorData(null, { data: [] });
+                //
+                // Reload available pi list.
+                //
+                _this.loadPiList();
 
-                function handle_start_recording_response(ts, prarms) {
-                    if(params.success) {
-                        $('#dataset-name-textfield').val('');
-                        alert("Recording started.");
-                        console.log("Recording started.", params);
-
-                        //
-                        // Clear any sensor values being displayed, since
-                        // we will no longer be listening for the
-                        // sensor messages.
-                        //
-                        editor.getProgramEditorPanel().handleSensorData(null, { data: [] });
-
-                        _this.loadPiList();
-                    } else {
-                        alert("Error starting recording: " + params.message);
-                    }
-                }
-                startRecordingParams.response_func = handle_start_recording_response;
-
-                var startRecording = MessageExecutor(startRecordingParams);
-                startRecording.execute();
-                                
             } else {
-                alert("Error transferring program to pi: " + params.message);
+                alert("Error starting recording: " + params.message);
             }
         }
-        setDiagramParams.response_func = handle_set_diagram_response;
-
-        var setDiagram = MessageExecutor(setDiagramParams);
-        setDiagram.execute();
+        var startRecording = MessageExecutor(startRecordingParams);
+        startRecording.execute();
 
     });
 
