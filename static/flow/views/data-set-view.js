@@ -245,9 +245,9 @@ var DataSetView = function(options) {
     //
     // Set the start and end time on the graph.
     //
-    // startTime    - UTC date string as stored in metadata
+    // startStr - UTC date string as stored in metadata
     //                  e.g. "2017-11-29 17:03:30.137684"
-    // endTime      - UTC date string as stored in metadata. If undefined, use
+    // endStr   - UTC date string as stored in metadata. If undefined, use
     //                  the current date (now)
     //
     function setTimeFrame(startStr, endStr) {
@@ -279,7 +279,7 @@ var DataSetView = function(options) {
         base.m_plotHandler.plotter.resetReceived();
 
         var start   = moment(startDate.getTime()).toISOString();
-        var end     = moment(endDate.getTime()).toISOString();
+        var end     = moment(endDate.getTime() - 1000).toISOString();
 
         var diagram = base.m_program;
 
