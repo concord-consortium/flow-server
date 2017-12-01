@@ -45,8 +45,11 @@ var ProgramEditorView = function(options) {
 
     content.append(mainTable);
 
-    
-    var programEditorDiv    = $('<div>')
+   
+	//
+    // Main editor panel
+    // 
+    var programEditorDiv    = $('<div>');
     var programEditorPanel  = ProgramEditorPanel(
                                 {container: programEditorDiv} );
     leftPanel.append(programEditorDiv);

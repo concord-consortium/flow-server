@@ -27,16 +27,17 @@ var ProgramEditorPanel = function(options) {
     //
     // Create block palette
     //
-    var palDiv = $('<div>', {   id: 'block-palette', 
-                                css: {  
+    var palDiv = $('<div>', {   id: 'block-palette',
+                                css: {
                                         top:        '50px',
                                         position:   'absolute',
                                         zIndex:     100,
                                         border:     '1px solid lightgrey',
-                                        width:      '150px' } } );
+                                        width:      '100px' } } );
 
     var palette = ProgramEditorBlockPalette({   container: palDiv,
                                                 programEditorPanel: this });
+
     this.container.append(palDiv);
 
     //
@@ -92,9 +93,11 @@ var ProgramEditorPanel = function(options) {
                 this.undisplayBlock(this.m_diagram.blocks[i]);
             }
         }
-        m_scale = 1.0;
-        m_diagram = specToDiagram(programSpec);
-        m_diagramName = programSpec.name;
+
+        this.m_scale = 1.0;
+        this.m_diagram = specToDiagram(programSpec);
+        this.m_diagramName = programSpec.name;
+
         //zoomBlocks(this.m_diagram.blocks, this.m_scale);
 
         //
@@ -865,6 +868,46 @@ var ProgramEditorPanel = function(options) {
                 $('#bv_' + block.id).html('...');
             } else {
                 $('#bv_' + block.id).html(block.value);  // fix(faster): check whether value has changed
+            }
+        }
+    }
+
+    /**
+     * zoom blocks
+     * Params:
+     *   blocks
+     *   factor: factor to zoom by, such as 0.7 or 1.3
+     */
+    this.zoomBlocks = function(increment) {
+        this.m_scale += increment;
+        // var blocks = this.m_diagram.blocks;
+        // for (var i = 0; i < blocks.length; i++) {
+        //    blocks[i].view.x = Math.round(blocks[i].view.x * this.m_scale);
+        //    blocks[i].view.y = Math.round(blocks[i].view.y * this.m_scale);
+        // }
+        this.redrawBlocks();
+    }
+
+    //
+    // Redraw blocks. Usually called as part of scaling.
+    //
+    this.redrawBlocks = function() {
+        if (this.m_diagram) {  // remove any existing diagram elements
+            for (var i = 0; i < this.m_diagram.blocks.length; i++) {
+                this.undisplayBlock(this.m_diagram.blocks[i]);
+            }
+            for (var i = 0; i < this.m_diagram.blocks.length; i++) {
+                this.displayBlock(this.m_diagram.blocks[i]);
+            }
+        }
+        // redraw connections
+        for (var i = 0; i < this.m_diagram.blocks.length; i++) {
+            var block = this.m_diagram.blocks[i];
+            for (var j = 0; j < block.pins.length; j++) {
+                var pin = block.pins[j];
+                if (pin.sourcePin) {
+                    this.displayConnection(pin, g_scale);
+                }
             }
         }
     }

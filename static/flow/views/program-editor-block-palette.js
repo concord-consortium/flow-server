@@ -41,7 +41,7 @@ var ProgramEditorBlockPalette = function(options) {
     // Sensors
     //
 
-    var temp        = createSensorBtn("Temperature", "temperature");
+    var temp        = createSensorBtn("Temp", "temperature");
     var humidity    = createSensorBtn("Humidity", "humidity");
     var co2         = createSensorBtn("CO2", "CO2");
     var light       = createSensorBtn("Light", "light");
@@ -118,6 +118,30 @@ var ProgramEditorBlockPalette = function(options) {
 
     var numerics = createSection("Numeric", numericContent);
     blockPalette.append(numerics);
+
+    //
+    // Zoom
+    //
+
+    var zoomIn = $('<button>', { css: { width: '100%' } } );
+    zoomIn.text('Zoom +');
+    zoomIn.click( function() {
+        programEditorPanel.zoomBlocks(.25);
+    });
+
+    var zoomOut = $('<button>', { css: { width: '100%' } } );
+    zoomOut.text('Zoom -');
+    zoomOut.click( function() {
+        programEditorPanel.zoomBlocks(-.25);
+    });
+
+    var zoomContent = $('<div>');
+    zoomContent.append(zoomIn);
+    zoomContent.append(zoomOut);
+
+    var zoom = createSection("Zoom", zoomContent);
+    blockPalette.append(zoom);
+
 
     //
     // Add all block palette content to the container.
