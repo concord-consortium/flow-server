@@ -816,6 +816,19 @@ var ProgramEditorPanel = function(options) {
                     }
                 }
             }
+
+            //
+            // Now compute values for non-sensor blocks
+            //
+            console.log("[DEBUG] diagram.update()");
+            _this.m_diagram.update();
+
+            //
+            // Update UI
+            //
+            for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
+                _this.displayBlockValue(_this.m_diagram.blocks[i]);
+            }
         }
     }
 
