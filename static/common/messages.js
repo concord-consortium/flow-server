@@ -171,7 +171,8 @@ function createWebSocketHolder() {
 			if (func) {
 
 				// console.log(type + ":" + JSON.stringify(message['parameters']))
-				debug("MESSAGE HANDLER", type + ":" + JSON.stringify(message['parameters']))
+				// debug("MESSAGE HANDLER", type + ":" + JSON.stringify(message['parameters']))
+
 				func(moment(message['timestamp']), message['parameters']);
 
 			} else {

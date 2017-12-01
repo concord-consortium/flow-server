@@ -59,8 +59,8 @@ var MessageExecutor = function(config) {
 
         // console.log("[DEBUG] MessageExecutor execute()");
 
-        console.log("[DEBUG] MessageExecutor call addMessageHandler", 
-                        this.response_type );
+        // console.log("[DEBUG] MessageExecutor call addMessageHandler", 
+        //                this.response_type );
 
         //
         // Some kind of bug here does not allow multiple message types
@@ -71,15 +71,17 @@ var MessageExecutor = function(config) {
         addMessageHandler(  
             this.response_type, 
             function(timestamp, params) {
-                console.log("[DEBUG] MessageExecutor handleResponse()", 
-                            _this.response_type, 
-                            _this.response_func,
-                            params);
+
+                // console.log("[DEBUG] MessageExecutor handleResponse()", 
+                //            _this.response_type, 
+                //            _this.response_func,
+                //            params);
 
                 if( _this.src_folder != null &&
                     _this.src_folder != params.src_folder) {
-                    console.log("[DEBUG] MessageExecutor ignoring message from " + 
-                                params.src_folder);
+
+                    // console.log("[DEBUG] MessageExecutor ignoring 
+                    //              message from " + params.src_folder);
                     return;
                 }
                 if(_this.remove_handler) {

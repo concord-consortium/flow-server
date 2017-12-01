@@ -104,7 +104,7 @@ var ProgramEditorPanel = function(options) {
         // Display blocks
         //
         for (var i = 0; i < this.m_diagram.blocks.length; i++) {
-            console.log("[DEBUG] display block", this.m_diagram.blocks[i]);
+            // console.log("[DEBUG] display block", this.m_diagram.blocks[i]);
             var block = this.m_diagram.blocks[i];
             this.displayBlock(block);
             this.nameHash[block.name] = block;
@@ -118,7 +118,7 @@ var ProgramEditorPanel = function(options) {
             for (var j = 0; j < block.pins.length; j++) {
                 var pin = block.pins[j];
                 if (pin.sourcePin) {
-                    console.log("[DEBUG] displayConnection", pin);
+                    // console.log("[DEBUG] displayConnection", pin);
                     this.displayConnection(pin, this.m_scale);
                 }
             }
@@ -823,7 +823,7 @@ var ProgramEditorPanel = function(options) {
             //
             // Now compute values for non-sensor blocks
             //
-            console.log("[DEBUG] diagram.update()");
+            // console.log("[DEBUG] diagram.update()");
             _this.m_diagram.update();
 
             //

@@ -172,7 +172,7 @@ function createFlowBlock(blockSpec) {
         // if this block has inputs, we'll need to compute a new value here
         if (this.inputCount) {
             
-            console.log("[DEBUG] updating block", block.name, block);
+            // console.log("[DEBUG] updating block", block.name, block);
 
             // get inputs
             var inputs = [];
@@ -197,9 +197,9 @@ function createFlowBlock(blockSpec) {
             // compute new value
             if (this.outputCount) {  // fix(soon): figure out how to determine whether this is a filter
                 if (inputs.length == this.inputCount) {
-                    console.log("[DEBUG] Setting computed value", this);
+                    // console.log("[DEBUG] Setting computed value", this);
                     this.value = this.computeFilterValue(inputs);
-                    console.log("[DEBUG] Setting computed value", this.value);
+                    // console.log("[DEBUG] Setting computed value", this.value);
                 } else {
                     this.value = null;
                 }
