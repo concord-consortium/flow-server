@@ -12,7 +12,7 @@ var RecordingStatusPanel = function(options) {
                                     css: {  width: '200px',
                                             float: 'right' } } );
 
-    var table       = jQuery('<table>');
+    var table       = jQuery('<table>', { css: { width: '100%' } } );
 
     var buttonPanel = $('<div>', { css: {       textAlign:  'center',
                                                 float:      'right',
@@ -61,7 +61,7 @@ var RecordingStatusPanel = function(options) {
     //
     // Start and end times (in a table)
     //
-    var timeTable = $('<table>')
+    var timeTable = $('<table>', { css: { width: '100%' } } );
 
     var startLabel  = $('<div>').text('Started: ');
     var startTime   = $('<div>').text('N/A');
@@ -122,7 +122,7 @@ var RecordingStatusPanel = function(options) {
         //
         // Show start time
         //
-        startTime.text( Util.getLocalDate(start) + " " +
+        startTime.html( Util.getLocalDate(start) + "<br/>" +
                         Util.getLocalTime(start) );
 
         //
@@ -130,11 +130,11 @@ var RecordingStatusPanel = function(options) {
         //
         var endStr = "N/A";
         if(end) {
-            endStr = Util.getLocalDate(end) + " " +
+            endStr = Util.getLocalDate(end) + "<br/>" +
                      Util.getLocalTime(end);
             
         }
-        endTime.text(endStr);
+        endTime.html(endStr);
 
         //
         // Set button visibility
