@@ -787,13 +787,35 @@ var ProgramEditorPanel = function(options) {
     }
 
     //
+    // Store the last received sensor data
+    //
+    this.receivedSensorData = {};
+
+    //
+    // Return an array containing block names for any sensor blocks that cannot 
+    // be mapped to the last received sensor data.
+    //
+    this.getUnmappedSensors = function() {
+        var ret = [];
+        for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
+            var block = _this.m_diagram.blocks[i];
+            if(_this.isDeviceBlock(block.type)) {
+                if(!_this.receivedSensorData[block.name]) {
+                    ret.push(block.name);
+                }
+            }
+        }
+        return ret;
+    }
+
+    //
     // Handle sensor data messages
     //
     this.handleSensorData = function(timestamp, params) {
-        console.log("[DEBUG] handleSensorData", params);
+        // console.log("[DEBUG] handleSensorData", params);
         if(params.data) {
-            console.log("[DEBUG] handleSensorData updating blocks.");
-            var receivedData = {};
+            // console.log("[DEBUG] handleSensorData updating blocks.");
+            _this.receivedSensorData = {};
             for(var i = 0; i < params.data.length; i++) {
                 var sensor  = params.data[i];
                 var name    = sensor.name;
@@ -803,7 +825,7 @@ var ProgramEditorPanel = function(options) {
                     block.updateValue(value);
                     _this.displayBlockValue(block);
                 }
-                receivedData[name] = true;
+                _this.receivedSensorData[name] = sensor;
             }
 
             //
@@ -813,7 +835,7 @@ var ProgramEditorPanel = function(options) {
             for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
                 var block = _this.m_diagram.blocks[i];
                 if(_this.isDeviceBlock(block.type)) {
-                    if(!receivedData[block.name]) {
+                    if(!_this.receivedSensorData[block.name]) {
                         block.updateValue(null);
                         _this.displayBlockValue(block);
                     }

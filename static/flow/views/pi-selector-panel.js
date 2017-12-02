@@ -151,8 +151,23 @@ var PiSelectorPanel = function(options) {
         }
 
         //
-        // Set name on program (maybe just do this in editor when we get the
-        // program spec as a non-string object...)
+        // Check that all sensor blocks can be mapped to physical sensors.
+        //
+        var unmapped = editor.getProgramEditorPanel().getUnmappedSensors();
+        if(unmapped.length > 0) {
+            var names = "";
+            for(var i = 0; i < unmapped.length; i++) {
+                if(i != 0) { 
+                    names += ","; 
+                }
+                names += " " + unmapped[i];
+            }
+            alert("Error: The following blocks do not have available sensors on the selected pi:" + names);
+            return;
+        }
+
+        //
+        // Set name on program
         //
         var name = editor.getFileManager().getProgramName();
         programSpec.name = name;
