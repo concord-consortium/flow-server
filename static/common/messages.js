@@ -164,14 +164,17 @@ function createWebSocketHolder() {
 					window.location.reload();
 				}
 			}
-            console.log("All handlers", wsh.handlers);
-            console.log("Message type", type);
+            // console.log("All handlers", wsh.handlers);
+            // console.log("Message type", type);
+
 			var func = wsh.handlers[type];
-            console.log("Message func", func);
+
+            // console.log("Message func", func);
 			if (func) {
 
 				// console.log(type + ":" + JSON.stringify(message['parameters']))
-				debug("MESSAGE HANDLER", type + ":" + JSON.stringify(message['parameters']))
+				// debug("MESSAGE HANDLER", type + ":" + JSON.stringify(message['parameters']))
+
 				func(moment(message['timestamp']), message['parameters']);
 
 			} else {

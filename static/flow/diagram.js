@@ -29,7 +29,39 @@ function createDiagram() {
 		this.blocks = blocks;
 	};
 
-	// return block by ID
+    //
+    // Compute new values for all the blocks in the diagram
+    //
+    diagram.update = function() {
+
+        //
+        // Mark all blocks as having a stale value
+        //
+        for (var i = 0; i < this.blocks.length; i++) {
+            this.blocks[i].stale = true;
+        }
+
+        //
+        // Loop over blocks
+        //
+        for (var i = 0; i < this.blocks.length; i++) {
+            var block = this.blocks[i];
+
+            //
+            // if block does not currently have outputs, update it; 
+            // it will recursively call updates on inputs
+            // fix(faster): keep track of dest count for each pin or each block?
+            //
+            var destPins = this.findDestPins(block);
+            if (destPins.length === 0) {
+                block.update();
+            }
+        }
+    }
+
+    //
+	// Return block by ID
+    //
 	diagram.findBlockById = function(id) {
 		var block = null;
 		for (var i = 0; i < this.blocks.length; i++) {
@@ -116,6 +148,12 @@ function createFlowBlock(blockSpec) {
 		block.view.y = blockSpec.view.y || 0;
 	}
 
+    var _allowedFilterTypes = allowedFilterTypes();
+    if(_allowedFilterTypes.indexOf(blockSpec.type) >= 0) {
+        console.log("[DEBUG] Adding filter methods...");
+        addFilterMethods(block, blockSpec.type);
+    }
+
 	// add pins
 	for (var i = 0; i < block.inputCount; i++) {
 		var pin = createPin(block, i, true);
@@ -125,6 +163,59 @@ function createFlowBlock(blockSpec) {
 		var pin = createPin(block, i, false);
 		block.pins.push(pin);
 	}
+
+    //
+    // Update the block value
+    //
+    block.update = function() {
+
+        // if this block has inputs, we'll need to compute a new value here
+        if (this.inputCount) {
+            
+            // console.log("[DEBUG] updating block", block.name, block);
+
+            // get inputs
+            var inputs = [];
+            var decimalPlaces = 0;
+            for (var i = 0; i < this.pins.length; i++) {
+                var pin = this.pins[i];
+                if (pin.sourcePin) {
+                    var sourceBlock = pin.sourcePin.block;
+                    if (sourceBlock.stale) {
+                        sourceBlock.update();
+                    }
+                    if (sourceBlock.value !== null) {
+                        inputs.push(sourceBlock.value);
+                        if (sourceBlock.decimalPlaces > decimalPlaces) {
+                            decimalPlaces = sourceBlock.decimalPlaces;
+                        }
+                    }
+                }
+            }
+            block.decimalPlaces = decimalPlaces;
+
+            // compute new value
+            if (this.outputCount) {  // fix(soon): figure out how to determine whether this is a filter
+                if (inputs.length == this.inputCount) {
+                    // console.log("[DEBUG] Setting computed value", this);
+                    this.value = this.computeFilterValue(inputs);
+                    // console.log("[DEBUG] Setting computed value", this.value);
+                } else {
+                    this.value = null;
+                }
+            } else {  // no outputs: actuator or display
+                if (inputs.length) {
+                    this.value = inputs[0];
+                    if (this.virtual === false) {  // send data to actuator
+                        sendMessage('update_actuator', {'name': this.name, 'value': this.value});
+                    }
+                } else {
+                    this.value = null;
+                }
+            }
+        }
+        this.stale = false;
+    }
 
 	// serialize to dictionary (suitable for conversion to JSON)
 	block.asSpec = function() {

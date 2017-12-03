@@ -27,16 +27,17 @@ var ProgramEditorPanel = function(options) {
     //
     // Create block palette
     //
-    var palDiv = $('<div>', {   id: 'block-palette', 
-                                css: {  
+    var palDiv = $('<div>', {   id: 'block-palette',
+                                css: {
                                         top:        '50px',
                                         position:   'absolute',
                                         zIndex:     100,
                                         border:     '1px solid lightgrey',
-                                        width:      '150px' } } );
+                                        width:      '100px' } } );
 
     var palette = ProgramEditorBlockPalette({   container: palDiv,
                                                 programEditorPanel: this });
+
     this.container.append(palDiv);
 
     //
@@ -92,16 +93,18 @@ var ProgramEditorPanel = function(options) {
                 this.undisplayBlock(this.m_diagram.blocks[i]);
             }
         }
-        m_scale = 1.0;
-        m_diagram = specToDiagram(programSpec);
-        m_diagramName = programSpec.name;
+
+        this.m_scale = 1.0;
+        this.m_diagram = specToDiagram(programSpec);
+        this.m_diagramName = programSpec.name;
+
         //zoomBlocks(this.m_diagram.blocks, this.m_scale);
 
         //
         // Display blocks
         //
         for (var i = 0; i < this.m_diagram.blocks.length; i++) {
-            console.log("[DEBUG] display block", this.m_diagram.blocks[i]);
+            // console.log("[DEBUG] display block", this.m_diagram.blocks[i]);
             var block = this.m_diagram.blocks[i];
             this.displayBlock(block);
             this.nameHash[block.name] = block;
@@ -115,7 +118,7 @@ var ProgramEditorPanel = function(options) {
             for (var j = 0; j < block.pins.length; j++) {
                 var pin = block.pins[j];
                 if (pin.sourcePin) {
-                    console.log("[DEBUG] displayConnection", pin);
+                    // console.log("[DEBUG] displayConnection", pin);
                     this.displayConnection(pin, this.m_scale);
                 }
             }
@@ -784,13 +787,35 @@ var ProgramEditorPanel = function(options) {
     }
 
     //
+    // Store the last received sensor data
+    //
+    this.receivedSensorData = {};
+
+    //
+    // Return an array containing block names for any sensor blocks that cannot 
+    // be mapped to the last received sensor data.
+    //
+    this.getUnmappedSensors = function() {
+        var ret = [];
+        for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
+            var block = _this.m_diagram.blocks[i];
+            if(_this.isDeviceBlock(block.type)) {
+                if(!_this.receivedSensorData[block.name]) {
+                    ret.push(block.name);
+                }
+            }
+        }
+        return ret;
+    }
+
+    //
     // Handle sensor data messages
     //
     this.handleSensorData = function(timestamp, params) {
-        console.log("[DEBUG] handleSensorData", params);
+        // console.log("[DEBUG] handleSensorData", params);
         if(params.data) {
-            console.log("[DEBUG] handleSensorData updating blocks.");
-            var receivedData = {};
+            // console.log("[DEBUG] handleSensorData updating blocks.");
+            _this.receivedSensorData = {};
             for(var i = 0; i < params.data.length; i++) {
                 var sensor  = params.data[i];
                 var name    = sensor.name;
@@ -800,7 +825,7 @@ var ProgramEditorPanel = function(options) {
                     block.updateValue(value);
                     _this.displayBlockValue(block);
                 }
-                receivedData[name] = true;
+                _this.receivedSensorData[name] = sensor;
             }
 
             //
@@ -810,11 +835,24 @@ var ProgramEditorPanel = function(options) {
             for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
                 var block = _this.m_diagram.blocks[i];
                 if(_this.isDeviceBlock(block.type)) {
-                    if(!receivedData[block.name]) {
+                    if(!_this.receivedSensorData[block.name]) {
                         block.updateValue(null);
                         _this.displayBlockValue(block);
                     }
                 }
+            }
+
+            //
+            // Now compute values for non-sensor blocks
+            //
+            // console.log("[DEBUG] diagram.update()");
+            _this.m_diagram.update();
+
+            //
+            // Update UI
+            //
+            for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
+                _this.displayBlockValue(_this.m_diagram.blocks[i]);
             }
         }
     }
@@ -852,6 +890,46 @@ var ProgramEditorPanel = function(options) {
                 $('#bv_' + block.id).html('...');
             } else {
                 $('#bv_' + block.id).html(block.value);  // fix(faster): check whether value has changed
+            }
+        }
+    }
+
+    /**
+     * zoom blocks
+     * Params:
+     *   blocks
+     *   factor: factor to zoom by, such as 0.7 or 1.3
+     */
+    this.zoomBlocks = function(increment) {
+        this.m_scale += increment;
+        // var blocks = this.m_diagram.blocks;
+        // for (var i = 0; i < blocks.length; i++) {
+        //    blocks[i].view.x = Math.round(blocks[i].view.x * this.m_scale);
+        //    blocks[i].view.y = Math.round(blocks[i].view.y * this.m_scale);
+        // }
+        this.redrawBlocks();
+    }
+
+    //
+    // Redraw blocks. Usually called as part of scaling.
+    //
+    this.redrawBlocks = function() {
+        if (this.m_diagram) {  // remove any existing diagram elements
+            for (var i = 0; i < this.m_diagram.blocks.length; i++) {
+                this.undisplayBlock(this.m_diagram.blocks[i]);
+            }
+            for (var i = 0; i < this.m_diagram.blocks.length; i++) {
+                this.displayBlock(this.m_diagram.blocks[i]);
+            }
+        }
+        // redraw connections
+        for (var i = 0; i < this.m_diagram.blocks.length; i++) {
+            var block = this.m_diagram.blocks[i];
+            for (var j = 0; j < block.pins.length; j++) {
+                var pin = block.pins[j];
+                if (pin.sourcePin) {
+                    this.displayConnection(pin, g_scale);
+                }
             }
         }
     }
