@@ -9,9 +9,10 @@ import datetime
 #
 # external imports
 #
-from flask import request, abort, current_app
+from flask import request, abort, current_app, url_for, redirect
 from flask_login import current_user, login_user
 from sqlalchemy.orm.exc import NoResultFound
+from rauth              import OAuth2Service
 
 #
 # internal imports
@@ -364,5 +365,72 @@ def load_dataset():
 @app.route('/ext/flow/delete_dataset', methods=['POST'])
 def delete_dataset():
     return file_operation('delete', 'datasets')
- 
+
+
+#
+# Create portal oauth service
+#
+def get_portal_oauth():
+
+    portal_base         = current_app.config.get('FLOW_PORTAL_SITE')
+    client_id           = current_app.config.get('FLOW_PORTAL_SSO_CLIENT_ID')
+    client_secret       = current_app.config.get('FLOW_PORTAL_SSO_CLIENT_SECRET')
+    authorize_url       = '%s/auth/concord_id/authorize' % (portal_base)
+    access_token_url    = '%s/auth/concord_id/access_token' % (portal_base)
+
+    portal_oauth = OAuth2Service(
+        name='portal',
+        client_id=client_id,
+        client_secret=client_secret,
+        authorize_url=authorize_url,
+        access_token_url=access_token_url,
+        base_url=portal_base
+    )
+
+    return portal_oauth
+
+#
+# SSO Client Login
+# 
+@app.route('/ext/flow/login')
+def sso_login():
+
+    redirect_uri = url_for('authorized', _external=True)
+    params = { 'redirect_uri': redirect_uri }
+
+    url = get_portal_oauth().get_authorize_url(**params)
+    return redirect(url)
+
+
+#
+# SSO Callback
+#
+@app.route('/ext/flow/portal/authorized')
+def authorized():
+
+    redirect_uri = url_for('authorized', _external=True)
+    code = request.args['code']
+    session = get_portal_oauth().get_auth_session(
+                    data={  'code': code,
+                            'redirect_uri': redirect_uri},
+                    decoder=json.loads )
+
+    user = session.get('/auth/user').json()
+
+    email   = user['info']['email']
+    username = user['extra']['username']
+    firstname = user['extra']['first_name']
+    lastname = user['extra']['last_name']
+    roles   = user['extra']['roles']
+
+    print("!!! user %s" % (user) )
+    print("!!! email %s" % (email) )
+    print("!!! username %s" % (username) )
+    print("!!! firstname %s" % (firstname) )
+    print("!!! lastname %s" % (lastname) )
+    print("!!! roles %s" % (roles) )
+
+    return redirect(url_for('flow_app', features=1))
+
+
 
