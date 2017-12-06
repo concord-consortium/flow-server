@@ -441,7 +441,7 @@ def authorized():
     if user is not None:
         userinfo  = get_flow_userinfo(username)
 
-        if 'is_sso' in userinfo and userinfo[is_sso]:
+        if 'is_sso' in userinfo and userinfo['is_sso']:
 
             #
             # Log in this user.
@@ -455,7 +455,7 @@ def authorized():
             # Do not allow login for this user from 
             # the SSO provider.
             #
-            print("User %s not an SSO user.", username)
+            print("User %s not an SSO user." % (username))
             return redirect(url_for('flow_app', features=1))
     
     else:

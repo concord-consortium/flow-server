@@ -73,7 +73,7 @@ def create_flow_user(   email,
     #
     path        = '%s/%s/%s/userinfo' % ('testing', 'student-folders', username)
     content     = json.dumps({
-                        'is_sso_user': is_sso
+                        'is_sso': is_sso
                     })
     now         = datetime.datetime.now()
     resource    = _create_file(path, now, now, content)
