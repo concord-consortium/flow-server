@@ -109,7 +109,7 @@ var LandingPageView = function(options) {
     var myDatasets = LandingPageDataSetView({id: 'landing-page-dataset-view'});
 
     base.show = function() {
-        // console.log("[DEBUG] LandingPageView show()");
+        console.log("[DEBUG] LandingPageView show()");
         jQuery('#'+base.getDivId()).show();
         myPrograms.show();
         myDatasets.show();

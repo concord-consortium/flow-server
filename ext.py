@@ -417,18 +417,59 @@ def authorized():
 
     user = session.get('/auth/user').json()
 
-    email   = user['info']['email']
-    username = user['extra']['username']
-    firstname = user['extra']['first_name']
-    lastname = user['extra']['last_name']
-    roles   = user['extra']['roles']
+    email       = user['info']['email']
+    username    = user['extra']['username']
+    firstname   = user['extra']['first_name']
+    lastname    = user['extra']['last_name']
+    roles       = user['extra']['roles']
 
-    print("!!! user %s" % (user) )
-    print("!!! email %s" % (email) )
-    print("!!! username %s" % (username) )
-    print("!!! firstname %s" % (firstname) )
-    print("!!! lastname %s" % (lastname) )
-    print("!!! roles %s" % (roles) )
+    is_sso      = True
+    is_admin    = False
+
+    if 'admin' in roles:
+        is_admin = True
+
+
+    #
+    # Check if this is an SSO user
+    #
+    user = User.query.filter(User.user_name == username).first()
+    if user is not None:
+        userinfo  = get_flow_userinfo(username)
+
+        if 'is_sso' in userinfo and userinfo[is_sso]:
+
+            #
+            # Log in this user.
+            #
+            print("Logging in user %s", username)
+            login_user(user, remember = True)
+
+        else:
+            #
+            # User exists but this is not an SSO user. 
+            # Do not allow login for this user from 
+            # the SSO provider.
+            #
+            print("User %s not an SSO user.", username)
+            return redirect(url_for('flow_app', features=1))
+    
+    else:
+        #
+        # There does not yet exist a user for this SSO provider account.
+        # Create one.
+        #
+        print("Creating new user %s" % (username))
+
+        #
+        # Create random password. Is there a better way to do this?
+        #
+        password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(10))
+
+        user = create_flow_user(email, username, password,
+                                firstname + " " + lastname, is_sso, is_admin )
+        login_user(user, remember = True)
+
 
     return redirect(url_for('flow_app', features=1))
 

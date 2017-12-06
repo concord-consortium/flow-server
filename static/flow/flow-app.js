@@ -45,14 +45,17 @@ function getTopLevelView(id) {
 // Display the specified top level view and hide all others
 //
 function showTopLevelView(id) {
+
+    for(var key in topLevelViews) {
+        view = topLevelViews[key];
+        view.hide();
+    }
+
     for(var key in topLevelViews) {
         view = topLevelViews[key];
         if(key == id) {
             view.show();
-        } else {
-            // console.log("[DEBUG] hiding", id);
-            view.hide();
-        }
+        } 
     }
 }
 
