@@ -1,4 +1,10 @@
 #
+# Standard python imports
+#
+import json
+import datetime
+
+#
 # Rhizo imports
 #
 from main.app                       import db
@@ -65,7 +71,7 @@ def create_flow_user(   email,
     #
     # Add some user metadata
     #
-    path        = '%s/%s/%s/userinfo' % (org_name, 'student-folders', username)
+    path        = '%s/%s/%s/userinfo' % ('testing', 'student-folders', username)
     content     = json.dumps({
                         'is_sso_user': is_sso
                     })
@@ -74,7 +80,7 @@ def create_flow_user(   email,
  
     # print('Created flow user: %s' % (email))
 
-    user = User.query.filter(User.user_id == user_id).first()
+    user = User.query.filter(User.id == user_id).first()
     return user
 
 #

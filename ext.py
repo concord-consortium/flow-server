@@ -1,13 +1,15 @@
 #
-# standard python imports
+# Standard python imports
 #
 import json
 import os
 import subprocess
 import datetime
+import string
+import random
 
 #
-# external imports
+# External imports
 #
 from flask import request, abort, current_app, url_for, redirect
 from flask_login import current_user, login_user
@@ -15,13 +17,15 @@ from sqlalchemy.orm.exc import NoResultFound
 from rauth              import OAuth2Service
 
 #
-# internal imports
+# Internal imports
 #
 from main.app                       import app, db
 from main.users.models              import User, OrganizationUser
 from main.resources.models          import Resource, ControllerStatus
 from main.resources.resource_util   import _create_file, find_resource, read_resource
 from main.extension                 import Extension
+
+from user_management                import get_flow_userinfo, create_flow_user
 
 
 #

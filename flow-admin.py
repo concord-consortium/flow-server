@@ -8,11 +8,13 @@
 
 from optparse                       import OptionParser
 
-from user_management                import get_flow_userinfo
 from main.app                       import db
 from main.users.auth                import create_user
 from main.users.models              import User, OrganizationUser
 from main.resources.resource_util   import find_resource, _create_folders
+
+from user_management                import get_flow_userinfo, delete_flow_user, create_flow_user
+
 
 if __name__ == '__main__':
 
@@ -49,7 +51,7 @@ if __name__ == '__main__':
 
         create_flow_user(email, username, password, fullname, is_sso, is_admin)
 
-        print('Created flow user: %s' % (username))
+        # print('Created flow user: %s' % (username))
 
     elif options.delete_username:
 
@@ -59,7 +61,8 @@ if __name__ == '__main__':
         username = options.delete_username
 
         delete_flow_user(username)
-        print('Deleted flow user: %s.' % (username))
+
+        # print('Deleted flow user: %s.' % (username))
 
     elif options.list_users:
 
@@ -75,6 +78,7 @@ if __name__ == '__main__':
             print('  email      : %s' % (user.email_address))
             print('  full name  : %s' % (user.full_name))
             print('  is_sso     : %s' % (is_sso))
+            print('  is_admin   : %s' % ((user.role == User.SYSTEM_ADMIN)))
 
             print('')
 
