@@ -49,10 +49,11 @@ Optionally configure SSO login.
 2. Add or modify the following variables to point to your SSO provider
     (e.g. learn.concord.org) and specify your SSO client id and secret.
 
+    ```
     FLOW_PORTAL_SITE = 'http://portal-sso.staging.concord.org:3000'
     FLOW_PORTAL_SSO_CLIENT_ID = 'foo'
     FLOW_PORTAL_SSO_CLIENT_SECRET = 'bar'
-
+    ```
 
 ## Data Flow Diagram Structure
 
