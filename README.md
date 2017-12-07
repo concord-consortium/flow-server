@@ -47,7 +47,7 @@ The web app itself is stored in the `static` and `templates` folders witin this 
 
 Optionally configure SSO login.
 
-1. Within the `rhizo-server` directory, find the file `settings/config.py`
+1. Within the `rhizo-server` directory, edit the file `settings/config.py`
 2. Add or modify the following variables to point to your SSO provider
     (e.g. learn.concord.org) and specify your SSO client id and secret.
 
