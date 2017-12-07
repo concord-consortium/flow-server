@@ -301,6 +301,11 @@ var PiSelectorPanel = function(options) {
                     //
                     for(var i = 0; i < _this.availableControllers.length; i++) {
                         var controller = _this.availableControllers[i];
+
+                        if(!controller.online) {
+                            continue;
+                        }
+
                         if(controller.status.recording_interval != null) {
                             continue;
                         }
