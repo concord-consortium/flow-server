@@ -104,11 +104,7 @@ var LandingPageView = function(options) {
     // Add admin button to welcome message
     //
     if(g_user != null && g_user.isAdmin) {
-        var adminButton = $('<button>', {   css: {  
-                                                    float: 'right',
-                                                    position: 'relative',
-                                                    top: '5px' },
-                                            html: 'Admin' } );
+        var adminButton = $('<button>', {   html: 'Admin' } );
         adminButton.css('font-size','10px');
 
         adminButton.click(function(e) {
