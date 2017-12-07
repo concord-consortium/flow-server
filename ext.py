@@ -1,26 +1,31 @@
 #
-# standard python imports
+# Standard python imports
 #
 import json
 import os
 import subprocess
 import datetime
+import string
+import random
 
 #
-# external imports
+# External imports
 #
-from flask import request, abort, current_app
-from flask_login import current_user, login_user
+from flask              import request, abort, current_app, url_for, redirect, session
+from flask_login        import current_user, login_user, logout_user
 from sqlalchemy.orm.exc import NoResultFound
+from rauth              import OAuth2Service
 
 #
-# internal imports
+# Internal imports
 #
 from main.app                       import app, db
 from main.users.models              import User, OrganizationUser
 from main.resources.models          import Resource, ControllerStatus
 from main.resources.resource_util   import _create_file, find_resource, read_resource
 from main.extension                 import Extension
+
+from user_management                import get_flow_userinfo, create_flow_user
 
 
 #
@@ -364,5 +369,143 @@ def load_dataset():
 @app.route('/ext/flow/delete_dataset', methods=['POST'])
 def delete_dataset():
     return file_operation('delete', 'datasets')
- 
+
+
+#
+# Create portal oauth service
+#
+def get_portal_oauth():
+
+    portal_base         = current_app.config.get('FLOW_PORTAL_SITE')
+    client_id           = current_app.config.get('FLOW_PORTAL_SSO_CLIENT_ID')
+    client_secret       = current_app.config.get('FLOW_PORTAL_SSO_CLIENT_SECRET')
+    authorize_url       = '%s/auth/concord_id/authorize' % (portal_base)
+    access_token_url    = '%s/auth/concord_id/access_token' % (portal_base)
+
+    portal_oauth = OAuth2Service(
+        name='portal',
+        client_id=client_id,
+        client_secret=client_secret,
+        authorize_url=authorize_url,
+        access_token_url=access_token_url,
+        base_url=portal_base
+    )
+
+    return portal_oauth
+
+#
+# SSO Client Login
+# 
+@app.route('/ext/flow/login')
+def sso_login():
+
+    redirect_uri = url_for('authorized', _external=True)
+    params = { 'redirect_uri': redirect_uri }
+
+    url = get_portal_oauth().get_authorize_url(**params)
+    return redirect(url)
+
+#
+# Logout
+#
+@app.route('/ext/flow/logout')
+def logout():
+    if current_user.is_authenticated:
+
+        #
+        # Can we and do we want to logout from SSO provider?
+        #
+        #userinfo = get_flow_userinfo(current_user.user_name)
+        #if 'is_sso' in userinfo and userinfo['is_sso']:
+        #    redirect_uri = url_for('authorized', _external=True)
+        #    if 'oauth_code' in session:
+        #        code = session['oauth_code']
+        #        oauth_session = get_portal_oauth().get_auth_session(
+        #                data={  'code': code,
+        #                        'redirect_uri': redirect_uri },
+        #                decoder=json.loads )
+        #         #oauth_session.get('/users/sign_out')
+        #         oauth_session.get('/api/v1/users/sign_out')
+
+        #
+        # Log out rhizo user
+        #
+        logout_user()
+
+    return redirect(url_for('flow_app', features=1))
+
+
+#
+# SSO Callback
+#
+@app.route('/ext/flow/portal/authorized')
+def authorized():
+
+    redirect_uri = url_for('authorized', _external=True)
+    code = request.args['code']
+    session['oauth_code'] = code
+    oauth_session = get_portal_oauth().get_auth_session(
+                    data={  'code': code,
+                            'redirect_uri': redirect_uri},
+                    decoder=json.loads )
+
+    user = oauth_session.get('/auth/user').json()
+
+    email       = user['info']['email']
+    username    = user['extra']['username']
+    firstname   = user['extra']['first_name']
+    lastname    = user['extra']['last_name']
+    roles       = user['extra']['roles']
+
+    is_sso      = True
+    is_admin    = False
+
+    if 'admin' in roles:
+        is_admin = True
+
+
+    #
+    # Check if this is an SSO user
+    #
+    user = User.query.filter(User.user_name == username).first()
+    if user is not None:
+        userinfo  = get_flow_userinfo(username)
+
+        if 'is_sso' in userinfo and userinfo['is_sso']:
+
+            #
+            # Log in this user.
+            #
+            print("Logging in user %s", username)
+            login_user(user, remember = True)
+
+        else:
+            #
+            # User exists but this is not an SSO user. 
+            # Do not allow login for this user from 
+            # the SSO provider.
+            #
+            print("User %s not an SSO user." % (username))
+            return redirect(url_for('flow_app', features=1))
+    
+    else:
+        #
+        # There does not yet exist a user for this SSO provider account.
+        # Create one.
+        #
+        print("Creating new user %s" % (username))
+
+        #
+        # Create random password. Is there a better way to do this?
+        #
+        password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(10))
+
+        user = create_flow_user(email, username, password,
+                                firstname + " " + lastname, is_sso, is_admin )
+        login_user(user, remember = True)
+
+
+    return redirect(url_for('flow_app', features=1))
+
+
 

@@ -190,32 +190,6 @@ var AdminView = function(options) {
                         return button;
                     };
 
-                    var start = createRecordingControl('Start Recording',
-                        function() {
-                            var path = controller.path;
-                            console.log("[DEBUG] start_recording", path);
-                            _this.sendAdminMessage( path, 
-                                                    'start_recording',
-                                                    { rate: 60 } );
-                            _this.sendAdminMessage( path, 
-                                                    'request_status',
-                                                    {} );
-                        }
-                    );
-
-                    var stop = createRecordingControl('Stop Recording',
-                        function() {
-                            var path = controller.path;
-                            console.log("[DEBUG] stop recording", path);
-                            _this.sendAdminMessage( path, 
-                                                    'stop_recording',
-                                                    {} );
-                            _this.sendAdminMessage( path, 
-                                                    'request_status',
-                                                    {} );
-                        }
-                    );
-
                     var stopProgram = createRecordingControl('Stop Program',
                         function() {
                             var path = controller.path;
@@ -229,10 +203,6 @@ var AdminView = function(options) {
                         }
                     );
 
-                    start.appendTo(recordingControlDiv);
-                    $('<br>').appendTo(recordingControlDiv);
-                    stop.appendTo(recordingControlDiv);
-                    $('<br>').appendTo(recordingControlDiv);
                     stopProgram.appendTo(recordingControlDiv);
 
                     //

@@ -28,16 +28,31 @@ The web app itself is stored in the `static` and `templates` folders witin this 
 ## Installation
 
 1.  Install `rhizo-server` according to the instructions in its `README.md`.
-2.  Create an `extensions` folder inside `rhizo-server`
-3.  Create an empty `__init__.py` file inside it.
-4.  Place the `flow-server` repo (this repo) inside that.
+2.  Install rauth 
+    `pip install rauth`
+3.  Create an `extensions` folder inside `rhizo-server`
+4.  Create an empty `__init__.py` file inside it.
+5.  Place the `flow-server` repo (this repo) inside that.
     (If everything is in the right place, you should have a `rhizo-server/extensions/flow-server/ext.py` file.)
-5.  In `rhizo-server/settings/config.py` change the `EXTENSIONS = []` line to `EXTENSIONS = ['flow-server']`.
-6.  Start/restart the server (using `python run.py -s`) and visit it's web interface. 
+6.  In `rhizo-server/settings/config.py` change the `EXTENSIONS = []` line to `EXTENSIONS = ['flow-server']`.
+7.  Start/restart the server (using `python run.py -s`) and visit it's web interface. 
     If you are running the server locally, visit [http://localhost:5000/](http://localhost:5000/).
-7.  Log in as a system admin.
-8.  Select `System` / `Organizations` / `New Organization` and create a `Testing` organization with a `testing` folder name.
-9.  Click on the organization and then `Assign User` to add yourself to the new organization.
+8.  Log in as a system admin.
+9.  Select `System` / `Organizations` / `New Organization` and create a `Testing` organization with a `testing` folder name.
+10.  Click on the organization and then `Assign User` to add yourself to the new organization.
+
+## Configure SSO Login
+
+Optionally configure SSO login.
+
+1. Within the `rhixo-server` directory, find the file `settings/config.py`
+2. Add or modify the following variables to point to your SSO provider
+    (e.g. learn.concord.org) and specify your SSO client id and secret.
+
+    FLOW_PORTAL_SITE = 'http://portal-sso.staging.concord.org:3000'
+    FLOW_PORTAL_SSO_CLIENT_ID = 'foo'
+    FLOW_PORTAL_SSO_CLIENT_SECRET = 'bar'
+
 
 ## Data Flow Diagram Structure
 

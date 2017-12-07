@@ -5,12 +5,14 @@
 //
 function initFlowApp() {
     if(g_featuresEnabled) {
+        registerTopLevelView(LoginPageView({id: 'login-page-view'}));
         registerTopLevelView(LandingPageView({id: 'landing-page-view'}));
         registerTopLevelView(ProgramEditorView({id: 'program-editor-view'}));
         registerTopLevelView(AdminView({id: 'admin-view'}));
         registerTopLevelView(DataSetView({id: 'data-set-view'}));
 
-        showTopLevelView('landing-page-view');
+        // showTopLevelView('landing-page-view');
+        showTopLevelView('login-page-view');
 
     } else {
         //
@@ -43,14 +45,17 @@ function getTopLevelView(id) {
 // Display the specified top level view and hide all others
 //
 function showTopLevelView(id) {
+
+    for(var key in topLevelViews) {
+        view = topLevelViews[key];
+        view.hide();
+    }
+
     for(var key in topLevelViews) {
         view = topLevelViews[key];
         if(key == id) {
             view.show();
-        } else {
-            // console.log("[DEBUG] hiding", id);
-            view.hide();
-        }
+        } 
     }
 }
 
