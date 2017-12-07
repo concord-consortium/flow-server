@@ -44,7 +44,7 @@ def create_flow_user(   email,
                             username, 
                             password, 
                             fullname,
-                            User.STANDARD_USER)
+                            user_type )
 
     #
     # Add user to flow organization

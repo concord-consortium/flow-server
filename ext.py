@@ -11,8 +11,8 @@ import random
 #
 # External imports
 #
-from flask import request, abort, current_app, url_for, redirect
-from flask_login import current_user, login_user
+from flask              import request, abort, current_app, url_for, redirect, session
+from flask_login        import current_user, login_user, logout_user
 from sqlalchemy.orm.exc import NoResultFound
 from rauth              import OAuth2Service
 
@@ -405,6 +405,35 @@ def sso_login():
     url = get_portal_oauth().get_authorize_url(**params)
     return redirect(url)
 
+#
+# Logout
+#
+@app.route('/ext/flow/logout')
+def logout():
+    if current_user.is_authenticated:
+
+        #
+        # Can we and do we want to logout from SSO provider?
+        #
+        #userinfo = get_flow_userinfo(current_user.user_name)
+        #if 'is_sso' in userinfo and userinfo['is_sso']:
+        #    redirect_uri = url_for('authorized', _external=True)
+        #    if 'oauth_code' in session:
+        #        code = session['oauth_code']
+        #        oauth_session = get_portal_oauth().get_auth_session(
+        #                data={  'code': code,
+        #                        'redirect_uri': redirect_uri },
+        #                decoder=json.loads )
+        #         #oauth_session.get('/users/sign_out')
+        #         oauth_session.get('/api/v1/users/sign_out')
+
+        #
+        # Log out rhizo user
+        #
+        logout_user()
+
+    return redirect(url_for('flow_app', features=1))
+
 
 #
 # SSO Callback
@@ -414,12 +443,13 @@ def authorized():
 
     redirect_uri = url_for('authorized', _external=True)
     code = request.args['code']
-    session = get_portal_oauth().get_auth_session(
+    session['oauth_code'] = code
+    oauth_session = get_portal_oauth().get_auth_session(
                     data={  'code': code,
                             'redirect_uri': redirect_uri},
                     decoder=json.loads )
 
-    user = session.get('/auth/user').json()
+    user = oauth_session.get('/auth/user').json()
 
     email       = user['info']['email']
     username    = user['extra']['username']

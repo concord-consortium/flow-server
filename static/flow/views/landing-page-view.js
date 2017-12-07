@@ -76,15 +76,28 @@ var LandingPageView = function(options) {
     //
     var welcomeMessage = jQuery('<div>', { css: {   position: 'absolute',
                                                     paddingRight: '5px',
+                                                    display: 'inline-block',
+                                                    whiteSpace: 'nowrap',
                                                     top: '0px',
                                                     right: '0px' } } );
-    var welcomeText = jQuery('<div>');
+    var welcomeText = jQuery('<span>');
+
+    var signOut = jQuery('<a>', { href: '/ext/flow/logout' } );
+    signOut.text('logout');
+
     if(g_user != null) {
         welcomeText.text('Welcome ' + g_user.full_name);
-        welcomeText.appendTo(welcomeMessage);
+        welcomeMessage.append(welcomeText);
+        welcomeMessage.append(jQuery('<span>').text(' '));
+        welcomeMessage.append(signOut);
+        var spacing = jQuery('<span>', { css: { 
+                                    paddingRight: '5px'} } );
+        spacing.text(' ');
+        welcomeMessage.append(spacing);
+
     } else {
         welcomeText.text('You are not logged in.');
-        welcomeText.appendTo(welcomeMessage);
+        welcomeMessage.append(welcomeText);
     }
 
     //
@@ -94,7 +107,7 @@ var LandingPageView = function(options) {
         var adminButton = $('<button>', {   css: {  
                                                     float: 'right',
                                                     position: 'relative',
-                                                    bottom: '5px' },
+                                                    top: '5px' },
                                             html: 'Admin' } );
         adminButton.css('font-size','10px');
 
