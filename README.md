@@ -29,7 +29,9 @@ The web app itself is stored in the `static` and `templates` folders witin this 
 
 1.  Install `rhizo-server` according to the instructions in its `README.md`.
 2.  Install rauth 
-    `pip install rauth`
+```
+    pip install rauth
+```
 3.  Create an `extensions` folder inside `rhizo-server`
 4.  Create an empty `__init__.py` file inside it.
 5.  Place the `flow-server` repo (this repo) inside that.
