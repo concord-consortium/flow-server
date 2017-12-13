@@ -81,7 +81,160 @@ var AdminView = function(options) {
                 alert('Error loading admin data.')
             },
         });
-    }
+
+    };
+
+    //
+    // Create the user admin div area
+    //
+    this.createUserAdminDiv = function() {
+
+        var controllerAdminContent = $('#'+base.getDivId());
+        var userAdmin = $('<div>', {    id: 'user-admin-div', 
+                                        css: {  height: '500px',
+                                                padding: '5px' } } );
+        controllerAdminContent.append(userAdmin);
+        _this.updateUserAdminDiv();
+    };
+
+    //
+    // Update the user admin div.
+    //
+    this.updateUserAdminDiv = function() {
+        var userAdmin = $('#user-admin-div');
+        userAdmin.empty();
+
+        var userAdminLabel = $('<h3>').text("User Administration");
+        userAdmin.append(userAdminLabel);
+
+        var searchLabel = $('<span>').text('Username: ');
+        userAdmin.append(searchLabel);
+
+        var username = $('<input>', { id: 'user-admin-search', type: 'text' });
+        userAdmin.append(username);
+        
+        var userSearch = $('<button>', { id: 'user-search-button'} ).text('Search');
+        userAdmin.append(userSearch);
+
+        var userSearchResult = $('<div>', { id: 'user-admin-search-result' } );
+        userAdmin.append(userSearchResult);
+
+        userSearch.click( function() {
+            username = $('#user-admin-search').val();
+            $('#user-admin-search-result').empty();
+
+            $.ajax({
+                url:    '/ext/flow/get_user',
+                method: 'POST',
+                data:   {   username:   username,
+                            csrf_token: g_csrfToken },
+
+                success: function(data) {
+                    var response = JSON.parse(data);
+                    if(response.success) {
+                        var user = response.data;
+                        var resultDiv = $('#user-admin-search-result');
+
+                        resultDiv.empty();
+                        var resultTable = $('<table>');
+
+                        Util.addTableRow(resultTable, [
+                                            $('<div>').text("Username"),
+                                            $('<div>').text(user.user_name) ],
+                                            { padding: '5px' } );
+
+                        Util.addTableRow(resultTable, [
+                                            $('<div>').text("Email"),
+                                            $('<div>').text(user.email_address) ],
+                                            { padding: '5px' } );
+
+                        Util.addTableRow(resultTable, [
+                                            $('<div>').text("Full Name"),
+                                            $('<div>').text(user.full_name) ],
+                                            { padding: '5px' } );
+
+                        Util.addTableRow(resultTable, [
+                                            $('<div>').text("SSO User"),
+                                            $('<div>').text(user.is_sso) ],
+                                            { padding: '5px' } );
+
+
+                        var setAdmin = $('<button>');
+                        if(user.is_admin) {
+                            setAdmin.text('Remove Admin');
+                        } else {
+                            setAdmin.text('Set Admin');
+                        }
+                        setAdmin.click( function() {
+                            _this.updateUser(username,
+                                                { is_admin: !user.is_admin } );
+                        });
+
+                        Util.addTableRow(resultTable, [
+                                            $('<div>').text("Admin"),
+                                            $('<div>').text(user.is_admin),
+                                            setAdmin ],
+                                            { padding: '5px' } );
+
+                        
+                        resultDiv.append(resultTable);
+
+                    } else {
+                        console.log("[ERROR] Cannot find user.", response);
+                        alert("Cannot find user " + username);
+                    }
+                },
+
+                error: function(data) {
+                    console.log('[ERROR] Error searching for user', data);
+                    alert('Error searching for user ' + username);
+                }
+            });
+
+        });
+
+    };
+
+    //
+    // Update user data
+    //
+    this.updateUser = function(username, data) {
+        console.log("[DEBUG] updateUser", username, data);
+
+        $.ajax({
+                url:    '/ext/flow/set_user',
+                method: 'POST',
+                data:   {   username:   username,
+                            data:       JSON.stringify(data),
+                            csrf_token: g_csrfToken },
+
+                success: function(data) {
+                    var response = JSON.parse(data);
+                    if(response.success) {
+
+                        alert("Updated user " + username);
+
+                        //
+                        // Perform a search again using the same username
+                        // to refresh the user info div
+                        //
+                        $('#user-admin-search').val(username);
+                        $('#user-search-button').click();
+
+                    } else {
+                        console.log("[ERROR] Error updating user.", response);
+                        alert('Error updating user ' + username);
+                    }
+                },
+                error: function(data) {
+                    console.log('[ERROR] Error updating user', data);
+                    alert('Error updating user ' + username);
+                }
+            });
+
+               
+
+    };
 
     //
     // Util function to create table headers.
@@ -282,6 +435,8 @@ var AdminView = function(options) {
      
             }
         }
+
+        _this.createUserAdminDiv();
     }
 
     //

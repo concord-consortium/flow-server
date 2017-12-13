@@ -508,4 +508,96 @@ def authorized():
     return redirect(url_for('flow_app', features=1))
 
 
+#
+# Get user info
+#
+@app.route('/ext/flow/get_user', methods=['POST'])
+def get_user():
+
+    if not current_user.is_authenticated:
+        return json.dumps({
+            'success': False,
+            'message': 'User not authenticated.'
+        })
+
+    if not current_user.role == User.SYSTEM_ADMIN:
+        return json.dumps({
+            'success': False,
+            'message': 'Only admin can perform this operation.'
+        })
+
+    username = request.values.get('username')
+
+    user = User.query.filter(User.user_name == username).first()
+    if user is None:
+        return json.dumps({
+                'success':  False,
+                'message':  'User not found' })
+
+    userinfo = get_flow_userinfo(username)
+
+    is_sso = False
+    if 'is_sso' in userinfo:
+        is_sso = userinfo['is_sso']
+
+    return json.dumps({
+                'success':  True,
+                'message':  'Found user info',
+                'data':     {   'user_name':        user.user_name,
+                                'email_address':    user.email_address,
+                                'full_name':        user.full_name,
+                                'is_sso':       is_sso,
+                                'is_admin':     (user.role == User.SYSTEM_ADMIN)
+                            } 
+            })
+
+    
+#
+# Set user info
+#
+@app.route('/ext/flow/set_user', methods=['POST'])
+def set_user():
+
+    if not current_user.is_authenticated:
+        return json.dumps({
+            'success': False,
+            'message': 'User not authenticated.'
+        })
+
+    if not current_user.role == User.SYSTEM_ADMIN:
+        return json.dumps({
+            'success': False,
+            'message': 'Only admin can perform this operation.'
+        })
+
+    username = request.values.get('username')
+
+    user = User.query.filter(User.user_name == username).first()
+    if user is None:
+        return json.dumps({
+                'success':  False,
+                'message':  'User not found' })
+
+    data = request.values.get('data')
+    
+    if data is None:
+        return json.dumps({
+                'success':  False,
+                'message':  'No user data specified.' })
+
+    data = json.loads(data);
+
+    if 'is_admin' in data:
+        if data['is_admin']:
+            user.role = User.SYSTEM_ADMIN
+        else:
+            user.role = User.STANDARD_USER
+
+    db.session.commit()
+
+    return json.dumps({
+                'success':  True,
+                'message':  'User updated.' })
+
+
 
