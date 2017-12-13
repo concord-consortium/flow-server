@@ -10,7 +10,8 @@ var ProgramEditorFileManager = function(options) {
     //
     // Create save widget
     //
-    var fileWidget  = jQuery('<div>', { css: {  zIndex: 100,
+    this.fileWidget  = jQuery('<div>', { id: 'program-editor-file-manager',
+                                        css: {  zIndex: 100,
                                                 backgroundColor: 'white',
                                                 position: 'absolute' } });
 
@@ -137,13 +138,13 @@ var ProgramEditorFileManager = function(options) {
                             showTopLevelView('landing-page-view');
                         });
 
-    fileWidget.append(nameLabel);
-    fileWidget.append(nameField);
-    fileWidget.append(saveButton);
-    fileWidget.append(deleteButton);
-    fileWidget.append(exitButton);
+    this.fileWidget.append(nameLabel);
+    this.fileWidget.append(nameField);
+    this.fileWidget.append(saveButton);
+    this.fileWidget.append(deleteButton);
+    this.fileWidget.append(exitButton);
 
-    container.append(fileWidget);
+    container.append(this.fileWidget);
 
     //
     // Get name of program
@@ -151,7 +152,23 @@ var ProgramEditorFileManager = function(options) {
     this.getProgramName = function() { 
         console.log("[DEBUG] getProgramName() " + nameField.val());
         return nameField.val(); 
-    }
+    };
+
+    //
+    // Hide this widget
+    //
+    // this.hide = function() {
+    //    console.log("[DEBUG] hiding file manager.");
+    //    this.fileWidget.hide();
+    // };
+
+    //
+    // Show this widget
+    //
+    // this.show = function() {
+    //    console.log("[DEBUG] showing file manager.");
+    //    this.fileWidget.show();
+    // };
 
     return this;
 }

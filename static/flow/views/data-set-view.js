@@ -77,17 +77,30 @@ var DataSetView = function(options) {
     content.append(mainTable);
 
     //
+    // Show a read only view of the program associated with this dataset.
+    //
+    viewProgBtn.click( function() {
+        var editor = getTopLevelView('program-editor-view');
+        editor.loadProgram( {   readOnly:       true,
+                                programSpec:    base.m_dataSet.metadata.program,
+                                closeFunc:      function() {
+                                    showTopLevelView('data-set-view'); 
+                                } } );
+        showTopLevelView('program-editor-view');
+    });
+
+    //
     // Load a dataset and initialize view.
     //
     base.loadDataSet = function(dataSet) {
        
-        console.log("[DEBUG] loadDataSet", dataSet);
+        console.log("[DEBUG] loadDataSet loading", dataSet);
 
         base.m_dataSet              = dataSet;
         base.m_program              = specToDiagram(dataSet.metadata.program);
         base.m_recordingLocation    = "/" + dataSet.metadata.recording_location;
        
-        console.log("[DEBUG] loadDataSet", 
+        console.log("[DEBUG] loadDataSet loaded", 
                         base.m_program, 
                         base.m_recordingLocation);
 
@@ -167,9 +180,9 @@ var DataSetView = function(options) {
             var block = null;
         	for (var i = 0; i < diagram.blocks.length; i++) {
 
-                console.log("[DEBUG] Checking blocks", 
-                            diagram.blocks[i].name, 
-                            blockName);
+                // console.log("[DEBUG] Checking blocks", 
+                //            diagram.blocks[i].name, 
+                //            blockName);
 
             	if (diagram.blocks[i].name === blockName) {
                 	block = diagram.blocks[i];
@@ -177,7 +190,7 @@ var DataSetView = function(options) {
             	}
         	}
             if (block) {
-                console.log("[DEBUG] Creating dataPair", block);
+                // console.log("[DEBUG] Creating dataPair", block);
                 dataPair = base.createDataPair(block);
                 
                 // add data pair to plotter
@@ -231,13 +244,13 @@ var DataSetView = function(options) {
         var dataPairs = base.m_plotHandler.plotter.dataPairs;
         for (var i = 0; i < dataPairs.length; i++) {
             var d = dataPairs[i];
-            console.log("[DEBUG] findDataPair checking", d.yData.name, blockName);
+            // console.log("[DEBUG] findDataPair checking", d.yData.name, blockName);
             if (d.yData.name === blockName) {
                 dataPair = d;
                 break;
             }
         }
-        console.log("[DEBUG] findDataPair", blockName, "found", dataPair);
+        // console.log("[DEBUG] findDataPair", blockName, "found", dataPair);
         return dataPair;
     }
 

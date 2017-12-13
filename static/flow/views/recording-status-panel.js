@@ -106,6 +106,10 @@ var RecordingStatusPanel = function(options) {
     // Display panel with latest loaded dataset metadata
     //
     this.show = function() {
+        if(!dataSetView || !dataSetView.getDataSet()) {
+            return;
+        }
+
         var metadata    = dataSetView.getDataSet().metadata;
         var recording   = metadata.recording;
         var start       = metadata.start_time;

@@ -149,4 +149,17 @@ var ProgramEditorBlockPalette = function(options) {
 
     container.append(blockPalette);
 
+    var base = {};
+
+    // this.hide = function() {
+    //    console.log("[DEBUG] Hiding block palette.");
+    //    container.hide();
+    // };
+
+    // this.show = function() {
+    //    console.log("[DEBUG] Showing block palette.");
+    //    container.show();
+    // };
+
+    return this;
 }

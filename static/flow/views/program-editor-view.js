@@ -43,6 +43,22 @@ var ProgramEditorView = function(options) {
                         [leftPanel, rightPanel], 
                         { verticalAlign: 'top'} );
 
+	//
+    // A custom close button. Attach close functions to this button.
+    //
+    var closeButton = $('<div>', {  id: 'editor-close-button',
+                                    css: {
+                                        border:             '1px solid grey',
+                                        cursor:             'pointer',
+                                        textAlign:          'center',
+                                        backgroundColor:    'white',
+                                        verticalAlign:      'top',
+                                        float:              'right',
+                                        padding:            '2px',
+                                        display:            'inline-block' }});
+    closeButton.html("X");
+    rightPanel.append(closeButton);
+
     content.append(mainTable);
 
    
@@ -76,10 +92,7 @@ var ProgramEditorView = function(options) {
         // console.log("[DEBUG] Reset editor.");
 
         var nameWidget      = jQuery('#program-editor-filename');
-        // var contentWidget   = jQuery('#program-content');
-
         nameWidget.val('');
-        // contentWidget.val('');
 
         $('#my-data-panel').hide();
         $('#pi-selector-panel').show();
@@ -93,14 +106,48 @@ var ProgramEditorView = function(options) {
         // console.log("[DEBUG] ProgramEditorView loadProgram()", params);
 
         var nameWidget      = jQuery('#program-editor-filename');
-
-        // var contentWidget   = jQuery('#program-content');
-
         nameWidget.val('');
 
-        // contentWidget.val('');
-        
-        piSelectorPanel.loadPiList();
+        var readOnly = false;
+
+        if(params && params.readOnly) {
+
+            readOnly = true;
+            console.log("[DEBUG] readonly mode. Hiding all edit widgets.");
+            
+            $('#program-editor-file-manager').hide();
+            $('#my-data-panel').hide();
+            $('#pi-selector-panel').hide();
+            $('#editor-close-button').hide();
+
+            //
+            // Allow custom close funcitons for read only views.
+            // E.g. return to data set view, or return to 
+            // browing programs that belong to others.
+            //
+            if(params.closeFunc) {
+                $('#editor-close-button').show();
+                $('#editor-close-button').click( params.closeFunc );
+            }
+
+            console.log("[DEBUG] readonly mode. Edit widgets hidden.");
+
+            //
+            // If we are loading a readonly view of the program, 
+            // use the program spec passed to us.
+            //
+            base.getProgramEditorPanel().loadProgram({ 
+                                            programSpec: params.programSpec,
+                                            readOnly: readOnly } );
+
+            return;
+
+        } 
+
+        $('#editor-close-button').hide();
+        $('#program-editor-file-manager').show();
+        $('#my-data-panel').hide();
+        $('#pi-selector-panel').show();
 
         //
         // If no program to load, create a new program
@@ -145,10 +192,18 @@ var ProgramEditorView = function(options) {
                         var content = response.content;
                         var programSpec = JSON.parse(content);
                         nameWidget.val(filename);
-                        programEditorPanel.loadProgram(programSpec);
+                        programEditorPanel.loadProgram({
+                                            programSpec:    programSpec,
+                                            readOnly:       false });
 
-                        // contentWidget.val(content);
-                        // contentWidget.attr("disabled", false);
+                        // console.log("[DEBUG] Editable mode. Showing all widgets.");
+
+                        // base.getFileManager().show();
+                        // base.getPiSelectorPanel().show();
+                        // base.getMyDataPanel().show();
+                        // base.getProgramEditorPanel().show();
+
+                        base.getPiSelectorPanel().loadPiList();
 
                     } else {
                         alert("Error: " + response.message);

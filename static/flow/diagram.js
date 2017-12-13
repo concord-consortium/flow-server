@@ -150,7 +150,7 @@ function createFlowBlock(blockSpec) {
 
     var _allowedFilterTypes = allowedFilterTypes();
     if(_allowedFilterTypes.indexOf(blockSpec.type) >= 0) {
-        console.log("[DEBUG] Adding filter methods...");
+        // console.log("[DEBUG] Adding filter methods...");
         addFilterMethods(block, blockSpec.type);
     }
 
@@ -287,6 +287,8 @@ function createPin(block, index, isInput) {
 function specToDiagram(diagramSpec) {
 	var diagram = createDiagram();
 
+    // console.log("[DEBUG] Creating blocks.", diagramSpec);
+
 	// first pass: create blocks
 	for (var i = 0; i < diagramSpec.blocks.length; i++) {
 		var blockSpec = diagramSpec.blocks[i];
@@ -298,9 +300,15 @@ function specToDiagram(diagramSpec) {
 	}
 
 	// second pass: create links between blocks (between pins)
+    // console.log("[DEBUG] Creating block links.", diagramSpec);
+
 	for (var i = 0; i < diagramSpec.blocks.length; i++) {
 		var blockSpec = diagramSpec.blocks[i];
+        // console.log("[DEBUG] Checking block", blockSpec);
 		if (blockSpec.sources) {
+            // console.log("[DEBUG] Linking ", blockSpec.sources,
+            //            " sources for ", blockSpec.name);
+
 			var block = diagram.blocks[i];
 			for (var j = 0; j < blockSpec.sources.length; j++) {
 

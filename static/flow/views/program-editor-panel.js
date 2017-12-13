@@ -27,7 +27,7 @@ var ProgramEditorPanel = function(options) {
     //
     // Create block palette
     //
-    var palDiv = $('<div>', {   id: 'block-palette',
+    var palDiv = $('<div>', {   id: 'program-editor-block-palette',
                                 css: {
                                         top:        '50px',
                                         position:   'absolute',
@@ -35,7 +35,7 @@ var ProgramEditorPanel = function(options) {
                                         border:     '1px solid lightgrey',
                                         width:      '100px' } } );
 
-    var palette = ProgramEditorBlockPalette({   container: palDiv,
+    this.palette = ProgramEditorBlockPalette({   container: palDiv,
                                                 programEditorPanel: this });
 
     this.container.append(palDiv);
@@ -59,12 +59,31 @@ var ProgramEditorPanel = function(options) {
     //
     // Load a diagram from a spec dictionary into the UI editor
     //
-    this.loadProgram = function(programSpec) {
+    this.loadProgram = function(params) {
+       
+        // console.log("[DEBUG] program-editor-panel loadProgram()");
+
+        var programSpec = null;
+        var readOnly    = false;
+
+        if(params) {
+            programSpec = params.programSpec;
+            readOnly    = params.readOnly;
+            // console.log("[DEBUG] program-editor-panel loadProgram() spec", programSpec);
+        }
 
         if(this.m_svgDrawer == null) {
             this.m_svgDrawer = SVG('program-holder');
             $('#program-holder').mousemove(this.mouseMove);
             $('#program-holder').mouseup(this.mouseUp);
+        }
+
+        if(readOnly) {
+            // console.log("[DEBUG] program-editor-panel hide block palette.");
+            $('#program-editor-block-palette').hide();
+        } else {
+            // console.log("[DEBUG] program-editor-panel show block palette.");
+            $('#program-editor-block-palette').show();
         }
 
         // console.log("[DEBUG] loadProgram", programSpec);
@@ -94,11 +113,15 @@ var ProgramEditorPanel = function(options) {
             }
         }
 
+        console.log("[DEBUG] Display spec", programSpec);
+
         this.m_scale = 1.0;
         this.m_diagram = specToDiagram(programSpec);
         this.m_diagramName = programSpec.name;
 
         //zoomBlocks(this.m_diagram.blocks, this.m_scale);
+
+        // console.log("[DEBUG] Display diagram", this.m_diagram);
 
         //
         // Display blocks
@@ -113,8 +136,10 @@ var ProgramEditorPanel = function(options) {
         //
         // Display connections
         //
+        // console.log("[DEBUG] displaying connections...");
         for (var i = 0; i < this.m_diagram.blocks.length; i++) {
             var block = this.m_diagram.blocks[i];
+            // console.log("[DEBUG] Checking pins", block.pins);
             for (var j = 0; j < block.pins.length; j++) {
                 var pin = block.pins[j];
                 if (pin.sourcePin) {

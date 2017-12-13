@@ -8,7 +8,7 @@ var PiSelectorPanel = function(options) {
 
     var _this = this;
 
-    var panel = jQuery('<div>', { id: 'pi-selector-panel',
+    this.panel = jQuery('<div>', { id: 'pi-selector-panel',
                                     css: {  position:   'absolute',
                                             right:      '0px',
                                             zIndex:     100,
@@ -104,8 +104,8 @@ var PiSelectorPanel = function(options) {
                         {   padding: '2px',
                             verticalAlign: 'bottom' } );
 
-    panel.append(piTable);
-    container.append(panel);
+    this.panel.append(piTable);
+    container.append(this.panel);
 
     this.availableControllers = [];
     this.selectedController = null;
@@ -337,6 +337,16 @@ var PiSelectorPanel = function(options) {
         });
         
     };
+
+    // this.hide = function() {
+    //    console.log("[DEBUG] hiding pi selector panel");
+    //    this.panel.hide();
+    //};
+    //
+    //this.show = function() {
+    //    console.log("[DEBUG] showing pi selector panel");
+    //    this.panel.show();
+    //};
 
     this.loadPiList();
 

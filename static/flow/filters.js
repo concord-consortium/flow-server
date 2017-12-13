@@ -1,6 +1,6 @@
 function addFilterMethods(block, type) {
 
-    console.log("[DEBUG] addFilterMethods()", type);
+    // console.log("[DEBUG] addFilterMethods()", type);
 
     // make sure this is an allowed type
     var _allowedFilterTypes = allowedFilterTypes();
@@ -20,7 +20,7 @@ function addFilterMethods(block, type) {
     // computeFilterValue will just be one of these functions.
     block.computeFilterValue = (function() {
 
-        console.log("[DEBUG] computeFilterValue()");
+        // console.log("[DEBUG] computeFilterValue()");
 
         switch (block.type) {
             case 'and':
