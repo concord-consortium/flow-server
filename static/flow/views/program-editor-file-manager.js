@@ -8,28 +8,82 @@ var ProgramEditorFileManager = function(options) {
     var editor      = options.editor;
 
     //
-    // Create save widget
-    //
-    var fileWidget  = jQuery('<div>', { css: {  zIndex: 100,
-                                                backgroundColor: 'white',
-                                                position: 'absolute' } });
+    // create a menu section
+    //  
+    var createSection = function(name, content) {
+        
+        var div = $('<div>', {class: 'diagramMenu'});
+        var header = $('<div>', {class: 'diagramMenuHeader'} );
+        var title = $('<div>', {class: 'diagramMenuTitle noSelect'} ).text(name);
+        var chevron = $('<div>', {class: 'diagramMenuChevron glyphicon glyphicon-chevron-down'} );
+        
+        if(name == 'program'){
+            header.addClass('concordblue');
+        }
+        else{
+            header.addClass('concordlightblue');
+        }
 
-    //
-    // Label
-    //
-    var nameLabel   = jQuery('<label>').text('Program Name').css('padding', '2px');;
+        header.click( function(e) {
+            if(content.is(":visible")) {
+                chevron.removeClass('glyphicon-chevron-down');
+                chevron.addClass('glyphicon-chevron-right');
+                content.hide();
+            } else {
+                chevron.removeClass('glyphicon-chevron-right');
+                chevron.addClass('glyphicon-chevron-down');
+                content.show();
+            }
+        });
+        div.append(header); 
+        header.append(title); 
+        header.append(chevron); 
+        div.append(content);
 
+        return div;
+    }
+    
     //
-    // File name field
+    // Program: enter program name, save, delete
     //
-    var nameField   = jQuery('<input>').attr({  id: 'program-editor-filename', 
-                                                type: 'text' });
+    var programContent = $('<div>');
+    
+    var programNameMenuEntry = $('<div>', {class: 'diagramMenuHeader menulightgray', css:{height:'60px'}} );
+    var title = $('<div>', {class: 'diagramMenuEntry noSelect'} ).text("program name");
+    var programNameField = jQuery('<input>', {  
+                                                id: 'program-editor-filename',
+                                                type: 'text',
+                                                css: {  width: '210px',
+                                                        marginLeft: '5px',
+                                                        fontSize: '12px',
+                                                        } });
+                                                        
+    programContent.append(programNameMenuEntry);
+    programNameMenuEntry.append(title); 
+    programNameMenuEntry.append(programNameField); 
+    
+    var saveButton = $('<div>', {class: 'diagramMenuHeader menudarkgray'} );
+    var savetitle = $('<div>', {class: 'diagramMenuEntryWithGlyph noSelect'} ).text("save");
+    var savechevron = $('<div>', {class: 'diagramMenuChevron glyphicon glyphicon-floppy-disk', css:{color:'000000'}} );
+    saveButton.append(savetitle); 
+    saveButton.append(savechevron); 
+    
+    programContent.append(saveButton);
+    
+    var deleteButton = $('<div>', {class: 'diagramMenuHeader menulightgray'} );
+    var deletetitle = $('<div>', {class: 'diagramMenuEntryWithGlyph noSelect'} ).text("delete");
+    var deletechevron = $('<div>', {class: 'diagramMenuChevron glyphicon glyphicon-floppy-remove', css:{color:'000000'}} );
+    deleteButton.append(deletetitle); 
+    deleteButton.append(deletechevron); 
+    
+    programContent.append(deleteButton);
 
+    var programfeatures = createSection("program", programContent);
+    container.append(programfeatures);
+    
     //
-    // Save button with handler and callback
+    // handle save button click event
     //
-    var saveButton  = jQuery('<button>').text('Save');
-
     saveButton.click( function() {
                            
         var filename = jQuery('#program-editor-filename').val();
@@ -75,8 +129,6 @@ var ProgramEditorFileManager = function(options) {
     //
     // Delete button with handler and callback
     //
-    var deleteButton = jQuery('<button>').text('Delete');
-
     deleteButton.click( function() {
     
         var filename = jQuery('#program-editor-filename').val();
@@ -126,24 +178,6 @@ var ProgramEditorFileManager = function(options) {
         });
 
     });
-
- 
-    //
-    // Exit button
-    //
-    var exitButton  = jQuery('<button>').text('Exit')
-                        .click( function() {
-                            editor.resetEditor();
-                            showTopLevelView('landing-page-view');
-                        });
-
-    fileWidget.append(nameLabel);
-    fileWidget.append(nameField);
-    fileWidget.append(saveButton);
-    fileWidget.append(deleteButton);
-    fileWidget.append(exitButton);
-
-    container.append(fileWidget);
 
     //
     // Get name of program

@@ -3,57 +3,92 @@
 // Edit dataflow programs and select RPi to run them on.
 //
 var ProgramEditorView = function(options) {
-
+    //
+    // create the main content boxes and top bar
+    //
     var base = BaseView(options);
 
     var content = jQuery('#'+base.getDivId());
+    
+    var outlinebox  = jQuery('<div>', {class:'outlinebox'} );
+    
+    outlinebox.appendTo(content);
+    
+    var maincontentbox  = jQuery('<div>', {class:'maincontentbox'} );
+               
+    maincontentbox.appendTo(outlinebox);        
+    
+    var topbar  = jQuery('<div>', {class:'topbar'} );
+    
+    topbar.appendTo(maincontentbox);        
+
+    var titlebar  = jQuery('<span>', {class:'titlebar noSelect', text:"dataflow"} );
+    
+    titlebar.appendTo(topbar);
 
     //
-    // Create the editor panel
+    // Build the left and right menu holders
     //
-    var leftPanel       = jQuery('<div>', 
-                            {   id: 'program-editor-left-panel',
-                                css: { width: '100%' } } );
-
+    var menuandcontentholder  = jQuery('<div>', {class:'menuandcontentholder'} );
+    
+    menuandcontentholder.appendTo(maincontentbox);    
+    
+    
+    var menuholder  = jQuery('<div>', {class:'menuholder'} );
+    var menurightholder  = jQuery('<div>', {class:'menurightholder'} );
+    
+    menuholder.appendTo(menuandcontentholder);    
+    menurightholder.appendTo(menuandcontentholder);    
+    
+    var menutopbuttonholder  = jQuery('<div>', {class:'menutopbuttonholder'} );
+    
+    menutopbuttonholder.appendTo(menuholder);    
+    
+    var menufilesbutton  = jQuery('<button>', {class:'menutopbutton menumediumgray noSelect', text:"files"} );
+    menufilesbutton.appendTo(menutopbuttonholder);    
+    var menublocksbutton  = jQuery('<div>', {class:'menutopbuttoninactive menudarkgray noSelect', text:"blocks"} );
+    menublocksbutton.appendTo(menutopbuttonholder);
+    menufilesbutton.click( function(e) {
+        showTopLevelView('landing-page-view');
+    });
+    
     //
-    // Create file manager widget
-    //
-    var fileManager    = ProgramEditorFileManager({ container:  leftPanel,
-                                                    editor:     base    } );
-
-    //
-    // Create the panel for the "My Data" and "Pi Selector" components.
-    //
-    var rightPanel      = jQuery('<div>', 
-                                {   id: 'program-editor-right-panel',
-                                    css: { width: '100%' } });
-
-    var piSelectorPanel = PiSelectorPanel({ container:  rightPanel,
-                                            editor:     base        } );
-
-    var myDataPanel     = MyDataPanel({ container:  rightPanel,
-                                        editor:     base        } );
-
-    //
-    // Create main table and add all of our components
-    //
-    var mainTable = jQuery('<table>', { css: { width: '100%' } });
-
-    Util.addTableRow(   mainTable, 
-                        [leftPanel, rightPanel], 
-                        { verticalAlign: 'top'} );
-
-    content.append(mainTable);
-
-   
-	//
     // Main editor panel
     // 
     var programEditorDiv    = $('<div>');
     var programEditorPanel  = ProgramEditorPanel(
-                                {container: programEditorDiv} );
-    leftPanel.append(programEditorDiv);
+                                {container: programEditorDiv,
+                                menuandcontentdiv: menuandcontentholder,
+                                menuholderdiv: menuholder} );
+    menuandcontentholder.append(programEditorDiv);
 
+    //
+    // Create file manager widget
+    //
+    var fileManager    = ProgramEditorFileManager({ container:  menurightholder,
+                                                    editor:     base    } );
+    
+    //
+    // Create the panel for the "My Data" and "Pi Selector" components.
+    //    
+    var piSelectorMenuPanel = PiSelectorPanel({ container:  menurightholder,
+                                                editor:     base        } );
+
+    //
+    // Create zoom widget
+    //
+    var zoomWidget  = jQuery('<span>', { css: {  zIndex: 100,
+                                                float:'right' } });
+    var zoomIn = $('<button>', {class: 'topBarIcon glyphicon glyphicon-zoom-in noSelect', 'aria-hidden': 'true'}).appendTo(zoomWidget);
+    var zoomOut = $('<button>', {class: 'topBarIcon glyphicon glyphicon-zoom-out noSelect', 'aria-hidden': 'true'}).appendTo(zoomWidget);
+    zoomIn.click( function() {
+        programEditorPanel.zoomBlocks(.25);
+    });
+    zoomOut.click( function() {
+        programEditorPanel.zoomBlocks(-.25);
+    });
+    zoomWidget.appendTo(topbar);
+    
     //
     // Accessors for our subcomponents.
     //
@@ -94,13 +129,9 @@ var ProgramEditorView = function(options) {
 
         var nameWidget      = jQuery('#program-editor-filename');
 
-        // var contentWidget   = jQuery('#program-content');
-
         nameWidget.val('');
-
-        // contentWidget.val('');
         
-        piSelectorPanel.loadPiList();
+        piSelectorMenuPanel.loadPiList();
 
         //
         // If no program to load, create a new program
@@ -114,15 +145,11 @@ var ProgramEditorView = function(options) {
         if(params && params.filename) {
 
             var filename    = params.filename;
- 
-            // contentWidget.val("Loading program " + filename + " ...");
-            // contentWidget.attr("disabled", true);
 
             var url = '/ext/flow/load_program'
 
             var data = {    filename:   filename,
                             csrf_token: g_csrfToken      };
-
 
             //
             // Display editor

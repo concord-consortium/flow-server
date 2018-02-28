@@ -7,7 +7,6 @@ var LandingPageDataSetView = function(options) {
 
     var base = BaseView(options);
 
-
     //
     // AJAX call and handler for updating "Recording Now" and 
     // "Previously Recorded" div.
@@ -28,7 +27,7 @@ var LandingPageDataSetView = function(options) {
             success: function(data) {
                 var response = JSON.parse(data);
 
-                // console.log("[DEBUG] List datasets", response);
+                //console.log("[DEBUG] List datasets", response);
 
                 if(response.success) {
 
@@ -46,79 +45,68 @@ var LandingPageDataSetView = function(options) {
                     }
 
                     div.empty();
-
+                    
                     var createDataSetList = function(displayName, list) {
-
-                        var recordingNow = jQuery('<div>');
-                        recordingNow.text(displayName);
-                        recordingNow.appendTo(div);
-
                         if(list.length == 0) {
-                            div.append( jQuery('<div>', { css: { height: '100px' }} ) );
                             return;
                         }
-
-                        //
-                        // A wrapper div around the table allows 
-                        // "float: right" to align properly without
-                        // overlapping the center divider.
-                        //
-                        var tableWrapper = jQuery('<div>', 
-                                    {   id: 'recording-now-table-wrapper', 
-                                        css: {  float:      'right',
-                                                textAlign:  'center' } } );
-
-                        // console.log("[DEBUG] Creating 'Recording Now' table...");
-
-                        var table = jQuery('<table>');
-
-                        var row = [];
                         for(var i = 0; i < list.length; i++) {
-                            
+                            var btn = createMyDataSetBtn ( list[i].name, i );
+                            btn.appendTo(div);
                             // console.log("[DEBUG] Creating dataset item", items[i]);
-
-                            // (function(_i){
-                            var wrapper = jQuery('<div>', 
-                                            { css: {    testAlign: 'center',
-                                                        padding: '10px' } });
-
-                            var icon = DataSetIcon( 
-                                                {   container:  wrapper,
-                                                    item:       list[i]  } );
-                            row.push(wrapper);
-                            // })(i);
-
-
-                            if (i % 2 == 1) {
-                                Util.addTableRow(table, row);
-                                row = [];
-                            }
                         }
-                        if (i % 2 == 1) {
-                            row.push(jQuery('<div>',
-                                            { css: {    width:  '120px',
-                                                        height: '120px',
-                                                        padding: '10px' } }) );
-                            Util.addTableRow(table, row);
-                        }
-
-                        tableWrapper.appendTo(div);
-                        table.appendTo(tableWrapper);
                     }
 
                     createDataSetList("Recording Now", recording);
                     createDataSetList("Previously Recorded", recorded);
+                    
+                    if(recording.length == 0 && recorded.length == 0) {
+                        addNoDatasetsToMenu(div);
+                    }
 
                 } else {
+                    addNoDatasetsToMenu(div);
                     console.log("[ERROR] Error listing datasets", response);
                 }
             },
             error: function(data) {
+                addNoDatasetsToMenu(div);
                 console.log("[ERROR] List datasets error", data);
             },
         });
         
     };
+    
+    //
+    //didn't find any datasets, add a menu entry letting the user know there are no datasets available
+    //
+    this.addNoDatasetsToMenu = function(div){    
+        div.empty();
+        var emptyButton = $('<div>', {class: 'diagramMenuEntry noSelect menudarkgray'} ).text("no available datasets");
+        div.append(emptyButton);
+    }
+    
+    //
+    // create a menu item button to load a saved dataset
+    //
+    var createMyDataSetBtn = function(name, index) {
+        var btn;
+        var filename = name;
+        if(index%2 == 0){
+            btn = $('<button>', { text:filename, class: 'diagramMenuEntry menulightgray' } );
+        }
+        else{
+            btn = $('<button>', { text:filename, class: 'diagramMenuEntry menudarkgray' } );
+        }
+        btn.click(name, function(e) {
+            console.log("[DEBUG] DataSetButton click", e.data);
+            var dataSetView = getTopLevelView('data-set-view');
+            dataSetView.loadDataSet(e.data);
+            showTopLevelView('data-set-view');
+        });
+
+        return btn;
+    }
 
     base.show = function() {
         var content = jQuery('#'+base.getDivId());
