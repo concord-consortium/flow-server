@@ -13,7 +13,7 @@ var LandingPageMyProgramsView = function(options) {
     //
     var loadPrograms = function(div) {
 
-        // console.log("[DEBUG] loadPrograms loading My Programs...");
+        //console.log("[DEBUG] loadPrograms loading My Programs...");
 
         div.empty();
         div.text("Loading My Programs...");
@@ -33,43 +33,16 @@ var LandingPageMyProgramsView = function(options) {
                 if(response.success) {
                    
                     div.empty();
-                    div.css('width', '200px');
-
-                    var title = jQuery('<div>');
-                    title.text("My Programs");
-                    title.appendTo(div);
-
-                    // console.log("[DEBUG] loadPrograms Creating My Programs table...");
-
-                    var table = jQuery('<table>', 
-                                    { css: {  margin: '0 auto' } } );
+                    //div.css('width', '200px');
 
                     var items = response.items;
-                    var row = [];
+                   // var row = [];
                     for(var i = 0; i < items.length; i++) {
+                        var btn = createMyProgramBtn ( items[i].name, i );
 
-                        var wrapper = jQuery('<div>', 
-                                        { css: {    testAlign: 'center',
-                                                    padding: '10px' } });
-
-                        var icon = ProgramIcon( {   container:  wrapper,
-                                                    item:       items[i] } );
-
-                        row.push(wrapper);
-
-                        if (i % 2 == 1) {
-                            Util.addTableRow(table, row);
-                            row = [];
-                        }
+                        btn.appendTo(div);
                     }
-                    if (i % 2 == 1) {
-                        row.push(jQuery('<div>',
-                                        { css: {    width:  '100px',
-                                                    height: '100px',
-                                                    padding: '10px' } }) );
-                        Util.addTableRow(table, row);
-                    }
-                    table.appendTo(div);
+
 
                 } else {
                     console.log("[ERROR] Error listing programs", response);
@@ -81,6 +54,26 @@ var LandingPageMyProgramsView = function(options) {
         });
         
     };
+    
+    //
+    // create a menu item button to load a saved program
+    //
+    var createMyProgramBtn = function(name, index) {
+        var btn;
+        var filename = name;
+        if(index%2 == 0){
+            btn = $('<button>', { text:filename, class: 'diagramMenuEntry menulightgray' } );
+        }
+        else{
+            btn = $('<button>', { text:filename, class: 'diagramMenuEntry menudarkgray' } );
+        }
+        btn.click(name, function(e) {
+            //console.log("[DEBUG] MyProgramBtn click", filename);
+            var editor = getTopLevelView('program-editor-view');
+            editor.loadProgram({filename: filename});
+        });
+        return btn;
+    }
 
     base.show = function() {
         var content = jQuery('#'+base.getDivId());

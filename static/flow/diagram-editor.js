@@ -701,16 +701,30 @@ function zoomBlocks(blocks, factor) {
  * contains a map for each class for css properties to scale -> mapped to defautl value at 1.0 scale.
 */
 var CLASS_SCALING_TABLE = {
-   'flowBlock': { "width": 175 },
+   'flowBlock': { "width": 210, "height": 36 },
+   'flowBlockTallWide': { "width": 240, "height": 72 },
+   'flowBlockPlot': { "width": 375, "height": 200 },
+   'flowBlockContent': { "left": 20, "width": 170, "height": 36 },
+   'flowBlockContentTallWide': { "width": 200, "height": 72 },
+   'flowBlockContentPlot': { "width": 335, "height": 200 },
+   'flowBlockEndArcLeft': { "height": 36, "width": 36, "border-radius": 36 },
+   'flowBlockEndArcRight': { "height": 36, "width": 36, "border-radius": 36 },
+   'flowBlockEndArcTallWide': { "height": 72 },
+   'flowBlockEndArcPlot': { "height": 200 },
    'flowBlockValue': { "font-size": 36 },
-   'flowBlockValueAndUnits': { "margin-bottom": 15 },
-   'flowBlockName': { "font-size": 16 },
-   'flowBlockValue': { "font-size": 36 },
-   'flowBlockUnits': { "font-size": 22 },
-   'flowBlockInput': { "font-size": 20, "margin-bottom": 25 },
-   'flowBlockMenuHolder': { "height": 26 },
+   'flowBlockName': { "font-size": 14, "line-height": 36, "height": 36, "margin-left": 2 },
+   'flowBlockParamLabel': { "font-size": 14, "line-height": 36, "height": 36, "margin-left": 2 },
+   'flowBlockValueAndUnits': { "height": 36, "margin-right": 2,  "padding-left": 2, "padding-right": 2},
+   'flowBlockValue': { "font-size": 16, "line-height": 36 },
+   'flowBlockUnits': { "font-size": 14, "line-height": 36 },
+   'flowBlockInputHolderMargin': {  "margin-right": 20 },
+   'flowBlockInput': { "font-size": 16, "margin-top": 3, "margin-right": 2, "margin-bottom": 3, "width": 60, "height": 30 },
+   'flowBlockMenuHolder': { "height": 30, "margin-top": 3, "margin-bottom": 3, "margin-left": 3,},
    'flowBlockWithPlot': { "width": 330 },
    'flowBlockWithImage': { "width": 330 },
+   'flowBlockMenuImage': { "height": 12, "width": 20},
+   'flowBlockPlotCanvas': { "height": 200, "width": 300},
+   'flowBlockIcon': { "font-size": 16, "margin-right": 0, "margin-left": 5, "line-height": 30, "height": 30 },
 };
 
 /**

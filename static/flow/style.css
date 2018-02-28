@@ -1,57 +1,347 @@
+.outlinebox{
+    height:1200px;
+    width:100%;
+    padding:15px;
+    background-color:#007c88;
+}
+.maincontentbox{
+    width:100%;
+    height:100%
+    background-color: #ffffff;
+}
+.topbar{
+    width:100%;
+    height: 60px;
+    padding-left: 30px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: #f1f2f2;
+}
+.titlebar{
+    line-height:50px;
+    text-align: left;
+    font-size: 22px;
+    font-family: 'museo500', Arial, sans-serif;
+    background-color: #f1f2f2;
+}
+.topBarIcon {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-right: 2px;
+    padding-left: 2px;
+    margin-right: 2px;
+    margin-left: 2px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-size: 24px;
+    color: #404040;
+    height: 40px;
+    width: 40px;
+}
+.topBarFileText {
+    margin-top: 5px;
+    padding-bottom: 5px;
+    margin-right: 5px;
+    font-size: 14px;
+    color: #000000;
+    line-height: 30px;
+}
+.topBarFileEntry {
+    margin-right: 5px;
+    font-size: 12px;
+    color: #000000;
+}
+
+.menuandcontentholder{
+    position: relative;
+    height: 1110px;
+    width: 100%; 
+    background-color: #ffffff;
+}
+.menuholder{
+    width: 220px; 
+    height: 100%; 
+    z-index: 100; 
+    background-color: #f1f2f2;
+    display: inline-block;
+    float:left;
+}
+.menurightholder{
+    width: 220px; 
+    z-index: 100; 
+    background-color: #f1f2f2;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+}
+.menutopbuttonholder{
+    width:100%;
+    height: 30px;
+}
+.menutopbutton{
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.1s;
+    border:none;
+    width:50%;
+    height:100%;
+    padding-left: 10px;
+    padding-top: 5px;
+    padding-bottom: 10px;
+    display: inline-block;
+    text-align: left;
+    font-size: 14px;
+    font-family: 'museo500', Arial, sans-serif;
+    cursor: pointer;
+}
+.menutopbutton:hover {
+    background-color: #e5f1fb;
+}
+.menutopbuttoninactive
+{
+    width:50%;
+    height:100%;
+    padding-left: 10px;
+    padding-top: 5px;
+    padding-bottom: 10px;
+    display: inline-block;
+    text-align: left;
+    font-size: 14px;
+    font-family: 'museo500', Arial, sans-serif;
+}
+.newProgramMenuTitle {
+    display: inline-block;
+    padding-top:5px;
+    padding-bottom:5px;
+    padding-left:10px;
+    color: #007c88;
+    height: 30px;
+    font-size: 14px;
+    font-family: 'museo500', Arial, sans-serif;
+}
+.diagramMenuEntryWithGlyph {
+    display: inline-block;
+    padding-top:5px;
+    padding-bottom:5px;
+    padding-left:10px;
+    color: #000000;
+    height: 30px;
+    font-size: 14px;
+    font-family: 'museo500', Arial, sans-serif;
+}
+
+.diagramMenu {
+    width: 100%;
+    cursor: pointer;
+    
+}
+.diagramZoomBlock {
+    width: 100%;
+    cursor: pointer;
+    float:right;
+}
+.diagramMenuHeader {
+    display: inline-block;
+    height: 30px;
+    width: 100%;
+}
+.diagramMenuHeader:hover {
+    opacity: .8;
+}
+.diagramMenuTitle {
+    display: inline-block;
+    padding-top:6px;
+    padding-bottom:10px;
+    padding-left:10px;
+    color: #ffffff;
+    height: 30px;
+    font-size: 14px;
+    font-family: 'museo500', Arial, sans-serif;
+}
+.diagramMenuChevron {
+    display: inline-block;
+    float: right;
+    padding-top:10px;
+    padding-bottom:4px;
+    padding-right:10px;
+    color: #ffffff;
+    font-size: 12px;
+}
+.diagramMenuEntry {
+    text-align: left;
+    padding-top:2px;
+    padding-bottom:2px;
+    padding-left:10px;
+    width: 100%;    
+    height: 25px;
+    border:0px;
+    font-size: 14px;
+    font-family: 'museo500', Arial, sans-serif;
+}
+.diagramMenuEntry:hover {
+    opacity: .8;
+}
+
 .flowBlock {
     position: absolute;
-    border: 2px solid black;
-    background-color: #f8f8f8;
-    text-align: center;
     cursor: move;
-    width: 175px;
+    width: 210px;
+    height: 36px;
+}
+.flowBlockTallWide {
+    width: 240px;
+    height: 72px;
+}
+.flowBlockPlot {
+    width: 375px;
+    height: 200px;
+}
+.flowBlockContent {
+    position: absolute;
+    top:0px;
+    left:20px;
+    width: 170px;
+    height: 36px;
+    color: #ffffff;
+    text-align: left;
+    cursor: move;
+    font-family: 'museo500', Arial, sans-serif;
+}
+.flowBlockContentTallWide {
+    width: 200px;
+    height: 72px
+}
+.flowBlockContentPlot {
+    width: 335px;
+    height: 200px
+}
+.flowBlockEndArcLeft {
+    float: left;
+    left:0px;
+    top:0px;
+    width: 36px;
+    height: 36px;
+    background-color: #808080;
+    border-radius: 36px;
+}
+.flowBlockEndArcRight {    
+    float: right;
+    top:0px;
+    width: 36px;
+    height: 36px;
+    background-color: #808080;
+    border-radius: 36px;
+}
+.flowBlockEndArcTallWide {
+    height: 72px;
+}
+.flowBlockEndArcPlot {
+    height: 200px;
 }
 .flowBlockWithPlot {
     width: 330px;
+    height: 200px;
 }
 .flowBlockWithImage {
     width: 330px;
 }
 .flowBlockMenuHolder {
-    height: 26px;
+    display: inline-block;
+    float: right;
+    height: 30px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    margin-left: 3px;
+    margin-right: 0px;
+}
+.flowBlockMenuImage {
+    height: 12px;
+    width: 20px;
 }
 .flowBlockName {
-    font-size: 16px;
+    display: inline-block;
+    font-size: 14px;
+    line-height: 40px;
+    height: 40px;
+    margin-left: 2px;
+}
+.flowBlockParamLabel {
+    display: inline-block;
+    font-size: 14px;
+    line-height: 36px;
+    height:36px;
+    margin-left: 2px;
+    
 }
 .flowBlockValueAndUnits {
-    margin-bottom: 15px;
+    display: inline-block;
+    float: right;
+    color: #ffffff;
+    height: 36px;
+    margin-right: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
 }
 .flowBlockValue {
-    font-size: 36px;
+    font-size: 16px;
+    line-height: 36px;
+    height: 36px;
+}
+.flowBlockNameSmall {
+    font-size: 12px;
+    line-height: 36px;
 }
 .flowBlockUnits {
-    font-size: 22px;
+    font-size: 14px;
+    line-height: 36px;
+    height: 36px;
 }
-.flowBlockPlot {
-    margin-bottom: 10px;
+
+.flowBlockPlotCanvas {
+    display: inline-block;
+    width: 300px;
+    height: 200px;
     cursor: pointer;
 }
+
 .flowBlockImage {
     margin-bottom: 2px;
 }
+.flowBlockInputHolderMargin{
+    margin-right: 20px;
+}
 .flowBlockInput {
+    display: inline-block;
+    float: right;
     text-align: center;
-    font-size: 20px;
-    width: 60%;
-    margin-left: 20%;
-    margin-right: 20%;
-    margin-bottom: 25px;
+    width: 60px;
+    height: 30px;
+    margin-top: 3px;
+    margin-right: 3px;
+    font-size: 16px;
+    padding-left:1px;
+    padding-right:1px;
+    padding-top:1px;
+    padding-bottom:1px;
 }
 .flowBlockMenu {
     float: right;
     text-align: left;
     cursor: pointer;
+    height:100%;
+}
+.dropdown-toggle {
+    height:100%;
 }
 .flowBlockIcon {
-    padding: 5px;
+    line-height: 30px;
+    height: 30px;
+    margin-right: 0px;
+    margin-left: 5px;
     font-size: 16px;
-    color: #cccccc;
+    color: #ffffff;;
 }
+
 .timeframe-label {
     display: inline-block;
     padding: 10px;
@@ -118,7 +408,7 @@ button.filter {
 }
 
 .landing-page-padding {
-    padding:            50px;
+    padding: 0px;
 }
 
 .circle { 
@@ -165,6 +455,43 @@ button.filter {
     background-color:   orange;
 }
 
+.concordgreen { 
+    background-color: #2da343;
+}
+.concordlightblue { 
+    background-color: #6fc6da;
+}
+.concordblue { 
+    background-color: #0592af;
+}
+.concorddarkblue { 
+    background-color: #007c88;
+}
+.concordorange { 
+    background-color: #e16d2f;
+}
+.concordgold { 
+    background-color: #ffc320;
+}
+.menuwhite { 
+    background-color: #ffffff;
+}
+.menulightgray { 
+    background-color: #f5f5f5;
+}
+.menumediumgray { 
+    background-color: #e1e1e1;
+}
+.menudarkgray { 
+    background-color: #cdcdcd;
+}
+.menuverydarkgray { 
+    background-color: #313131;
+}
+.debuggray { 
+    background-color: #808080;
+}
+
 .vertical-line {
     width:              2px;
     background-color:   black;
@@ -203,5 +530,16 @@ button.filter {
 .color-stop-recording-button {
     color:              black;
     background-color: #83c4d7;
+}
+
+@font-face {
+    font-family: 'museo500';
+    src: url('fonts/museo500-regular-webfont.woff2') format('woff2'),
+         url('fonts/museo500-regular-webfont.woff') format('woff');
+         url('fonts/museo500-regular-webfont.woff') format('opentype');
+         url("fonts/Museo500-Regular.otf") format("opentype"),
+    font-weight: normal;
+    font-style: normal;
+
 }
 
