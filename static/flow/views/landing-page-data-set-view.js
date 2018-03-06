@@ -82,7 +82,7 @@ var LandingPageDataSetView = function(options) {
     //
     this.addNoDatasetsToMenu = function(div){    
         div.empty();
-        var emptyButton = $('<div>', {class: 'diagramMenuEntry noSelect menudarkgray'} ).text("no available datasets");
+        var emptyButton = $('<div>', {class: 'diagramMenuEntryNoSelect noSelect menudarkgray'} ).text("no available datasets");
         div.append(emptyButton);
     }
     

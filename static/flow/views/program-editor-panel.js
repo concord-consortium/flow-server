@@ -41,13 +41,13 @@ var ProgramEditorPanel = function(options) {
     var svgDiv = $('<div>', {   id: 'program-holder', 
                                 css: {  position:   'absolute',
                                         top: '0px',
-                                        left: '220px',
+                                        left: '160px',
                                         width:      '100%',
                                         height: '100%', 
                                         } } );
     svgWrapper.append(svgDiv);
     this.container.append(svgWrapper);
-    var holderoffsetx = 235;
+    var holderoffsetx = 175;
     var holderoffsety = 75;
 
     //
@@ -627,7 +627,7 @@ var ProgramEditorPanel = function(options) {
             "not", "and", "or", "xor", "nand",
             "plus", "minus", "times", "divided by", "absolute value",
             "equals", "not equals", "less than", "greater than",
-            "moving average", "exponential moving average"
+            "moving average", "exp moving average"
         ];
         for (var i = 0; i < filterTypes.length; i++) {
             var type = filterTypes[i];
@@ -776,7 +776,7 @@ var ProgramEditorPanel = function(options) {
             output_type:    'n',
             output_count:   1,
             view: {
-                x: 200 + offset,  // fix(later): smarter positioning
+                x: 50 + offset,  // fix(later): smarter positioning
                 y: 50 + offset,
             }
         };
@@ -805,7 +805,7 @@ var ProgramEditorPanel = function(options) {
             output_type:    null,
             output_count:   0,
             view: {
-                x: 200 + offset,  // fix(later): smarter positioning
+                x: 50 + offset,  // fix(later): smarter positioning
                 y: 50 + offset,
             }
         };
@@ -834,8 +834,8 @@ var ProgramEditorPanel = function(options) {
         if (type === 'not' || type == 'absolute value') {
             blockSpec.input_count = 1;
         }
-        if (type === 'moving average'|| type === 'exponential moving average') {
-            if (type === 'exponential moving average'){
+        if (type === 'moving average'|| type === 'exp moving average') {
+            if (type === 'exp moving average'){
                 blockSpec.name = "exp moving average";
             }
             blockSpec.input_count = 1;
@@ -873,7 +873,7 @@ var ProgramEditorPanel = function(options) {
         var offset = _this.m_diagram.blocks.length * 50;
         var block = createFlowBlock(blockSpec);  // fix(soon): generate unique name from type
         _this.m_diagram.blocks.push(block);
-        block.view.x = 200 + offset;
+        block.view.x = 50 + offset;
         block.view.y = 50 + offset;
         _this.displayBlock(block);
     };
@@ -892,7 +892,7 @@ var ProgramEditorPanel = function(options) {
                             output_type:    'n'    });
 
         _this.m_diagram.blocks.push(block);
-        block.view.x = 200 + offset;
+        block.view.x = 50 + offset;
         block.view.y = 50 + offset;
         _this.displayBlock(block);
     };
@@ -910,7 +910,7 @@ var ProgramEditorPanel = function(options) {
                             input_type:     'n'     });
 
         _this.m_diagram.blocks.push(block);
-        block.view.x = 200 + offset;
+        block.view.x = 50 + offset;
         block.view.y = 50 + offset;
         _this.displayBlock(block);
         CodapTest.logTopic('Dataflow/AddPlot');

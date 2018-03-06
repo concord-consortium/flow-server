@@ -67,6 +67,9 @@
     display: inline-block;
     float:left;
 }
+.menuholderprogram{
+	width: 160px; 
+}
 .menurightholder{
     width: 220px; 
     z-index: 100; 
@@ -148,6 +151,12 @@
 .diagramMenuHeader:hover {
     opacity: .8;
 }
+.diagramMenuHeaderNoSelect {
+    display: inline-block;
+    height: 30px;
+    width: 100%;
+	cursor: default;
+}
 .diagramMenuTitle {
     display: inline-block;
     padding-top:6px;
@@ -180,6 +189,18 @@
 }
 .diagramMenuEntry:hover {
     opacity: .8;
+}
+.diagramMenuEntryNoSelect {
+    text-align: left;
+    padding-top:2px;
+    padding-bottom:2px;
+    padding-left:10px;
+    width: 100%;    
+    height: 25px;
+    border:0px;
+    font-size: 14px;
+    font-family: 'museo500', Arial, sans-serif;
+	cursor: default;
 }
 
 .flowBlock {

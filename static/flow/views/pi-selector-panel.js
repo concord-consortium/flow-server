@@ -84,8 +84,8 @@ var PiSelectorPanel = function(options) {
     //
     var recordContent = $('<div>');
     
-    var datasetNameMenuEntry = $('<div>', {class: 'diagramMenuHeader menulightgray', css:{height:'60px'}} );
-    var title = $('<div>', {class: 'diagramMenuEntry noSelect'} ).text("dataset name");
+    var datasetNameMenuEntry = $('<div>', {class: 'diagramMenuHeaderNoSelect noSelect menulightgray', css:{height:'60px'}} );
+    var title = $('<div>', {class: 'diagramMenuEntryNoSelect noSelect'} ).text("dataset name");
     var datasetNameField = jQuery('<input>', {  
                                                 id: 'dataset-name-textfield',
                                                 type: 'text',
@@ -249,10 +249,10 @@ var PiSelectorPanel = function(options) {
     this.addPiToMenu = function(piindex, menuindex, piname){
         var piButton;
         if(menuindex%2 == 0){
-            piButton = $('<div>', {class: 'diagramMenuHeader menulightgray'} );
+            piButton = $('<div>', {class: 'diagramMenuHeader menudarkgray'} );
         }
         else{
-            piButton = $('<div>', {class: 'diagramMenuHeader menudarkgray'} );
+            piButton = $('<div>', {class: 'diagramMenuHeader menulightgray'} );
         }                        
         var title = $('<div>', {class: 'diagramMenuEntryWithGlyph noSelect'} ).text(piname);
         var chevron = $('<div>', {class: 'diagramMenuChevron glyphicon glyphicon-ok', css:{color:'000000', display: 'none'}} );
@@ -269,7 +269,7 @@ var PiSelectorPanel = function(options) {
     }
     //didn't find any pis, add a menu entry letting the user know there are no pis available
     this.addNoDevicesToMenu = function(){    
-        var emptyButton = $('<div>', {class: 'diagramMenuEntry noSelect menudarkgray'} ).text("no available devices");
+        var emptyButton = $('<div>', {class: 'diagramMenuEntryNoSelect noSelect menudarkgray'} ).text("no available devices");
 
         piList.append(emptyButton);
     }
