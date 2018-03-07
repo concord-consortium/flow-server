@@ -80,8 +80,8 @@ var MessageExecutor = function(config) {
                 if( _this.src_folder != null &&
                     _this.src_folder != params.src_folder) {
 
-                     console.log("[DEBUG] MessageExecutor ignoring 
-                                  message from " + params.src_folder);
+                     //console.log("[DEBUG] MessageExecutor ignoring 
+                     //             message from " + params.src_folder);
                     return;
                 }
                 if(_this.remove_handler) {
