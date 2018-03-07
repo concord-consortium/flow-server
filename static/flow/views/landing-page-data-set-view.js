@@ -103,7 +103,7 @@ var LandingPageDataSetView = function(options) {
 				btn = $('<div>', {class: 'diagramMenuHeader menulightgray'} );
 			}                        
 			var title = $('<div>', {class: 'diagramMenuEntryWithGlyph noSelect'} ).text(filename);
-			var chevron = $('<div>', {class: 'diagramMenuChevron glyphicon glyphicon-play-circle', css:{color:'000000', display: 'block'}} );
+			var chevron = $('<div>', {class: 'diagramMenuChevron glyphicon glyphicon-play-circle', css:{color:'FF0000', display: 'block'}} );
 			btn.append(title); 
 			btn.append(chevron); 
 		}
