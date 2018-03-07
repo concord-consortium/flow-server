@@ -136,7 +136,7 @@ var ProgramEditorPanel = function(options) {
 
         var blockDiv = $('<div>', {class: 'flowBlock', id: 'b_' + block.id});
         block.view.div = blockDiv;
-        if (block.type === 'number_display_and_input') {
+        if (block.type === 'ema' || block.type === 'box') {// if (block.type === 'number_display_and_input') {
              blockDiv.addClass('flowBlockTallWide');
         }
         else if (block.type === 'plot') {
@@ -167,7 +167,7 @@ var ProgramEditorPanel = function(options) {
             blockRightArcDiv = $('<div>', {class: 'flowBlockEndArcRight concordorange', id: 'brarc_' + block.id});
             blockLeftArcDiv = $('<div>', {class: 'flowBlockEndArcLeft concordorange', id: 'blarc_' + block.id});            
         }            
-        else if (block.type === 'number_display_and_input') {
+        else if (block.type === 'ema' || block.type === 'box') {//else if (block.type === 'number_display_and_input') {
             blockContentDiv = $('<div>', {class: 'flowBlockContent flowBlockContentTallWide concordgreen', id: 'bcon_' + block.id});
             blockRightArcDiv = $('<div>', {class: 'flowBlockEndArcRight flowBlockEndArcTallWide concordgreen', id: 'brarc_' + block.id});
             blockLeftArcDiv = $('<div>', {class: 'flowBlockEndArcLeft flowBlockEndArcTallWide concordgreen', id: 'blarc_' + block.id});            
@@ -255,7 +255,7 @@ var ProgramEditorPanel = function(options) {
         
             div.appendTo(blockContentDiv);
             
-            if (block.type === 'number_display_and_input') {
+            if (block.type === 'ema' || block.type === 'box') {//if (block.type === 'number_display_and_input') {
                 var divdivider = $('<div>', {css:{backgroundColor:'FFFFFF'}, width: '90%', height:1});
                 divdivider.addClass('noSelect flowBlockInputHolderMargin');
                 divdivider.appendTo(blockContentDiv);
@@ -837,10 +837,14 @@ var ProgramEditorPanel = function(options) {
         if (type === 'moving average'|| type === 'exp moving average') {
             if (type === 'exp moving average'){
                 blockSpec.name = "exp moving average";
+				blockSpec.type = "ema";
             }
+			else if(type === 'moving average'){
+				 blockSpec.type = "box";
+			}
 			
             blockSpec.input_count = 1;
-            blockSpec.type = "number_display_and_input";
+            //blockSpec.type = "number_display_and_input";
             blockSpec.params = [{
                 'name': 'last',
                 'type': 'n',

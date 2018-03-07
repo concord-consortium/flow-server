@@ -329,7 +329,7 @@ function displayBlock(block) {
 			$('<span>', {class: 'flowBlockUnits', html: ' ' + units}).appendTo(div);
 		}
 		div.appendTo(blockDiv);
-		if (block.type === 'number_display_and_input') {
+		if (block.type === 'ema' || block.type === 'box') {//if (block.type === 'number_display_and_input') {
 			appendBlockParametersToBlockDiv(block, blockDiv);
 		}
 	}
@@ -828,9 +828,13 @@ function addFilterBlock(e) {
 	if (type === 'not' || type == 'absolute value') {
 		blockSpec.input_count = 1;
 	}
-	if (type === 'simple moving average'|| type === 'exponential moving average') {
+	if (type === 'simple moving average' || type === 'exponential moving average') {
 		blockSpec.input_count = 1;
-		blockSpec.type = "number_display_and_input"
+		if(type === 'simple moving average')
+			blockSpec.type = "box"
+		else if(type === 'exponential moving average')
+			blockSpec.type = "ema"
+		//blockSpec.type = "number_display_and_input"
 		blockSpec.params = [{
 			'name': 'period',
 			'type': 'n',
