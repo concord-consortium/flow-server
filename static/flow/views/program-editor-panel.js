@@ -837,9 +837,13 @@ var ProgramEditorPanel = function(options) {
         if (type === 'moving average'|| type === 'exp moving average') {
             if (type === 'exp moving average'){
                 blockSpec.name = "exp moving average";
+				blockSpec.type = "ema";
+            }
+			else if (type === 'moving average'){
+                blockSpec.type = "box";
             }
             blockSpec.input_count = 1;
-            blockSpec.type = "number_display_and_input";
+            
             blockSpec.params = [{
                 'name': 'last',
                 'type': 'n',
@@ -956,9 +960,9 @@ var ProgramEditorPanel = function(options) {
     // Handle sensor data messages
     //
     this.handleSensorData = function(timestamp, params) {
-        // console.log("[DEBUG] handleSensorData", params);
+        //console.log("[DEBUG] handleSensorData", params);
         if(params.data) {
-            // console.log("[DEBUG] handleSensorData updating blocks.");
+            //console.log("[DEBUG] handleSensorData updating blocks.");
             _this.receivedSensorData = {};
             for(var i = 0; i < params.data.length; i++) {
                 var sensor  = params.data[i];
@@ -989,7 +993,7 @@ var ProgramEditorPanel = function(options) {
             //
             // Now compute values for non-sensor blocks
             //
-            // console.log("[DEBUG] diagram.update()");
+            //console.log("[DEBUG] diagram.update()");
             _this.m_diagram.update();
 
             //
