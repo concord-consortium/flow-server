@@ -96,7 +96,7 @@ var LandingPageDataSetView = function(options) {
         var btn;
         var filename = name;
 		if(addRecordButton){
-			if(menuindex%2 == 0){
+			if(index%2 == 0){
 				btn = $('<div>', {class: 'diagramMenuHeader menudarkgray'} );
 			}
 			else{
