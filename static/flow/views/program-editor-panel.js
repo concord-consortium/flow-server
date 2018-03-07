@@ -842,7 +842,7 @@ var ProgramEditorPanel = function(options) {
 			else if(type === 'moving average'){
 				 blockSpec.type = "box";
 			}
-			
+			blockSpec.boxSize = 10;
             blockSpec.input_count = 1;
             //blockSpec.type = "number_display_and_input";
             blockSpec.params = [{
