@@ -129,7 +129,6 @@ function allowedFilterTypes() {
         "box", "ema",
         "plus", "minus", "times", "divided by", "absolute value",
         "equals", "not equals", "less than", "greater than",
-		"number_display_and_input"
     ];
 }
 
