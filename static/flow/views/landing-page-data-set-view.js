@@ -54,7 +54,7 @@ var LandingPageDataSetView = function(options) {
 						if(displayName == "Recording Now")
 							recordButton = true;
                         for(var i = 0; i < list.length; i++) {
-                            var btn = createMyDataSetBtn ( list[i].name, i, recordButton );
+                            var btn = createMyDataSetBtn ( list[i], i, recordButton );
                             btn.appendTo(div);
                             // console.log("[DEBUG] Creating dataset item", items[i]);
                         }
@@ -92,9 +92,9 @@ var LandingPageDataSetView = function(options) {
     //
     // create a menu item button to load a saved dataset
     //
-    var createMyDataSetBtn = function(name, index, addRecordButton) {
+    var createMyDataSetBtn = function(item, index, addRecordButton) {
         var btn;
-        var filename = name;
+        var filename = item.name;
 		if(addRecordButton){
 			if(index%2 == 0){
 				btn = $('<div>', {class: 'diagramMenuHeader menudarkgray'} );
@@ -117,7 +117,7 @@ var LandingPageDataSetView = function(options) {
 			}
 		}
 		
-        btn.click(name, function(e) {
+        btn.click(item, function(e) {
             console.log("[DEBUG] DataSetButton click", e.data);
             var dataSetView = getTopLevelView('data-set-view');
             dataSetView.loadDataSet(e.data);
