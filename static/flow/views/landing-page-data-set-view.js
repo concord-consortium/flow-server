@@ -50,8 +50,11 @@ var LandingPageDataSetView = function(options) {
                         if(list.length == 0) {
                             return;
                         }
+						var recordButton = false;
+						if(displayName == "Recording Now")
+							recordButton = true;
                         for(var i = 0; i < list.length; i++) {
-                            var btn = createMyDataSetBtn ( list[i].name, i );
+                            var btn = createMyDataSetBtn ( list[i].name, i, recordButton );
                             btn.appendTo(div);
                             // console.log("[DEBUG] Creating dataset item", items[i]);
                         }
@@ -89,15 +92,31 @@ var LandingPageDataSetView = function(options) {
     //
     // create a menu item button to load a saved dataset
     //
-    var createMyDataSetBtn = function(name, index) {
+    var createMyDataSetBtn = function(name, index, addRecordButton) {
         var btn;
         var filename = name;
-        if(index%2 == 0){
-            btn = $('<button>', { text:filename, class: 'diagramMenuEntry menulightgray' } );
-        }
-        else{
-            btn = $('<button>', { text:filename, class: 'diagramMenuEntry menudarkgray' } );
-        }
+		if(addRecordButton){
+			if(menuindex%2 == 0){
+				btn = $('<div>', {class: 'diagramMenuHeader menudarkgray'} );
+			}
+			else{
+				btn = $('<div>', {class: 'diagramMenuHeader menulightgray'} );
+			}                        
+			var title = $('<div>', {class: 'diagramMenuEntryWithGlyph noSelect'} ).text(piname);
+			var chevron = $('<div>', {class: 'diagramMenuChevron glyphicon glyphicon-play-circle', css:{color:'000000', display: 'block'}} );
+			btn.append(title); 
+			btn.append(chevron); 
+		}
+		else{
+			if(index%2 == 0){
+				//diagramMenuHeader
+				btn = $('<button>', { text:filename, class: 'diagramMenuEntry menulightgray' } );
+			}
+			else{
+				btn = $('<button>', { text:filename, class: 'diagramMenuEntry menudarkgray' } );
+			}
+		}
+		
         btn.click(name, function(e) {
             console.log("[DEBUG] DataSetButton click", e.data);
             var dataSetView = getTopLevelView('data-set-view');
