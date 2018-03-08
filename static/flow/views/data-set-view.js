@@ -54,13 +54,22 @@ var DataSetView = function(options) {
     var leftTd      = $('<td>', { css: { textAlign: 'left', padding: '2px' } });
     var rightTd     = $('<td>', { css: { textAlign: 'right', padding: '2px' } });
     var viewProgBtn = $('<button>').text('View Program');
+	var selectIntervalBtn = $('<button>').text('Select Interval');
     var exportBtn   = $('<button>').text('Export to...');
     bTable.append(tr)
     tr.append(leftTd);
     leftTd.append(viewProgBtn);
+	leftTd.append(selectIntervalBtn);
     tr.append(rightTd);
     rightTd.append(exportBtn);
     leftPanel.append(bTable);
+	
+	selectIntervalBtn.click( function(e) {
+		selectInterval();
+	});
+	exportBtn.click( function(e) {
+		exploreRecordedDataInCODAP();
+	});
 
     //
     // Panel on right (indicates status like "Currently Recording" etc.)
