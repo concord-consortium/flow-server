@@ -173,9 +173,9 @@ var ProgramEditorPanel = function(options) {
             blockLeftArcDiv = $('<div>', {class: 'flowBlockEndArcLeft flowBlockEndArcTallWide concordgreen', id: 'blarc_' + block.id});            
         }
         else if (block.type === 'plot') {
-            blockContentDiv = $('<div>', {class: 'flowBlockContent flowBlockContentPlot menumediumgray', id: 'bcon_' + block.id});
-            blockRightArcDiv = $('<div>', {class: 'flowBlockEndArcRight flowBlockEndArcPlot menumediumgray', id: 'brarc_' + block.id});
-            blockLeftArcDiv = $('<div>', {class: 'flowBlockEndArcLeft flowBlockEndArcPlot menumediumgray', id: 'blarc_' + block.id});            
+            blockContentDiv = $('<div>', {class: 'flowBlockContent flowBlockContentPlot concorddarkblue', id: 'bcon_' + block.id});
+            blockRightArcDiv = $('<div>', {class: 'flowBlockEndArcRight flowBlockEndArcPlot concorddarkblue', id: 'brarc_' + block.id});
+            blockLeftArcDiv = $('<div>', {class: 'flowBlockEndArcLeft flowBlockEndArcPlot concorddarkblue', id: 'blarc_' + block.id});            
         }        
         else {
             blockContentDiv = $('<div>', {class: 'flowBlockContent concordlightblue', id: 'bcon_' + block.id});

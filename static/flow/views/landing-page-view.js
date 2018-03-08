@@ -16,8 +16,8 @@ var LandingPageView = function(options) {
     
     outlinebox.appendTo(content);        
     
-    var maincontentbox  = jQuery('<div>', {class:'maincontentbox'} );
-               
+    var maincontentbox  = jQuery('<div>', {class:'maincontentbox'} );	
+			   
     maincontentbox.appendTo(outlinebox);    
 
     var topbar  = jQuery('<div>', {class:'topbar'} );

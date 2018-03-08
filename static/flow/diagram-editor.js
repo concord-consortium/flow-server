@@ -703,14 +703,14 @@ function zoomBlocks(blocks, factor) {
 var CLASS_SCALING_TABLE = {
    'flowBlock': { "width": 210, "height": 36 },
    'flowBlockTallWide': { "width": 240, "height": 72 },
-   'flowBlockPlot': { "width": 375, "height": 200 },
+   'flowBlockPlot': { "width": 365, "height": 150 },
    'flowBlockContent': { "left": 20, "width": 170, "height": 36 },
    'flowBlockContentTallWide': { "width": 200, "height": 72 },
-   'flowBlockContentPlot': { "width": 335, "height": 200 },
+   'flowBlockContentPlot': { "width": 325, "height": 150 },
    'flowBlockEndArcLeft': { "height": 36, "width": 36, "border-radius": 36 },
    'flowBlockEndArcRight': { "height": 36, "width": 36, "border-radius": 36 },
    'flowBlockEndArcTallWide': { "height": 72 },
-   'flowBlockEndArcPlot': { "height": 200 },
+   'flowBlockEndArcPlot': { "height": 150 },
    'flowBlockValue': { "font-size": 36 },
    'flowBlockName': { "font-size": 14, "line-height": 36, "height": 36, "margin-left": 2 },
    'flowBlockParamLabel': { "font-size": 14, "line-height": 36, "height": 36, "margin-left": 2 },
@@ -723,7 +723,7 @@ var CLASS_SCALING_TABLE = {
    'flowBlockWithPlot': { "width": 330 },
    'flowBlockWithImage': { "width": 330 },
    'flowBlockMenuImage': { "height": 12, "width": 20},
-   'flowBlockPlotCanvas': { "height": 200, "width": 300},
+   'flowBlockPlotCanvas': { "height": 150, "width": 300},
    'flowBlockIcon': { "font-size": 16, "margin-right": 0, "margin-left": 5, "line-height": 30, "height": 30 },
 };
 

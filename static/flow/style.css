@@ -214,7 +214,7 @@
     height: 72px;
 }
 .flowBlockPlot {
-    width: 375px;
+    width: 365px;
     height: 200px;
 }
 .flowBlockContent {
@@ -233,8 +233,8 @@
     height: 72px
 }
 .flowBlockContentPlot {
-    width: 335px;
-    height: 200px
+    width: 325px;
+    height: 150px
 }
 .flowBlockEndArcLeft {
     float: left;
@@ -257,11 +257,11 @@
     height: 72px;
 }
 .flowBlockEndArcPlot {
-    height: 200px;
+    height: 150px;
 }
 .flowBlockWithPlot {
     width: 330px;
-    height: 200px;
+    height: 150px;
 }
 .flowBlockWithImage {
     width: 330px;
@@ -321,7 +321,7 @@
 .flowBlockPlotCanvas {
     display: inline-block;
     width: 300px;
-    height: 200px;
+    height: 150px;
     cursor: pointer;
 }
 
@@ -493,6 +493,9 @@ button.filter {
 }
 .concordgold { 
     background-color: #ffc320;
+}
+.uiyellow { 
+    background-color: #edbc32;
 }
 .menuwhite { 
     background-color: #ffffff;
