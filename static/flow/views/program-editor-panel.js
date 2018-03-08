@@ -849,10 +849,9 @@ var ProgramEditorPanel = function(options) {
                 'type': 'n',
                 'min': 0,
                 'max': 9999,
-                'default': 10,
-				'boxSize': 10
+                'default': 10
             }];
-			block.boxSize = 10;
+			blockSpec.boxSize = 10; //set a default size
         }
         if (type === 'blur' || type === 'brightness') {  // fix(soon): get this from controller block type spec list
             blockSpec.input_type = 'i';
