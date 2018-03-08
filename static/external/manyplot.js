@@ -197,7 +197,7 @@ function createPlotter( canvas, multiFrame ) {
 			// If we don't fix the decimals, then the elapsed time can visually bounce around when it hits whole numbers
 			captionOverrides["xMinLabelOverride"] = toFixedSafe(captionOverrides["xMinLabelOverride"], 2);
 			captionOverrides["xMaxLabelOverride"] = toFixedSafe(captionOverrides["xMaxLabelOverride"], 2);
-			captionOverrides["xLabelOverride"] = "seconds";
+			captionOverrides["xLabelOverride"] = "seconds!!!";
 		}
 		return captionOverrides;
 	};
@@ -1007,8 +1007,8 @@ function createFrame( ctx ) {
 		var ctx = this.ctx;
 
 		// prepare font (need to do this before measure size)
-		ctx.font = "12px sans-serif";
-		ctx.fillStyle = "rgb(0,0,0)";
+		ctx.font = "12px museo500"; //ctx.font = "12px sans-serif";
+		ctx.fillStyle = "rgb(255,255,255)";
 
 		// get bounds for quick reference
 		var boxMinX = this.boxMinX;
@@ -1021,6 +1021,7 @@ function createFrame( ctx ) {
 		var xMaxLabelSize = ctx.measureText( this.maxLabelX ).width;
 		ctx.textBaseline = "top";
 		ctx.textAlign = "center";
+
 		ctx.fillText( this.labelX, (boxMinX + boxMaxX) * 0.5, boxMaxY + 5 );
 		if (xMinLabelSize < 20) {
 			ctx.fillText( this.minLabelX, boxMinX, boxMaxY + 5 );
@@ -1349,7 +1350,7 @@ function createFrame( ctx ) {
 				if (x > 1000000) { // if standard unix timestamp (we'll assume small numbers are elapsed time, not timestamps)
 					this.drawTextBox( xScreen, this.boxMinY, localTimestampToStr( x, showSeconds ) );
 				} else {
-					this.drawTextBox( xScreen, this.boxMinY, toFixedSafe( x, 3 ) + " seconds" ); // fix: use decimalPlaces?
+					this.drawTextBox( xScreen, this.boxMinY, toFixedSafe( x, 3 ) + " seconds!!" ); // fix: use decimalPlaces?
 				}
 			}else if(typeof useTimestamp !== 'undefined' && !useTimestamp && xData.type === "timestamp"){
 				// If we're not using timestamp but the xData is a timestamp, then we should show elapsed time values
