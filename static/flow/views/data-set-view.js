@@ -54,7 +54,8 @@ var DataSetView = function(options) {
     var leftTd      = $('<td>', { css: { textAlign: 'left', padding: '2px' } });
     var rightTd     = $('<td>', { css: { textAlign: 'right', padding: '2px' } });
     var viewProgBtn = $('<button>').text('View Program');
-	var selectIntervalBtn = $('<button>').text('Select Interval');
+	var selectIntervalBtn = $('<button>', {id: 'data-set-select-interval'}).text('Select Interval');
+	
     var exportBtn   = $('<button>').text('Export to...');
     bTable.append(tr)
     tr.append(leftTd);
