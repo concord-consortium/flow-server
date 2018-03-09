@@ -713,6 +713,8 @@ var CLASS_SCALING_TABLE = {
    'flowBlockEndArcPlot': { "height": 150 },
    'flowBlockValue': { "font-size": 36 },
    'flowBlockName': { "font-size": 14, "line-height": 36, "height": 36, "margin-left": 2 },
+   'flowBlockNameNormal': { "width": 85 },
+   'flowBlockNameShort': { "width": 80 }, 
    'flowBlockParamLabel': { "font-size": 14, "line-height": 36, "height": 36, "margin-left": 2 },
    'flowBlockValueAndUnits': { "height": 36, "margin-right": 2,  "padding-left": 2, "padding-right": 2},
    'flowBlockValue': { "font-size": 16, "line-height": 36 },

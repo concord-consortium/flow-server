@@ -285,6 +285,14 @@
     line-height: 40px;
     height: 40px;
     margin-left: 2px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+.flowBlockNameNormal {
+	width: 85px;
+}
+.flowBlockNameShort {
+	width: 80px;
 }
 .flowBlockParamLabel {
     display: inline-block;

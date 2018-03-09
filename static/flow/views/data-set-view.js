@@ -56,7 +56,7 @@ var DataSetView = function(options) {
     var viewProgBtn = $('<button>').text('View Program');
 	var selectIntervalBtn = $('<button>', {id: 'data-set-select-interval'}).text('Select Interval');
 	
-    var exportBtn   = $('<button>').text('Export to...');
+    var exportBtn   = $('<button>').text('Export to CODAP');
     bTable.append(tr)
     tr.append(leftTd);
     leftTd.append(viewProgBtn);

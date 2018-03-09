@@ -219,7 +219,12 @@ var ProgramEditorPanel = function(options) {
         // add name, value, and units
         //
         if (block.type !== 'plot') {
-            var namediv = $('<div>', {class: 'flowBlockName noSelect', id: 'bn_' + block.id, html: block.name});
+			var namediv 
+			if (block.type === 'number_entry')
+				namediv = $('<div>', {class: 'flowBlockName flowBlockNameShort noSelect', id: 'bn_' + block.id, html: block.name});
+			else
+				namediv = $('<div>', {class: 'flowBlockName flowBlockNameNormal noSelect', id: 'bn_' + block.id, html: block.name});
+
             namediv.appendTo(blockContentDiv);
         }
 
@@ -614,6 +619,8 @@ var ProgramEditorPanel = function(options) {
             _this.m_diagram.removeBlock(block);
             delete _this.nameHash[block.name];
         }
+		//update any blocks that this action may affect
+		_this.updateAllBlocks();
     };
 
     //
@@ -663,6 +670,9 @@ var ProgramEditorPanel = function(options) {
             _this.m_activeStartPin = null;
             _this.m_activeLineSvg.remove();
             _this.m_activeLineSvg = null;
+			
+			//update any blocks that this action may affect
+			_this.updateAllBlocks();
 
             // CodapTest.logTopic('Dataflow/ConnectBlock');
         }
@@ -692,6 +702,9 @@ var ProgramEditorPanel = function(options) {
         var destPin = this.remember('destPin');
         destPin.sourcePin = null;
         destPin.view.svgConn.remove();
+		
+		//update any blocks that this action may affect
+		_this.updateAllBlocks();
     };
 
     //
@@ -933,6 +946,9 @@ var ProgramEditorPanel = function(options) {
             block.updateValue(val);
         }
         // fix(faster): only trigger if value has changed
+		
+		//update any blocks that this action may affect
+		_this.updateAllBlocks();
     }
 
     //
@@ -1005,6 +1021,23 @@ var ProgramEditorPanel = function(options) {
             }
         }
     }
+	
+	this.updateAllBlocks = function() {
+
+		//
+		// Now compute values for non-sensor blocks
+		//
+		console.log("[DEBUG] diagram.update()");
+		_this.m_diagram.update();
+
+		//
+		// Update UI
+		//
+		for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
+			_this.displayBlockValue(_this.m_diagram.blocks[i]);
+		}		
+
+	}
 
     //
     // Display the current value of a block in the UI
