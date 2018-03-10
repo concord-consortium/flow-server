@@ -272,7 +272,7 @@
     height: 30px;
     margin-top: 3px;
     margin-bottom: 3px;
-    margin-left: 3px;
+    margin-left: 0px;
     margin-right: 0px;
 }
 .flowBlockMenuImage {
@@ -281,7 +281,7 @@
 }
 .flowBlockName {
     display: inline-block;
-    font-size: 14px;
+    font-size: 13px;
     line-height: 40px;
     height: 40px;
     margin-left: 2px;
@@ -289,14 +289,14 @@
 	overflow: hidden;
 }
 .flowBlockNameNormal {
-	width: 85px;
+	width: 82px;
 }
 .flowBlockNameShort {
 	width: 80px;
 }
 .flowBlockParamLabel {
     display: inline-block;
-    font-size: 14px;
+    font-size: 12px;
     line-height: 36px;
     height:36px;
     margin-left: 2px;
@@ -312,7 +312,7 @@
     padding-right: 2px;
 }
 .flowBlockValue {
-    font-size: 16px;
+    font-size: 14px;
     line-height: 36px;
     height: 36px;
 }
@@ -321,7 +321,7 @@
     line-height: 36px;
 }
 .flowBlockUnits {
-    font-size: 14px;
+    font-size: 12px;
     line-height: 36px;
     height: 36px;
 }
@@ -347,7 +347,7 @@
     height: 30px;
     margin-top: 3px;
     margin-right: 3px;
-    font-size: 16px;
+    font-size: 14px;
     padding-left:1px;
     padding-right:1px;
     padding-top:1px;
@@ -365,8 +365,8 @@
 .flowBlockIcon {
     line-height: 30px;
     height: 30px;
-    margin-right: 0px;
-    margin-left: 5px;
+    margin-right: -6px;
+    margin-left: 4px;
     font-size: 16px;
     color: #ffffff;;
 }
