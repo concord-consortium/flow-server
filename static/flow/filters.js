@@ -128,7 +128,7 @@ function allowedFilterTypes() {
         "not", "and", "or", "xor", "nand",
         "box", "ema",
         "plus", "minus", "times", "divided by", "absolute value",
-        "equals", "not equals", "less than", "greater than"
+        "equals", "not equals", "less than", "greater than",
     ];
 }
 

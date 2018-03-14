@@ -34,7 +34,7 @@ var ProgramEditorView = function(options) {
     menuandcontentholder.appendTo(maincontentbox);    
     
     
-    var menuholder  = jQuery('<div>', {class:'menuholder'} );
+    var menuholder  = jQuery('<div>', {class:'menuholder menuholderprogram'} );
     var menurightholder  = jQuery('<div>', {class:'menurightholder'} );
     
     menuholder.appendTo(menuandcontentholder);    

@@ -41,13 +41,13 @@ var ProgramEditorPanel = function(options) {
     var svgDiv = $('<div>', {   id: 'program-holder', 
                                 css: {  position:   'absolute',
                                         top: '0px',
-                                        left: '220px',
+                                        left: '160px',
                                         width:      '100%',
                                         height: '100%', 
                                         } } );
     svgWrapper.append(svgDiv);
     this.container.append(svgWrapper);
-    var holderoffsetx = 235;
+    var holderoffsetx = 175;
     var holderoffsety = 75;
 
     //
@@ -136,7 +136,7 @@ var ProgramEditorPanel = function(options) {
 
         var blockDiv = $('<div>', {class: 'flowBlock', id: 'b_' + block.id});
         block.view.div = blockDiv;
-        if (block.type === 'number_display_and_input') {
+        if (block.type === 'ema' || block.type === 'box') {// if (block.type === 'number_display_and_input') {
              blockDiv.addClass('flowBlockTallWide');
         }
         else if (block.type === 'plot') {
@@ -167,15 +167,15 @@ var ProgramEditorPanel = function(options) {
             blockRightArcDiv = $('<div>', {class: 'flowBlockEndArcRight concordorange', id: 'brarc_' + block.id});
             blockLeftArcDiv = $('<div>', {class: 'flowBlockEndArcLeft concordorange', id: 'blarc_' + block.id});            
         }            
-        else if (block.type === 'number_display_and_input') {
+        else if (block.type === 'ema' || block.type === 'box') {//else if (block.type === 'number_display_and_input') {
             blockContentDiv = $('<div>', {class: 'flowBlockContent flowBlockContentTallWide concordgreen', id: 'bcon_' + block.id});
             blockRightArcDiv = $('<div>', {class: 'flowBlockEndArcRight flowBlockEndArcTallWide concordgreen', id: 'brarc_' + block.id});
             blockLeftArcDiv = $('<div>', {class: 'flowBlockEndArcLeft flowBlockEndArcTallWide concordgreen', id: 'blarc_' + block.id});            
         }
         else if (block.type === 'plot') {
-            blockContentDiv = $('<div>', {class: 'flowBlockContent flowBlockContentPlot menumediumgray', id: 'bcon_' + block.id});
-            blockRightArcDiv = $('<div>', {class: 'flowBlockEndArcRight flowBlockEndArcPlot menumediumgray', id: 'brarc_' + block.id});
-            blockLeftArcDiv = $('<div>', {class: 'flowBlockEndArcLeft flowBlockEndArcPlot menumediumgray', id: 'blarc_' + block.id});            
+            blockContentDiv = $('<div>', {class: 'flowBlockContent flowBlockContentPlot concorddarkblue', id: 'bcon_' + block.id});
+            blockRightArcDiv = $('<div>', {class: 'flowBlockEndArcRight flowBlockEndArcPlot concorddarkblue', id: 'brarc_' + block.id});
+            blockLeftArcDiv = $('<div>', {class: 'flowBlockEndArcLeft flowBlockEndArcPlot concorddarkblue', id: 'blarc_' + block.id});            
         }        
         else {
             blockContentDiv = $('<div>', {class: 'flowBlockContent concordlightblue', id: 'bcon_' + block.id});
@@ -219,7 +219,12 @@ var ProgramEditorPanel = function(options) {
         // add name, value, and units
         //
         if (block.type !== 'plot') {
-            var namediv = $('<div>', {class: 'flowBlockName noSelect', id: 'bn_' + block.id, html: block.name});
+			var namediv 
+			if (block.type === 'number_entry')
+				namediv = $('<div>', {class: 'flowBlockName flowBlockNameShort noSelect', id: 'bn_' + block.id, html: block.name});
+			else
+				namediv = $('<div>', {class: 'flowBlockName flowBlockNameNormal noSelect', id: 'bn_' + block.id, html: block.name});
+
             namediv.appendTo(blockContentDiv);
         }
 
@@ -255,7 +260,7 @@ var ProgramEditorPanel = function(options) {
         
             div.appendTo(blockContentDiv);
             
-            if (block.type === 'number_display_and_input') {
+            if (block.type === 'ema' || block.type === 'box') {//if (block.type === 'number_display_and_input') {
                 var divdivider = $('<div>', {css:{backgroundColor:'FFFFFF'}, width: '90%', height:1});
                 divdivider.addClass('noSelect flowBlockInputHolderMargin');
                 divdivider.appendTo(blockContentDiv);
@@ -614,6 +619,8 @@ var ProgramEditorPanel = function(options) {
             _this.m_diagram.removeBlock(block);
             delete _this.nameHash[block.name];
         }
+		//update any blocks that this action may affect
+		_this.updateAllBlocks();
     };
 
     //
@@ -627,7 +634,7 @@ var ProgramEditorPanel = function(options) {
             "not", "and", "or", "xor", "nand",
             "plus", "minus", "times", "divided by", "absolute value",
             "equals", "not equals", "less than", "greater than",
-            "moving average", "exponential moving average"
+            "moving average", "exp moving average"
         ];
         for (var i = 0; i < filterTypes.length; i++) {
             var type = filterTypes[i];
@@ -663,6 +670,9 @@ var ProgramEditorPanel = function(options) {
             _this.m_activeStartPin = null;
             _this.m_activeLineSvg.remove();
             _this.m_activeLineSvg = null;
+			
+			//update any blocks that this action may affect
+			_this.updateAllBlocks();
 
             // CodapTest.logTopic('Dataflow/ConnectBlock');
         }
@@ -692,6 +702,9 @@ var ProgramEditorPanel = function(options) {
         var destPin = this.remember('destPin');
         destPin.sourcePin = null;
         destPin.view.svgConn.remove();
+		
+		//update any blocks that this action may affect
+		_this.updateAllBlocks();
     };
 
     //
@@ -776,7 +789,7 @@ var ProgramEditorPanel = function(options) {
             output_type:    'n',
             output_count:   1,
             view: {
-                x: 200 + offset,  // fix(later): smarter positioning
+                x: 50 + offset,  // fix(later): smarter positioning
                 y: 50 + offset,
             }
         };
@@ -805,7 +818,7 @@ var ProgramEditorPanel = function(options) {
             output_type:    null,
             output_count:   0,
             view: {
-                x: 200 + offset,  // fix(later): smarter positioning
+                x: 50 + offset,  // fix(later): smarter positioning
                 y: 50 + offset,
             }
         };
@@ -834,12 +847,16 @@ var ProgramEditorPanel = function(options) {
         if (type === 'not' || type == 'absolute value') {
             blockSpec.input_count = 1;
         }
-        if (type === 'moving average'|| type === 'exponential moving average') {
-            if (type === 'exponential moving average'){
+        if (type === 'moving average'|| type === 'exp moving average') {
+            if (type === 'exp moving average'){
                 blockSpec.name = "exp moving average";
+				blockSpec.type = "ema";
             }
+			else if(type === 'moving average'){
+				 blockSpec.type = "box";
+			}
             blockSpec.input_count = 1;
-            blockSpec.type = "number_display_and_input";
+            //blockSpec.type = "number_display_and_input";
             blockSpec.params = [{
                 'name': 'last',
                 'type': 'n',
@@ -847,6 +864,7 @@ var ProgramEditorPanel = function(options) {
                 'max': 9999,
                 'default': 10
             }];
+			blockSpec.boxSize = 10; //set a default size
         }
         if (type === 'blur' || type === 'brightness') {  // fix(soon): get this from controller block type spec list
             blockSpec.input_type = 'i';
@@ -873,7 +891,7 @@ var ProgramEditorPanel = function(options) {
         var offset = _this.m_diagram.blocks.length * 50;
         var block = createFlowBlock(blockSpec);  // fix(soon): generate unique name from type
         _this.m_diagram.blocks.push(block);
-        block.view.x = 200 + offset;
+        block.view.x = 50 + offset;
         block.view.y = 50 + offset;
         _this.displayBlock(block);
     };
@@ -892,7 +910,7 @@ var ProgramEditorPanel = function(options) {
                             output_type:    'n'    });
 
         _this.m_diagram.blocks.push(block);
-        block.view.x = 200 + offset;
+        block.view.x = 50 + offset;
         block.view.y = 50 + offset;
         _this.displayBlock(block);
     };
@@ -910,7 +928,7 @@ var ProgramEditorPanel = function(options) {
                             input_type:     'n'     });
 
         _this.m_diagram.blocks.push(block);
-        block.view.x = 200 + offset;
+        block.view.x = 50 + offset;
         block.view.y = 50 + offset;
         _this.displayBlock(block);
         CodapTest.logTopic('Dataflow/AddPlot');
@@ -928,6 +946,9 @@ var ProgramEditorPanel = function(options) {
             block.updateValue(val);
         }
         // fix(faster): only trigger if value has changed
+		
+		//update any blocks that this action may affect
+		_this.updateAllBlocks();
     }
 
     //
@@ -956,9 +977,9 @@ var ProgramEditorPanel = function(options) {
     // Handle sensor data messages
     //
     this.handleSensorData = function(timestamp, params) {
-        // console.log("[DEBUG] handleSensorData", params);
+        console.log("[DEBUG] handleSensorData", params);
         if(params.data) {
-            // console.log("[DEBUG] handleSensorData updating blocks.");
+            console.log("[DEBUG] handleSensorData updating blocks.");
             _this.receivedSensorData = {};
             for(var i = 0; i < params.data.length; i++) {
                 var sensor  = params.data[i];
@@ -989,7 +1010,7 @@ var ProgramEditorPanel = function(options) {
             //
             // Now compute values for non-sensor blocks
             //
-            // console.log("[DEBUG] diagram.update()");
+            console.log("[DEBUG] diagram.update()");
             _this.m_diagram.update();
 
             //
@@ -1000,6 +1021,23 @@ var ProgramEditorPanel = function(options) {
             }
         }
     }
+	
+	this.updateAllBlocks = function() {
+
+		//
+		// Now compute values for non-sensor blocks
+		//
+		console.log("[DEBUG] diagram.update()");
+		_this.m_diagram.update();
+
+		//
+		// Update UI
+		//
+		for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
+			_this.displayBlockValue(_this.m_diagram.blocks[i]);
+		}		
+
+	}
 
     //
     // Display the current value of a block in the UI

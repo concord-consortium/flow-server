@@ -121,6 +121,7 @@ function createFlowBlock(blockSpec) {
 	block.inputType = ('input_type' in blockSpec) ? blockSpec.input_type : 'n';  // default to numeric for now
 	block.outputType = ('output_type' in blockSpec) ? blockSpec.output_type : 'n';  // default to numeric for now
 	block.hasSeq = blockSpec.has_seq || false;  // false if corresponds to physical hardware
+	block.boxSize = blockSpec.boxSize; //does this need to live on the pi too?
 	if (blockSpec.id) {
 		block.id = blockSpec.id;
 	} else {

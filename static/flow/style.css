@@ -60,12 +60,15 @@
     background-color: #ffffff;
 }
 .menuholder{
-    width: 220px; 
+    width: 270px; 
     height: 100%; 
     z-index: 100; 
     background-color: #f1f2f2;
     display: inline-block;
     float:left;
+}
+.menuholderprogram{
+	width: 160px; 
 }
 .menurightholder{
     width: 220px; 
@@ -148,6 +151,12 @@
 .diagramMenuHeader:hover {
     opacity: .8;
 }
+.diagramMenuHeaderNoSelect {
+    display: inline-block;
+    height: 30px;
+    width: 100%;
+	cursor: default;
+}
 .diagramMenuTitle {
     display: inline-block;
     padding-top:6px;
@@ -181,6 +190,18 @@
 .diagramMenuEntry:hover {
     opacity: .8;
 }
+.diagramMenuEntryNoSelect {
+    text-align: left;
+    padding-top:2px;
+    padding-bottom:2px;
+    padding-left:10px;
+    width: 100%;    
+    height: 25px;
+    border:0px;
+    font-size: 14px;
+    font-family: 'museo500', Arial, sans-serif;
+	cursor: default;
+}
 
 .flowBlock {
     position: absolute;
@@ -193,7 +214,7 @@
     height: 72px;
 }
 .flowBlockPlot {
-    width: 375px;
+    width: 365px;
     height: 200px;
 }
 .flowBlockContent {
@@ -212,8 +233,8 @@
     height: 72px
 }
 .flowBlockContentPlot {
-    width: 335px;
-    height: 200px
+    width: 325px;
+    height: 150px
 }
 .flowBlockEndArcLeft {
     float: left;
@@ -236,11 +257,11 @@
     height: 72px;
 }
 .flowBlockEndArcPlot {
-    height: 200px;
+    height: 150px;
 }
 .flowBlockWithPlot {
     width: 330px;
-    height: 200px;
+    height: 150px;
 }
 .flowBlockWithImage {
     width: 330px;
@@ -251,7 +272,7 @@
     height: 30px;
     margin-top: 3px;
     margin-bottom: 3px;
-    margin-left: 3px;
+    margin-left: 0px;
     margin-right: 0px;
 }
 .flowBlockMenuImage {
@@ -260,14 +281,22 @@
 }
 .flowBlockName {
     display: inline-block;
-    font-size: 14px;
+    font-size: 13px;
     line-height: 40px;
     height: 40px;
     margin-left: 2px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+.flowBlockNameNormal {
+	width: 82px;
+}
+.flowBlockNameShort {
+	width: 80px;
 }
 .flowBlockParamLabel {
     display: inline-block;
-    font-size: 14px;
+    font-size: 12px;
     line-height: 36px;
     height:36px;
     margin-left: 2px;
@@ -283,7 +312,7 @@
     padding-right: 2px;
 }
 .flowBlockValue {
-    font-size: 16px;
+    font-size: 14px;
     line-height: 36px;
     height: 36px;
 }
@@ -292,7 +321,7 @@
     line-height: 36px;
 }
 .flowBlockUnits {
-    font-size: 14px;
+    font-size: 12px;
     line-height: 36px;
     height: 36px;
 }
@@ -300,7 +329,7 @@
 .flowBlockPlotCanvas {
     display: inline-block;
     width: 300px;
-    height: 200px;
+    height: 150px;
     cursor: pointer;
 }
 
@@ -318,7 +347,7 @@
     height: 30px;
     margin-top: 3px;
     margin-right: 3px;
-    font-size: 16px;
+    font-size: 14px;
     padding-left:1px;
     padding-right:1px;
     padding-top:1px;
@@ -336,8 +365,8 @@
 .flowBlockIcon {
     line-height: 30px;
     height: 30px;
-    margin-right: 0px;
-    margin-left: 5px;
+    margin-right: -6px;
+    margin-left: 4px;
     font-size: 16px;
     color: #ffffff;;
 }
@@ -472,6 +501,9 @@ button.filter {
 }
 .concordgold { 
     background-color: #ffc320;
+}
+.uiyellow { 
+    background-color: #edbc32;
 }
 .menuwhite { 
     background-color: #ffffff;

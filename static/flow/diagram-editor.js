@@ -329,7 +329,7 @@ function displayBlock(block) {
 			$('<span>', {class: 'flowBlockUnits', html: ' ' + units}).appendTo(div);
 		}
 		div.appendTo(blockDiv);
-		if (block.type === 'number_display_and_input') {
+		if (block.type === 'ema' || block.type === 'box') {//if (block.type === 'number_display_and_input') {
 			appendBlockParametersToBlockDiv(block, blockDiv);
 		}
 	}
@@ -703,28 +703,30 @@ function zoomBlocks(blocks, factor) {
 var CLASS_SCALING_TABLE = {
    'flowBlock': { "width": 210, "height": 36 },
    'flowBlockTallWide': { "width": 240, "height": 72 },
-   'flowBlockPlot': { "width": 375, "height": 200 },
+   'flowBlockPlot': { "width": 365, "height": 150 },
    'flowBlockContent': { "left": 20, "width": 170, "height": 36 },
    'flowBlockContentTallWide': { "width": 200, "height": 72 },
-   'flowBlockContentPlot': { "width": 335, "height": 200 },
+   'flowBlockContentPlot': { "width": 325, "height": 150 },
    'flowBlockEndArcLeft': { "height": 36, "width": 36, "border-radius": 36 },
    'flowBlockEndArcRight': { "height": 36, "width": 36, "border-radius": 36 },
    'flowBlockEndArcTallWide': { "height": 72 },
-   'flowBlockEndArcPlot': { "height": 200 },
+   'flowBlockEndArcPlot': { "height": 150 },
    'flowBlockValue': { "font-size": 36 },
-   'flowBlockName': { "font-size": 14, "line-height": 36, "height": 36, "margin-left": 2 },
+   'flowBlockName': { "font-size": 13, "line-height": 36, "height": 36, "margin-left": 2 },
+   'flowBlockNameNormal': { "width": 82 },
+   'flowBlockNameShort': { "width": 80 }, 
    'flowBlockParamLabel': { "font-size": 14, "line-height": 36, "height": 36, "margin-left": 2 },
    'flowBlockValueAndUnits': { "height": 36, "margin-right": 2,  "padding-left": 2, "padding-right": 2},
-   'flowBlockValue': { "font-size": 16, "line-height": 36 },
-   'flowBlockUnits': { "font-size": 14, "line-height": 36 },
+   'flowBlockValue': { "font-size": 14, "line-height": 36 },
+   'flowBlockUnits': { "font-size": 12, "line-height": 36 },
    'flowBlockInputHolderMargin': {  "margin-right": 20 },
-   'flowBlockInput': { "font-size": 16, "margin-top": 3, "margin-right": 2, "margin-bottom": 3, "width": 60, "height": 30 },
-   'flowBlockMenuHolder': { "height": 30, "margin-top": 3, "margin-bottom": 3, "margin-left": 3,},
+   'flowBlockInput': { "font-size": 14, "margin-top": 3, "margin-right": 2, "margin-bottom": 3, "width": 60, "height": 30 },
+   'flowBlockMenuHolder': { "height": 30, "margin-top": 3, "margin-bottom": 3, "margin-left": 0,},
    'flowBlockWithPlot': { "width": 330 },
    'flowBlockWithImage': { "width": 330 },
    'flowBlockMenuImage': { "height": 12, "width": 20},
-   'flowBlockPlotCanvas': { "height": 200, "width": 300},
-   'flowBlockIcon': { "font-size": 16, "margin-right": 0, "margin-left": 5, "line-height": 30, "height": 30 },
+   'flowBlockPlotCanvas': { "height": 150, "width": 300},
+   'flowBlockIcon': { "font-size": 16, "margin-right": -6, "margin-left": 4, "line-height": 30, "height": 30 },
 };
 
 /**
@@ -828,9 +830,13 @@ function addFilterBlock(e) {
 	if (type === 'not' || type == 'absolute value') {
 		blockSpec.input_count = 1;
 	}
-	if (type === 'simple moving average'|| type === 'exponential moving average') {
+	if (type === 'simple moving average' || type === 'exponential moving average') {
 		blockSpec.input_count = 1;
-		blockSpec.type = "number_display_and_input"
+		if(type === 'simple moving average')
+			blockSpec.type = "box"
+		else if(type === 'exponential moving average')
+			blockSpec.type = "ema"
+		//blockSpec.type = "number_display_and_input"
 		blockSpec.params = [{
 			'name': 'period',
 			'type': 'n',

@@ -48,8 +48,8 @@ var ProgramEditorFileManager = function(options) {
     //
     var programContent = $('<div>');
     
-    var programNameMenuEntry = $('<div>', {class: 'diagramMenuHeader menulightgray', css:{height:'60px'}} );
-    var title = $('<div>', {class: 'diagramMenuEntry noSelect'} ).text("program name");
+    var programNameMenuEntry = $('<div>', {class: 'diagramMenuHeaderNoSelect noSelect menulightgray', css:{height:'60px'}} );
+    var title = $('<div>', {class: 'diagramMenuEntryNoSelect noSelect'} ).text("program name");
     var programNameField = jQuery('<input>', {  
                                                 id: 'program-editor-filename',
                                                 type: 'text',
@@ -183,8 +183,8 @@ var ProgramEditorFileManager = function(options) {
     // Get name of program
     //
     this.getProgramName = function() { 
-        console.log("[DEBUG] getProgramName() " + nameField.val());
-        return nameField.val(); 
+        console.log("[DEBUG] getProgramName() " + programNameField.val());
+        return programNameField.val(); 
     }
 
     return this;
