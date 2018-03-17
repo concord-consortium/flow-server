@@ -239,7 +239,7 @@ def file_operation(operation, type):
     # Save op
     #
     def _save():
-        content     = request.values.get('content')
+        content     = request.values.get('content').encode('utf-8')
         now         = datetime.datetime.now()
         resource    = _create_file(path, now, now, content)
         return json.dumps({
@@ -252,12 +252,12 @@ def file_operation(operation, type):
     #
     def _load():
         resource    = find_resource(path)
-        data        = read_resource(resource)
+        data        = read_resource(resource).decode('utf-8')
         return json.dumps({
                     'success': True,
                     'message': 'Loaded file %s.' % (resource.name),
                     'content': data
-                })
+                },ensure_ascii=False)
 
     #
     # Delete op
