@@ -252,7 +252,10 @@ def file_operation(operation, type):
     #
     def _load():
         resource    = find_resource(path)
-        data        = read_resource(resource).decode('utf-8')
+        data        = read_resource(resource)
+        if data is not None:
+            data = data.decode('utf-8')
+        
         return json.dumps({
                     'success': True,
                     'message': 'Loaded file %s.' % (resource.name),
