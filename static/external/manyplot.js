@@ -25,6 +25,8 @@ function createPlotHandler( canvas, multiFrame ) {
 	plotHandler.mouseDown = false;
 	plotHandler.xDownLast = null;
 	plotHandler.intervalSelect = false; // Start in pan mode
+	plotHandler.xOverLast = null;
+	plotHandler.yOverLast = null;
 
 	plotHandler.drawPlot = function( xMouse, yMouse ) {
 		var args = {
@@ -32,6 +34,12 @@ function createPlotHandler( canvas, multiFrame ) {
 			"presentIsZero": false,
 			"intervalSelect": this.intervalSelect
 		};
+		
+		if(xMouse===null && !isNaN(!this.xOverLast))
+			xMouse = this.xOverLast;
+		if(yMouse===null && !isNaN(!this.yOverLast))
+			yMouse = this.yOverLast;
+		
 		this.plotter.drawPlot( xMouse, yMouse, args );
 	}
 
@@ -66,6 +74,8 @@ function createPlotHandler( canvas, multiFrame ) {
 			} else {
 				plotHandler.drawPlot( x, y );
 				plotHandler.xDownLast = null;
+				plotHandler.xOverLast = x;
+				plotHandler.yOverLast = y;
 			}
 		}
 	};
@@ -129,6 +139,9 @@ function createPlotter( canvas, multiFrame ) {
 	plotter.frames = [];
 	plotter.zoomLevel = 1;
 	plotter.plotMode = 'line';
+	plotter.showYaxisBuffer = false;
+	plotter.YaxisBufferPercent = 0;
+	plotter.showTimeHighlight = true;
 
 	// Takes a string and sets the plotter.plotMode.
 	plotter.setPlotMode = function(plotMode){
@@ -225,6 +238,13 @@ function createPlotter( canvas, multiFrame ) {
 			}
 		}
 	};
+	
+	//add a buffer around the y axis values for improved display
+	plotter.addYaxisBuffer = function(bufferPercent) {
+		this.showYaxisBuffer = true;
+		this.YaxisBufferPercent = bufferPercent;
+		
+	}
 
 	// Recalculate the bounds based on the current data
 	plotter.autoBounds = function(adjustTimestamps){
@@ -246,6 +266,23 @@ function createPlotter( canvas, multiFrame ) {
 				xMax = xD.maxBound === null ? xD.max : xD.maxBound;
 				yMin = yD.minBound === null ? yD.min : yD.minBound;
 				yMax = yD.maxBound === null ? yD.max : yD.maxBound;
+				
+				if(this.showYaxisBuffer){
+					var yRange = yMax - yMin;
+					var buffer = yRange * this.YaxisBufferPercent * .01;
+					//if(yRange >= 1)
+					//	buffer = Math.ceil(buffer);
+
+					if(yMin>=0 && (yMin - buffer) <= 0)
+						yMin = 0;
+					else
+						yMin = yMin - buffer;
+					yMax = yMax + buffer;
+					yMin = Math.floor(yMin);
+					yMax = Math.ceil(yMax);
+				}
+				
+				
 				if (xMin && (xMinAll === null || xMin < xMinAll)) {
 					xMinAll = xMin;
 				}
@@ -509,7 +546,7 @@ function createPlotter( canvas, multiFrame ) {
 
 		// fit frame to caption text and draw caption text
 		this.setFrameCount( 1 );
-		this.frames[ 0 ].setCaptions( xLabel, xMinLabel, xMaxLabel, yLabel, yLabelUnit, yMinLabel, yMaxLabel, rotateLabelY );
+		this.frames[ 0 ].setCaptions( xLabel, xMinLabel, xMaxLabel, yLabel, yLabelUnit, yMinLabel, yMaxLabel, rotateLabelY, true, true );
 		this.frames[ 0 ].fitBoxToCaptions( 0, width - 1, 0, height - 1 );
 		this.frames[ 0 ].drawCaptions();
 	};
@@ -557,6 +594,8 @@ function createPlotter( canvas, multiFrame ) {
 			var yLabel = yData.name;
 			var yMinLabel = yData.format( this.frames[ i ].dataMinY );
 			var yMaxLabel = yData.format( this.frames[ i ].dataMaxY );
+			var hideXaxisLabel = xData.hideAxisLabel;
+			var hideYaxisLabel = yData.hideAxisLabel;
 
 			if (xLabelOverride !== undefined)
 				xLabel = xLabelOverride;
@@ -572,7 +611,7 @@ function createPlotter( canvas, multiFrame ) {
 			var outerMaxY = Math.round( outerFrameHeight * (i + 1) - 1 );
 
 			// fit frame to caption text
-			this.frames[ i ].setCaptions( xLabel, xMinLabel, xMaxLabel, yLabel, units, yMinLabel, yMaxLabel, yData.rotateLabel );
+			this.frames[ i ].setCaptions( xLabel, xMinLabel, xMaxLabel, yLabel, units, yMinLabel, yMaxLabel, yData.rotateLabel, hideXaxisLabel, hideYaxisLabel );
 			this.frames[ i ].fitBoxToCaptions( outerMinX, outerMaxX, outerMinY, outerMaxY );
 		}
 
@@ -671,11 +710,13 @@ function createPlotter( canvas, multiFrame ) {
 		if (xScreen > this.frames[ 0 ].boxMinX && xScreen < this.frames[ 0 ].boxMaxX) {
 			if(this.frames.length === this.dataPairs.length){ // If one frame per data pair
 				for (var i = 0; i < this.frames.length; i++) {
+					this.frames[ i ].showTimeHighlight = this.showTimeHighlight;
 					this.frames[ i ].highlightValue( this.dataPairs[i].xData, this.dataPairs[i].yData, xMouseData, useTimestamp, presentIsZero );
 				}
 			}else{ // If one frame with multiple data pairs
 				for (var i = 0; i < this.dataPairs.length; ++i) {
 					var drawLine = i === 0 ? true : false;
+					this.frames[ 0 ].showTimeHighlight = this.showTimeHighlight;
 					this.frames[ 0 ].highlightValue( this.dataPairs[i].xData, this.dataPairs[i].yData, xMouseData, useTimestamp, presentIsZero, drawLine );
 				}
 			}
@@ -913,7 +954,12 @@ function createFrame( ctx ) {
 	frame.maxLabelY = "";
 	frame.labelYUnit = "";
 	frame.rotateLabelY = false;
-
+	frame.hideXaxisLabel = false;
+	frame.hideYaxisLabel = false;
+	
+	// highlights
+	frame.showTimeHighlight = true;
+	
 	// ================ coordinates / transforms ================
 
 	// transform screen (canvas-relative) x-coordinate to data x-coordinate
@@ -941,7 +987,7 @@ function createFrame( ctx ) {
 	};
 
 	// set captions for this frame
-	frame.setCaptions = function( labelX, minLabelX, maxLabelX, labelY, labelYUnit, minLabelY, maxLabelY, rotateLabelY ) {
+	frame.setCaptions = function( labelX, minLabelX, maxLabelX, labelY, labelYUnit, minLabelY, maxLabelY, rotateLabelY , hideXaxisLabel, hideYaxisLabel) {
 		this.labelX = labelX;
 		this.labelY = labelY;
 		if (labelYUnit) {
@@ -959,6 +1005,8 @@ function createFrame( ctx ) {
 			this.minLabelY = isFinite(minLabelY) ? minLabelY : 0;
 			this.maxLabelY = isFinite(maxLabelY) ? maxLabelY : 0;
 		}
+		this.hideXaxisLabel = hideXaxisLabel;
+		this.hideYaxisLabel = hideYaxisLabel;
 	};
 
 	// compute plot frame/box bounds using caption text;
@@ -1022,20 +1070,22 @@ function createFrame( ctx ) {
 		ctx.textBaseline = "top";
 		ctx.textAlign = "center";
 
+		
 		ctx.fillText( this.labelX, (boxMinX + boxMaxX) * 0.5, boxMaxY + 5 );
-		if (xMinLabelSize < 20) {
-			ctx.fillText( this.minLabelX, boxMinX, boxMaxY + 5 );
-		} else {
-			ctx.textAlign = "left";
-			ctx.fillText( this.minLabelX, boxMinX - 5, boxMaxY + 5 );
+		if(!this.hideXaxisLabel){	
+			if (xMinLabelSize < 20) {
+				ctx.fillText( this.minLabelX, boxMinX, boxMaxY + 5 );
+			} else {
+				ctx.textAlign = "left";
+				ctx.fillText( this.minLabelX, boxMinX - 5, boxMaxY + 5 );
+			}
+			if (xMaxLabelSize < 20) {
+				ctx.fillText( this.maxLabelX, boxMaxX, boxMaxY + 5 );
+			} else {
+				ctx.textAlign = "right";
+				ctx.fillText( this.maxLabelX, boxMaxX + 5, boxMaxY + 5 );
+			}
 		}
-		if (xMaxLabelSize < 20) {
-			ctx.fillText( this.maxLabelX, boxMaxX, boxMaxY + 5 );
-		} else {
-			ctx.textAlign = "right";
-			ctx.fillText( this.maxLabelX, boxMaxX + 5, boxMaxY + 5 );
-		}
-
 		// draw text for y labels
 		ctx.textBaseline = "middle";
 		ctx.textAlign = "right";
@@ -1075,7 +1125,7 @@ function createFrame( ctx ) {
 		var first = true;
 		var ctx = this.ctx;
 		ctx.lineWidth = 2;
-		ctx.beginPath();
+		ctx.beginPath();		
 
 		// if no y variation, just draw a straight line across from first point to last point
 		if (yDataMax === yDataMin) {
@@ -1342,29 +1392,31 @@ function createFrame( ctx ) {
 			}
 
 			// display timestamp
-			var showSeconds = false;
-			if (xData.min && xData.max && xData.max - xData.min < 24 * 60 * 60)
-				showSeconds = true;
-			ctx.fillStyle = "rgb(0,0,0)";
-			if(typeof useTimestamp !== 'undefined' && useTimestamp){
-				if (x > 1000000) { // if standard unix timestamp (we'll assume small numbers are elapsed time, not timestamps)
-					this.drawTextBox( xScreen, this.boxMinY, localTimestampToStr( x, showSeconds ) );
-				} else {
-					this.drawTextBox( xScreen, this.boxMinY, toFixedSafe( x, 3 ) + " seconds!!" ); // fix: use decimalPlaces?
-				}
-			}else if(typeof useTimestamp !== 'undefined' && !useTimestamp && xData.type === "timestamp"){
-				// If we're not using timestamp but the xData is a timestamp, then we should show elapsed time values
-				var elapsedTimeAtMouse = 0;
-				if(presentIsZero){
-					// Then the max timestamp should be regarded as "0".
-					elapsedTimeAtMouse = (new Date(x * 1000) - new Date(xData.max * 1000)) / 1000;
+			if(this.showTimeHighlight){
+				var showSeconds = false;
+				if (xData.min && xData.max && xData.max - xData.min < 24 * 60 * 60)
+					showSeconds = true;
+				ctx.fillStyle = "rgb(0,0,0)";
+				if(typeof useTimestamp !== 'undefined' && useTimestamp){
+					if (x > 1000000) { // if standard unix timestamp (we'll assume small numbers are elapsed time, not timestamps)
+						this.drawTextBox( xScreen, this.boxMinY, localTimestampToStr( x, showSeconds ) );
+					} else {
+						this.drawTextBox( xScreen, this.boxMinY, toFixedSafe( x, 3 ) + " seconds!!" ); // fix: use decimalPlaces?
+					}
+				}else if(typeof useTimestamp !== 'undefined' && !useTimestamp && xData.type === "timestamp"){
+					// If we're not using timestamp but the xData is a timestamp, then we should show elapsed time values
+					var elapsedTimeAtMouse = 0;
+					if(presentIsZero){
+						// Then the max timestamp should be regarded as "0".
+						elapsedTimeAtMouse = (new Date(x * 1000) - new Date(xData.max * 1000)) / 1000;
+					}else{
+						// Then the min timestamp should be regarded as "0"
+						elapsedTimeAtMouse = (new Date(x * 1000) - new Date(xData.min * 1000)) / 1000;
+					}
+					this.drawTextBox(xScreen, this.boxMinY, toFixedSafe(elapsedTimeAtMouse, 2));
 				}else{
-					// Then the min timestamp should be regarded as "0"
-					elapsedTimeAtMouse = (new Date(x * 1000) - new Date(xData.min * 1000)) / 1000;
+					this.drawTextBox( xScreen, this.boxMinY, toFixedSafe(x, 2) );
 				}
-				this.drawTextBox(xScreen, this.boxMinY, toFixedSafe(elapsedTimeAtMouse, 2));
-			}else{
-				this.drawTextBox( xScreen, this.boxMinY, toFixedSafe(x, 2) );
 			}
 
 			// display values
@@ -1537,6 +1589,8 @@ function createDataColumn( name, data ) {
 	dataColumn.decimalPlaces = 2;
 	dataColumn.isDefault = true;
 	dataColumn.rotateLabel = false;
+	dataColumn.hideAxisLabel = false;
+
 	// These are the computed min and max values from the data
 	dataColumn.min = null;
 	dataColumn.max = null;

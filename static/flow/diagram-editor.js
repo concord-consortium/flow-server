@@ -484,7 +484,10 @@ function undisplayBlock(block) {
 function displayPlot(block) {
 	var canvas = document.getElementById('bc_' + block.id);
 	block.view.plotHandler = createPlotHandler(canvas);
-	block.view.xData = createDataColumn('seconds', []);
+	block.view.plotHandler.plotter.addYaxisBuffer(10);
+	block.view.plotHandler.plotter.showTimeHighlight = false;
+	block.view.xData = createDataColumn('last 30 seconds', []);
+	block.view.xData.hideAxisLabel = true;
 	block.view.xData.type = 'timestamp';
 	block.view.yData = createDataColumn('value', []);
 	var dataPairs = [
@@ -701,32 +704,32 @@ function zoomBlocks(blocks, factor) {
  * contains a map for each class for css properties to scale -> mapped to defautl value at 1.0 scale.
 */
 var CLASS_SCALING_TABLE = {
-   'flowBlock': { "width": 210, "height": 36 },
-   'flowBlockTallWide': { "width": 240, "height": 72 },
-   'flowBlockPlot': { "width": 365, "height": 150 },
-   'flowBlockContent': { "left": 20, "width": 170, "height": 36 },
-   'flowBlockContentTallWide': { "width": 200, "height": 72 },
-   'flowBlockContentPlot': { "width": 325, "height": 150 },
-   'flowBlockEndArcLeft': { "height": 36, "width": 36, "border-radius": 36 },
-   'flowBlockEndArcRight': { "height": 36, "width": 36, "border-radius": 36 },
-   'flowBlockEndArcTallWide': { "height": 72 },
-   'flowBlockEndArcPlot': { "height": 150 },
-   'flowBlockValue': { "font-size": 36 },
-   'flowBlockName': { "font-size": 13, "line-height": 36, "height": 36, "margin-left": 2 },
-   'flowBlockNameNormal': { "width": 82 },
-   'flowBlockNameShort': { "width": 80 }, 
-   'flowBlockParamLabel': { "font-size": 14, "line-height": 36, "height": 36, "margin-left": 2 },
-   'flowBlockValueAndUnits': { "height": 36, "margin-right": 2,  "padding-left": 2, "padding-right": 2},
-   'flowBlockValue': { "font-size": 14, "line-height": 36 },
-   'flowBlockUnits': { "font-size": 12, "line-height": 36 },
-   'flowBlockInputHolderMargin': {  "margin-right": 20 },
-   'flowBlockInput': { "font-size": 14, "margin-top": 3, "margin-right": 2, "margin-bottom": 3, "width": 60, "height": 30 },
+   'flowBlock': { "width": 200, "height": 32, "border-radius": 24 },
+   'flowBlockTallWide': { "width": 220, "height": 64 },
+   'flowBlockTimer': { "width": 220, "height": 96 },
+   'flowBlockPlot': { "width": 350, "height": 150 },
+   'flowBlockData': { "width": 220, "height": 142},
+   'flowBlockContent': { "left": 8, "width": 192, "height": 32 },
+   'flowBlockContentTallWide': { "left": 12, "width": 208, "height": 64, "border-radius": 16 },
+   'flowBlockContentTimer': { "left": 12, "width": 208, "height": 96, "border-radius": 16 },
+   'flowBlockContentData': { "left": 12, "width": 208, "height": 142, "border-radius": 16 },
+   'flowBlockContentPlot': { "width": 330, "height": 150 },
+   'flowBlockName': { "font-size": 13, "line-height": 32, "height": 32, "margin-left": 2 },
+   'flowBlockNameNormal': { "width": 88 },
+   'flowBlockNameLong': { "width": 130 },
+   'flowBlockParamLabel': { "font-size": 13, "line-height": 36, "height": 36, "margin-left": 2 },
+   'flowBlockValueAndUnits': { "height": 32, "margin-right": 0,  "padding-left": 0, "padding-right": 0},
+   'flowBlockValue': { "font-size": 14, "line-height": 32 },
+   'flowBlockUnits': { "font-size": 12, "line-height": 32 },
+   'flowBlockInputHolderMargin': {  "margin-right": 24 },
+   'flowBlockInput': { "font-size": 14, "margin-top": 3, "margin-right": 2, "margin-bottom": 3, "width": 60, "height": 26 },
+   'flowBlockInputLong': { "width": 140 },
    'flowBlockMenuHolder': { "height": 30, "margin-top": 3, "margin-bottom": 3, "margin-left": 0,},
    'flowBlockWithPlot': { "width": 330 },
    'flowBlockWithImage': { "width": 330 },
    'flowBlockMenuImage': { "height": 12, "width": 20},
    'flowBlockPlotCanvas': { "height": 150, "width": 300},
-   'flowBlockIcon': { "font-size": 16, "margin-right": -6, "margin-left": 4, "line-height": 30, "height": 30 },
+   'flowBlockIcon': { "font-size": 12, "margin-right": 8, "margin-left": 10, "line-height": 26, "height": 26 },
 };
 
 /**

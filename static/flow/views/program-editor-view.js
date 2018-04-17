@@ -22,10 +22,131 @@ var ProgramEditorView = function(options) {
     
     topbar.appendTo(maincontentbox);        
 
-    var titlebar  = jQuery('<span>', {class:'titlebar noSelect', text:"dataflow"} );
+    var titlebar  = jQuery('<span>', {class:'titlebar titlebarLink noSelect', text:"dataflow"} );
+    titlebar.click( function(e) {
+        showTopLevelView('landing-page-view');
+    });
     
     titlebar.appendTo(topbar);
+    
+    //input field to enter program name
+    var programNameField = jQuery('<input>', {  
+                                            id: 'program-editor-filename',
+                                            type: 'text',
+                                            class: 'programName'
+    });
+    programNameField.appendTo(topbar);            
 
+    //program save button
+    var saveButton = $('<button>', {class: 'topBarIcon glyphicon glyphicon-floppy-disk noSelect', 'aria-hidden': 'true'}).appendTo(topbar);
+    //
+    // handle save button click event
+    //
+    saveButton.click( function() {
+                           
+        var filename = jQuery('#program-editor-filename').val();
+        var programSpec = base.getProgramSpec();
+        var programStr = JSON.stringify(programSpec);
+        console.log("Saving:", programStr);
+
+        //
+        // Call API to save program.
+        //
+        var url = '/ext/flow/save_program'
+        var data = {    filename:   filename,
+                        content:    programStr,
+                        csrf_token: g_csrfToken };
+
+        $.ajax({
+            url:        url,
+            method:     'POST',
+            data:       data,
+            success:    function(data) {
+                var response = JSON.parse(data);
+
+                console.log(
+                    "[DEBUG] Save program response", 
+                    response);
+
+                if(response.success) {
+                    alert("Program saved");
+                } else {
+                    alert("Error: " + response.message);
+                }
+            },
+            error: function(data) {
+                console.log("[ERROR] Save error", data);
+                alert('Error saving program.')
+            },
+        });
+
+    });
+    
+     var deviceHolder  = jQuery('<span>', {class:'deviceHolder'} );
+     var deviceStatus  = jQuery('<span>', {id: 'program-editor-recordingstatus', class:'deviceStatus noSelect', text:"Connected to "} );
+     deviceStatus.appendTo(deviceHolder);            
+     var deviceMenuHolder  = jQuery('<span>', {class:'deviceMenuHolder'} );
+     deviceMenuHolder.appendTo(deviceHolder);     
+     var deviceSelect = $('<select />', {class:'deviceMenuSelect'} );
+     
+      //program start button
+     var devicerunHolder  = jQuery('<span>', {class:'deviceRunHolder'} );
+     var runProgramButton = $('<button>', { class:'deviceRunButton', html: '<span class="glyphicon glyphicon-play"></span><span class="deviceRunButtonText">Run Program</span>' } );
+
+     var piSelectorPanel = PiSelectorPanel({ deviceDropDownMenu:  deviceSelect,
+                                                 editor:     base,
+                                                 runProgramButton:     runProgramButton                                             
+                                                 } );
+    runProgramButton.appendTo(devicerunHolder); 
+    
+    deviceSelect.appendTo(deviceMenuHolder); 
+    deviceHolder.appendTo(topbar);            
+    devicerunHolder.appendTo(topbar);
+    //
+    // Show welcome message
+    //
+    var welcomeMessage = jQuery('<div>', { css: {   position: 'absolute',
+                                                    paddingRight: '5px',
+                                                    display: 'inline-block',
+                                                    fontSize: '12px',
+                                                    whiteSpace: 'nowrap',
+                                                    top: '40px',
+                                                    right: '20px' } } );
+    var welcomeText = jQuery('<span>');
+
+    var signOut = jQuery('<a>', { href: '/ext/flow/logout' } );
+    signOut.text('logout');
+
+    if(g_user != null) {
+        welcomeText.text('Welcome, ' + g_user.full_name + '!');
+        welcomeMessage.append(welcomeText);
+        welcomeMessage.append(jQuery('<span>').text(' '));
+        welcomeMessage.append(signOut);
+        var spacing = jQuery('<span>', { css: { 
+                                    paddingRight: '5px'} } );
+        spacing.text(' ');
+        welcomeMessage.append(spacing);
+
+    } else {
+        welcomeText.text('You are not logged in.');
+        welcomeMessage.append(welcomeText);
+    }
+
+    //
+    // Add admin button to welcome message
+    //
+    if(g_user != null && g_user.isAdmin) {
+        var adminButton = $('<button>', {   html: 'Admin' } );
+        adminButton.css('font-size','10px');
+
+        adminButton.click(function(e) {
+            showTopLevelView('admin-view');
+        });
+        adminButton.appendTo(welcomeMessage);
+    }
+    welcomeMessage.appendTo(topbar);    
+    
+    
     //
     // Build the left and right menu holders
     //
@@ -33,20 +154,26 @@ var ProgramEditorView = function(options) {
     
     menuandcontentholder.appendTo(maincontentbox);    
     
+    var menuandcontentholderoverlay  = jQuery('<div>', {class:'menuandcontentholderoverlay', id: 'program-holder-overlay'} );
+    
+    var menuandcontentholderoverlaytext  = jQuery('<div>', {class: 'overlaydisplay', text:"program locked while running!"} );
+    //var menuandcontentholderoverlayicon  = jQuery('<div>', {class: 'overlaydisplay glyphicon glyphicon-lock noSelect'} );
+    menuandcontentholderoverlaytext.appendTo(menuandcontentholderoverlay); 
+    //menuandcontentholderoverlayicon.appendTo(menuandcontentholderoverlay); 
+    
+    menuandcontentholderoverlay.appendTo(menuandcontentholder);   
     
     var menuholder  = jQuery('<div>', {class:'menuholder menuholderprogram'} );
-    var menurightholder  = jQuery('<div>', {class:'menurightholder'} );
     
-    menuholder.appendTo(menuandcontentholder);    
-    menurightholder.appendTo(menuandcontentholder);    
+    menuholder.appendTo(menuandcontentholder);       
     
     var menutopbuttonholder  = jQuery('<div>', {class:'menutopbuttonholder'} );
     
     menutopbuttonholder.appendTo(menuholder);    
     
-    var menufilesbutton  = jQuery('<button>', {class:'menutopbutton menumediumgray noSelect', text:"files"} );
+    var menufilesbutton  = jQuery('<button>', {class:'menutopbutton menumediumgray noSelect', text:"my stuff"} );
     menufilesbutton.appendTo(menutopbuttonholder);    
-    var menublocksbutton  = jQuery('<div>', {class:'menutopbuttoninactive menudarkgray noSelect', text:"blocks"} );
+    var menublocksbutton  = jQuery('<div>', {class:'menutopbuttoninactive menudarkgray noSelect', text:"editor"} );
     menublocksbutton.appendTo(menutopbuttonholder);
     menufilesbutton.click( function(e) {
         showTopLevelView('landing-page-view');
@@ -63,20 +190,10 @@ var ProgramEditorView = function(options) {
     menuandcontentholder.append(programEditorDiv);
 
     //
-    // Create file manager widget
-    //
-    var fileManager    = ProgramEditorFileManager({ container:  menurightholder,
-                                                    editor:     base    } );
-    
-    //
-    // Create the panel for the "My Data" and "Pi Selector" components.
-    //    
-    var piSelectorMenuPanel = PiSelectorPanel({ container:  menurightholder,
-                                                editor:     base        } );
-
-    //
     // Create zoom widget
     //
+    //temporarily remove the zoom (we might need to add this back in later)
+    /*
     var zoomWidget  = jQuery('<span>', { css: {  zIndex: 100,
                                                 float:'right' } });
     var zoomIn = $('<button>', {class: 'topBarIcon glyphicon glyphicon-zoom-in noSelect', 'aria-hidden': 'true'}).appendTo(zoomWidget);
@@ -88,11 +205,12 @@ var ProgramEditorView = function(options) {
         programEditorPanel.zoomBlocks(-.25);
     });
     zoomWidget.appendTo(topbar);
+    */
     
     //
     // Accessors for our subcomponents.
     //
-    base.getFileManager         = function() { return fileManager; };
+    //base.getFileManager         = function() { return fileManager; };
     base.getPiSelectorPanel     = function() { return piSelectorPanel; };
     base.getMyDataPanel         = function() { return myDataPanel; };
     base.getProgramEditorPanel  = function() { return programEditorPanel; };
@@ -119,20 +237,57 @@ var ProgramEditorView = function(options) {
         $('#my-data-panel').hide();
         $('#pi-selector-panel').show();
     }
+    
+    var programloaded = false;
+    //
+    // have we already loaded a program, set up the editor view
+    //
+    base.programLoaded = function() {return programloaded;}
+    
+    //
+    // Load program from spec stored in dataset metadata
+    //
+    base.loadProgramFromSpec = function(params) {
+        // console.log("[DEBUG] ProgramEditorView loadProgramFromSpec()", params);
+
+        programloaded = true;
+        
+        var programSpec = params.programdata;
+        
+        var nameWidget      = jQuery('#program-editor-filename');
+
+        nameWidget.val(programSpec.name);
+        
+        //piSelectorPanel.loadPiList(); 
+        piSelectorPanel.exitRunProgramState();
+        piSelectorPanel.resetPiSelectionState();
+
+        //
+        // Display editor
+        //
+        showTopLevelView('program-editor-view');
+
+        
+        programEditorPanel.loadProgram(programSpec);
+        
+        
+    }
 
     //
     // Load program from server
     //
     base.loadProgram = function(params) {
-    
+        programloaded = true;
         // console.log("[DEBUG] ProgramEditorView loadProgram()", params);
 
         var nameWidget      = jQuery('#program-editor-filename');
 
         nameWidget.val('');
         
-        piSelectorMenuPanel.loadPiList();
-
+        piSelectorPanel.loadPiList();
+        piSelectorPanel.exitRunProgramState();
+        piSelectorPanel.resetPiSelectionState();
+        
         //
         // If no program to load, create a new program
         //

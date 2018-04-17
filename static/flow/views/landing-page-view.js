@@ -16,8 +16,8 @@ var LandingPageView = function(options) {
     
     outlinebox.appendTo(content);        
     
-    var maincontentbox  = jQuery('<div>', {class:'maincontentbox'} );	
-			   
+    var maincontentbox  = jQuery('<div>', {class:'maincontentbox'} );
+               
     maincontentbox.appendTo(outlinebox);    
 
     var topbar  = jQuery('<div>', {class:'topbar'} );
@@ -25,9 +25,9 @@ var LandingPageView = function(options) {
     topbar.appendTo(maincontentbox);        
 
     var titlebar  = jQuery('<span>', {class:'titlebar noSelect', text:"dataflow"} );
-    
+        
     titlebar.appendTo(topbar);    
-    
+
     //
     // Show welcome message
     //
@@ -36,7 +36,7 @@ var LandingPageView = function(options) {
                                                     display: 'inline-block',
                                                     fontSize: '12px',
                                                     whiteSpace: 'nowrap',
-                                                    top: '35px',
+                                                    top: '40px',
                                                     right: '20px' } } );
     var welcomeText = jQuery('<span>');
 
@@ -44,7 +44,7 @@ var LandingPageView = function(options) {
     signOut.text('logout');
 
     if(g_user != null) {
-        welcomeText.text('Welcome ' + g_user.full_name);
+        welcomeText.text('Welcome, ' + g_user.full_name + '!');
         welcomeMessage.append(welcomeText);
         welcomeMessage.append(jQuery('<span>').text(' '));
         welcomeMessage.append(signOut);
@@ -77,31 +77,52 @@ var LandingPageView = function(options) {
     //
     var menuandcontentholder  = jQuery('<div>', {class:'menuandcontentholder'} );
     
-    menuandcontentholder.appendTo(maincontentbox);    
+    menuandcontentholder.appendTo(maincontentbox);   
+
+    //resize div
+    base.resizemenuandcontentholder = function() {
+        var contentheight = menutopbuttonholder.height();
+        contentheight = contentheight + $("#landing-page-programs-diagrammenu").height();
+        contentheight = contentheight + $("#landing-page-recordeddatasets-diagrammenu").height();
+        var windowheight = window.innerHeight - 80;//$(window).height() - 90;
+        var newheight = contentheight;
+        if(windowheight > contentheight)
+            newheight = windowheight;
+        
+        menuandcontentholder.height(newheight);
+    }
+        
     
     var menuholder  = jQuery('<div>', {class:'menuholder'} );
     
     menuholder.appendTo(menuandcontentholder);    
     
-    var menutopbuttonholder  = jQuery('<div>', {class:'menutopbuttonholder'} );
+    var menutopbuttonholder  = jQuery('<div>', {class:'menutopbuttonholder', id: 'landing-page-menutopbuttonholder'} );
     
     menutopbuttonholder.appendTo(menuholder);    
     
-    var menufilesbutton  = jQuery('<div>', {class:'menutopbuttoninactive menudarkgray noSelect', text:"files"} );
+    var menufilesbutton  = jQuery('<div>', {class:'menutopbuttoninactive menudarkgray noSelect', text:"my stuff"} );
     menufilesbutton.appendTo(menutopbuttonholder);    
-    var menublocksbutton  = jQuery('<button>', {class:'menutopbutton menumediumgray noSelect', text:"blocks"} );
+    var menublocksbutton  = jQuery('<button>', {class:'menutopbutton menumediumgray noSelect', text:"editor"} );
     menublocksbutton.appendTo(menutopbuttonholder);
-    var programLoaded = false;
     menublocksbutton.click( function(e) {
-        if(programLoaded){
+        var editor = getTopLevelView('program-editor-view');
+        if(editor.programLoaded() ){
             showTopLevelView('program-editor-view');
         }
         else{
-            var editor = getTopLevelView('program-editor-view');
             editor.loadProgram();
-            programLoaded = true;
         }
     });
+    
+    //
+    // live data
+    //
+    var livedataholder  = jQuery('<div>', {class:'liveDataHolder'} );
+    livedataholder.appendTo(menuandcontentholder);    
+    var livedatatitlebar  = jQuery('<div>', {class:'liveDataTitleBar', text:"currently running"} );
+    livedatatitlebar.appendTo(livedataholder);       
+    
     
     //
     // programs
@@ -114,25 +135,27 @@ var LandingPageView = function(options) {
 
     var programsheader = createLandingPageMenuSection("programs", programsContent);
     programsheader.appendTo(menuholder);    
-    
+      
     //
     // new program
     //
-    var newprogramContent = $('<div>');
-    var newprogramheader = createLandingPageNewProgramMenuSection(newprogramContent);
-    newprogramheader.appendTo(menuholder);    
+    var newprogramheader = createLandingPageNewProgramMenuEntry();
+    newprogramheader.prependTo(programsContent);   
+
     
     //
     // data
     //
+    
     var dataContent = $('<div>');
     var mydatadiv       = jQuery('<div>', { id: 'landing-page-dataset-view'} );
                                                     
     mydatadiv.appendTo(dataContent);                                                    
-    var myDatasets = LandingPageDataSetView({id: 'landing-page-dataset-view'});    
+    var myDatasets = LandingPageDataSetView({id: 'landing-page-dataset-view', livedataholder: livedataholder});    
 
-    var dataheader = createLandingPageMenuSection("data", dataContent);
+    var dataheader = createLandingPageMenuSection("recorded datasets", dataContent);
     dataheader.appendTo(menuholder);    
+
     
 /*
 //UNCOMMENT THIS WHEN SHARE IS READY
@@ -167,7 +190,7 @@ var LandingPageView = function(options) {
         var chevron = $('<div>', {class: 'diagramMenuChevron glyphicon glyphicon-plus', css:{color:'2D758C'}} );
         
         header.click( function(e) {
-             var editor = getTopLevelView('program-editor-view');
+            var editor = getTopLevelView('program-editor-view');
             editor.loadProgram();
         });
         div.append(header);
@@ -177,12 +200,33 @@ var LandingPageView = function(options) {
 
         return div;
     }
+    //
+    // create the landing page menu entry for new program
+    //	
+    var createLandingPageNewProgramMenuEntry = function() {
+        
+        var menuentry = $('<div>', {class: 'landingPageMenuEntry menuwhite'} );
+        var title = $('<div>', {class: 'landingPageMenuTextContent noSelect', css:{color:'2D758C'}} ).text("new program");
+        var chevron = $('<div>', {class: 'diagramMenuChevron glyphicon glyphicon-plus', css:{color:'2D758C'}} );
+        
+        menuentry.click( function(e) {
+            var editor = getTopLevelView('program-editor-view');
+            editor.loadProgram();
+        });
+
+        menuentry.append(title); 
+        menuentry.append(chevron); 
+
+        return menuentry;
+    }
 
     //
     // create generic landing page menu sections with collapsable content
     //
     var createLandingPageMenuSection = function(name, content) {
-        div = $('<div>', {class: 'diagramMenu'});
+        str = name.replace(/\s/g, '');
+        var id = "landing-page-" + str + "-diagrammenu";
+        div = $('<div>', {class: 'diagramMenu', id: id});
         var header = $('<div>', {class: 'diagramMenuHeader concorddarkblue'} );
         var title = $('<div>', {class: 'diagramMenuTitle noSelect'} ).text(name);
         var chevron = $('<div>', {class: 'diagramMenuChevron glyphicon glyphicon-chevron-down', css:{color:'ffffff'}} );
@@ -207,3 +251,8 @@ var LandingPageView = function(options) {
         return div;
     }
 
+    $( window ).resize(function() {
+        //resize the landing page view
+        var lpv = getTopLevelView('landing-page-view');
+        lpv.resizemenuandcontentholder();
+    });

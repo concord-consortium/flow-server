@@ -96,8 +96,9 @@ var RecordingStatusPanel = function(options) {
                         {   textAlign:  'right',
                             padding:    '5px'      } );
 
-    Util.addTableRow(table, [stopButton] );
-    Util.addTableRow(table, [deleteButton] );
+	//remove stop and delete buttons from data view for now						
+    //Util.addTableRow(table, [stopButton] );
+    //Util.addTableRow(table, [deleteButton] );
 
     panel.append(table);
     container.append(panel);
@@ -139,6 +140,7 @@ var RecordingStatusPanel = function(options) {
         //
         // Set button visibility
         //
+		
         if(recording) {
             stopButton.show();
             deleteButton.hide();
@@ -146,6 +148,8 @@ var RecordingStatusPanel = function(options) {
             stopButton.hide();
             deleteButton.show();
         }
+		
+		
     }
 
     //
