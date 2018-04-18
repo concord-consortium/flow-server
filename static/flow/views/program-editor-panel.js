@@ -248,7 +248,11 @@ var ProgramEditorPanel = function(options) {
             this.appendBlockParametersToBlockDiv(block, blockDiv);
         } else {
             var div = $('<div>', {class: 'flowBlockValueAndUnits noSelect'});
-            var span = $('<span>', {class: 'flowBlockValue', html: '...', id: 'bv_' + block.id});
+            var initval = "...";
+            if (block.type === "data storage"){
+                initval = "";
+            }    
+            var span = $('<span>', {class: 'flowBlockValue', html: initval, id: 'bv_' + block.id});
             span.appendTo(div);
             // console.log("[DEBUG] units:", block.units);
 
@@ -283,7 +287,7 @@ var ProgramEditorPanel = function(options) {
                     var initval = param.value;
                     var displayedParamName = param.name;
                     var input;
-                    var paramindex = 0;
+                    var divindex = 1;
                     if(param.name=="period"){
                         displayedParamName = "last";
                         $('<div>', {class: 'flowBlockParamLabel noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder);                    
@@ -301,33 +305,38 @@ var ProgramEditorPanel = function(options) {
                     }
                     else if(param.name=="sequence_names"){
                         //if loading from file, this might be populated
-                        //paramindex matches the order of divs and the order of items in the values object
                         paramKeyArray = Object.keys(param.value);
                         paramValueArray = Object.values(param.value);
-                        displayedParamName = "seq";
+                        displayedParamName = "type";
                         
-                        for(var x = 0; x < (paramValueArray.length); x++){
-                            //make a new div to show sequence info
-                            var divflowBlockInputHolderEphemeral = $('<div>', {class: 'flowBlockInputHolder flowBlockInputHolderMargin ephemeralDiv'});
-                            divflowBlockInputHolderEphemeral.appendTo(blockContentDiv);
-                            
-                            initval = "sequence";
-                            if(x < paramValueArray.length)
-                                initval = paramValueArray[x];
-                            
-                            $('<div>', {class: 'flowBlockParamLabel noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolderEphemeral);    
-                            var divindexephemeral = x+1;                                        
-                            var inputephemeral = $('<input>', {class: 'form-control flowBlockInput flowBlockInputLong', type: 'text', id: 'b' + block.id + '_bp_' + "sequence_names" + divindexephemeral, value: initval}).prependTo(divflowBlockInputHolderEphemeral);
-                            
-                            inputephemeral.mousedown(function(e) {e.stopPropagation()});
-                            var eventdataephemeral = {blockid:block.id, paramname: "sequence_names", paramindex:divindexephemeral };
-                            inputephemeral.keyup(eventdataephemeral, _this.paramEntryChanged);
-
-                        }                        
+                        for(var p = 0; p < block.pins.length; p++){
+                            if(block.pins[p].sourcePin!=null){
+                                var connectedblockid = block.pins[p].sourcePin.block.id;
+                                
+                                for(var x = 0; x < (paramKeyArray.length); x++){
+                                    if(connectedblockid == paramKeyArray[x]){
+                                        initval = paramValueArray[x];
+                                        break;
+                                    }
+                                }
+                                //make a new div to show sequence info
+                                var divflowBlockInputHolderEphemeral = $('<div>', {class: 'flowBlockInputHolder flowBlockInputHolderMargin ephemeralDiv'});
+                                divflowBlockInputHolderEphemeral.appendTo(blockContentDiv);
+                                
+                                $('<div>', {class: 'flowBlockParamLabel noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolderEphemeral);    
+                                var divindexephemeral = x+1;                                        
+                                var inputephemeral = $('<input>', {class: 'form-control flowBlockInput flowBlockInputLong', type: 'text', id: 'b' + block.id + '_bp_' + "sequence_names" + divindexephemeral, value: initval}).prependTo(divflowBlockInputHolderEphemeral);
+                                
+                                inputephemeral.mousedown(function(e) {e.stopPropagation()});
+                                var eventdataephemeral = {blockid:block.id, paramname: "sequence_names", connectedblockid:connectedblockid, divindex:divindexephemeral };
+                                inputephemeral.keyup(eventdataephemeral, _this.paramEntryChanged);
+                            }
+                        }
+                 
                         divflowBlockInputHolder3.appendTo(blockContentDiv);
                         $('<div>', {class: 'flowBlockParamLabel noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder3);   
-                        initval = "sequence" + (paramValueArray.length + 1);
-                        paramindex = paramValueArray.length + 1;
+                        initval = "data type" + (paramValueArray.length + 1);
+                        divindex = paramValueArray.length + 1;
                         input = $('<input>', {class: 'form-control flowBlockInput flowBlockInputLong', type: 'text', id: 'b' + block.id + '_bp_' + param.name + (paramValueArray.length + 1), value: initval}).prependTo(divflowBlockInputHolder3);
         
                         
@@ -348,7 +357,7 @@ var ProgramEditorPanel = function(options) {
                     }
                                 
                     input.mousedown(function(e) {e.stopPropagation()});
-                    var eventdata = {blockid:block.id, paramname: param.name, paramindex:paramindex };
+                    var eventdata = {blockid:block.id, paramname: param.name, connectedblockid:-1, divindex:divindex};
                     input.keyup(eventdata, _this.paramEntryChanged);
                 }                    
             }
@@ -530,7 +539,7 @@ var ProgramEditorPanel = function(options) {
 
             input.mousedown(function(e) {e.stopPropagation()});
             var eventdata = {blockid:block.id, paramname: param.name};
-             input.keyup(eventdata, _this.paramEntryChanged);
+            input.keyup(eventdata, _this.paramEntryChanged);
         }
     };
 
@@ -1259,19 +1268,18 @@ var ProgramEditorPanel = function(options) {
     this.paramEntryChanged = function(e) {
         var block = _this.m_diagram.findBlockById(e.data.blockid);
         var paramname = e.data.paramname;
-        var paramindex = e.data.paramindex;
+        var connectedblockid = e.data.connectedblockid;
+        var divindex = e.data.divindex;
         for (var i = 0; i < block.params.length; i++) {
             var param = block.params[i];
             if(paramname == param.name){
                 var defval = param['default'];
                 if(isNaN(defval)){
                     if(paramname == "sequence_names"){
-                        var val = $('#b' + block.id + '_bp_' + param.name + paramindex).val();
-                        //paramindex matches the order of divs and the order of items in the values object
+                        var val = $('#b' + block.id + '_bp_' + param.name + divindex).val();
                         paramKeyArray = Object.keys(param.value);
                         paramValueArray = Object.values(param.value);
-                        paramKey = paramKeyArray[paramindex-1];
-                        param.value[paramKey] = val;
+                        param.value[connectedblockid] = val;
                     }
                     else{
                         var val = $('#b' + block.id + '_bp_' + param.name).val();
@@ -1475,7 +1483,7 @@ var ProgramEditorPanel = function(options) {
                             if(_this.m_diagram.blocks[i].pins[x].sourcePin==null){
                                 _this.m_diagram.blocks[i].pins[x].view.svg.remove();
                                 _this.m_diagram.blocks[i].pins.splice(x, 1);
-                                deletionIndex = x;
+                               // deletionIndex = x;
                                 break;
                             }
                         }
@@ -1487,30 +1495,48 @@ var ProgramEditorPanel = function(options) {
                         }
                     }                    
                     
-                    
-                    //update the block params    
+                    //update the block params 
+                    var paramSequenceObject;                    
                     var paramKeyArray;    
-                    var paramValueArray;                    
+                    var paramValueArray; 
+                    var newlyConnectedBlockId;
                     for (var pa = 0; pa < _this.m_diagram.blocks[i].params.length; pa++) {
-                        var param = _this.m_diagram.blocks[i].params[pa];                
-                        if(param.name=="sequence_names"){
+                        paramSequenceObject = _this.m_diagram.blocks[i].params[pa];                
+                        if(paramSequenceObject.name=="sequence_names"){
+                            
                             //found the sequence names params
                             if(addingPin){
                                 //the newly connected pin
-                                var connectedid = _this.m_diagram.blocks[i].pins[numConnectedPins-1].sourcePin.block.id;
+                                newlyConnectedBlockId = _this.m_diagram.blocks[i].pins[numConnectedPins-1].sourcePin.block.id;
                                 //get the sequence name from the div
                                 var bid = 'b' + _this.m_diagram.blocks[i].id + '_bp_' + "sequence_names" + (newPinCount-1);
                                 var sequencename = $('#' + bid).val();
-                                _this.m_diagram.blocks[i].params[pa].value[connectedid] = sequencename;
+                                _this.m_diagram.blocks[i].params[pa].value[newlyConnectedBlockId] = sequencename;
                             }
                             else{
-                                paramKeyArray = Object.keys(param.value);
-                                var deletionId = paramKeyArray[deletionIndex];
+                                paramKeyArray = Object.keys(paramSequenceObject.value);
+                                var deletionId;
+                                //determine the param that needs to be removed    
+                                for(var pk = 0; pk < paramKeyArray.length; pk++){
+                                    var foundit = false;
+                                    for(var pi = 0; pi < _this.m_diagram.blocks[i].pins.length; pi++){
+                                        if(_this.m_diagram.blocks[i].pins[pi].sourcePin!=null){
+                                            if(_this.m_diagram.blocks[i].pins[pi].sourcePin.block.id == paramKeyArray[pk]){
+                                                foundit = true;
+                                                break;
+                                            }
+                                        }
+                                    }    
+                                    if(!foundit){
+                                        deletionId = paramKeyArray[pk];
+                                        break;        
+                                    }
+                                }
                                 delete _this.m_diagram.blocks[i].params[pa].value[deletionId];
-                                //generate arrays of the keys and values, we need these to create the HTML divs
-                                paramKeyArray = Object.keys(_this.m_diagram.blocks[i].params[pa].value);
-                                paramValueArray = Object.values(_this.m_diagram.blocks[i].params[pa].value);
                             }
+                            //generate arrays of the keys and values, we need these to create the HTML divs
+                            paramKeyArray = Object.keys(_this.m_diagram.blocks[i].params[pa].value);
+                            paramValueArray = Object.values(_this.m_diagram.blocks[i].params[pa].value);
                         }
                     }
                     
@@ -1520,40 +1546,40 @@ var ProgramEditorPanel = function(options) {
                     $("#b_" + _this.m_diagram.blocks[i].id ).css('height', newDivHeight + 'px');
                     $("#bcon_" + _this.m_diagram.blocks[i].id ).css('height', newDivHeight + 'px');
 
-                    if(addingPin){
+                    //remove all existing ephemeral divs 
+                    $('.ephemeralDiv').remove()
+                    //create divs
+                    for(var x = 0; x < (newPinCount); x++){
                         //make a new div to show sequence info
                         var divflowBlockInputHolder = $('<div>', {class: 'flowBlockInputHolder flowBlockInputHolderMargin ephemeralDiv'});
                         $("#bcon_" + _this.m_diagram.blocks[i].id ).append(divflowBlockInputHolder);
-                        var displayedParamName = "seq";
-                        var initval = "sequence" + newPinCount;
-                        $('<div>', {class: 'flowBlockParamLabel noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder);
-                        var paramindex = newPinCount;                    
-                        var input = $('<input>', {class: 'form-control flowBlockInput flowBlockInputLong', type: 'text', id: 'b' + _this.m_diagram.blocks[i].id + '_bp_' + "sequence_names" + paramindex, value: initval}).prependTo(divflowBlockInputHolder);
-                        //set up mouse events
+                        var displayedParamName = "type";
+                        var initval = "data type" + (x+1);
+                        
+                        //get the block id from each connected pin, use that block id to get sequence name to put here
+                        var connectedBlockId = -1;
+                        //find the id on the xth pin
+                        if(_this.m_diagram.blocks[i].pins[x].sourcePin!=null){
+                            connectedBlockId = _this.m_diagram.blocks[i].pins[x].sourcePin.block.id;
+                            var pindex = 0;
+                            for(var pk = 0; pk < paramKeyArray.length; pk++){
+                                if(connectedBlockId == paramKeyArray[pk]){
+                                    pindex = pk;
+                                    break;
+                                }
+                            }
+                            initval = paramValueArray[pindex];
+                        }
+                        
+                        $('<div>', {class: 'flowBlockParamLabel noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder);    
+                        var divindex = x+1;                                        
+                        var input = $('<input>', {class: 'form-control flowBlockInput flowBlockInputLong', type: 'text', id: 'b' + _this.m_diagram.blocks[i].id + '_bp_' + "sequence_names" + divindex, value: initval}).prependTo(divflowBlockInputHolder);
+                        
                         input.mousedown(function(e) {e.stopPropagation()});
-                        var eventdata = {blockid:_this.m_diagram.blocks[i].id, paramname: "sequence_names", paramindex:paramindex };
+                        var eventdata = {blockid:_this.m_diagram.blocks[i].id, paramname: "sequence_names", connectedblockid:connectedBlockId, divindex:divindex };
                         input.keyup(eventdata, _this.paramEntryChanged);
                     }
-                    else{
-                        //remove all existing ephemeral divs 
-                        $('.ephemeralDiv').remove()
-                        for(var x = 0; x < (newPinCount); x++){
-                            //make a new div to show sequence info
-                            var divflowBlockInputHolder = $('<div>', {class: 'flowBlockInputHolder flowBlockInputHolderMargin ephemeralDiv'});
-                            $("#bcon_" + _this.m_diagram.blocks[i].id ).append(divflowBlockInputHolder);
-                            var displayedParamName = "seq";
-                            var initval = "sequence" + (x+1);
-                            if(x < paramValueArray.length)
-                                initval = paramValueArray[x];
-                            $('<div>', {class: 'flowBlockParamLabel noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder);    
-                            var paramindex = x+1;                                        
-                            var input = $('<input>', {class: 'form-control flowBlockInput flowBlockInputLong', type: 'text', id: 'b' + _this.m_diagram.blocks[i].id + '_bp_' + "sequence_names" + paramindex, value: initval}).prependTo(divflowBlockInputHolder);
-                            
-                            input.mousedown(function(e) {e.stopPropagation()});
-                            var eventdata = {blockid:_this.m_diagram.blocks[i].id, paramname: "sequence_names", paramindex:paramindex };
-                            input.keyup(eventdata, _this.paramEntryChanged);
-                        }
-                    }
+                    
                     
                     //force refresh of block so we display pins and connections correctly
                     _this.moveBlock(_this.m_diagram.blocks[i], 
@@ -1595,7 +1621,10 @@ var ProgramEditorPanel = function(options) {
                 console.log('set image ' + block.value.length);
                 $('#bi_' + block.id).attr('src', 'data:image/jpeg;base64,' + block.value);
             }
-        } else {
+        } else if (block.type === "data storage"){
+            $('#bv_' + block.id).html('');
+        }        
+        else {
             if (block.value === null) {
                 $('#bv_' + block.id).html('...');
             } else {

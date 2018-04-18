@@ -37,7 +37,7 @@ var LandingPageDataSetView = function(options) {
                 if(response.success) {
 
                     var items = response.items;
-                    var recording = [];
+                    var recording = [];recording
                     var recorded = [];
                     for(var i = 0; i < items.length; i++) {
                         var item = items[i];
@@ -45,7 +45,11 @@ var LandingPageDataSetView = function(options) {
                         if(item.metadata && item.metadata.recording == true) {
                             recording.push(item);
                         } else {
-                            recorded.push(item);
+                            var isEmpty = false;
+                            if(item.metadata && item.metadata.is_empty && item.metadata.is_empty == true)
+                                isEmpty = true;
+                            if(!isEmpty)
+                                recorded.push(item);
                         }
                     }
                     recordingData = recording;
@@ -124,6 +128,9 @@ var LandingPageDataSetView = function(options) {
         var controllername = metadata.controller_name;
         var programdata = metadata.program;
         var programname = programdata.name;
+        var isEmpty = false;
+        if(metadata.is_empty && metadata.is_empty == true)
+            isEmpty = true;
         
         var livedataitemholder  = jQuery('<div>', {class:'liveDataItemHolder'} );
         
@@ -147,10 +154,10 @@ var LandingPageDataSetView = function(options) {
             console.log("[DEBUG] viewProgramButton click", e.data);
             var editor = getTopLevelView('program-editor-view');
             editor.loadProgramFromSpec({programdata: programdata});
-			
-			var piSelectorPanel = editor.getPiSelectorPanel();
-			piSelectorPanel.simulateRunProgramState(metadata.controller_name, metadata.controller_path, metadata.recording_location);
-			
+            
+            var piSelectorPanel = editor.getPiSelectorPanel();
+            piSelectorPanel.simulateRunProgramState(metadata.controller_name, metadata.controller_path, metadata.recording_location);
+            
         });
             
         //
@@ -248,13 +255,14 @@ var LandingPageDataSetView = function(options) {
             stopDiagram.execute();
 
         });        
-            
+
         var livedataitemboxdata  = jQuery('<div>', {class:'liveDataItemBox concordblue'} );
         var livedataitemboxdatatitle  = jQuery('<div>', {class:'liveDataItemBoxTitle', text:"recording dataset"} );
         var livedataitemboxdataname  = jQuery('<div>', {class:'liveDataItemBoxName', text:filename} );
         var viewButton = $('<button>', { class:'liveDataItemBoxButton',   html: 'view dataset' } );
         livedataitemboxdatatitle.appendTo(livedataitemboxdata);   
         livedataitemboxdataname.appendTo(livedataitemboxdata);
+        
         viewButton.appendTo(livedataitemboxdata);         
     
         viewButton.click(item, function(e) {
@@ -273,8 +281,10 @@ var LandingPageDataSetView = function(options) {
         livedataitemboxpi.appendTo(livedataitemholder);   
         livedataiteconnector1.appendTo(livedataitemholder);   
         livedataitemboxprogram.appendTo(livedataitemholder);   
-        livedataiteconnector2.appendTo(livedataitemholder);   
-        livedataitemboxdata.appendTo(livedataitemholder);   
+        if(!isEmpty) 
+            livedataiteconnector2.appendTo(livedataitemholder);   
+        if(!isEmpty) 
+            livedataitemboxdata.appendTo(livedataitemholder);   
         livedataitemholder.appendTo(livedataholder);   
         return livedataitemholder;
     }
