@@ -8,12 +8,12 @@ var LoginPageView = function(options) {
     var content = jQuery('#'+base.getDivId());
 
     var title = jQuery('<h1>');
-    title.text('DataFlow');
+    title.text('Dataflow');
 
     var ssoMessage = jQuery('<span>');
     ssoMessage.text('Login with ');
     var ssoLink = jQuery('<a>', { href: '/ext/flow/login' } );
-    ssoLink.text('Portal SSO');
+    ssoLink.text('Login');
 
     var loginMessage = jQuery('<span>');
     loginMessage.text('Login with ');
@@ -26,11 +26,11 @@ var LoginPageView = function(options) {
                                                 textAlign: 'center' } } );
 
     welcomeText.append(title);
-    welcomeText.append(ssoMessage);
+    //welcomeText.append(ssoMessage);
     welcomeText.append(ssoLink);
     welcomeText.append(jQuery('<br>'));
-    welcomeText.append(loginMessage);
-    welcomeText.append(loginLink);
+    //welcomeText.append(loginMessage);
+    //welcomeText.append(loginLink);
     content.append(welcomeText);
 
     base.show = function() {

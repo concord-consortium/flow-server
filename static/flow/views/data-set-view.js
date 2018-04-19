@@ -36,7 +36,7 @@ var DataSetView = function(options) {
     
     topbar.appendTo(maincontentbox);        
 
-    var titlebar  = jQuery('<span>', {class:'titlebar noSelect', text:"dataflow"} );
+    var titlebar  = jQuery('<span>', {class:'titlebar noSelect', text:"Dataflow"} );
         
     titlebar.appendTo(topbar);    
 

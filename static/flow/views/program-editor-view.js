@@ -22,7 +22,7 @@ var ProgramEditorView = function(options) {
     
     topbar.appendTo(maincontentbox);        
 
-    var titlebar  = jQuery('<span>', {class:'titlebar titlebarLink noSelect', text:"dataflow"} );
+    var titlebar  = jQuery('<span>', {class:'titlebar titlebarLink noSelect', text:"Dataflow"} );
     titlebar.click( function(e) {
         showTopLevelView('landing-page-view');
     });
