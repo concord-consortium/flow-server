@@ -37,7 +37,7 @@ var LandingPageDataSetView = function(options) {
                 if(response.success) {
 
                     var items = response.items;
-                    var recording = [];recording
+                    var recording = [];
                     var recorded = [];
                     for(var i = 0; i < items.length; i++) {
                         var item = items[i];
