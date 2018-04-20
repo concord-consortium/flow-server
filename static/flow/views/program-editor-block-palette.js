@@ -10,20 +10,20 @@ var ProgramEditorBlockPalette = function(options) {
     //
     // create a menu section
     //    
-    var createSection = function(name, content) {
+    var createSection = function(name, content, collapsedbydefault) {
         
         var div = $('<div>', {class: 'diagramMenu'});
         var header = $('<div>', {class: 'diagramMenuHeader'} );
         var title = $('<div>', {class: 'diagramMenuTitle noSelect'} ).text(name);
         var chevron = $('<div>', {class: 'diagramMenuChevron glyphicon glyphicon-chevron-down'} );
         
-        if(name == 'sensors'){
-            header.addClass('concorddarkblue');
+        if(name == 'input'){
+            header.addClass('concordblue');
         }
         else if(name == 'logic'){
             header.addClass('concordgreen');
         }
-        else if(name == 'relays'){
+        else if(name == 'outputs'){
             header.addClass('concordorange');
         }
         else{
@@ -46,6 +46,12 @@ var ProgramEditorBlockPalette = function(options) {
         header.append(chevron); 
         div.append(content);
 
+        if(collapsedbydefault){
+            chevron.removeClass('glyphicon-chevron-down');
+            chevron.addClass('glyphicon-chevron-right');
+            content.hide();
+        }
+        
         return div;
     }
     
@@ -63,8 +69,12 @@ var ProgramEditorBlockPalette = function(options) {
 
         btn.text(name);
         btn.click( function() {
-            programEditorPanel.addDeviceBlock(type);
+            if(name == "timer")
+                programEditorPanel.addTimerBlock("timer");
+            else
+                programEditorPanel.addDeviceBlock(type);
         });
+        
         return btn;
     };
 
@@ -81,6 +91,8 @@ var ProgramEditorBlockPalette = function(options) {
     var light       = createSensorBtn("light", "light", sensorentrynum);
     sensorentrynum++;
     var soil        = createSensorBtn("soil moisture", "soilmoisture", sensorentrynum);
+    sensorentrynum++;
+    var timer        = createSensorBtn("timer", "timer", sensorentrynum);
 
     var sensorContent = $('<div>');
     sensorContent.append(temp);
@@ -88,8 +100,8 @@ var ProgramEditorBlockPalette = function(options) {
     sensorContent.append(co2);
     sensorContent.append(light);
     sensorContent.append(soil);
-
-    var sensors     = createSection("sensors", sensorContent);
+    sensorContent.append(timer);
+    var sensors     = createSection("input", sensorContent, false);
     container.append(sensors);
 
     //
@@ -110,7 +122,7 @@ var ProgramEditorBlockPalette = function(options) {
         }
         // console.log("[DEBUG] programEditorPanel", programEditorPanel);
         btn.click(type, function(e) {
-            if(type=='numeric'){
+            if(type=='number'){
                 programEditorPanel.addNumericBlock();
             }
             else{
@@ -122,7 +134,7 @@ var ProgramEditorBlockPalette = function(options) {
     }
     
     var entrynum = 0;
-    var numericButton   = createFilterBtn("numeric", entrynum);
+    var numericButton   = createFilterBtn("number", entrynum);
     entrynum++;
     var andButton   = createFilterBtn("and", entrynum);
     entrynum++;
@@ -181,21 +193,35 @@ var ProgramEditorBlockPalette = function(options) {
     filterContent.append(simpleavgButton);
     filterContent.append(expavgButton);
 
-    var filters = createSection("logic", filterContent);
+    var filters = createSection("logic", filterContent, true);
 
     container.append(filters);
     
     //
-    // Relays
+    // Outputs: relays and plots and data bucket
     //
-    var relayContent = $('<div>');
+    var outputContent = $('<div>');
     var relay = $('<button>', { class: 'diagramMenuEntry menulightgray' } );
     relay.text('relay');
     relay.click( function() {
         programEditorPanel.addRelayBlock("relay");
     });
-    relayContent.append(relay);
-    var relays = createSection("relays", relayContent);
-    container.append(relays);
+    var plot = $('<button>', { class: 'diagramMenuEntry menudarkgray' } );
+    plot.text('plot');
+    plot.click( function() {
+        programEditorPanel.addPlotBlock("plot");
+    });    
+    
+    var databucket = $('<button>', { class: 'diagramMenuEntry menulightgray' } );
+    databucket.text('data storage');
+    databucket.click( function() {
+        programEditorPanel.addDataStorageBlock("data storage");
+    });    
+
+    outputContent.append(relay);
+    outputContent.append(plot);
+    outputContent.append(databucket);
+    var outputs = createSection("outputs", outputContent, true);
+    container.append(outputs);
 
 }

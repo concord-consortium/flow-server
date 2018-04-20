@@ -9,7 +9,7 @@ function addFilterMethods(block, type) {
         return;
     }
     
-    block.inputCount = type === "not" || type === "box" || type === "ema" || type === "absolute value" ? 1 : 2;
+    block.inputCount = type === "not" || type === "exponential moving average" || type === "simple moving average" || type === "absolute value" ? 1 : 2;
     block.outputCount = 1;
     
     // filter-specific block attributes
@@ -79,13 +79,13 @@ function addFilterMethods(block, type) {
                 return function(inputs) {
                     return inputs[0] > inputs[1] ? 1 : 0;
                 };
-            case 'box':
+            case 'simple moving average':
                 return function(inputs) {
-                    return block.computeMovingAverage(inputs[0], block.boxSize);
+                    return block.computeMovingAverage(inputs[0], block.params[0].value);//return block.computeMovingAverage(inputs[0], block.boxSize);
                 };
-            case 'ema':
+            case 'exponential moving average':
                 return function(inputs) {
-                    return block.computeEMA(inputs[0], block.boxSize);
+                    return block.computeEMA(inputs[0], block.params[0].value);//return block.computeEMA(inputs[0], block.boxSize);
                 };
         }
     })();
@@ -101,6 +101,13 @@ function addFilterMethods(block, type) {
         }
 
         var len = block.averageStorage.length;
+        if(len > 0){
+            for (var i = 0; i < len; i++) {
+                avg += block.averageStorage[i] / len;
+            }                    
+        }
+        //incorrect calculation, leave in in case we need to compare methods
+        /*
         if (len < boxSize && len > 0) {
             for (var i = 0; i < len; i++) {
                 avg += block.averageStorage[i] / len;
@@ -108,6 +115,7 @@ function addFilterMethods(block, type) {
         } else if (block.lastAverage !== null) {
             avg = block.lastAverage + 1 / boxSize * (newValue - block.averageStorage[0]);
         }
+        */
         block.lastAverage = avg;
         return avg;
     };
@@ -126,7 +134,7 @@ function addFilterMethods(block, type) {
 function allowedFilterTypes() {
     return [
         "not", "and", "or", "xor", "nand",
-        "box", "ema",
+        "simple moving average", "exponential moving average",
         "plus", "minus", "times", "divided by", "absolute value",
         "equals", "not equals", "less than", "greater than",
     ];

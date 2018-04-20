@@ -111,6 +111,7 @@ def flow_app():
     return flow_extension.render_template('flow-app.html',
         controllers_json = json.dumps(controller_infos),
         use_codap = (request.args.get('use_codap', 0) or request.args.get('codap', 0)),
+        testblocks_enabled = int(request.args.get('blocks', 0)),
         dev_enabled     = int(request.args.get('dev', default_dev_enabled)),
         admin_enabled           = admin_enabled,
         features_enabled        = features_enabled,
@@ -225,10 +226,15 @@ def file_operation(operation, type):
     # Construct path
     #
     if operation == 'list':
-        path = '%s/%s/%s/%s' % (org_name, 'student-folders', username, type)
+        if type == 'sequences':
+            path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, 'datasets', filename)
+        else:
+            path = '%s/%s/%s/%s' % (org_name, 'student-folders', username, type)
     else:
         if type == 'datasets':
             if operation == 'load':
+                path = '%s/%s/%s/%s/%s/metadata' % (org_name, 'student-folders', username, type, filename)
+            elif operation == 'save':
                 path = '%s/%s/%s/%s/%s/metadata' % (org_name, 'student-folders', username, type, filename)
             else:
                 path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, type, filename)
@@ -328,7 +334,7 @@ def file_operation(operation, type):
 @app.route('/ext/flow/save_program', methods=['POST'])
 def save_program():
     return file_operation('save', 'programs')
-
+	
 #
 # API for loading (retrieving the contents of) a program 
 # from the rhizo-server
@@ -360,7 +366,7 @@ def list_datasets():
     return file_operation('list', 'datasets')
 
 #
-# API for listing named datasets saved on the rhizo-server
+# API for loading named datasets saved on the rhizo-server
 #
 @app.route('/ext/flow/load_dataset', methods=['POST'])
 def load_dataset():
@@ -373,7 +379,21 @@ def load_dataset():
 def delete_dataset():
     return file_operation('delete', 'datasets')
 
+#
+# API for saving dataset metadata to the rhizo-server
+#
+@app.route('/ext/flow/save_datasetmetadata', methods=['POST'])
+def save_datasetmetadata():
+    return file_operation('save', 'datasets')	
 
+#
+# API for listing dataset sequences saved on the rhizo-server
+#
+@app.route('/ext/flow/list_datasetsequences', methods=['POST'])
+def list_datasetsequences():
+    return file_operation('list', 'sequences')	
+
+	
 #
 # Create portal oauth service
 #

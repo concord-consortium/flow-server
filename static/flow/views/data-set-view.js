@@ -17,6 +17,81 @@ var DataSetView = function(options) {
 
     PLOTTER_PADDING_VERTICAL    = 80;   // px
     RIGHT_PANEL_WIDTH           = 200;  // px
+    VERTICAL_MARGIN                = 80;   // px
+    HORIZONTAL_MARGIN           = 100;  // px
+    
+    //
+    // create the main content boxes and top bar
+    //
+    
+    var outlinebox  = jQuery('<div>', {class:'outlinebox'} );
+    
+    outlinebox.appendTo(content);        
+    
+    var maincontentbox  = jQuery('<div>', {class:'maincontentbox'} );    
+               
+    maincontentbox.appendTo(outlinebox);    
+
+    var topbar  = jQuery('<div>', {class:'topbar'} );
+    
+    topbar.appendTo(maincontentbox);        
+
+    var titlebar  = jQuery('<span>', {class:'titlebar noSelect', text:"Dataflow"} );
+        
+    titlebar.appendTo(topbar);    
+
+    
+    //
+    // Show welcome message
+    //
+    var welcomeMessage = jQuery('<div>', { css: {   position: 'absolute',
+                                                    paddingRight: '5px',
+                                                    display: 'inline-block',
+                                                    fontSize: '12px',
+                                                    whiteSpace: 'nowrap',
+                                                    top: '40px',
+                                                    right: '20px' } } );
+    var welcomeText = jQuery('<span>');
+
+    var signOut = jQuery('<a>', { href: '/ext/flow/logout' } );
+    signOut.text('logout');
+
+    if(g_user != null) {
+        welcomeText.text('Welcome, ' + g_user.full_name + '!');
+        welcomeMessage.append(welcomeText);
+        welcomeMessage.append(jQuery('<span>').text(' '));
+        welcomeMessage.append(signOut);
+        var spacing = jQuery('<span>', { css: { 
+                                    paddingRight: '5px'} } );
+        spacing.text(' ');
+        welcomeMessage.append(spacing);
+
+    } else {
+        welcomeText.text('You are not logged in.');
+        welcomeMessage.append(welcomeText);
+    }
+
+    //
+    // Add admin button to welcome message
+    //
+    if(g_user != null && g_user.isAdmin) {
+        var adminButton = $('<button>', {   html: 'Admin' } );
+        adminButton.css('font-size','10px');
+
+        adminButton.click(function(e) {
+            showTopLevelView('admin-view');
+        });
+        adminButton.appendTo(welcomeMessage);
+    }
+    welcomeMessage.appendTo(topbar);    
+    
+    //
+    // Build the menu and content holder
+    //
+    var menuandcontentholder  = jQuery('<div>', {class:'menuandcontentholder'} );
+    
+    menuandcontentholder.appendTo(maincontentbox);    
+    
 
     //
     // Create the left panel 
@@ -54,23 +129,24 @@ var DataSetView = function(options) {
     var leftTd      = $('<td>', { css: { textAlign: 'left', padding: '2px' } });
     var rightTd     = $('<td>', { css: { textAlign: 'right', padding: '2px' } });
     var viewProgBtn = $('<button>').text('View Program');
-	var selectIntervalBtn = $('<button>', {id: 'data-set-select-interval'}).text('Select Interval');
-	
+    var selectIntervalBtn = $('<button>', {id: 'data-set-select-interval'}).text('Select Interval');
+    
     var exportBtn   = $('<button>').text('Export to CODAP');
     bTable.append(tr)
     tr.append(leftTd);
-    leftTd.append(viewProgBtn);
-	leftTd.append(selectIntervalBtn);
+    //remove for now
+    //leftTd.append(viewProgBtn);
+    if(g_useCodap)leftTd.append(selectIntervalBtn);
     tr.append(rightTd);
-    rightTd.append(exportBtn);
+    if(g_useCodap)rightTd.append(exportBtn);
     leftPanel.append(bTable);
-	
-	selectIntervalBtn.click( function(e) {
-		selectInterval();
-	});
-	exportBtn.click( function(e) {
-		exploreRecordedDataInCODAP();
-	});
+    
+    selectIntervalBtn.click( function(e) {
+        selectInterval();
+    });
+    exportBtn.click( function(e) {
+        exploreRecordedDataInCODAP();
+    });
 
     //
     // Panel on right (indicates status like "Currently Recording" etc.)
@@ -84,14 +160,16 @@ var DataSetView = function(options) {
                         {   // paddingTop:     '10px',
                             verticalAlign:  'top' } );
 
-    content.append(mainTable);
+    // content.append(mainTable);
+    menuandcontentholder.append(mainTable);
 
+ 
     //
     // Load a dataset and initialize view.
     //
     base.loadDataSet = function(dataSet) {
        
-        console.log("[DEBUG] loadDataSet", dataSet);
+        //console.log("[DEBUG] loadDataSet", dataSet);
 
         base.m_dataSet              = dataSet;
         base.m_program              = specToDiagram(dataSet.metadata.program);
@@ -113,12 +191,42 @@ var DataSetView = function(options) {
         base.resizeCanvas();
 
         base.m_plotHandler.plotter.resetReceived();
+        
+        var url = '/ext/flow/list_datasetsequences';
+        var data = { filename:      dataSet.name,
+                     csrf_token:    g_csrfToken     };        
 
-        //
-        // Set time frame on graph to start and end time of recording.
-        //
-        setTimeFrame(   base.m_dataSet.metadata.start_time, 
-                        base.m_dataSet.metadata.end_time );
+        $.ajax({
+            url: url,
+            method: 'POST',
+            data: data,
+            success: function(data) {
+                var response = JSON.parse(data);
+
+                // console.log("[DEBUG] List sequences", response);
+
+                if(response.success) {
+                   
+                    var items = response.items;
+                    for(var i = 0; i < items.length; i++) {
+                        console.log("[DEBUG] List sequences", items[i]);
+                    }
+                    //
+                    // Set time frame on graph to start and end time of recording.
+                    //
+                    setTimeFrame(   items, base.m_dataSet.metadata.start_time, 
+                                    base.m_dataSet.metadata.end_time );
+
+                } else {
+                    console.log("[ERROR] Error listing sequences", response);
+                }
+            },
+            error: function(data) {
+                console.log("[ERROR] List sequences error", data);
+            },
+        });
+        
+
 
         recordingStatusPanel.show();
     }
@@ -132,11 +240,11 @@ var DataSetView = function(options) {
     // Resize canvas
     //
     base.resizeCanvas = function() {
-        console.log("[DEBUG] resizeCanvas", 
-                        window.innerWidth, 
-                        window.innerHeight);
-        base.m_canvas.width = window.innerWidth - RIGHT_PANEL_WIDTH;;
-        base.m_canvas.height = window.innerHeight - PLOTTER_MARGIN_BOTTOM;
+        //console.log("[DEBUG] resizeCanvas", 
+        //                window.innerWidth, 
+        //                window.innerHeight);
+        base.m_canvas.width = window.innerWidth - RIGHT_PANEL_WIDTH - HORIZONTAL_MARGIN;
+        base.m_canvas.height = window.innerHeight - PLOTTER_MARGIN_BOTTOM - VERTICAL_MARGIN;
         if (base.m_plotHandler){
             base.m_plotHandler.drawPlot(null, null);
         }
@@ -149,7 +257,7 @@ var DataSetView = function(options) {
     }
 
     base.historyResponseHandler = function(data) {
-        blockName = data.name;
+        sequenceName = data.name;
         var values = data.values;
         var timestamps = data.timestamps;
 
@@ -170,32 +278,15 @@ var DataSetView = function(options) {
 
         //
         // Update plot data
-		//
-        var dataPair = base.findDataPair(blockName);
+        //
+        var dataPair = base.findDataPair(sequenceName);
         if (!dataPair) {
-            var diagram = base.m_program;
-            var block = null;
-        	for (var i = 0; i < diagram.blocks.length; i++) {
-
-                console.log("[DEBUG] Checking blocks", 
-                            diagram.blocks[i].name, 
-                            blockName);
-
-            	if (diagram.blocks[i].name === blockName) {
-                	block = diagram.blocks[i];
-                	break;
-            	}
-        	}
-            if (block) {
-                console.log("[DEBUG] Creating dataPair", block);
-                dataPair = base.createDataPair(block);
-                
-                // add data pair to plotter
-                base.m_plotHandler.plotter.dataPairs.push(dataPair);
-                base.m_plotHandler.plotter.setData(base.m_plotHandler.plotter.dataPairs);
-            } else {
-                console.log("[DEBUG] Skipping dataPair for", block);
-            }
+            
+            dataPair = base.createDataPair(sequenceName);
+            
+            // add data pair to plotter
+            base.m_plotHandler.plotter.dataPairs.push(dataPair);
+            base.m_plotHandler.plotter.setData(base.m_plotHandler.plotter.dataPairs);            
         }
 
         if (dataPair) {
@@ -223,12 +314,12 @@ var DataSetView = function(options) {
         $.get(url, params, base.historyResponseHandler);
     }
 
-    base.createDataPair = function(block) {
+    base.createDataPair = function(sequenceName) {
         var xData = createDataColumn('timestamp', []);
         xData.type = 'timestamp';
         var yData = createDataColumn('value', []);
-        yData.name = block.name;
-        yData.units = block.units;
+        yData.name = sequenceName;
+        //yData.units = block.units;
         return {
             'xData': xData,
             'yData': yData,
@@ -236,18 +327,18 @@ var DataSetView = function(options) {
         };
     }
 
-    base.findDataPair = function(blockName) {
+    base.findDataPair = function(sequenceName) {
         var dataPair = null;
         var dataPairs = base.m_plotHandler.plotter.dataPairs;
         for (var i = 0; i < dataPairs.length; i++) {
             var d = dataPairs[i];
-            console.log("[DEBUG] findDataPair checking", d.yData.name, blockName);
-            if (d.yData.name === blockName) {
+            console.log("[DEBUG] findDataPair checking", d.yData.name, sequenceName);
+            if (d.yData.name === sequenceName) {
                 dataPair = d;
                 break;
             }
         }
-        console.log("[DEBUG] findDataPair", blockName, "found", dataPair);
+        console.log("[DEBUG] findDataPair", sequenceName, "found", dataPair);
         return dataPair;
     }
 
@@ -260,7 +351,7 @@ var DataSetView = function(options) {
     // endStr   - UTC date string as stored in metadata. If undefined, use
     //                  the current date (now)
     //
-    function setTimeFrame(startStr, endStr) {
+    function setTimeFrame(sequences, startStr, endStr) {
 
         //
         // Parse the date string into a javascript Date object.
@@ -290,36 +381,19 @@ var DataSetView = function(options) {
 
         var start   = moment(startDate.getTime()).toISOString();
         var end     = moment(endDate.getTime() - 1000).toISOString();
-
-        var diagram = base.m_program;
-
-        console.log("[DEBUG] Requesting block data", diagram.blocks);
-        console.log("[DEBUG] date range", start, end);
-
-        //
-        // request all current input blocks from server
-        //
-        for (var i = 0; i < diagram.blocks.length; i++) {
-            var block = diagram.blocks[i];
-            if (block.inputCount === 0) {
-                if (g_useBle) {
-                    bleRequestHistory({
-                        name: block.name,
-                        count: 100000,
-                        start_timestamp: start,
-                        end_timestamp: end
-                    });
-
-                } else {
-                    console.log("[DEBUG] Requesting block data", block.name);
-                    base.requestServerSequenceData(block.name, {
-                        count: 100000,
-                        start_timestamp: start,
-                        end_timestamp: end
-                    });
-
-                }
+        
+        
+        for (var i = 0; i < sequences.length; i++) {
+            if(i!=0){
+                base.requestServerSequenceData(sequences[i].name, {
+                    count: 100000,
+                    start_timestamp: start,
+                    end_timestamp: end
+                });
+                
             }
+            
+            
         }
     }
 

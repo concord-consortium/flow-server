@@ -20,380 +20,442 @@ function getNearest(arr,value) {
 
 function createPlotHandler( canvas, multiFrame ) {
 
-	var plotHandler = {};
-	plotHandler.plotter = createPlotter( canvas, multiFrame );
-	plotHandler.mouseDown = false;
-	plotHandler.xDownLast = null;
-	plotHandler.intervalSelect = false; // Start in pan mode
+    var plotHandler = {};
+    plotHandler.plotter = createPlotter( canvas, multiFrame );
+    plotHandler.mouseDown = false;
+    plotHandler.xDownLast = null;
+    plotHandler.intervalSelect = false; // Start in pan mode
+    plotHandler.xOverLast = null;
+    plotHandler.yOverLast = null;
 
-	plotHandler.drawPlot = function( xMouse, yMouse ) {
-		var args = {
-			"useTimestamp": true,
-			"presentIsZero": false,
-			"intervalSelect": this.intervalSelect
-		};
-		this.plotter.drawPlot( xMouse, yMouse, args );
-	}
+    plotHandler.drawPlot = function( xMouse, yMouse ) {
+        var args = {
+            "useTimestamp": true,
+            "presentIsZero": false,
+            "intervalSelect": this.intervalSelect
+        };
+        
+        if(xMouse===null && !isNaN(!this.xOverLast))
+            xMouse = this.xOverLast;
+        if(yMouse===null && !isNaN(!this.yOverLast))
+            yMouse = this.yOverLast;
+        
+        this.plotter.drawPlot( xMouse, yMouse, args );
+    }
 
-	// handle mouse events (pan the plot or display mouse-over info)
-	plotHandler.onMouse = function( e ) {
-		var x = objectClickX( e );
-		var y = objectClickY( e );
-		e.preventDefault();
-		e.stopPropagation();
-		if (e.type === "mousedown") {
-			plotHandler.mouseDown = true;
-		} else if (e.type === "mouseup") {
-			plotHandler.mouseDown = false;
-		} else if (e.type === "mouseout" || e.type === "mouseleave") {
-			plotHandler.mouseDown = false;
-		}
+    // handle mouse events (pan the plot or display mouse-over info)
+    plotHandler.onMouse = function( e ) {
+        var x = objectClickX( e );
+        var y = objectClickY( e );
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.type === "mousedown") {
+            plotHandler.mouseDown = true;
+        } else if (e.type === "mouseup") {
+            plotHandler.mouseDown = false;
+        } else if (e.type === "mouseout" || e.type === "mouseleave") {
+            plotHandler.mouseDown = false;
+        }
 
-		if (plotHandler.intervalSelect){
-			if (e.type === "mousedown") {
-				plotHandler.plotter.setIntervalFirstBound(x);
-			} else if (plotHandler.mouseDown) {
-				plotHandler.plotter.setIntervalSecondBound(x);
-			}
-			plotHandler.drawPlot( x, y );
-		} else {
-			if (plotHandler.mouseDown) {
-				if (plotHandler.xDownLast) {
-					plotHandler.plotter.pan( plotHandler.xDownLast, x );
-				}
-				plotHandler.drawPlot( x, y );
-				plotHandler.xDownLast = x;
-			} else {
-				plotHandler.drawPlot( x, y );
-				plotHandler.xDownLast = null;
-			}
-		}
-	};
+        if (plotHandler.intervalSelect){
+            if (e.type === "mousedown") {
+                plotHandler.plotter.setIntervalFirstBound(x);
+            } else if (plotHandler.mouseDown) {
+                plotHandler.plotter.setIntervalSecondBound(x);
+            }
+            plotHandler.drawPlot( x, y );
+        } else {
+            if (plotHandler.mouseDown) {
+                if (plotHandler.xDownLast) {
+                    plotHandler.plotter.pan( plotHandler.xDownLast, x );
+                }
+                plotHandler.drawPlot( x, y );
+                plotHandler.xDownLast = x;
+            } else {
+                plotHandler.drawPlot( x, y );
+                plotHandler.xDownLast = null;
+                plotHandler.xOverLast = x;
+                plotHandler.yOverLast = y;
+            }
+        }
+    };
 
-	plotHandler.onClick = function( e ) {
-		if (!plotHandler.intervalSelect) return;
-		var x = objectClickX( e );
-		var y = objectClickY( e );
-		e.preventDefault();
-		e.stopPropagation();
-		var args = {
-			"useTimestamp": true,
-			"presentIsZero": false,
-			"intervalSelect": plotHandler.intervalSelect,
-			"isClick": true
-		};
-		plotHandler.plotter.drawPlot( x, y, args );
-	}
+    plotHandler.onClick = function( e ) {
+        if (!plotHandler.intervalSelect) return;
+        var x = objectClickX( e );
+        var y = objectClickY( e );
+        e.preventDefault();
+        e.stopPropagation();
+        var args = {
+            "useTimestamp": true,
+            "presentIsZero": false,
+            "intervalSelect": plotHandler.intervalSelect,
+            "isClick": true
+        };
+        plotHandler.plotter.drawPlot( x, y, args );
+    }
 
-	canvas.addEventListener( "mousemove", plotHandler.onMouse, false );
-	canvas.addEventListener( "mouseup", plotHandler.onMouse, false );
-	canvas.addEventListener( "mousedown", plotHandler.onMouse, false );
-	canvas.addEventListener( "mouseout", plotHandler.onMouse, false );
-	canvas.addEventListener( "mouseleave", plotHandler.onMouse, false );
-	// canvas.addEventListener( "click", plotHandler.onClick, false );
+    canvas.addEventListener( "mousemove", plotHandler.onMouse, false );
+    canvas.addEventListener( "mouseup", plotHandler.onMouse, false );
+    canvas.addEventListener( "mousedown", plotHandler.onMouse, false );
+    canvas.addEventListener( "mouseout", plotHandler.onMouse, false );
+    canvas.addEventListener( "mouseleave", plotHandler.onMouse, false );
+    // canvas.addEventListener( "click", plotHandler.onClick, false );
 
-	plotHandler.zoomIn = function() {
-		plotHandler.plotter.zoomIn();
-		plotHandler.drawPlot( null, null );
-	};
+    plotHandler.zoomIn = function() {
+        plotHandler.plotter.zoomIn();
+        plotHandler.drawPlot( null, null );
+    };
 
-	plotHandler.zoomOut = function() {
-		plotHandler.plotter.zoomOut();
-		plotHandler.drawPlot( null, null );
-	};
+    plotHandler.zoomOut = function() {
+        plotHandler.plotter.zoomOut();
+        plotHandler.drawPlot( null, null );
+    };
 
-	plotHandler.setIntervalSelect = function(intervalSelect) {
-		this.intervalSelect = intervalSelect;
-	};
+    plotHandler.setIntervalSelect = function(intervalSelect) {
+        this.intervalSelect = intervalSelect;
+    };
 
-	return plotHandler;
+    return plotHandler;
 }
 
 
 // returns a plotter object suitable for displaying numeric plots on an HTML5 canvas context
 function createPlotter( canvas, multiFrame ) {
-	// If multiFrame is false, then we'll draw all frames in one plot.
-	// If true, then each frame will have it's own box, captions, etc.
-	if(typeof multiFrame === 'undefined') multiFrame = true;
-	var plotter = {};
-	// Get the canvas and ctx. If this is the plotter of a child plotBlock,
-	// it won't have a canvas element.
-	plotter.canvas = canvas;
-	if(plotter.canvas){
-		plotter.ctx = plotter.canvas.getContext( "2d" );
-		setInitTransform( plotter.ctx );
-		addDrawMethods( plotter.ctx );
-	}
+    // If multiFrame is false, then we'll draw all frames in one plot.
+    // If true, then each frame will have it's own box, captions, etc.
+    if(typeof multiFrame === 'undefined') multiFrame = true;
+    var plotter = {};
+    // Get the canvas and ctx. If this is the plotter of a child plotBlock,
+    // it won't have a canvas element.
+    plotter.canvas = canvas;
+    if(plotter.canvas){
+        plotter.ctx = plotter.canvas.getContext( "2d" );
+        setInitTransform( plotter.ctx );
+        addDrawMethods( plotter.ctx );
+    }
 
-	plotter.dataPairs = []; // A list of objects {"xData":DataColumn, "yData":DataColumn, "color":"rgb(#,#,#)"}
-	plotter.frames = [];
-	plotter.zoomLevel = 1;
-	plotter.plotMode = 'line';
+    plotter.dataPairs = []; // A list of objects {"xData":DataColumn, "yData":DataColumn, "color":"rgb(#,#,#)"}
+    plotter.frames = [];
+    plotter.zoomLevel = 1;
+    plotter.plotMode = 'line';
+    plotter.showYaxisBuffer = false;
+    plotter.YaxisBufferPercent = 0;
+    plotter.showTimeHighlight = true;
 
-	// Takes a string and sets the plotter.plotMode.
-	plotter.setPlotMode = function(plotMode){
-		switch(plotMode){
-			case "line":
-				this.plotMode = plotMode;
-				break;
-			case "histogram":
-				this.plotMode = plotMode;
-				break;
-			case "scatter":
-				this.plotMode = plotMode;
-				break;
-			default:
-				this.plotMode = "line";
-		}
-	};
+    // Takes a string and sets the plotter.plotMode.
+    plotter.setPlotMode = function(plotMode){
+        switch(plotMode){
+            case "line":
+                this.plotMode = plotMode;
+                break;
+            case "histogram":
+                this.plotMode = plotMode;
+                break;
+            case "scatter":
+                this.plotMode = plotMode;
+                break;
+            default:
+                this.plotMode = "line";
+        }
+    };
 
-	// set data to use for plotting; updates plot bounds from data
-	plotter.setData = function( dataPairs ) {
-		this.dataPairs = dataPairs;
-		// Frame count
-		var frameCount = multiFrame ? this.dataPairs.length : 1;
-		if(frameCount < 1){
-			frameCount = 1;
-		}
-		this.setFrameCount( frameCount );
+    // set data to use for plotting; updates plot bounds from data
+    plotter.setData = function( dataPairs ) {
+        this.dataPairs = dataPairs;
+        // Frame count
+        var frameCount = multiFrame ? this.dataPairs.length : 1;
+        if(frameCount < 1){
+            frameCount = 1;
+        }
+        this.setFrameCount( frameCount );
 
-		if(this.plotMode === "line"){
-			this.resetZoom(); //This will call autobounds as well
-		}
-		if(this.plotMode === "scatter"){
-			this.autoBounds();
-		}
-	};
+        if(this.plotMode === "line"){
+            this.resetZoom(); //This will call autobounds as well
+        }
+        if(this.plotMode === "scatter"){
+            this.autoBounds();
+        }
+    };
 
-	// fix(soon): refactor
-	plotter.setFrameCount = function( frameCount ) {
-		while (this.frames.length < frameCount) {
-			this.frames.push( createFrame( this.canvas.getContext( "2d" ) ) );
-		}
-		if (this.frames.length > frameCount) {
-			this.frames = this.frames.slice( 0, frameCount );
-		}
-	};
+    // fix(soon): refactor
+    plotter.setFrameCount = function( frameCount ) {
+        while (this.frames.length < frameCount) {
+            this.frames.push( createFrame( this.canvas.getContext( "2d" ) ) );
+        }
+        if (this.frames.length > frameCount) {
+            this.frames = this.frames.slice( 0, frameCount );
+        }
+    };
 
-	plotter.elapsedTimeBounds = function(presentIsZero){
-		if(presentIsZero === undefined) presentIsZero = false;
-		var captionOverrides = {}; // This is the object we'll return
+    plotter.elapsedTimeBounds = function(presentIsZero){
+        if(presentIsZero === undefined) presentIsZero = false;
+        var captionOverrides = {}; // This is the object we'll return
 
-		// We're only setting the bounds once. This will override for all data pairs.
-		// So let's only do this if the first dataPair.xData is a timestamp
-		if(this.dataPairs.length && this.frames.length && this.dataPairs[0].xData.type === "timestamp"){
-			var timestampCol = this.dataPairs[0].xData;
-			var timestampMax = timestampCol.max;
-			var timestampMin = timestampCol.min;
-			if(presentIsZero){
-				// Then the max timestamp should be regarded as "0".
-				captionOverrides["xMinLabelOverride"] = (new Date(this.frames[0].dataMinX * 1000) - new Date(timestampMax * 1000)) / 1000;
-				captionOverrides["xMaxLabelOverride"] = (new Date(this.frames[0].dataMaxX * 1000) - new Date(timestampMax * 1000)) / 1000;
-			}else{
-				// Then the min timestamp should be regarded as "0"
-				captionOverrides["xMinLabelOverride"] = (new Date(this.frames[0].dataMinX * 1000) - new Date(timestampMin * 1000)) / 1000;
-				captionOverrides["xMaxLabelOverride"] = (new Date(this.frames[0].dataMaxX * 1000) - new Date(timestampMin * 1000)) / 1000;
-			}
-			// If we don't fix the decimals, then the elapsed time can visually bounce around when it hits whole numbers
-			captionOverrides["xMinLabelOverride"] = toFixedSafe(captionOverrides["xMinLabelOverride"], 2);
-			captionOverrides["xMaxLabelOverride"] = toFixedSafe(captionOverrides["xMaxLabelOverride"], 2);
-			captionOverrides["xLabelOverride"] = "seconds!!!";
-		}
-		return captionOverrides;
-	};
+        // We're only setting the bounds once. This will override for all data pairs.
+        // So let's only do this if the first dataPair.xData is a timestamp
+        if(this.dataPairs.length && this.frames.length && this.dataPairs[0].xData.type === "timestamp"){
+            var timestampCol = this.dataPairs[0].xData;
+            var timestampMax = timestampCol.max;
+            var timestampMin = timestampCol.min;
+            if(presentIsZero){
+                // Then the max timestamp should be regarded as "0".
+                captionOverrides["xMinLabelOverride"] = (new Date(this.frames[0].dataMinX * 1000) - new Date(timestampMax * 1000)) / 1000;
+                captionOverrides["xMaxLabelOverride"] = (new Date(this.frames[0].dataMaxX * 1000) - new Date(timestampMax * 1000)) / 1000;
+            }else{
+                // Then the min timestamp should be regarded as "0"
+                captionOverrides["xMinLabelOverride"] = (new Date(this.frames[0].dataMinX * 1000) - new Date(timestampMin * 1000)) / 1000;
+                captionOverrides["xMaxLabelOverride"] = (new Date(this.frames[0].dataMaxX * 1000) - new Date(timestampMin * 1000)) / 1000;
+            }
+            // If we don't fix the decimals, then the elapsed time can visually bounce around when it hits whole numbers
+            captionOverrides["xMinLabelOverride"] = toFixedSafe(captionOverrides["xMinLabelOverride"], 2);
+            captionOverrides["xMaxLabelOverride"] = toFixedSafe(captionOverrides["xMaxLabelOverride"], 2);
+            captionOverrides["xLabelOverride"] = "seconds!!!";
+        }
+        return captionOverrides;
+    };
 
-	// ================ display bounds ================
+    // ================ display bounds ================
 
-	// Set the bounds of the frames based on the current bounds of the data pairs
-	plotter.setBoundsFromData = function(){
-		// This only really makes sense when there is one dataPair per frame
-		// Otherwise, how do we choose which bounds to apply to the frame?
-		if(this.frames.length === this.dataPairs.length){
-			for(i = 0; i < this.frames.length; ++i){
-				// We just get the values directly. If we called computeBounds, this
-				// would overwrite the bounds that have been set.
-				xD = this.dataPairs[i].xData;
-				yD = this.dataPairs[i].yData;
-				var xMin = xD.minBound === null ? xD.min : xD.minBound;
-				var xMax = xD.maxBound === null ? xD.max : xD.maxBound;
-				var yMin = yD.minBound === null ? yD.min : yD.minBound;
-				var yMax = yD.maxBound === null ? yD.max : yD.maxBound;
-				this.frames[ i ].dataMinX = xMin;
-				this.frames[ i ].dataMaxX = xMax;
-				this.frames[ i ].dataMinY = yMin;
-				this.frames[ i ].dataMaxY = yMax;
-			}
-		}
-	};
+    // Set the bounds of the frames based on the current bounds of the data pairs
+    plotter.setBoundsFromData = function(){
+        // This only really makes sense when there is one dataPair per frame
+        // Otherwise, how do we choose which bounds to apply to the frame?
+        if(this.frames.length === this.dataPairs.length){
+            for(i = 0; i < this.frames.length; ++i){
+                // We just get the values directly. If we called computeBounds, this
+                // would overwrite the bounds that have been set.
+                xD = this.dataPairs[i].xData;
+                yD = this.dataPairs[i].yData;
+                var xMin = xD.minBound === null ? xD.min : xD.minBound;
+                var xMax = xD.maxBound === null ? xD.max : xD.maxBound;
+                var yMin = yD.minBound === null ? yD.min : yD.minBound;
+                var yMax = yD.maxBound === null ? yD.max : yD.maxBound;
+                this.frames[ i ].dataMinX = xMin;
+                this.frames[ i ].dataMaxX = xMax;
+                this.frames[ i ].dataMinY = yMin;
+                this.frames[ i ].dataMaxY = yMax;
+            }
+        }
+    };
+    
+    //add a buffer around the y axis values for improved display
+    plotter.addYaxisBuffer = function(bufferPercent) {
+        this.showYaxisBuffer = true;
+        this.YaxisBufferPercent = bufferPercent;
+        
+    }
 
-	// Recalculate the bounds based on the current data
-	plotter.autoBounds = function(adjustTimestamps){
-	    if (typeof adjustTimestamps === 'undefined') { adjustTimestamps = false; }
-		// If the plotter is zoomed, then presumably the user is inspecting
-		// some part of the plot and wouldn't want the view to snap back.
-		if(this.zoomLevel !== 1) return;
+    // Recalculate the bounds based on the current data
+    plotter.autoBounds = function(adjustTimestamps){
+        if (typeof adjustTimestamps === 'undefined') { adjustTimestamps = false; }
+        // If the plotter is zoomed, then presumably the user is inspecting
+        // some part of the plot and wouldn't want the view to snap back.
+        if(this.zoomLevel !== 1) return;
 
-		var i, xD, yD, xMin, xMax, yMin, yMax, frame;
-		if(multiFrame){
-			var xMinAll = null, xMaxAll = null;
-			for (i = 0; i < this.frames.length; ++i) {
-				frame = this.frames[i];
-				xD = this.dataPairs[i].xData;
-				yD = this.dataPairs[i].yData;
-				xD.computeBounds();
-				yD.computeBounds();
-				xMin = xD.minBound === null ? xD.min : xD.minBound;
-				xMax = xD.maxBound === null ? xD.max : xD.maxBound;
-				yMin = yD.minBound === null ? yD.min : yD.minBound;
-				yMax = yD.maxBound === null ? yD.max : yD.maxBound;
-				if (xMin && (xMinAll === null || xMin < xMinAll)) {
-					xMinAll = xMin;
-				}
-				if (xMax && (xMaxAll === null || xMax > xMaxAll)) {
-					xMaxAll = xMax;
-				}
-				frame.dataMinY = yMin;  // y bounds set per frame
-				frame.dataMaxY = yMax;
-			}
-			for (i = 0; i < this.frames.length; ++i) {
-				frame = this.frames[i];
-				frame.dataMinX = xMinAll;  // x bounds should be shared across frames (so all move in sync)
-				frame.dataMaxX = xMaxAll;
-				if (adjustTimestamps) {
-				    frame.dataMinX = Math.round(frame.dataMinX-0.5);
-				    frame.dataMaxX = Math.round(frame.dataMaxX+0.5);
-				}
-			}
-		}else{
-			if(this.frames.length < 1) return;
-			// Set the min and max from the first data pair
-			xD = this.dataPairs[0].xData;
-			yD = this.dataPairs[0].yData;
-			xD.computeBounds();
-			yD.computeBounds();
-			xMin = xD.min;
-			xMax = xD.max;
-			yMin = yD.min;
-			yMax = yD.max;
-			var boundsSet = false;
-			if(xD.minBound !== null){
-				boundsSet = true;
-				xMin = xD.minBound;
-			}
-			if(xD.maxBound !== null){
-				boundsSet = true;
-				xMax = xD.maxBound;
-			}
-			if(yD.minBound !== null){
-				boundsSet = true;
-				yMin = yD.minBound;
-			}
-			if(yD.maxBound !== null){
-				boundsSet = true;
-				yMax = yD.maxBound;
-			}
-			// If the bounds haven't been set, then see if any others are better
-			if(!boundsSet){
-				for(i = 1; i < this.dataPairs.length; ++i){
-					xD = this.dataPairs[i].xData;
-					yD = this.dataPairs[i].yData;
-					xD.computeBounds();
-					yD.computeBounds();
-					if(xD.min < xMin) xMin = xD.min;
-					if(xD.max > xMax) xMax = xD.max;
-					if(yD.min < yMin) yMin = yD.min;
-					if(yD.max > yMax) yMax = yD.max;
-				}
-			}
-			frame = this.frames[ 0 ];
-			frame.dataMinX = xMin;
-			frame.dataMaxX = xMax;
-			frame.dataMinY = yMin;
-			frame.dataMaxY = yMax;
+        var i, xD, yD, xMin, xMax, yMin, yMax, frame;
+        if(multiFrame){
+            var xMinAll = null, xMaxAll = null;
+            for (i = 0; i < this.frames.length; ++i) {
+                frame = this.frames[i];
+                xD = this.dataPairs[i].xData;
+                yD = this.dataPairs[i].yData;
+                xD.computeBounds();
+                yD.computeBounds();
+                xMin = xD.minBound === null ? xD.min : xD.minBound;
+                xMax = xD.maxBound === null ? xD.max : xD.maxBound;
+                yMin = yD.minBound === null ? yD.min : yD.minBound;
+                yMax = yD.maxBound === null ? yD.max : yD.maxBound;
+                
+                if(this.showYaxisBuffer){
+                    var yRange = yMax - yMin;
+                    var buffer = yRange * this.YaxisBufferPercent * .01;
+                    //if(yRange >= 1)
+                    //    buffer = Math.ceil(buffer);
+
+                    if(yMin>=0 && (yMin - buffer) <= 0)
+                        yMin = 0;
+                    else
+                        yMin = yMin - buffer;
+                    yMax = yMax + buffer;
+                    yMin = Math.floor(yMin);
+                    yMax = Math.ceil(yMax);
+                }
+                
+                
+                if (xMin && (xMinAll === null || xMin < xMinAll)) {
+                    xMinAll = xMin;
+                }
+                if (xMax && (xMaxAll === null || xMax > xMaxAll)) {
+                    xMaxAll = xMax;
+                }
+                frame.dataMinY = yMin;  // y bounds set per frame
+                frame.dataMaxY = yMax;
+            }
+            for (i = 0; i < this.frames.length; ++i) {
+                frame = this.frames[i];
+                frame.dataMinX = xMinAll;  // x bounds should be shared across frames (so all move in sync)
+                frame.dataMaxX = xMaxAll;
+                if (adjustTimestamps) {
+                    frame.dataMinX = Math.round(frame.dataMinX-0.5);
+                    frame.dataMaxX = Math.round(frame.dataMaxX+0.5);
+                }
+            }
+        }else{
+            if(this.frames.length < 1) return;
+            // Set the min and max from the first data pair
+            xD = this.dataPairs[0].xData;
+            yD = this.dataPairs[0].yData;
+            xD.computeBounds();
+            yD.computeBounds();
+            xMin = xD.min;
+            xMax = xD.max;
+            yMin = yD.min;
+            yMax = yD.max;
+            var boundsSet = false;
+            if(xD.minBound !== null){
+                boundsSet = true;
+                xMin = xD.minBound;
+            }
+            if(xD.maxBound !== null){
+                boundsSet = true;
+                xMax = xD.maxBound;
+            }
+            if(yD.minBound !== null){
+                boundsSet = true;
+                yMin = yD.minBound;
+            }
+            if(yD.maxBound !== null){
+                boundsSet = true;
+                yMax = yD.maxBound;
+            }
+            // If the bounds haven't been set, then see if any others are better
+            if(!boundsSet){
+                for(i = 1; i < this.dataPairs.length; ++i){
+                    xD = this.dataPairs[i].xData;
+                    yD = this.dataPairs[i].yData;
+                    xD.computeBounds();
+                    yD.computeBounds();
+                    if(xD.min < xMin) xMin = xD.min;
+                    if(xD.max > xMax) xMax = xD.max;
+                    if(yD.min < yMin) yMin = yD.min;
+                    if(yD.max > yMax) yMax = yD.max;
+                }
+            }
+            frame = this.frames[ 0 ];
+            frame.dataMinX = xMin;
+            frame.dataMaxX = xMax;
+            frame.dataMinY = yMin;
+            frame.dataMaxY = yMax;
             if (adjustTimestamps) {
                 frame.dataMinX = Math.round(frame.dataMinX-0.5);
                 frame.dataMaxX = Math.round(frame.dataMaxX+0.5);
             }
 
-		}
-	};
+        }
+    };
 
-	// Adds the given values to the bounds. Pass null to leave a bound unchanged
-	plotter.addToBounds = function(xMin, xMax, yMin, yMax){
-		var xMinDiff = xMin || 0;
-		var xMaxDiff = xMax || 0;
-		var yMinDiff = yMin || 0;
-		var yMaxDiff = yMax || 0;
-		// Make sure one is non-zero before continuing
-		if(xMinDiff || xMaxDiff || yMinDiff || yMaxDiff ){
-			for(var i = 0; i < this.frames.length; ++i){
-				this.frames[ i ].dataMinX += xMinDiff;
-				this.frames[ i ].dataMaxX += xMaxDiff;
-				this.frames[ i ].dataMinY += yMinDiff;
-				this.frames[ i ].dataMaxY += yMaxDiff;
-			}
-		}
-	};
+    // Adds the given values to the bounds. Pass null to leave a bound unchanged
+    plotter.addToBounds = function(xMin, xMax, yMin, yMax){
+        var xMinDiff = xMin || 0;
+        var xMaxDiff = xMax || 0;
+        var yMinDiff = yMin || 0;
+        var yMaxDiff = yMax || 0;
+        // Make sure one is non-zero before continuing
+        if(xMinDiff || xMaxDiff || yMinDiff || yMaxDiff ){
+            for(var i = 0; i < this.frames.length; ++i){
+                this.frames[ i ].dataMinX += xMinDiff;
+                this.frames[ i ].dataMaxX += xMaxDiff;
+                this.frames[ i ].dataMinY += yMinDiff;
+                this.frames[ i ].dataMaxY += yMaxDiff;
+            }
+        }
+    };
 
 
-	/**
-	 * Adjust dataPairs, including yData.decimalPlaces in individual
-	 * yData (column) objects
-	*/
-	plotter.adjustParameters = function() {
+    /**
+     * Adjust dataPairs, including yData.decimalPlaces in individual
+     * yData (column) objects
+    */
+    plotter.adjustParameters = function() {
 
         for (var i=0; i < this.dataPairs.length; i++) {
             var dataPair = this.dataPairs[i];
-            dataPair.yData.decimalPlaces = countDecimals(dataPair.yData.data);
+			
+            //determine the number of decimal places to use on the axis
+            var maxDecimalPlaces = countDecimals(dataPair.yData.max);
+            var minDecimalPlaces = countDecimals(dataPair.yData.min);
+            var plotDecimalPlaces = maxDecimalPlaces;
+            if(minDecimalPlaces > maxDecimalPlaces)
+                plotDecimalPlaces = minDecimalPlaces;
+            dataPair.yData.decimalPlacesAxis = plotDecimalPlaces; 
+			
+            //determine the number of decimal places to use on the data
+            var dataDecimalPlaces = countDecimals(dataPair.yData.data);
+            var dataIntegerPlaces;
+            if (!dataPair.yData.data || !dataPair.yData.data.length)
+                dataIntegerPlaces = 0;
+            else{
+                 var value = dataPair.yData.data[0];
+                 value = Math.floor(value);
+                 dataIntegerPlaces = value.toString().length;
+            }
+            var maxSigFigs = 5;
+            var maxDecimalPlaces = maxSigFigs - dataIntegerPlaces;
+            if(maxDecimalPlaces < 0)
+                maxDecimalPlaces = 0;
+            if(dataDecimalPlaces > maxDecimalPlaces)
+                dataDecimalPlaces = maxDecimalPlaces;
+            dataPair.yData.decimalPlaces = dataDecimalPlaces;
         }
-	}
+    }
 
-	/**
-	 * Reset 'dataReceived' status.
-	*/
-	plotter.resetReceived = function(){
+    /**
+     * Reset 'dataReceived' status.
+    */
+    plotter.resetReceived = function(){
         for (var i=0; i < this.dataPairs.length; i++) {
             this.dataPairs[i].dataReceived = false;
         }
-	}
+    }
 
-	// ================ drawing ================
+    // ================ drawing ================
 
-	// This method draws the type of plot set with plotter.setPlotMode() to the
-	// canvas the was provided when the plotter was created. If xMouse and yMouse
-	// values are provided, data near that point will be highlighted based on the
-	// plot mode.
-	plotter.drawPlot = function(xMouse, yMouse, args){
-		if(this.frames.length < 1) return;
+    // This method draws the type of plot set with plotter.setPlotMode() to the
+    // canvas the was provided when the plotter was created. If xMouse and yMouse
+    // values are provided, data near that point will be highlighted based on the
+    // plot mode.
+    plotter.drawPlot = function(xMouse, yMouse, args){
+        if(this.frames.length < 1) return;
 
-		if(typeof xMouse === 'undefined' || isNaN(xMouse)) xMouse = null;
-		if(typeof yMouse === 'undefined' || isNaN(yMouse)) yMouse = null;
+        if(typeof xMouse === 'undefined' || isNaN(xMouse)) xMouse = null;
+        if(typeof yMouse === 'undefined' || isNaN(yMouse)) yMouse = null;
 
         // adjust yData.decimalPlaces for all dataPairs based on actual data
         this.adjustParameters();
 
-		switch(this.plotMode){
-			case 'line':
-				this.drawLinePlot(
-					xMouse,
-					yMouse,
-					args["useTimestamp"],
-					args["presentIsZero"],
-					args["intervalSelect"],
-					args["isClick"]
-				);
-				break;
-			case 'histogram':
-				var histogramBuckets = 0;
-				if(args["histogramBuckets"] !== undefined && !isNaN(args["histogramBuckets"])){
-					histogramBuckets = args["histogramBuckets"];
-				}
-				this.drawHistogramPlot(xMouse, yMouse, histogramBuckets);
-				break;
-			case 'scatter':
-				this.drawScatterPlot(xMouse, yMouse);
-				break;
-		}
+        switch(this.plotMode){
+            case 'line':
+                this.drawLinePlot(
+                    xMouse,
+                    yMouse,
+                    args["useTimestamp"],
+                    args["presentIsZero"],
+                    args["intervalSelect"],
+                    args["isClick"]
+                );
+                break;
+            case 'histogram':
+                var histogramBuckets = 0;
+                if(args["histogramBuckets"] !== undefined && !isNaN(args["histogramBuckets"])){
+                    histogramBuckets = args["histogramBuckets"];
+                }
+                this.drawHistogramPlot(xMouse, yMouse, histogramBuckets);
+                break;
+            case 'scatter':
+                this.drawScatterPlot(xMouse, yMouse);
+                break;
+        }
 
         // checking for xMouse, yMouse inhibits alerts when moving mouse over the panel
         //  after data has been loaded.
@@ -401,15 +463,15 @@ function createPlotter( canvas, multiFrame ) {
 //            alert("No historical data available for the given interval. Close history view and click 'Start Recording'.");
 //        }
 
-	};
+    };
 
     /**
     * Returns true if all plot data arrived and all plot data is empty.
     *
     */
-	plotter.allPlotsEmpty = function() {
-		// check datapairs
-		var plotsEmpty = false;
+    plotter.allPlotsEmpty = function() {
+        // check datapairs
+        var plotsEmpty = false;
 
         for (var i = 0; i < this.dataPairs.length; i++) {
             if (!this.dataPairs[i].dataReceived) {
@@ -426,1192 +488,1236 @@ function createPlotter( canvas, multiFrame ) {
             }
         }
         return plotsEmpty;
-	}
+    }
 
-	// All parameters optional.
-	plotter.drawLinePlot = function(xMouse, yMouse, useTimestamp, presentIsZero, intervalSelect, isClick){
-		// If useTimestamp is either undefined or false
-		if(useTimestamp === undefined || !useTimestamp){
-			var captionOverrides = this.elapsedTimeBounds(presentIsZero);
-			this.drawCaptions(
-				captionOverrides["xLabelOverride"],
-				captionOverrides["xMinLabelOverride"],
-				captionOverrides["xMaxLabelOverride"]
-			);
-		}else{
-			this.drawCaptions();
-		}
-		this.drawBackground();
-		this.drawBox();
-		if (this.dataPairs.length) {
-			this.drawData( true );
-		}
-		if (xMouse !== null && yMouse !== null) {
-			this.highlightValue( xMouse, yMouse, useTimestamp, presentIsZero );
-			if (intervalSelect && isClick) {
-				this.selectInterval(xMouse, yMouse);
-			}
-		}
-	};
+    // All parameters optional.
+    plotter.drawLinePlot = function(xMouse, yMouse, useTimestamp, presentIsZero, intervalSelect, isClick){
+        // If useTimestamp is either undefined or false
+        if(useTimestamp === undefined || !useTimestamp){
+            var captionOverrides = this.elapsedTimeBounds(presentIsZero);
+            this.drawCaptions(
+                captionOverrides["xLabelOverride"],
+                captionOverrides["xMinLabelOverride"],
+                captionOverrides["xMaxLabelOverride"]
+            );
+        }else{
+            this.drawCaptions();
+        }
+        this.drawBackground();
+        this.drawBox();
+        if (this.dataPairs.length) {
+            this.drawData( true );
+        }
+        if (xMouse !== null && yMouse !== null) {
+            this.highlightValue( xMouse, yMouse, useTimestamp, presentIsZero );
+            if (intervalSelect && isClick) {
+                this.selectInterval(xMouse, yMouse);
+            }
+        }
+    };
 
-	plotter.drawHistogramPlot = function(xMouse, yMouse, histogramBuckets){
-		var histogram = null;
-		if(this.dataPairs.length){
-			var xData = this.dataPairs[0].xData;
-			//xData.computeBounds();
+    plotter.drawHistogramPlot = function(xMouse, yMouse, histogramBuckets){
+        var histogram = null;
+        if(this.dataPairs.length){
+            var xData = this.dataPairs[0].xData;
+            //xData.computeBounds();
 
-			// compute histogram
-			histogram = computeHistogram( xData.data, histogramBuckets, xData.min, xData.max );
-			// count labels
-			var yMin = 0;
-			var yMax = Math.max.apply( null, histogram.counts );
-			var yLabel = "count";
+            // compute histogram
+            histogram = computeHistogram( xData.data, histogramBuckets, xData.min, xData.max );
+            // count labels
+            var yMin = 0;
+            var yMax = Math.max.apply( null, histogram.counts );
+            var yLabel = "count";
 
-			this.drawRawCaptions( xData.name, xData.format(xData.min), xData.format(xData.max), yLabel, yMin, yMax );
-			this.drawBackground();
-			// draw the plot
-			this.drawBox();
-			this.drawHistogram(histogram.counts, false);
-		}else{
-			this.drawBackground();
-			this.drawBox();
-		}
+            this.drawRawCaptions( xData.name, xData.format(xData.min), xData.format(xData.max), yLabel, yMin, yMax );
+            this.drawBackground();
+            // draw the plot
+            this.drawBox();
+            this.drawHistogram(histogram.counts, false);
+        }else{
+            this.drawBackground();
+            this.drawBox();
+        }
 
-		if(xMouse !== null && yMouse !== null && histogram){
-			this.highlightHistogram( histogram.counts, xMouse, yMouse );
-		}
-	};
+        if(xMouse !== null && yMouse !== null && histogram){
+            this.highlightHistogram( histogram.counts, xMouse, yMouse );
+        }
+    };
 
-	plotter.drawScatterPlot = function(xMouse, yMouse){
-		this.drawCaptions();
-		this.drawBackground();
-		this.drawBox();
-		if(this.dataPairs.length){
-			this.drawDataDots(false);
-		}
+    plotter.drawScatterPlot = function(xMouse, yMouse){
+        this.drawCaptions();
+        this.drawBackground();
+        this.drawBox();
+        if(this.dataPairs.length){
+            this.drawDataDots(false);
+        }
 
-		if(xMouse !== null && yMouse !== null){
-			this.highlightDot( xMouse, yMouse );
-		}
-	};
+        if(xMouse !== null && yMouse !== null){
+            this.highlightDot( xMouse, yMouse );
+        }
+    };
 
-	// fix(soon): remove/rework
-	// draw x-axis and y-axis labels on the plot
-	plotter.drawRawCaptions = function( xLabel, xMinLabel, xMaxLabel,
-										yLabel, yLabelUnit, yMinLabel, yMaxLabel, rotateLabelY ) {
-		var ctx = this.ctx;
-		var width = this.canvas.width;
-		var height = this.canvas.height;
-		ctx.setTransform( 1, 0, 0, 1, 0, 0 );
+    // fix(soon): remove/rework
+    // draw x-axis and y-axis labels on the plot
+    plotter.drawRawCaptions = function( xLabel, xMinLabel, xMaxLabel,
+                                        yLabel, yLabelUnit, yMinLabel, yMaxLabel, rotateLabelY ) {
+        var ctx = this.ctx;
+        var width = this.canvas.width;
+        var height = this.canvas.height;
+        ctx.setTransform( 1, 0, 0, 1, 0, 0 );
 
-		// clear the background
-		ctx.clearRect( 0, 0, width, height );
+        // clear the background
+        ctx.clearRect( 0, 0, width, height );
 
-		// fit frame to caption text and draw caption text
-		this.setFrameCount( 1 );
-		this.frames[ 0 ].setCaptions( xLabel, xMinLabel, xMaxLabel, yLabel, yLabelUnit, yMinLabel, yMaxLabel, rotateLabelY );
-		this.frames[ 0 ].fitBoxToCaptions( 0, width - 1, 0, height - 1 );
-		this.frames[ 0 ].drawCaptions();
-	};
+        // fit frame to caption text and draw caption text
+        this.setFrameCount( 1 );
+        this.frames[ 0 ].setCaptions( xLabel, xMinLabel, xMaxLabel, yLabel, yLabelUnit, yMinLabel, yMaxLabel, rotateLabelY, true, true );
+        this.frames[ 0 ].fitBoxToCaptions( 0, width - 1, 0, height - 1 );
+        this.frames[ 0 ].drawCaptions();
+    };
 
-	// fix(soon): remove
-	plotter.drawBox = function() {
-		for (var i = 0; i < this.frames.length; i++)
-			this.frames[ i ].drawBox();
-	};
+    // fix(soon): remove
+    plotter.drawBox = function() {
+        for (var i = 0; i < this.frames.length; i++)
+            this.frames[ i ].drawBox();
+    };
 
-	// fix(soon): make faster and move into frame
-	// draw a white background for the data box
-	plotter.drawBackground = function() {
-		var ctx = this.ctx;
-		for(var i = 0; i < this.frames.length; ++i){
-			ctx.save();
-			this.frames[ i ].clipBox();
-			ctx.setTransform( 1, 0, 0, 1, 0, 0 );
-			ctx.fillStyle = "rgb(255,255,255)";
-			ctx.fillRect( 0, 0, this.canvas.width, this.canvas.height );
-			ctx.restore();
-		}
-	};
+    // fix(soon): make faster and move into frame
+    // draw a white background for the data box
+    plotter.drawBackground = function() {
+        var ctx = this.ctx;
+        for(var i = 0; i < this.frames.length; ++i){
+            ctx.save();
+            this.frames[ i ].clipBox();
+            ctx.setTransform( 1, 0, 0, 1, 0, 0 );
+            ctx.fillStyle = "rgb(255,255,255)";
+            ctx.fillRect( 0, 0, this.canvas.width, this.canvas.height );
+            ctx.restore();
+        }
+    };
 
-	// fix(soon): rework or remove
-	// draw x-axis and y-axis labels on the plot, using data set via setData
-	plotter.drawCaptions = function( xLabelOverride, xMinLabelOverride, xMaxLabelOverride ) {
-		var ctx = this.ctx;
-		var width = this.canvas.width;
-		var height = this.canvas.height;
-		ctx.setTransform( 1, 0, 0, 1, 0, 0 );
-		ctx.clearRect( 0, 0, width, height ); // clear the background
-		var outerFrameHeight = height / this.frames.length;
-		for (var i = 0; i < this.frames.length; i++) {
+    // fix(soon): rework or remove
+    // draw x-axis and y-axis labels on the plot, using data set via setData
+    plotter.drawCaptions = function( xLabelOverride, xMinLabelOverride, xMaxLabelOverride ) {
+        var ctx = this.ctx;
+        var width = this.canvas.width;
+        var height = this.canvas.height;
+        ctx.setTransform( 1, 0, 0, 1, 0, 0 );
+        ctx.clearRect( 0, 0, width, height ); // clear the background
+        var outerFrameHeight = height / this.frames.length;
+        for (var i = 0; i < this.frames.length; i++) {
 
-			// compute labels based on data columns
-			var units = "";
-			var xData = this.dataPairs[i].xData;
-			var yData = this.dataPairs[i].yData;
-			units = xData.units;
-			var xLabel = units === "" ? xData.name : units;
-			var xMinLabel = xData.format( this.frames[ i ].dataMinX );
-			var xMaxLabel = xData.format( this.frames[ i ].dataMaxX );
-			units = yData.units;
-			var yLabel = yData.name;
-			var yMinLabel = yData.format( this.frames[ i ].dataMinY );
-			var yMaxLabel = yData.format( this.frames[ i ].dataMaxY );
+            // compute labels based on data columns
+            var units = "";
+            var xData = this.dataPairs[i].xData;
+            var yData = this.dataPairs[i].yData;
+            units = xData.units;
+            var xLabel = units === "" ? xData.name : units;
+            var xMinLabel = xData.format( this.frames[ i ].dataMinX );
+            var xMaxLabel = xData.format( this.frames[ i ].dataMaxX );
+            units = yData.units;
+            var yLabel = yData.name;
+            var yMinLabel = yData.format( this.frames[ i ].dataMinY, xData.decimalPlacesAxis );
+            var yMaxLabel = yData.format( this.frames[ i ].dataMaxY, xData.decimalPlacesAxis );
+            var hideXaxisLabel = xData.hideAxisLabel;
+            var hideYaxisLabel = yData.hideAxisLabel;
 
-			if (xLabelOverride !== undefined)
-				xLabel = xLabelOverride;
-			if (xMinLabelOverride !== undefined)
-				xMinLabel = xMinLabelOverride;
-			if (xMaxLabelOverride !== undefined)
-				xMaxLabel = xMaxLabelOverride;
+            if (xLabelOverride !== undefined)
+                xLabel = xLabelOverride;
+            if (xMinLabelOverride !== undefined)
+                xMinLabel = xMinLabelOverride;
+            if (xMaxLabelOverride !== undefined)
+                xMaxLabel = xMaxLabelOverride;
 
-			// compute outer frame bounds
-			var outerMinX = 0;
-			var outerMaxX = width - 1;
-			var outerMinY = Math.round( outerFrameHeight * i );
-			var outerMaxY = Math.round( outerFrameHeight * (i + 1) - 1 );
+            // compute outer frame bounds
+            var outerMinX = 0;
+            var outerMaxX = width - 1;
+            var outerMinY = Math.round( outerFrameHeight * i );
+            var outerMaxY = Math.round( outerFrameHeight * (i + 1) - 1 );
 
-			// fit frame to caption text
-			this.frames[ i ].setCaptions( xLabel, xMinLabel, xMaxLabel, yLabel, units, yMinLabel, yMaxLabel, yData.rotateLabel );
-			this.frames[ i ].fitBoxToCaptions( outerMinX, outerMaxX, outerMinY, outerMaxY );
-		}
+            // fit frame to caption text
+            this.frames[ i ].setCaptions( xLabel, xMinLabel, xMaxLabel, yLabel, units, yMinLabel, yMaxLabel, yData.rotateLabel, hideXaxisLabel, hideYaxisLabel );
+            this.frames[ i ].fitBoxToCaptions( outerMinX, outerMaxX, outerMinY, outerMaxY );
+        }
 
-		// if multiple frames, left align their boxes
-		if (this.frames.length > 1) {
-			var leftSpace = 0;
-			for (var i = 0; i < this.frames.length; i++) {
-				var boxMinX = this.frames[ i ].boxMinX;
-				if (boxMinX > leftSpace)
-					leftSpace = boxMinX;
-			}
-			for (var i = 0; i < this.frames.length; i++) {
-				this.frames[ i ].boxMinX = leftSpace;
-			}
-		}
+        // if multiple frames, left align their boxes
+        if (this.frames.length > 1) {
+            var leftSpace = 0;
+            for (var i = 0; i < this.frames.length; i++) {
+                var boxMinX = this.frames[ i ].boxMinX;
+                if (boxMinX > leftSpace)
+                    leftSpace = boxMinX;
+            }
+            for (var i = 0; i < this.frames.length; i++) {
+                this.frames[ i ].boxMinX = leftSpace;
+            }
+        }
 
-		// draw caption text
-		for (var i = 0; i < this.frames.length; i++) {
-			this.frames[ i ].drawCaptions( xLabel, xMinLabel, xMaxLabel, yLabel, yMinLabel, yMaxLabel );
-		}
-	};
+        // draw caption text
+        for (var i = 0; i < this.frames.length; i++) {
+            this.frames[ i ].drawCaptions( xLabel, xMinLabel, xMaxLabel, yLabel, yMinLabel, yMaxLabel );
+        }
+    };
 
-	// draw the data as one or more line plots
-	plotter.drawData = function( clip ) {
-		if(this.frames.length < 1) return;
-		var ctx = this.ctx;
-		if (this.dataPairs.length == this.frames.length) { // if one frame per data pair
-				for (var i = 0; i < this.frames.length; i++) {
-						ctx.save(); // save before clip
-						if (clip)
-								this.frames[ i ].clipBox();
-						var color = "rgb(0,125,175)";
-						if(typeof this.dataPairs[i].color !== 'undefined'){
-							color = this.dataPairs[i].color;
-						}
-						ctx.strokeStyle = color;
-						this.frames[ i ].drawData( this.dataPairs[ i ].xData, this.dataPairs[i].yData );
-						ctx.restore(); // restore after clip
-				}
-		} else { // otherwise, assume one frame with multiple datas
-				ctx.save(); // save before clip
-				if (clip)
-						this.frames[ 0 ].clipBox();
-				for (var i = 0; i < this.dataPairs.length; i++) {
-						ctx.strokeStyle = this.dataPairs[i].color;
-						this.frames[ 0 ].drawData( this.dataPairs[ i ].xData, this.dataPairs[i].yData );
-				}
-				ctx.restore(); // restore after clip
-		}
-	};
+    // draw the data as one or more line plots
+    plotter.drawData = function( clip ) {
+        if(this.frames.length < 1) return;
+        var ctx = this.ctx;
+        if (this.dataPairs.length == this.frames.length) { // if one frame per data pair
+                for (var i = 0; i < this.frames.length; i++) {
+                        ctx.save(); // save before clip
+                        if (clip)
+                                this.frames[ i ].clipBox();
+                        var color = "rgb(0,125,175)";
+                        if(typeof this.dataPairs[i].color !== 'undefined'){
+                            color = this.dataPairs[i].color;
+                        }
+                        ctx.strokeStyle = color;
+                        this.frames[ i ].drawData( this.dataPairs[ i ].xData, this.dataPairs[i].yData );
+                        ctx.restore(); // restore after clip
+                }
+        } else { // otherwise, assume one frame with multiple datas
+                ctx.save(); // save before clip
+                if (clip)
+                        this.frames[ 0 ].clipBox();
+                for (var i = 0; i < this.dataPairs.length; i++) {
+                        ctx.strokeStyle = this.dataPairs[i].color;
+                        this.frames[ 0 ].drawData( this.dataPairs[ i ].xData, this.dataPairs[i].yData );
+                }
+                ctx.restore(); // restore after clip
+        }
+    };
 
-	// draw data (x coordinates and corresponding y coordinates) as dots
-	plotter.drawDataDots = function(clip) {
-		if(this.frames.length < 1) return;
-		var ctx = this.ctx;
-		var color = "rgba(0,157,223,0.5)";
-		if(typeof this.dataPairs[0].color !== 'undefined'){
-			color = this.dataPairs[0].color;
-		}
-		ctx.save(); // save before clip
-		if (clip)
-				this.frames[ 0 ].clipBox();
-		ctx.fillStyle = color;
-		this.frames[ 0 ].drawDataDots( this.dataPairs[0].xData, this.dataPairs[0].yData );
-		ctx.restore(); // restore after clip
-	};
+    // draw data (x coordinates and corresponding y coordinates) as dots
+    plotter.drawDataDots = function(clip) {
+        if(this.frames.length < 1) return;
+        var ctx = this.ctx;
+        var color = "rgba(0,157,223,0.5)";
+        if(typeof this.dataPairs[0].color !== 'undefined'){
+            color = this.dataPairs[0].color;
+        }
+        ctx.save(); // save before clip
+        if (clip)
+                this.frames[ 0 ].clipBox();
+        ctx.fillStyle = color;
+        this.frames[ 0 ].drawDataDots( this.dataPairs[0].xData, this.dataPairs[0].yData );
+        ctx.restore(); // restore after clip
+    };
 
-	plotter.drawHistogram = function(counts, clip){
-		if(this.frames.length < 1) return;
-		var ctx = this.ctx;
-		ctx.save(); // save before clip
-		if (clip)
-				this.frames[ 0 ].clipBox();
-		this.frames[ 0 ].drawHistogram( counts );
-		ctx.restore(); // restore after clip
-	};
+    plotter.drawHistogram = function(counts, clip){
+        if(this.frames.length < 1) return;
+        var ctx = this.ctx;
+        ctx.save(); // save before clip
+        if (clip)
+                this.frames[ 0 ].clipBox();
+        this.frames[ 0 ].drawHistogram( counts );
+        ctx.restore(); // restore after clip
+    };
 
-	// fix(soon): remove
-	// draw a line between two points in data coords
-	plotter.drawLine = function( x1, y1, x2, y2 ) {
-		if(this.frames.length < 1) return;
-		var ctx = this.ctx;
-		x1 = this.frames[ 0 ].dataToScreenX( x1 );
-		y1 = this.frames[ 0 ].dataToScreenY( y1 );
-		x2 = this.frames[ 0 ].dataToScreenX( x2 );
-		y2 = this.frames[ 0 ].dataToScreenY( y2 );
-		ctx.drawLine( x1, y1, x2, y2 );
-	};
+    // fix(soon): remove
+    // draw a line between two points in data coords
+    plotter.drawLine = function( x1, y1, x2, y2 ) {
+        if(this.frames.length < 1) return;
+        var ctx = this.ctx;
+        x1 = this.frames[ 0 ].dataToScreenX( x1 );
+        y1 = this.frames[ 0 ].dataToScreenY( y1 );
+        x2 = this.frames[ 0 ].dataToScreenX( x2 );
+        y2 = this.frames[ 0 ].dataToScreenY( y2 );
+        ctx.drawLine( x1, y1, x2, y2 );
+    };
 
-	// highlight the x value at a given y coordinate for all data pairs
-	plotter.highlightValue = function( xScreen, yScreen, useTimestamp, presentIsZero ) {
-		if(this.frames.length < 1) return;
-		if(typeof useTimestamp === 'undefined') useTimestamp = false;
+    // highlight the x value at a given y coordinate for all data pairs
+    plotter.highlightValue = function( xScreen, yScreen, useTimestamp, presentIsZero ) {
+        if(this.frames.length < 1) return;
+        if(typeof useTimestamp === 'undefined') useTimestamp = false;
 
-		var xMouseData = this.frames[ 0 ].screenToDataX( xScreen );
-		if (xScreen > this.frames[ 0 ].boxMinX && xScreen < this.frames[ 0 ].boxMaxX) {
-			if(this.frames.length === this.dataPairs.length){ // If one frame per data pair
-				for (var i = 0; i < this.frames.length; i++) {
-					this.frames[ i ].highlightValue( this.dataPairs[i].xData, this.dataPairs[i].yData, xMouseData, useTimestamp, presentIsZero );
-				}
-			}else{ // If one frame with multiple data pairs
-				for (var i = 0; i < this.dataPairs.length; ++i) {
-					var drawLine = i === 0 ? true : false;
-					this.frames[ 0 ].highlightValue( this.dataPairs[i].xData, this.dataPairs[i].yData, xMouseData, useTimestamp, presentIsZero, drawLine );
-				}
-			}
-		}
-	};
+        var xMouseData = this.frames[ 0 ].screenToDataX( xScreen );
+        if (xScreen > this.frames[ 0 ].boxMinX && xScreen < this.frames[ 0 ].boxMaxX) {
+            if(this.frames.length === this.dataPairs.length){ // If one frame per data pair
+                for (var i = 0; i < this.frames.length; i++) {
+                    this.frames[ i ].showTimeHighlight = this.showTimeHighlight;
+                    this.frames[ i ].highlightValue( this.dataPairs[i].xData, this.dataPairs[i].yData, xMouseData, useTimestamp, presentIsZero );
+                }
+            }else{ // If one frame with multiple data pairs
+                for (var i = 0; i < this.dataPairs.length; ++i) {
+                    var drawLine = i === 0 ? true : false;
+                    this.frames[ 0 ].showTimeHighlight = this.showTimeHighlight;
+                    this.frames[ 0 ].highlightValue( this.dataPairs[i].xData, this.dataPairs[i].yData, xMouseData, useTimestamp, presentIsZero, drawLine );
+                }
+            }
+        }
+    };
 
-	plotter.setIntervalFirstBound = function(xMouse){
-		var xMouseData = this.frames[ 0 ].screenToDataX( xMouse );
-		for (var i = 0; i < this.frames.length; i++) {
-			this.frames[i].snapIntervalFirstBound(xMouseData, this.dataPairs[i].xData.data);
-		}
-	}
+    plotter.setIntervalFirstBound = function(xMouse){
+        var xMouseData = this.frames[ 0 ].screenToDataX( xMouse );
+        for (var i = 0; i < this.frames.length; i++) {
+            this.frames[i].snapIntervalFirstBound(xMouseData, this.dataPairs[i].xData.data);
+        }
+    }
 
-	plotter.setIntervalSecondBound = function(xMouse){
-		var xMouseData = this.frames[ 0 ].screenToDataX( xMouse );
-		for (var i = 0; i < this.frames.length; i++) {
-			var frame = this.frames[i];
-			frame.snapIntervalSecondBound(xMouseData, this.dataPairs[i].xData.data);
+    plotter.setIntervalSecondBound = function(xMouse){
+        var xMouseData = this.frames[ 0 ].screenToDataX( xMouse );
+        for (var i = 0; i < this.frames.length; i++) {
+            var frame = this.frames[i];
+            frame.snapIntervalSecondBound(xMouseData, this.dataPairs[i].xData.data);
 
-			if (frame.intervalFirstBoundX && frame.intervalSecondBoundX) {
-				var lowerX, upperX;
-				if (frame.intervalSecondBoundX >= frame.intervalFirstBoundX) {
-					lowerX = frame.intervalFirstBoundX;
-					upperX = frame.intervalSecondBoundX;
-				} else {
-					lowerX = frame.intervalSecondBoundX;
-					upperX = frame.intervalFirstBoundX;
-				}
+            if (frame.intervalFirstBoundX && frame.intervalSecondBoundX) {
+                var lowerX, upperX;
+                if (frame.intervalSecondBoundX >= frame.intervalFirstBoundX) {
+                    lowerX = frame.intervalFirstBoundX;
+                    upperX = frame.intervalSecondBoundX;
+                } else {
+                    lowerX = frame.intervalSecondBoundX;
+                    upperX = frame.intervalFirstBoundX;
+                }
 
-				frame.intervalLowerX = lowerX;
-				frame.intervalUpperX = upperX;
+                frame.intervalLowerX = lowerX;
+                frame.intervalUpperX = upperX;
 
-			} else {
-				// Sanity check
-				console.log('Interval improperly set: clearing')
-				this.clearIntervalBounds();
-			}
-		}
-	}
+            } else {
+                // Sanity check
+                console.log('Interval improperly set: clearing')
+                this.clearIntervalBounds();
+            }
+        }
+    }
 
-	plotter.clearIntervalBounds = function() {
-		for (var i = 0; i < this.frames.length; i++) {
-			var frame = this.frames[i];
-			frame.intervalFirstBoundX = null;
-			frame.intervalSecondBoundX = null;
-			frame.intervalLowerIndex = null;
-			frame.intervalUpperIndex = null;
-		}
-	}
+    plotter.clearIntervalBounds = function() {
+        for (var i = 0; i < this.frames.length; i++) {
+            var frame = this.frames[i];
+            frame.intervalFirstBoundX = null;
+            frame.intervalSecondBoundX = null;
+            frame.intervalLowerIndex = null;
+            frame.intervalUpperIndex = null;
+        }
+    }
 
-	plotter.highlightHistogram = function(counts, xScreen, yScreen){
-		if(this.frames.length < 1) return;
-		this.frames[0].highlightHistogram(counts, xScreen, yScreen);
-	};
+    plotter.highlightHistogram = function(counts, xScreen, yScreen){
+        if(this.frames.length < 1) return;
+        this.frames[0].highlightHistogram(counts, xScreen, yScreen);
+    };
 
-	// highlight a dot in a scatter plot
-	plotter.highlightDot = function( xScreen, yScreen ) {
-		if(this.frames.length < 1) return;
-		this.frames[ 0 ].highlightDot( this.dataPairs[0].xData, this.dataPairs[0].yData, xScreen, yScreen );
-	};
+    // highlight a dot in a scatter plot
+    plotter.highlightDot = function( xScreen, yScreen ) {
+        if(this.frames.length < 1) return;
+        this.frames[ 0 ].highlightDot( this.dataPairs[0].xData, this.dataPairs[0].yData, xScreen, yScreen );
+    };
 
-	// ================ model bounds ================
+    // ================ model bounds ================
 
-	// model bounds in screen coords
-	plotter.modelBoundsLeft = null;
-	plotter.modelBoundsRight = null;
+    // model bounds in screen coords
+    plotter.modelBoundsLeft = null;
+    plotter.modelBoundsRight = null;
 
-	plotter.clearModelBounds = function(){
-		plotter.modelBoundsLeft = null;
-		plotter.modelBoundsRight = null;
-	};
+    plotter.clearModelBounds = function(){
+        plotter.modelBoundsLeft = null;
+        plotter.modelBoundsRight = null;
+    };
 
-	plotter.setModelBounds = function(xScreen1, xScreen2){
-		if(xScreen1){
-			plotter.modelBoundsLeft = plotter.frames[ 0 ].screenToDataX(xScreen1);
-		}
-		if(xScreen2){
-			plotter.modelBoundsRight = plotter.frames[ 0 ].screenToDataX(xScreen2);
-		}
+    plotter.setModelBounds = function(xScreen1, xScreen2){
+        if(xScreen1){
+            plotter.modelBoundsLeft = plotter.frames[ 0 ].screenToDataX(xScreen1);
+        }
+        if(xScreen2){
+            plotter.modelBoundsRight = plotter.frames[ 0 ].screenToDataX(xScreen2);
+        }
 
-		if(plotter.modelBoundsLeft && plotter.modelBoundsRight){
-			// If right is > left, swap.
-			if(plotter.modelBoundsLeft > plotter.modelBoundsRight){
-				var temp = plotter.modelBoundsLeft;
-				plotter.modelBoundsLeft = plotter.modelBoundsRight;
-				plotter.modelBoundsRight = temp;
-			}
-		}
-	};
+        if(plotter.modelBoundsLeft && plotter.modelBoundsRight){
+            // If right is > left, swap.
+            if(plotter.modelBoundsLeft > plotter.modelBoundsRight){
+                var temp = plotter.modelBoundsLeft;
+                plotter.modelBoundsLeft = plotter.modelBoundsRight;
+                plotter.modelBoundsRight = temp;
+            }
+        }
+    };
 
-	plotter.getModelBoundsIndices = function(){
-		var bounds = {};
-		bounds.left = 0;
-		bounds.right = 0;
+    plotter.getModelBoundsIndices = function(){
+        var bounds = {};
+        bounds.left = 0;
+        bounds.right = 0;
 
         // TODO: replace with more generic global function getNearest
-		function getNearestIndex(xScreen){
-			var xPosData = plotter.frames[ 0 ].screenToDataX( xScreen );
-			var nearestIndex = -1;
-			var nearestDist = 0;
-			var xDataRaw = plotter.dataPairs[ 0 ].xData.data;
-			for (var i = 0; i < xDataRaw.length; i++) {
-				var x = xDataRaw[ i ];
-				var xDiff = x - xPosData;
-				if (xDiff < 0) xDiff = -xDiff;
-				if (xDiff < nearestDist || nearestIndex == -1) {
-					nearestDist = xDiff;
-					nearestIndex = i;
-				}
-			}
-			return nearestIndex;
-		}
-		if (plotter.modelBoundsLeft && plotter.modelBoundsRight) {
-			bounds.left = getNearestIndex(plotter.frames[ 0 ].dataToScreenX(plotter.modelBoundsLeft));
-			bounds.right = getNearestIndex(plotter.frames[ 0 ].dataToScreenX(plotter.modelBoundsRight));
-		}
-		//console.log(bounds);
-		return bounds;
-	};
+        function getNearestIndex(xScreen){
+            var xPosData = plotter.frames[ 0 ].screenToDataX( xScreen );
+            var nearestIndex = -1;
+            var nearestDist = 0;
+            var xDataRaw = plotter.dataPairs[ 0 ].xData.data;
+            for (var i = 0; i < xDataRaw.length; i++) {
+                var x = xDataRaw[ i ];
+                var xDiff = x - xPosData;
+                if (xDiff < 0) xDiff = -xDiff;
+                if (xDiff < nearestDist || nearestIndex == -1) {
+                    nearestDist = xDiff;
+                    nearestIndex = i;
+                }
+            }
+            return nearestIndex;
+        }
+        if (plotter.modelBoundsLeft && plotter.modelBoundsRight) {
+            bounds.left = getNearestIndex(plotter.frames[ 0 ].dataToScreenX(plotter.modelBoundsLeft));
+            bounds.right = getNearestIndex(plotter.frames[ 0 ].dataToScreenX(plotter.modelBoundsRight));
+        }
+        //console.log(bounds);
+        return bounds;
+    };
 
-	plotter.drawModelBounds = function(){
-		if(this.dataPairs.length < 1) return;
+    plotter.drawModelBounds = function(){
+        if(this.dataPairs.length < 1) return;
 
-		var x;
-		var xData = this.dataPairs[0].xData;
-		var yData = this.dataPairs[0].yData;
-		if (this.modelBoundsLeft) {
-			x = this.frames[ 0 ].dataToScreenX( this.modelBoundsLeft );
-			this.frames[0].drawBound( xData, yData, x, true );
+        var x;
+        var xData = this.dataPairs[0].xData;
+        var yData = this.dataPairs[0].yData;
+        if (this.modelBoundsLeft) {
+            x = this.frames[ 0 ].dataToScreenX( this.modelBoundsLeft );
+            this.frames[0].drawBound( xData, yData, x, true );
         }
         if (this.modelBoundsRight) {
             x = this.frames[ 0 ].dataToScreenX( this.modelBoundsRight );
-			this.frames[0].drawBound( xData, yData, x, false );
+            this.frames[0].drawBound( xData, yData, x, false );
         }
-	};
+    };
 
-	// ================ pan / zoom ================
-	// These functions have no effect if the plotMode is not "line"
+    // ================ pan / zoom ================
+    // These functions have no effect if the plotMode is not "line"
 
-	// Takes two x values in screen coordinates
-	plotter.pan = function(lastX, currentX){
-		if(this.plotMode !== "line" || this.frames.length < 1) return;
-		var lastXData = this.frames[ 0 ].screenToDataX( lastX );
-		var currentXData = this.frames[ 0 ].screenToDataX( currentX );
-		var xDiff = currentXData - lastXData;
-		if(isNaN(xDiff)) xDiff = 0;
-		this.addToBounds(-xDiff, -xDiff, null, null);
-	};
+    // Takes two x values in screen coordinates
+    plotter.pan = function(lastX, currentX){
+        if(this.plotMode !== "line" || this.frames.length < 1) return;
+        var lastXData = this.frames[ 0 ].screenToDataX( lastX );
+        var currentXData = this.frames[ 0 ].screenToDataX( currentX );
+        var xDiff = currentXData - lastXData;
+        if(isNaN(xDiff)) xDiff = 0;
+        this.addToBounds(-xDiff, -xDiff, null, null);
+    };
 
-	plotter.selectInterval = function(x, y){
-		if(this.plotMode !== "line" || this.frames.length < 1) return;
+    plotter.selectInterval = function(x, y){
+        if(this.plotMode !== "line" || this.frames.length < 1) return;
 
-		var xMouseData = this.frames[ 0 ].screenToDataX( x );
+        var xMouseData = this.frames[ 0 ].screenToDataX( x );
 
-		for (var i = 0; i < this.frames.length; i++) {
-			var frame = this.frames[i];
-			frame.selectInterval( this.dataPairs[i].xData, this.dataPairs[i].yData, xMouseData);
-		}
-	};
+        for (var i = 0; i < this.frames.length; i++) {
+            var frame = this.frames[i];
+            frame.selectInterval( this.dataPairs[i].xData, this.dataPairs[i].yData, xMouseData);
+        }
+    };
 
-	plotter.zoomIn = function(){
-		if(this.plotMode !== "line") return;
-		this.zoom(true);
-	};
+    plotter.zoomIn = function(){
+        if(this.plotMode !== "line") return;
+        this.zoom(true);
+    };
 
-	plotter.zoomOut = function(){
-		if(this.plotMode !== "line") return;
-		this.zoom(false);
-	};
+    plotter.zoomOut = function(){
+        if(this.plotMode !== "line") return;
+        this.zoom(false);
+    };
 
-	plotter.zoom = function(zoomIn){
-		var processZoomForFrame = function(frame, zoomFactor){
-			var tCenter = (frame.dataMinX + frame.dataMaxX) * 0.5;
-			var tRadius = (frame.dataMaxX - frame.dataMinX) * zoomFactor;
-			frame.dataMinX = tCenter - tRadius;
-			frame.dataMaxX = tCenter + tRadius;
-		};
+    plotter.zoom = function(zoomIn){
+        var processZoomForFrame = function(frame, zoomFactor){
+            var tCenter = (frame.dataMinX + frame.dataMaxX) * 0.5;
+            var tRadius = (frame.dataMaxX - frame.dataMinX) * zoomFactor;
+            frame.dataMinX = tCenter - tRadius;
+            frame.dataMaxX = tCenter + tRadius;
+        };
 
-		var zoomFactor = 0.5 / 1.5;
-		if(zoomIn){ // Zooming in to arbitrary levels is allowed.
-			this.zoomLevel++;
-		}else{
-			if(this.zoomLevel !== 1){ // But you can't zoom out past 1
-				this.zoomLevel--;
-				zoomFactor = 0.5 * 1.5;
-			}
-			if(this.zoomLevel <= 1){
-				// If we try to zoom out after zooming out all the way. Recalculate our bounds
-				this.autoBounds();
-				return;
-			}
-		}
-		for(var i = 0; i < this.frames.length; ++i){
-			frame = this.frames[i];
-			processZoomForFrame(frame, zoomFactor);
-		}
-	};
+        var zoomFactor = 0.5 / 1.5;
+        if(zoomIn){ // Zooming in to arbitrary levels is allowed.
+            this.zoomLevel++;
+        }else{
+            if(this.zoomLevel !== 1){ // But you can't zoom out past 1
+                this.zoomLevel--;
+                zoomFactor = 0.5 * 1.5;
+            }
+            if(this.zoomLevel <= 1){
+                // If we try to zoom out after zooming out all the way. Recalculate our bounds
+                this.autoBounds();
+                return;
+            }
+        }
+        for(var i = 0; i < this.frames.length; ++i){
+            frame = this.frames[i];
+            processZoomForFrame(frame, zoomFactor);
+        }
+    };
 
-	plotter.resetZoom = function(){
-		this.zoomLevel = 1;
-		this.autoBounds();
-	};
+    plotter.resetZoom = function(){
+        this.zoomLevel = 1;
+        this.autoBounds();
+    };
 
 
-	return plotter;
+    return plotter;
 }
 
 // the Frame object is responsible for the rendering and rendering-related coordinate transformations for a plot
 function createFrame( ctx ) {
-	var frame = {};
-	frame.ctx = ctx; // store a reference to the context for quick reference
+    var frame = {};
+    frame.ctx = ctx; // store a reference to the context for quick reference
 
-	// these are the bounds (in pixels) of the box containing the data, relative to the canvas
-	frame.boxMinX = null;
-	frame.boxMaxX = null;
-	frame.boxMinY = null;
-	frame.boxMaxY = null;
+    // these are the bounds (in pixels) of the box containing the data, relative to the canvas
+    frame.boxMinX = null;
+    frame.boxMaxX = null;
+    frame.boxMinY = null;
+    frame.boxMaxY = null;
 
-	// these are the current visible bounds of the data values
-	frame.dataMinX = null;
-	frame.dataMaxX = null;
-	frame.dataMinY = null;
-	frame.dataMaxY = null;
+    // these are the current visible bounds of the data values
+    frame.dataMinX = null;
+    frame.dataMaxX = null;
+    frame.dataMinY = null;
+    frame.dataMaxY = null;
 
-	// current interval selection (if any)
-	frame.intervalLowerX = null;
-	frame.intervalUpperX = null;
+    // current interval selection (if any)
+    frame.intervalLowerX = null;
+    frame.intervalUpperX = null;
 
-	// captions
-	frame.labelX = "";
-	frame.minLabelX = "";
-	frame.maxLabelX = "";
-	frame.labelY = "";
-	frame.minLabelY = "";
-	frame.maxLabelY = "";
-	frame.labelYUnit = "";
-	frame.rotateLabelY = false;
+    // captions
+    frame.labelX = "";
+    frame.minLabelX = "";
+    frame.maxLabelX = "";
+    frame.labelY = "";
+    frame.minLabelY = "";
+    frame.maxLabelY = "";
+    frame.labelYUnit = "";
+    frame.rotateLabelY = false;
+    frame.hideXaxisLabel = false;
+    frame.hideYaxisLabel = false;
+    
+    // highlights
+    frame.showTimeHighlight = true;
+    
+    // ================ coordinates / transforms ================
 
-	// ================ coordinates / transforms ================
+    // transform screen (canvas-relative) x-coordinate to data x-coordinate
+    frame.screenToDataX = function( x ) {
+        return this.dataMinX + (x - this.boxMinX) * (this.dataMaxX - this.dataMinX) / (this.boxMaxX - this.boxMinX);
+    };
 
-	// transform screen (canvas-relative) x-coordinate to data x-coordinate
-	frame.screenToDataX = function( x ) {
-		return this.dataMinX + (x - this.boxMinX) * (this.dataMaxX - this.dataMinX) / (this.boxMaxX - this.boxMinX);
-	};
+    // transform screen (canvas-relative) y-coordinate to data y-coordinate
+    frame.screenToDataY = function( y ) {
+        return this.dataMaxY - (y - this.boxMinY) * (this.dataMaxY - this.dataMinY) / (this.boxMaxY - this.boxMinY);
+    };
 
-	// transform screen (canvas-relative) y-coordinate to data y-coordinate
-	frame.screenToDataY = function( y ) {
-		return this.dataMaxY - (y - this.boxMinY) * (this.dataMaxY - this.dataMinY) / (this.boxMaxY - this.boxMinY);
-	};
+    // transform data x-coordinate to screen (canvas-relative) x-coordinate
+    frame.dataToScreenX = function( x ) {
+        return (x - this.dataMinX) * (this.boxMaxX - this.boxMinX) / (this.dataMaxX - this.dataMinX) + this.boxMinX;
+    };
 
-	// transform data x-coordinate to screen (canvas-relative) x-coordinate
-	frame.dataToScreenX = function( x ) {
-		return (x - this.dataMinX) * (this.boxMaxX - this.boxMinX) / (this.dataMaxX - this.dataMinX) + this.boxMinX;
-	};
+    // transform data y-coordinate to screen (canvas-relative) y-coordinate
+    frame.dataToScreenY = function( y ) {
+        if (this.dataMaxY == this.dataMinY) {
+            return this.boxMinY + (this.boxMaxY - this.boxMinY) / 2;
+        } else {
+            return (this.dataMaxY - y) * (this.boxMaxY - this.boxMinY) / (this.dataMaxY - this.dataMinY) + this.boxMinY;
+        }
+    };
 
-	// transform data y-coordinate to screen (canvas-relative) y-coordinate
-	frame.dataToScreenY = function( y ) {
-		if (this.dataMaxY == this.dataMinY) {
-			return this.boxMinY + (this.boxMaxY - this.boxMinY) / 2;
-		} else {
-			return (this.dataMaxY - y) * (this.boxMaxY - this.boxMinY) / (this.dataMaxY - this.dataMinY) + this.boxMinY;
-		}
-	};
+    // set captions for this frame
+    frame.setCaptions = function( labelX, minLabelX, maxLabelX, labelY, labelYUnit, minLabelY, maxLabelY, rotateLabelY , hideXaxisLabel, hideYaxisLabel) {
+        this.labelX = labelX;
+        this.labelY = labelY;
+        if (labelYUnit) {
+            this.labelYUnit = '(' + labelYUnit + ')';
+        }
+        if (typeof rotateLabelY !== 'undefined')
+            this.rotateLabelY = rotateLabelY;
+        this.minLabelX = minLabelX;
+        this.maxLabelX = maxLabelX;
+        this.minLabelY = minLabelY;
+        this.maxLabelY = maxLabelY;
+        if(labelX.toLowerCase() !== "timestamp"){
+            this.minLabelX = isFinite(minLabelX) ? minLabelX : 0;
+            this.maxLabelX = isFinite(maxLabelX) ? maxLabelX : 0;
+            this.minLabelY = isFinite(minLabelY) ? minLabelY : 0;
+            this.maxLabelY = isFinite(maxLabelY) ? maxLabelY : 0;
+        }
+        this.hideXaxisLabel = hideXaxisLabel;
+        this.hideYaxisLabel = hideYaxisLabel;
+    };
 
-	// set captions for this frame
-	frame.setCaptions = function( labelX, minLabelX, maxLabelX, labelY, labelYUnit, minLabelY, maxLabelY, rotateLabelY ) {
-		this.labelX = labelX;
-		this.labelY = labelY;
-		if (labelYUnit) {
-			this.labelYUnit = '(' + labelYUnit + ')';
-		}
-		if (typeof rotateLabelY !== 'undefined')
-			this.rotateLabelY = rotateLabelY;
-		this.minLabelX = minLabelX;
-		this.maxLabelX = maxLabelX;
-		this.minLabelY = minLabelY;
-		this.maxLabelY = maxLabelY;
-		if(labelX.toLowerCase() !== "timestamp"){
-			this.minLabelX = isFinite(minLabelX) ? minLabelX : 0;
-			this.maxLabelX = isFinite(maxLabelX) ? maxLabelX : 0;
-			this.minLabelY = isFinite(minLabelY) ? minLabelY : 0;
-			this.maxLabelY = isFinite(maxLabelY) ? maxLabelY : 0;
-		}
-	};
+    // compute plot frame/box bounds using caption text;
+    // outerMinX/outerMaxX/outerMinY/outerMaxY specify outer bounds for the frame area (including captions)
+    frame.fitBoxToCaptions = function( outerMinX, outerMaxX, outerMinY, outerMaxY ) {
+        this.ctx.font = "12px sans-serif"; // need to set font before measure text size
+        var minLabelSize = this.ctx.measureText( this.minLabelY ).width;
+        var centLabelSize = this.rotateLabelY ? 10 : this.ctx.measureText( this.labelY ).width;
+        var maxLabelSize = this.ctx.measureText( this.maxLabelY ).width;
+        var yLabelSize = Math.max( minLabelSize, centLabelSize, maxLabelSize );
+        this.boxMinX = outerMinX + 12 + yLabelSize;
+        this.boxMaxX = outerMaxX - 14;
+        this.boxMinY = outerMinY + 14;
+        this.boxMaxY = outerMaxY - 20;
+    };
 
-	// compute plot frame/box bounds using caption text;
-	// outerMinX/outerMaxX/outerMinY/outerMaxY specify outer bounds for the frame area (including captions)
-	frame.fitBoxToCaptions = function( outerMinX, outerMaxX, outerMinY, outerMaxY ) {
-		this.ctx.font = "12px sans-serif"; // need to set font before measure text size
-		var minLabelSize = this.ctx.measureText( this.minLabelY ).width;
-		var centLabelSize = this.rotateLabelY ? 10 : this.ctx.measureText( this.labelY ).width;
-		var maxLabelSize = this.ctx.measureText( this.maxLabelY ).width;
-		var yLabelSize = Math.max( minLabelSize, centLabelSize, maxLabelSize );
-		this.boxMinX = outerMinX + 12 + yLabelSize;
-		this.boxMaxX = outerMaxX - 14;
-		this.boxMinY = outerMinY + 14;
-		this.boxMaxY = outerMaxY - 20;
-	};
+    // clip subsequent drawing to inside box
+    frame.clipBox = function() {
+        this.ctx.beginPath();
+        this.ctx.rect( this.boxMinX, this.boxMinY, this.boxMaxX - this.boxMinX, this.boxMaxY - this.boxMinY );
+        this.ctx.clip();
+    };
 
-	// clip subsequent drawing to inside box
-	frame.clipBox = function() {
-		this.ctx.beginPath();
-		this.ctx.rect( this.boxMinX, this.boxMinY, this.boxMaxX - this.boxMinX, this.boxMaxY - this.boxMinY );
-		this.ctx.clip();
-	};
+    // ================ drawing ================
 
-	// ================ drawing ================
+    // draw the borders around the data (including tick marks as appropriate
+    frame.drawBox = function() {
+        var ctx = this.ctx;
+        ctx.setTransform( 1, 0, 0, 1, 0.5, 0.5 );
+        ctx.strokeStyle = "rgb(200,200,200)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo( this.boxMinX, this.boxMinY );
+        ctx.lineTo( this.boxMinX, this.boxMaxY + 5 );
+        ctx.moveTo( this.boxMinX - 5, this.boxMaxY );
+        ctx.lineTo( this.boxMaxX, this.boxMaxY );
+        ctx.moveTo( this.boxMaxX, this.boxMaxY + 5 );
+        ctx.lineTo( this.boxMaxX, this.boxMinY );
+        ctx.moveTo( this.boxMaxX, this.boxMinY );
+        ctx.lineTo( this.boxMinX - 5, this.boxMinY );
+        ctx.stroke();
+    };
 
-	// draw the borders around the data (including tick marks as appropriate
-	frame.drawBox = function() {
-		var ctx = this.ctx;
-		ctx.setTransform( 1, 0, 0, 1, 0.5, 0.5 );
-		ctx.strokeStyle = "rgb(200,200,200)";
-		ctx.lineWidth = 1;
-		ctx.beginPath();
-		ctx.moveTo( this.boxMinX, this.boxMinY );
-		ctx.lineTo( this.boxMinX, this.boxMaxY + 5 );
-		ctx.moveTo( this.boxMinX - 5, this.boxMaxY );
-		ctx.lineTo( this.boxMaxX, this.boxMaxY );
-		ctx.moveTo( this.boxMaxX, this.boxMaxY + 5 );
-		ctx.lineTo( this.boxMaxX, this.boxMinY );
-		ctx.moveTo( this.boxMaxX, this.boxMinY );
-		ctx.lineTo( this.boxMinX - 5, this.boxMinY );
-		ctx.stroke();
-	};
+    // draw captions around the frame/box
+    frame.drawCaptions = function() {
+        var ctx = this.ctx;
 
-	// draw captions around the frame/box
-	frame.drawCaptions = function() {
-		var ctx = this.ctx;
+        // prepare font (need to do this before measure size)
+        ctx.font = "12px museo500"; //ctx.font = "12px sans-serif";
+        ctx.fillStyle = "rgb(255,255,255)";
 
-		// prepare font (need to do this before measure size)
-		ctx.font = "12px museo500"; //ctx.font = "12px sans-serif";
-		ctx.fillStyle = "rgb(255,255,255)";
+        // get bounds for quick reference
+        var boxMinX = this.boxMinX;
+        var boxMaxX = this.boxMaxX;
+        var boxMinY = this.boxMinY;
+        var boxMaxY = this.boxMaxY;
 
-		// get bounds for quick reference
-		var boxMinX = this.boxMinX;
-		var boxMaxX = this.boxMaxX;
-		var boxMinY = this.boxMinY;
-		var boxMaxY = this.boxMaxY;
+        // draw text for x labels
+        var xMinLabelSize = ctx.measureText( this.minLabelX ).width;
+        var xMaxLabelSize = ctx.measureText( this.maxLabelX ).width;
+        ctx.textBaseline = "top";
+        ctx.textAlign = "center";
 
-		// draw text for x labels
-		var xMinLabelSize = ctx.measureText( this.minLabelX ).width;
-		var xMaxLabelSize = ctx.measureText( this.maxLabelX ).width;
-		ctx.textBaseline = "top";
-		ctx.textAlign = "center";
+        
+        ctx.fillText( this.labelX, (boxMinX + boxMaxX) * 0.5, boxMaxY + 5 );
+        if(!this.hideXaxisLabel){    
+            if (xMinLabelSize < 20) {
+                ctx.fillText( this.minLabelX, boxMinX, boxMaxY + 5 );
+            } else {
+                ctx.textAlign = "left";
+                ctx.fillText( this.minLabelX, boxMinX - 5, boxMaxY + 5 );
+            }
+            if (xMaxLabelSize < 20) {
+                ctx.fillText( this.maxLabelX, boxMaxX, boxMaxY + 5 );
+            } else {
+                ctx.textAlign = "right";
+                ctx.fillText( this.maxLabelX, boxMaxX + 5, boxMaxY + 5 );
+            }
+        }
+        // draw text for y labels
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "right";
+        ctx.fillText( this.maxLabelY, boxMinX - 8, boxMinY );
+        ctx.fillText( this.minLabelY, boxMinX - 8, boxMaxY );
+        if (this.rotateLabelY) {
+            ctx.textAlign = "center";
+            var offsetX = boxMinX - 12;
+            var offsetY = (boxMinY + boxMaxY) * 0.5;
+            ctx.save();
+            ctx.translate( offsetX, offsetY );
+            ctx.rotate( -Math.PI * 0.5 );
+            ctx.fillText( this.labelY, 0, 0 );
+            ctx.restore();
+        } else {
+            ctx.fillText( this.labelY, boxMinX - 8, (boxMinY + boxMaxY) * 0.5 );
+            if (this.labelYUnit) {
+                ctx.fillText(this.labelYUnit, boxMinX - 8, (boxMinY + boxMaxY) * 0.5 + 20);
+            }
+        }
+        //if (yUnits) ctx.fillText( unitsY, boxMinX - 8, (boxMinY + boxMaxY) * 0.5 + 7 );
+    };
 
-		ctx.fillText( this.labelX, (boxMinX + boxMaxX) * 0.5, boxMaxY + 5 );
-		if (xMinLabelSize < 20) {
-			ctx.fillText( this.minLabelX, boxMinX, boxMaxY + 5 );
-		} else {
-			ctx.textAlign = "left";
-			ctx.fillText( this.minLabelX, boxMinX - 5, boxMaxY + 5 );
-		}
-		if (xMaxLabelSize < 20) {
-			ctx.fillText( this.maxLabelX, boxMaxX, boxMaxY + 5 );
-		} else {
-			ctx.textAlign = "right";
-			ctx.fillText( this.maxLabelX, boxMaxX + 5, boxMaxY + 5 );
-		}
+    // fix(soon): better comment (was: draws the data previously stored in plotter using the setData (or similar) method)
+    frame.drawData = function( xData, yData ) {
+        var xBoxMin = this.boxMinX;
+        var xBoxMax = this.boxMaxX;
+        var yBoxMin = this.boxMinY;
+        var yBoxMax = this.boxMaxY;
+        var xDataMin = this.dataMinX;
+        var xDataMax = this.dataMaxX;
+        var yDataMin = this.dataMinY;
+        var yDataMax = this.dataMaxY;
+        var xDataRaw = xData.data;
+        var yDataRaw = yData.data;
+        var len = xDataRaw.length;
+        var first = true;
+        var ctx = this.ctx;
+        ctx.lineWidth = 2;
+        ctx.beginPath();        
 
-		// draw text for y labels
-		ctx.textBaseline = "middle";
-		ctx.textAlign = "right";
-		ctx.fillText( this.maxLabelY, boxMinX - 8, boxMinY );
-		ctx.fillText( this.minLabelY, boxMinX - 8, boxMaxY );
-		if (this.rotateLabelY) {
-			ctx.textAlign = "center";
-			var offsetX = boxMinX - 12;
-			var offsetY = (boxMinY + boxMaxY) * 0.5;
-			ctx.save();
-			ctx.translate( offsetX, offsetY );
-			ctx.rotate( -Math.PI * 0.5 );
-			ctx.fillText( this.labelY, 0, 0 );
-			ctx.restore();
-		} else {
-			ctx.fillText( this.labelY, boxMinX - 8, (boxMinY + boxMaxY) * 0.5 );
-			if (this.labelYUnit) {
-				ctx.fillText(this.labelYUnit, boxMinX - 8, (boxMinY + boxMaxY) * 0.5 + 20);
-			}
-		}
-		//if (yUnits) ctx.fillText( unitsY, boxMinX - 8, (boxMinY + boxMaxY) * 0.5 + 7 );
-	};
+        // if no y variation, just draw a straight line across from first point to last point
+        if (yDataMax === yDataMin) {
+            var yPlot = yBoxMin + (yBoxMax - yBoxMin) / 2;
+            var xPlot = xBoxMin + (xBoxMax - xBoxMin) * (xDataRaw[ 0 ] - xDataMin) / (xDataMax - xDataMin);
+            ctx.moveTo( xPlot, yPlot );
+            xPlot = xBoxMin + (xBoxMax - xBoxMin) * (xDataRaw[ len - 1 ] - xDataMin) / (xDataMax - xDataMin);
+            ctx.lineTo( xPlot, yPlot );
 
-	// fix(soon): better comment (was: draws the data previously stored in plotter using the setData (or similar) method)
-	frame.drawData = function( xData, yData ) {
-		var xBoxMin = this.boxMinX;
-		var xBoxMax = this.boxMaxX;
-		var yBoxMin = this.boxMinY;
-		var yBoxMax = this.boxMaxY;
-		var xDataMin = this.dataMinX;
-		var xDataMax = this.dataMaxX;
-		var yDataMin = this.dataMinY;
-		var yDataMax = this.dataMaxY;
-		var xDataRaw = xData.data;
-		var yDataRaw = yData.data;
-		var len = xDataRaw.length;
-		var first = true;
-		var ctx = this.ctx;
-		ctx.lineWidth = 2;
-		ctx.beginPath();
+        // if many points, draw a subset
+        } else if (len > xBoxMax - xBoxMin) {
+            var xPlotLast = -1;
+            var yMinLocal = 0;
+            var yMaxLocal = 0;
+            var countLocal = 0;
+            for (var i = 0; i < len; i++) {
+                var y = yDataRaw[ i ];
+                if( y !== null){
+                    var inside = true;
+                    if (i + 1 < len && xDataRaw[ i + 1 ] < xDataMin) {
+                        inside = false;
+                    }
+                    if (i - 1 >= 0 && xDataRaw[ i - 1 ] > xDataMax) {
+                        inside = false;
+                    }
+                    if (inside) {
+                        var xPlot = xBoxMin + (xBoxMax - xBoxMin) * (xDataRaw[ i ] - xDataMin) / (xDataMax - xDataMin);
 
-		// if no y variation, just draw a straight line across from first point to last point
-		if (yDataMax === yDataMin) {
-			var yPlot = yBoxMin + (yBoxMax - yBoxMin) / 2;
-			var xPlot = xBoxMin + (xBoxMax - xBoxMin) * (xDataRaw[ 0 ] - xDataMin) / (xDataMax - xDataMin);
-			ctx.moveTo( xPlot, yPlot );
-			xPlot = xBoxMin + (xBoxMax - xBoxMin) * (xDataRaw[ len - 1 ] - xDataMin) / (xDataMax - xDataMin);
-			ctx.lineTo( xPlot, yPlot );
+                        // check whether we're at the start of a gap
+                        var startGap = false;
+                        if (i + 1 < len) {
+                            xPlotNext = xBoxMin + (xBoxMax - xBoxMin) * (xDataRaw[ i + 1 ] - xDataMin) / (xDataMax - xDataMin);
+                            if (xPlotNext - xPlot > 1)
+                                startGap = true;
+                        }
 
-		// if many points, draw a subset
-		} else if (len > xBoxMax - xBoxMin) {
-			var xPlotLast = -1;
-			var yMinLocal = 0;
-			var yMaxLocal = 0;
-			var countLocal = 0;
-			for (var i = 0; i < len; i++) {
-				var y = yDataRaw[ i ];
-				if( y !== null){
-					var inside = true;
-					if (i + 1 < len && xDataRaw[ i + 1 ] < xDataMin) {
-						inside = false;
-					}
-					if (i - 1 >= 0 && xDataRaw[ i - 1 ] > xDataMax) {
-						inside = false;
-					}
-					if (inside) {
-						var xPlot = xBoxMin + (xBoxMax - xBoxMin) * (xDataRaw[ i ] - xDataMin) / (xDataMax - xDataMin);
+                        // keep track of the min/max/count of y values between each pixel
+                        if (y < yMinLocal || countLocal == 0)
+                            yMinLocal = y;
+                        if (y > yMaxLocal || countLocal == 0)
+                            yMaxLocal = y;
+                        countLocal++;
 
-						// check whether we're at the start of a gap
-						var startGap = false;
-						if (i + 1 < len) {
-							xPlotNext = xBoxMin + (xBoxMax - xBoxMin) * (xDataRaw[ i + 1 ] - xDataMin) / (xDataMax - xDataMin);
-							if (xPlotNext - xPlot > 1)
-								startGap = true;
-						}
+                        // if we have traversed a pixel, time to draw
+                        if (first || xPlot - xPlotLast >= 1 || startGap) {
 
-						// keep track of the min/max/count of y values between each pixel
-						if (y < yMinLocal || countLocal == 0)
-							yMinLocal = y;
-						if (y > yMaxLocal || countLocal == 0)
-							yMaxLocal = y;
-						countLocal++;
+                            // draw to the min point over the last pixel
+                            var yPlot = yBoxMin + (yBoxMax - yBoxMin) * (1.0 - (yMinLocal - yDataMin) / (yDataMax - yDataMin));
+                            if (first) {
+                                ctx.moveTo( xPlot, yPlot );
+                            } else {
+                                ctx.lineTo( xPlot, yPlot );
+                            }
 
-						// if we have traversed a pixel, time to draw
-						if (first || xPlot - xPlotLast >= 1 || startGap) {
+                            // draw to the max point (if there was more than one)
+                            if (countLocal > 1) {
+                                yPlot = yBoxMin + (yBoxMax - yBoxMin) * (1.0 - (yMaxLocal - yDataMin) / (yDataMax - yDataMin));
+                                ctx.lineTo( xPlot, yPlot );
 
-							// draw to the min point over the last pixel
-							var yPlot = yBoxMin + (yBoxMax - yBoxMin) * (1.0 - (yMinLocal - yDataMin) / (yDataMax - yDataMin));
-							if (first) {
-								ctx.moveTo( xPlot, yPlot );
-							} else {
-								ctx.lineTo( xPlot, yPlot );
-							}
+                                // if there's an upcoming gap, draw the last point so that the line across the gap has the correct start
+                                if (startGap) {
+                                    yPlot = yBoxMin + (yBoxMax - yBoxMin) * (1.0 - (y - yDataMin) / (yDataMax - yDataMin));
+                                    ctx.lineTo( xPlot, yPlot );
+                                }
+                            }
 
-							// draw to the max point (if there was more than one)
-							if (countLocal > 1) {
-								yPlot = yBoxMin + (yBoxMax - yBoxMin) * (1.0 - (yMaxLocal - yDataMin) / (yDataMax - yDataMin));
-								ctx.lineTo( xPlot, yPlot );
+                            // reset for next pixel
+                            xPlotLast = xPlot;
+                            countLocal = 0;
+                            first = false;
+                        }
+                    }
+                }
+            }
 
-								// if there's an upcoming gap, draw the last point so that the line across the gap has the correct start
-								if (startGap) {
-									yPlot = yBoxMin + (yBoxMax - yBoxMin) * (1.0 - (y - yDataMin) / (yDataMax - yDataMin));
-									ctx.lineTo( xPlot, yPlot );
-								}
-							}
+        // if not too many points, draw them all
+        } else {
+            for (var i = 0; i < len; i++) {
+                var inside = true;
+                if (i + 1 < len && xDataRaw[ i + 1 ] < xDataMin) {
+                    inside = false;
+                }
+                if (i - 1 >= 0 && xDataRaw[ i - 1 ] > xDataMax) {
+                    inside = false;
+                }
+                if (inside) {
+                    var y = yDataRaw[ i ];
+                    if( y !== null ) {
+                        var xPlot = xBoxMin + (xBoxMax - xBoxMin) * (xDataRaw[ i ] - xDataMin) / (xDataMax - xDataMin);
+                        var yPlot = yBoxMin + (yBoxMax - yBoxMin) * (1.0 - (y - yDataMin) / (yDataMax - yDataMin));
+                        if (first) {
+                            ctx.moveTo( xPlot, yPlot );
+                        } else {
+                            ctx.lineTo( xPlot, yPlot );
+                            ctx.lineTo( xPlot + 0.1, yPlot );  // hack to avoid sharp spikes in plots
+                        }
+                        first = false;
+                    }
+                }
+            }
+        }
+        ctx.stroke();
 
-							// reset for next pixel
-							xPlotLast = xPlot;
-							countLocal = 0;
-							first = false;
-						}
-					}
-				}
-			}
+        // draw currently selected interval (if any)
+        var preserveStrokeStyle = ctx.strokeStyle;
+        if (this.intervalLowerX && this.intervalUpperX) {
+            first = true; // reset
+            ctx.beginPath();
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 4;
+//            for (var i = this.intervalLowerIndex; i <= this.intervalUpperIndex; i++) {
+            for (var i = 0; i < xDataRaw.length; i++) {
+                var x = xDataRaw[i];
+                if (x >= this.intervalLowerX && x <= this.intervalUpperX) {
+                    var y = yDataRaw[ i ];
+                    if( y !== null ) {
+                        var xPlot = xBoxMin + (xBoxMax - xBoxMin) * (xDataRaw[ i ] - xDataMin) / (xDataMax - xDataMin);
+                        var yPlot = yBoxMin + (yBoxMax - yBoxMin) * (1.0 - (y - yDataMin) / (yDataMax - yDataMin));
+                        if (first) {
+                            ctx.moveTo( xPlot, yPlot );
+                        } else {
+                            ctx.lineTo( xPlot, yPlot );
+                            ctx.lineTo( xPlot + 0.1, yPlot );  // hack to avoid sharp spikes in plots
+                        }
+                        first = false;
+                    }
+                }
+            }
+            ctx.stroke();
+        }
+        ctx.strokeStyle = preserveStrokeStyle;
+    };
 
-		// if not too many points, draw them all
-		} else {
-			for (var i = 0; i < len; i++) {
-				var inside = true;
-				if (i + 1 < len && xDataRaw[ i + 1 ] < xDataMin) {
-					inside = false;
-				}
-				if (i - 1 >= 0 && xDataRaw[ i - 1 ] > xDataMax) {
-					inside = false;
-				}
-				if (inside) {
-					var y = yDataRaw[ i ];
-					if( y !== null ) {
-						var xPlot = xBoxMin + (xBoxMax - xBoxMin) * (xDataRaw[ i ] - xDataMin) / (xDataMax - xDataMin);
-						var yPlot = yBoxMin + (yBoxMax - yBoxMin) * (1.0 - (y - yDataMin) / (yDataMax - yDataMin));
-						if (first) {
-							ctx.moveTo( xPlot, yPlot );
-						} else {
-							ctx.lineTo( xPlot, yPlot );
-							ctx.lineTo( xPlot + 0.1, yPlot );  // hack to avoid sharp spikes in plots
-						}
-						first = false;
-					}
-				}
-			}
-		}
-		ctx.stroke();
+    // draw text in a box with a border in the plot; x and y are in canvas/pixel coordinates
+    frame.drawTextBox = function( x, y, text ) {
+        var ctx = this.ctx;
+        var size = ctx.measureText( text );
+        var w = size.width + 10;
+        var h = 20; // size.height + 20;
+        var fill = ctx.fillStyle;
+        ctx.fillStyle = "rgb(255,255,255)";
+        if (x + w > this.boxMaxX) {
+            x -= w;
+        }
+        if (y + h > this.boxMaxY) {
+            y -= h;
+        }
+        ctx.drawRect( x, y, w, h );
+        ctx.fillStyle = fill;
+        ctx.textAlign = "left";
+        ctx.drawTextAbsolute( text, x + 5, y + 10 );
+    };
 
-		// draw currently selected interval (if any)
-		var preserveStrokeStyle = ctx.strokeStyle;
-		if (this.intervalLowerX && this.intervalUpperX) {
-			first = true; // reset
-			ctx.beginPath();
-			ctx.strokeStyle = 'red';
-			ctx.lineWidth = 4;
-//			for (var i = this.intervalLowerIndex; i <= this.intervalUpperIndex; i++) {
-			for (var i = 0; i < xDataRaw.length; i++) {
-				var x = xDataRaw[i];
-				if (x >= this.intervalLowerX && x <= this.intervalUpperX) {
-					var y = yDataRaw[ i ];
-					if( y !== null ) {
-						var xPlot = xBoxMin + (xBoxMax - xBoxMin) * (xDataRaw[ i ] - xDataMin) / (xDataMax - xDataMin);
-						var yPlot = yBoxMin + (yBoxMax - yBoxMin) * (1.0 - (y - yDataMin) / (yDataMax - yDataMin));
-						if (first) {
-							ctx.moveTo( xPlot, yPlot );
-						} else {
-							ctx.lineTo( xPlot, yPlot );
-							ctx.lineTo( xPlot + 0.1, yPlot );  // hack to avoid sharp spikes in plots
-						}
-						first = false;
-					}
-				}
-			}
-			ctx.stroke();
-		}
-		ctx.strokeStyle = preserveStrokeStyle;
-	};
+    // draw data (x coordinates and corresponding y coordinates) as dots
+    frame.drawDataDots = function( xData, yData ) {
+        var xDataRaw = xData.data;
+        var yDataRaw = yData.data;
+        var xBoxMin = this.boxMinX;
+        var xBoxMax = this.boxMaxX;
+        var yBoxMin = this.boxMinY;
+        var yBoxMax = this.boxMaxY;
+        var xDataMin = this.dataMinX;
+        var xDataMax = this.dataMaxX;
+        var yDataMin = this.dataMinY;
+        var yDataMax = this.dataMaxY;
+        var len = xDataRaw.length;
+        var ctx = this.ctx;
+        for (var i = 0; i < len; i++) {
+            var xPlot = xBoxMin + (xBoxMax - xBoxMin) * (xDataRaw[ i ] - xDataMin) / (xDataMax - xDataMin);
+            var yPlot = yBoxMin + (yBoxMax - yBoxMin) * (1.0 - (yDataRaw[ i ] - yDataMin) / (yDataMax - yDataMin));
+            if(xPlot <= xBoxMax && xPlot >= xBoxMin && yPlot <= yBoxMax & yPlot >= yBoxMin){
+                ctx.beginPath();
+                ctx.arc( xPlot, yPlot, 2, 0, 6.2831853 ); // don't use drawCircle because don't want stroke, just fill
+                ctx.fill();
+            }
+        }
+    };
 
-	// draw text in a box with a border in the plot; x and y are in canvas/pixel coordinates
-	frame.drawTextBox = function( x, y, text ) {
-		var ctx = this.ctx;
-		var size = ctx.measureText( text );
-		var w = size.width + 10;
-		var h = 20; // size.height + 20;
-		var fill = ctx.fillStyle;
-		ctx.fillStyle = "rgb(255,255,255)";
-		if (x + w > this.boxMaxX) {
-			x -= w;
-		}
-		if (y + h > this.boxMaxY) {
-			y -= h;
-		}
-		ctx.drawRect( x, y, w, h );
-		ctx.fillStyle = fill;
-		ctx.textAlign = "left";
-		ctx.drawTextAbsolute( text, x + 5, y + 10 );
-	};
+    // draw a set of histogram counts
+    frame.drawHistogram = function( counts ) {
+        var maxCount = Math.max.apply( null, counts );
+        var bucketCount = counts.length;
+        var bucketWidth = (this.boxMaxX - this.boxMinX) / bucketCount;
+        var heightFactor = (this.boxMaxY - this.boxMinY) / maxCount;
+        var ctx = this.ctx;
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "#009ddf";
+        ctx.fillStyle = "#e9f6fd";
+        for (var i = 0; i < bucketCount; i++) {
+            var w = bucketWidth;
+            var h = counts[ i ] * heightFactor;
+            var x = this.boxMinX + i * bucketWidth;
+            var y = this.boxMaxY - h;
+            ctx.drawRect( x, y, w, h );
+        }
+    };
 
-	// draw data (x coordinates and corresponding y coordinates) as dots
-	frame.drawDataDots = function( xData, yData ) {
-		var xDataRaw = xData.data;
-		var yDataRaw = yData.data;
-		var xBoxMin = this.boxMinX;
-		var xBoxMax = this.boxMaxX;
-		var yBoxMin = this.boxMinY;
-		var yBoxMax = this.boxMaxY;
-		var xDataMin = this.dataMinX;
-		var xDataMax = this.dataMaxX;
-		var yDataMin = this.dataMinY;
-		var yDataMax = this.dataMaxY;
-		var len = xDataRaw.length;
-		var ctx = this.ctx;
-		for (var i = 0; i < len; i++) {
-			var xPlot = xBoxMin + (xBoxMax - xBoxMin) * (xDataRaw[ i ] - xDataMin) / (xDataMax - xDataMin);
-			var yPlot = yBoxMin + (yBoxMax - yBoxMin) * (1.0 - (yDataRaw[ i ] - yDataMin) / (yDataMax - yDataMin));
-			if(xPlot <= xBoxMax && xPlot >= xBoxMin && yPlot <= yBoxMax & yPlot >= yBoxMin){
-				ctx.beginPath();
-				ctx.arc( xPlot, yPlot, 2, 0, 6.2831853 ); // don't use drawCircle because don't want stroke, just fill
-				ctx.fill();
-			}
-		}
-	};
+    // draw a left or right bound for fitting a model
+    frame.drawBound = function( xData, yData, xScreen, left ) {
+        var xMouseData = this.screenToDataX( xScreen );
+        if (xScreen > this.boxMinX && xScreen < this.boxMaxX) {
 
-	// draw a set of histogram counts
-	frame.drawHistogram = function( counts ) {
-		var maxCount = Math.max.apply( null, counts );
-		var bucketCount = counts.length;
-		var bucketWidth = (this.boxMaxX - this.boxMinX) / bucketCount;
-		var heightFactor = (this.boxMaxY - this.boxMinY) / maxCount;
-		var ctx = this.ctx;
-		ctx.lineWidth = 1;
-		ctx.strokeStyle = "#009ddf";
-		ctx.fillStyle = "#e9f6fd";
-		for (var i = 0; i < bucketCount; i++) {
-			var w = bucketWidth;
-			var h = counts[ i ] * heightFactor;
-			var x = this.boxMinX + i * bucketWidth;
-			var y = this.boxMaxY - h;
-			ctx.drawRect( x, y, w, h );
-		}
-	};
+            // find nearest index
+            var nearestIndex = -1;
+            var nearestDist = 0;
+            var xDataRaw = xData.data;
+            for (var i = 0; i < xDataRaw.length; i++) {
+                var x = xDataRaw[ i ];
+                var xDiff = x - xMouseData;
+                if (xDiff < 0) xDiff = -xDiff;
+                if (xDiff < nearestDist || nearestIndex == -1) {
+                    nearestDist = xDiff;
+                    nearestIndex = i;
+                }
+            }
+            if (nearestIndex >= 0) {
+                var x = xDataRaw[ nearestIndex ];
+                var xScreen = this.dataToScreenX( x );
+                var y = yData.data[ nearestIndex ];
+                var yScreen = this.dataToScreenY( y, false );
+                this.ctx.fillStyle = "#007daf";
+                this.ctx.drawCircle( xScreen, yScreen, 7 );
+                this.ctx.textAlign = "center";
+                this.ctx.fillStyle = "#FFFFFF";
+                this.ctx.font = 'bold 10px sans-serif';
+                if (left) {
+                    ctx.drawTextAbsolute( "L", xScreen, yScreen );
+                } else {
+                    ctx.drawTextAbsolute( "R", xScreen, yScreen );
+                }
+            }
+        }
+    };
 
-	// draw a left or right bound for fitting a model
-	frame.drawBound = function( xData, yData, xScreen, left ) {
-		var xMouseData = this.screenToDataX( xScreen );
-		if (xScreen > this.boxMinX && xScreen < this.boxMaxX) {
+    // highlight a value in a time series plot; show the x value of series at the selected y value
+    frame.highlightValue = function( xData, yData, xMouseData, useTimestamp, presentIsZero, drawLine ) {
 
-			// find nearest index
-			var nearestIndex = -1;
-			var nearestDist = 0;
-			var xDataRaw = xData.data;
-			for (var i = 0; i < xDataRaw.length; i++) {
-				var x = xDataRaw[ i ];
-				var xDiff = x - xMouseData;
-				if (xDiff < 0) xDiff = -xDiff;
-				if (xDiff < nearestDist || nearestIndex == -1) {
-					nearestDist = xDiff;
-					nearestIndex = i;
-				}
-			}
-			if (nearestIndex >= 0) {
-				var x = xDataRaw[ nearestIndex ];
-				var xScreen = this.dataToScreenX( x );
-				var y = yData.data[ nearestIndex ];
-				var yScreen = this.dataToScreenY( y, false );
-				this.ctx.fillStyle = "#007daf";
-				this.ctx.drawCircle( xScreen, yScreen, 7 );
-				this.ctx.textAlign = "center";
-				this.ctx.fillStyle = "#FFFFFF";
-				this.ctx.font = 'bold 10px sans-serif';
-				if (left) {
-					ctx.drawTextAbsolute( "L", xScreen, yScreen );
+        // find nearest index (if mouse is within data bounds)
+        var nearestIndex = -1;
+        var nearestDist = 0;
+        var xDataRaw = xData.data;
+        // fix(later): should we use min( xData ) and max( xData )? is xData always monotonically increasing?
+        if (xMouseData >= xDataRaw[ 0 ] && xMouseData <= xDataRaw[ xDataRaw.length - 1 ]) {
+            for (var i = 0; i < xDataRaw.length; i++) {
+                var x = xDataRaw[ i ];
+                var xDiff = x - xMouseData;
+                if (xDiff < 0) xDiff = -xDiff;
+                if ((xDiff < nearestDist || nearestIndex == -1) && x >= frame.dataMinX && x <= frame.dataMaxX) {
+                    nearestDist = xDiff;
+                    nearestIndex = i;
+                }
+            }
+        }
+        if (nearestIndex >= 0) {
+
+            var x = xDataRaw[ nearestIndex ];
+            var xScreen = this.dataToScreenX( x );
+            var ctx = this.ctx;
+            if(typeof drawLine === 'undefined' || drawLine === true){
+                // draw line
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = "rgb(200,200,200)";
+                ctx.drawLine( xScreen, this.boxMinY, xScreen, this.boxMaxY );
+            }
+
+            // display timestamp
+            if(this.showTimeHighlight){
+                var showSeconds = false;
+                if (xData.min && xData.max && xData.max - xData.min < 24 * 60 * 60)
+                    showSeconds = true;
+                ctx.fillStyle = "rgb(0,0,0)";
+                if(typeof useTimestamp !== 'undefined' && useTimestamp){
+                    if (x > 1000000) { // if standard unix timestamp (we'll assume small numbers are elapsed time, not timestamps)
+                        this.drawTextBox( xScreen, this.boxMinY, localTimestampToStr( x, showSeconds ) );
+                    } else {
+                        this.drawTextBox( xScreen, this.boxMinY, toFixedSafe( x, 3 ) + " seconds!!" ); // fix: use decimalPlaces?
+                    }
+                }else if(typeof useTimestamp !== 'undefined' && !useTimestamp && xData.type === "timestamp"){
+                    // If we're not using timestamp but the xData is a timestamp, then we should show elapsed time values
+                    var elapsedTimeAtMouse = 0;
+                    if(presentIsZero){
+                        // Then the max timestamp should be regarded as "0".
+                        elapsedTimeAtMouse = (new Date(x * 1000) - new Date(xData.max * 1000)) / 1000;
+                    }else{
+                        // Then the min timestamp should be regarded as "0"
+                        elapsedTimeAtMouse = (new Date(x * 1000) - new Date(xData.min * 1000)) / 1000;
+                    }
+                    this.drawTextBox(xScreen, this.boxMinY, toFixedSafe(elapsedTimeAtMouse, 2));
+                }else{
+                    this.drawTextBox( xScreen, this.boxMinY, toFixedSafe(x, 2) );
+                }
+            }
+
+            // display values
+            var y = yData.data[ nearestIndex ];
+
+            // make sure there's a value to display
+            if( y !== null ){
+                var yScreen = this.dataToScreenY( y );
+
+                var outOfBounds = false;
+                var offset = 0;
+                if(y > frame.dataMaxY){
+                    yScreen = this.dataToScreenY(frame.dataMaxY);
+                    outOfBounds = true;
+                    offset = -5;
+                }else if(y < frame.dataMinY){
+                    yScreen = this.dataToScreenY(frame.dataMinY);
+                    outOfBounds = true;
+                    offset = 5;
+                }
+
+                ctx.fillStyle = "#007daf";
+				//refine treatment of decimal places in highlighted value
+				var dataDecimalPlaces = 0;
+				var parts = y.toString().split(".")
+				if (parts.length < 2) {
+					dataDecimalPlaces = 0;
 				} else {
-					ctx.drawTextAbsolute( "R", xScreen, yScreen );
-				}
-			}
-		}
-	};
+					dataDecimalPlaces = parts[1].length || 0;
+				}				
+				var dataIntegerPlaces;
+				var value = Math.floor(y);
+				dataIntegerPlaces = value.toString().length;
+				var maxSigFigs = 5;
+				var maxDecimalPlaces = maxSigFigs - dataIntegerPlaces;
+				if(maxDecimalPlaces < 0)
+					maxDecimalPlaces = 0;
+				if(dataDecimalPlaces > maxDecimalPlaces)
+					dataDecimalPlaces = maxDecimalPlaces;
+                var text = yData.name + ": " + yData.format( y, dataDecimalPlaces );
+                this.drawTextBox( xScreen, yScreen - offset, text );
+                if(!outOfBounds){
+                    ctx.drawCircle( xScreen, yScreen, 5 );
+                }else{
+                    ctx.drawTriangle(xScreen, yScreen, xScreen + offset, yScreen - offset, xScreen - offset, yScreen - offset, false);
+                }
+            }
+        }
+    };
 
-	// highlight a value in a time series plot; show the x value of series at the selected y value
-	frame.highlightValue = function( xData, yData, xMouseData, useTimestamp, presentIsZero, drawLine ) {
+    /**
+     * Snap first x coordinate to nearest time point of xData measurements
+    */
+    frame.snapIntervalFirstBound = function(xcoord, xData) {
+        var index = getNearest(xData, xcoord);
+        this.intervalFirstBoundX = xData[index];
+    }
 
-		// find nearest index (if mouse is within data bounds)
-		var nearestIndex = -1;
-		var nearestDist = 0;
-		var xDataRaw = xData.data;
-		// fix(later): should we use min( xData ) and max( xData )? is xData always monotonically increasing?
-		if (xMouseData >= xDataRaw[ 0 ] && xMouseData <= xDataRaw[ xDataRaw.length - 1 ]) {
-			for (var i = 0; i < xDataRaw.length; i++) {
-				var x = xDataRaw[ i ];
-				var xDiff = x - xMouseData;
-				if (xDiff < 0) xDiff = -xDiff;
-				if ((xDiff < nearestDist || nearestIndex == -1) && x >= frame.dataMinX && x <= frame.dataMaxX) {
-					nearestDist = xDiff;
-					nearestIndex = i;
-				}
-			}
-		}
-		if (nearestIndex >= 0) {
-
-			var x = xDataRaw[ nearestIndex ];
-			var xScreen = this.dataToScreenX( x );
-			var ctx = this.ctx;
-			if(typeof drawLine === 'undefined' || drawLine === true){
-				// draw line
-				ctx.lineWidth = 1;
-				ctx.strokeStyle = "rgb(200,200,200)";
-				ctx.drawLine( xScreen, this.boxMinY, xScreen, this.boxMaxY );
-			}
-
-			// display timestamp
-			var showSeconds = false;
-			if (xData.min && xData.max && xData.max - xData.min < 24 * 60 * 60)
-				showSeconds = true;
-			ctx.fillStyle = "rgb(0,0,0)";
-			if(typeof useTimestamp !== 'undefined' && useTimestamp){
-				if (x > 1000000) { // if standard unix timestamp (we'll assume small numbers are elapsed time, not timestamps)
-					this.drawTextBox( xScreen, this.boxMinY, localTimestampToStr( x, showSeconds ) );
-				} else {
-					this.drawTextBox( xScreen, this.boxMinY, toFixedSafe( x, 3 ) + " seconds!!" ); // fix: use decimalPlaces?
-				}
-			}else if(typeof useTimestamp !== 'undefined' && !useTimestamp && xData.type === "timestamp"){
-				// If we're not using timestamp but the xData is a timestamp, then we should show elapsed time values
-				var elapsedTimeAtMouse = 0;
-				if(presentIsZero){
-					// Then the max timestamp should be regarded as "0".
-					elapsedTimeAtMouse = (new Date(x * 1000) - new Date(xData.max * 1000)) / 1000;
-				}else{
-					// Then the min timestamp should be regarded as "0"
-					elapsedTimeAtMouse = (new Date(x * 1000) - new Date(xData.min * 1000)) / 1000;
-				}
-				this.drawTextBox(xScreen, this.boxMinY, toFixedSafe(elapsedTimeAtMouse, 2));
-			}else{
-				this.drawTextBox( xScreen, this.boxMinY, toFixedSafe(x, 2) );
-			}
-
-			// display values
-			var y = yData.data[ nearestIndex ];
-
-			// make sure there's a value to display
-			if( y !== null ){
-				var yScreen = this.dataToScreenY( y );
-
-				var outOfBounds = false;
-				var offset = 0;
-				if(y > frame.dataMaxY){
-					yScreen = this.dataToScreenY(frame.dataMaxY);
-					outOfBounds = true;
-					offset = -5;
-				}else if(y < frame.dataMinY){
-					yScreen = this.dataToScreenY(frame.dataMinY);
-					outOfBounds = true;
-					offset = 5;
-				}
-
-				ctx.fillStyle = "#007daf";
-				var text = yData.name + ": " + yData.format( y );
-				this.drawTextBox( xScreen, yScreen - offset, text );
-				if(!outOfBounds){
-					ctx.drawCircle( xScreen, yScreen, 5 );
-				}else{
-					ctx.drawTriangle(xScreen, yScreen, xScreen + offset, yScreen - offset, xScreen - offset, yScreen - offset, false);
-				}
-			}
-		}
-	};
-
-	/**
-	 * Snap first x coordinate to nearest time point of xData measurements
-	*/
-	frame.snapIntervalFirstBound = function(xcoord, xData) {
-		var index = getNearest(xData, xcoord);
-		this.intervalFirstBoundX = xData[index];
-	}
-
-	/**
-	 * Snap second x coordinate to nearest time point of xData measurements
-	*/
-	frame.snapIntervalSecondBound = function(xcoord, xData) {
-		var index = getNearest(xData, xcoord);
-		this.intervalSecondBoundX = xData[index];
-	}
+    /**
+     * Snap second x coordinate to nearest time point of xData measurements
+    */
+    frame.snapIntervalSecondBound = function(xcoord, xData) {
+        var index = getNearest(xData, xcoord);
+        this.intervalSecondBoundX = xData[index];
+    }
 
 
 
-	frame.selectInterval = function( xData, yData, xMouseData ) {
-		console.log('selectInterval');
-		console.log(xData);
-		console.log(yData);
-		console.log(xMouseData);
+    frame.selectInterval = function( xData, yData, xMouseData ) {
+        console.log('selectInterval');
+        console.log(xData);
+        console.log(yData);
+        console.log(xMouseData);
 
-		// find nearest index (if mouse is within data bounds)
-		var nearestIndex = -1;
-		var nearestDist = 0;
-		var xDataRaw = xData.data;
-		// fix(later): should we use min( xData ) and max( xData )? is xData always monotonically increasing?
-		if (xMouseData >= xDataRaw[ 0 ] && xMouseData <= xDataRaw[ xDataRaw.length - 1 ]) {
-			for (var i = 0; i < xDataRaw.length; i++) {
-				var x = xDataRaw[ i ];
-				var xDiff = x - xMouseData;
-				if (xDiff < 0) xDiff = -xDiff;
-				if ((xDiff < nearestDist || nearestIndex == -1) && x >= frame.dataMinX && x <= frame.dataMaxX) {
-					nearestDist = xDiff;
-					nearestIndex = i;
-				}
-			}
-		}
-		if (nearestIndex >= 0) {
-			// Set interval lower and upper bounds depending on which click
-			if (!frame.intervalFirstBound){
-				frame.intervalFirstBound = nearestIndex;
-			} else if (!frame.intervalSecondBound){
-				// Set upper bound if lower bound already set
-				frame.intervalSecondBound = nearestIndex;
-			} else {
-				// If both are set, clear the interval
-				console.log('interval clear');
-				frame.intervalFirstBound = null;
-				frame.intervalSecondBound = null;
-				frame.intervalLower = null;
-				frame.intervalUpper = null;
-			}
+        // find nearest index (if mouse is within data bounds)
+        var nearestIndex = -1;
+        var nearestDist = 0;
+        var xDataRaw = xData.data;
+        // fix(later): should we use min( xData ) and max( xData )? is xData always monotonically increasing?
+        if (xMouseData >= xDataRaw[ 0 ] && xMouseData <= xDataRaw[ xDataRaw.length - 1 ]) {
+            for (var i = 0; i < xDataRaw.length; i++) {
+                var x = xDataRaw[ i ];
+                var xDiff = x - xMouseData;
+                if (xDiff < 0) xDiff = -xDiff;
+                if ((xDiff < nearestDist || nearestIndex == -1) && x >= frame.dataMinX && x <= frame.dataMaxX) {
+                    nearestDist = xDiff;
+                    nearestIndex = i;
+                }
+            }
+        }
+        if (nearestIndex >= 0) {
+            // Set interval lower and upper bounds depending on which click
+            if (!frame.intervalFirstBound){
+                frame.intervalFirstBound = nearestIndex;
+            } else if (!frame.intervalSecondBound){
+                // Set upper bound if lower bound already set
+                frame.intervalSecondBound = nearestIndex;
+            } else {
+                // If both are set, clear the interval
+                console.log('interval clear');
+                frame.intervalFirstBound = null;
+                frame.intervalSecondBound = null;
+                frame.intervalLower = null;
+                frame.intervalUpper = null;
+            }
 
-			// When both are set highlight interval
-			if (frame.intervalFirstBound && frame.intervalSecondBound){
-				var lower, upper;
-				if (frame.intervalSecondBound - frame.intervalFirstBound >= 0){
-					lower = frame.intervalFirstBound;
-					upper = frame.intervalSecondBound;
-				} else {
-					lower = frame.intervalSecondBound;
-					upper = frame.intervalFirstBound;
-				}
-				frame.intervalLowerIndex = lower;
-				frame.intervalUpperIndex = upper;
-				console.log('interval set:')
-				console.log('lower:', lower);
-				console.log('upper:', upper);
-			}
-		}
-	};
+            // When both are set highlight interval
+            if (frame.intervalFirstBound && frame.intervalSecondBound){
+                var lower, upper;
+                if (frame.intervalSecondBound - frame.intervalFirstBound >= 0){
+                    lower = frame.intervalFirstBound;
+                    upper = frame.intervalSecondBound;
+                } else {
+                    lower = frame.intervalSecondBound;
+                    upper = frame.intervalFirstBound;
+                }
+                frame.intervalLowerIndex = lower;
+                frame.intervalUpperIndex = upper;
+                console.log('interval set:')
+                console.log('lower:', lower);
+                console.log('upper:', upper);
+            }
+        }
+    };
 
-	// highlight a dot in a scatter plot; show the coordinates of the dot
-	frame.highlightDot = function( xData, yData, xScreen, yScreen ) {
-		var xVector = xData.data;
-		var yVector = yData.data;
-		var len = xVector.length;
-		var bestDistSqd = 10 * 10;
-		var bestIndex = -1;
-		for (var i = 0; i < len; i++) {
-			var xDiff = this.dataToScreenX( xVector[ i ] ) - xScreen;
-			var yDiff = this.dataToScreenY( yVector[ i ] ) - yScreen;
-			var distSqd = xDiff * xDiff + yDiff * yDiff;
-			if (distSqd < bestDistSqd) {
-				bestIndex = i;
-			}
-		}
-		if (bestIndex >= 0) {
-			var x = this.dataToScreenX( xVector[ bestIndex ] );
-			var y = this.dataToScreenY( yVector[ bestIndex ] );
-			var ctx = this.ctx;
-			ctx.lineWidth = 1;
-			ctx.strokeStyle = "rgb( 0, 0, 0 )";
-			ctx.fillStyle = "rgb( 170, 170, 225 )";
-			ctx.drawCircle( x, y, 2 );
-			ctx.fillStyle = "rgb( 0, 0, 0 )";
-			this.drawTextBox( x, y, "x: " + toFixedSafe(xVector[ bestIndex ], 2 ) + " y: " + toFixedSafe(yVector[ bestIndex ], 2 ) );
-		}
-	};
+    // highlight a dot in a scatter plot; show the coordinates of the dot
+    frame.highlightDot = function( xData, yData, xScreen, yScreen ) {
+        var xVector = xData.data;
+        var yVector = yData.data;
+        var len = xVector.length;
+        var bestDistSqd = 10 * 10;
+        var bestIndex = -1;
+        for (var i = 0; i < len; i++) {
+            var xDiff = this.dataToScreenX( xVector[ i ] ) - xScreen;
+            var yDiff = this.dataToScreenY( yVector[ i ] ) - yScreen;
+            var distSqd = xDiff * xDiff + yDiff * yDiff;
+            if (distSqd < bestDistSqd) {
+                bestIndex = i;
+            }
+        }
+        if (bestIndex >= 0) {
+            var x = this.dataToScreenX( xVector[ bestIndex ] );
+            var y = this.dataToScreenY( yVector[ bestIndex ] );
+            var ctx = this.ctx;
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = "rgb( 0, 0, 0 )";
+            ctx.fillStyle = "rgb( 170, 170, 225 )";
+            ctx.drawCircle( x, y, 2 );
+            ctx.fillStyle = "rgb( 0, 0, 0 )";
+            this.drawTextBox( x, y, "x: " + toFixedSafe(xVector[ bestIndex ], 2 ) + " y: " + toFixedSafe(yVector[ bestIndex ], 2 ) );
+        }
+    };
 
-	// highlight a bar in a histogram; show the count for that bar
-	frame.highlightHistogram = function( counts, xScreen, yScreen ) {
-		var maxCount = Math.max.apply( null, counts );
-		var bucketCount = counts.length;
-		var bucketWidth = (this.boxMaxX - this.boxMinX) / bucketCount;
-		var heightFactor = (this.boxMaxY - this.boxMinY) / maxCount;
-		for (var i = 0; i < bucketCount; i++) {
-			var w = bucketWidth;
-			var h = counts[ i ] * heightFactor;
-			var x = this.boxMinX + i * bucketWidth;
-			var y = this.boxMaxY - h;
-			if (xScreen > x && xScreen < x + w && yScreen > y && yScreen < y + h) {
-				this.ctx.lineWidth = 1;
-				this.ctx.strokeStyle = "rgb( 0, 0, 0 )";
-				this.ctx.fillStyle = "#b9d6dd";
-				this.ctx.drawRect( x, y, w, h );
-				this.ctx.fillStyle = "rgb( 0, 0, 0 )";
-				this.drawTextBox( x + w * 0.5, y + h, "count: " + counts[ i ] );
-				break;
-			}
-		}
-	};
+    // highlight a bar in a histogram; show the count for that bar
+    frame.highlightHistogram = function( counts, xScreen, yScreen ) {
+        var maxCount = Math.max.apply( null, counts );
+        var bucketCount = counts.length;
+        var bucketWidth = (this.boxMaxX - this.boxMinX) / bucketCount;
+        var heightFactor = (this.boxMaxY - this.boxMinY) / maxCount;
+        for (var i = 0; i < bucketCount; i++) {
+            var w = bucketWidth;
+            var h = counts[ i ] * heightFactor;
+            var x = this.boxMinX + i * bucketWidth;
+            var y = this.boxMaxY - h;
+            if (xScreen > x && xScreen < x + w && yScreen > y && yScreen < y + h) {
+                this.ctx.lineWidth = 1;
+                this.ctx.strokeStyle = "rgb( 0, 0, 0 )";
+                this.ctx.fillStyle = "#b9d6dd";
+                this.ctx.drawRect( x, y, w, h );
+                this.ctx.fillStyle = "rgb( 0, 0, 0 )";
+                this.drawTextBox( x + w * 0.5, y + h, "count: " + counts[ i ] );
+                break;
+            }
+        }
+    };
 
-	return frame;
+    return frame;
 }
 
 // create a DataColumn object used to represent a vector of data and associated meta-data
 function createDataColumn( name, data ) {
-	var dataColumn = {};
-	dataColumn.name = name;
-	dataColumn.data = data;
-	dataColumn.type = "numeric";
-	dataColumn.units = "";
-	dataColumn.decimalPlaces = 2;
-	dataColumn.isDefault = true;
-	dataColumn.rotateLabel = false;
-	// These are the computed min and max values from the data
-	dataColumn.min = null;
-	dataColumn.max = null;
-	// These can be used when visualizing the data, but have no direct relation to
-	// the data.
-	dataColumn.minBound = null;
-	dataColumn.maxBound = null;
-	dataColumn.format = function( value ) {
-		if (value === undefined || value === null) {
-			value = "";
-		} else {
-			if (this.type == 'timestamp') {
-				var showSeconds = false;
-				if (this.max && this.min && this.max - this.min < 24 * 60 * 60) {
-					showSeconds = true;
-				}
-				if (value > 1000000) { // if standard unix timestamp (we'll assume small numbers are elapsed time, not timestamps)
-					value = localTimestampToStr( value, showSeconds );
-				} else {
-					value = toFixedSafe( value, 3 ); // fix: use decimalPlaces?
-				}
-			} else if (this.type == 'numeric' && value.length !== 0) {
-				value = toFixedSafe( parseFloat( value ), this.decimalPlaces );
-			} else if ((this.type == 'latitude' || this.type == 'longitude') && value.length !== 0) {
-				value = toFixedSafe( parseFloat( value ), 6 );
-			} else if (this.type == 'document') {
-				if (value && typeof value === "string") {
-					var url = value;
-					var slashPos = url.lastIndexOf( '/' );
-					var fileName = url.substr( slashPos + 1 );
-					value = '<a href="' + url + '">' + fileName + '</a>';
-				}
-			}
-		}
-		return value;
-	};
-	dataColumn.computeBounds = function() {
-        var minMax = getMinMax(this.data);
-		this.min = minMax["min"];
-        this.max = minMax["max"];
-		if(!isNumber(this.min)) this.min = 0;
-		if(!isNumber(this.max)) this.max = 0;
+    var dataColumn = {};
+    dataColumn.name = name;
+    dataColumn.data = data;
+    dataColumn.type = "numeric";
+    dataColumn.units = "";
+    dataColumn.decimalPlaces = 2;
+    dataColumn.decimalPlacesAxis = 0;
+    dataColumn.isDefault = true;
+    dataColumn.rotateLabel = false;
+    dataColumn.hideAxisLabel = false;
 
-	};
-	return dataColumn;
+    // These are the computed min and max values from the data
+    dataColumn.min = null;
+    dataColumn.max = null;
+    // These can be used when visualizing the data, but have no direct relation to
+    // the data.
+    dataColumn.minBound = null;
+    dataColumn.maxBound = null;
+    dataColumn.format = function( value, numericDecimalPlaces ) {
+        if (value === undefined || value === null) {
+            value = "";
+        } else {
+            if (this.type == 'timestamp') {
+                var showSeconds = false;
+                if (this.max && this.min && this.max - this.min < 24 * 60 * 60) {
+                    showSeconds = true;
+                }
+                if (value > 1000000) { // if standard unix timestamp (we'll assume small numbers are elapsed time, not timestamps)
+                    value = localTimestampToStr( value, showSeconds );
+                } else {
+                    value = toFixedSafe( value, 3 ); // fix: use decimalPlaces?
+                }
+            } else if (this.type == 'numeric' && value.length !== 0) {
+                var dp;
+                if (numericDecimalPlaces === undefined) {
+                    // numericDecimalPlaces was not passed
+                    dp = this.decimalPlaces;
+                }
+                else{
+                    dp = numericDecimalPlaces;
+                }
+                
+                value = toFixedSafe( parseFloat( value ), dp );
+            } else if ((this.type == 'latitude' || this.type == 'longitude') && value.length !== 0) {
+                value = toFixedSafe( parseFloat( value ), 6 );
+            } else if (this.type == 'document') {
+                if (value && typeof value === "string") {
+                    var url = value;
+                    var slashPos = url.lastIndexOf( '/' );
+                    var fileName = url.substr( slashPos + 1 );
+                    value = '<a href="' + url + '">' + fileName + '</a>';
+                }
+            }
+        }
+        return value;
+    };
+    dataColumn.computeBounds = function() {
+        var minMax = getMinMax(this.data);
+        this.min = minMax["min"];
+        this.max = minMax["max"];
+        if(!isNumber(this.min)) this.min = 0;
+        if(!isNumber(this.max)) this.max = 0;
+
+    };
+    return dataColumn;
 }
 
 // compute a histogram; returns and object with .counts (the bucket counts) and .centers (the bucket centers)
 function computeHistogram( data, bucketCount, min, max ) {
-	if (min === undefined)
-		min = getMin(data);
-	if (max === undefined)
-		max = getMax(data);
-	var bucketSize = (max - min) / (bucketCount - 1);
+    if (min === undefined)
+        min = getMin(data);
+    if (max === undefined)
+        max = getMax(data);
+    var bucketSize = (max - min) / (bucketCount - 1);
 
-	// initialize counts and centers
-	var counts = [];
-	var centers = [];
-	for (var i = 0; i < bucketCount; i++) {
-		counts[ i ] = 0;
-		centers[ i ] = min + i * (max - min) / (bucketCount - 1);
-	}
+    // initialize counts and centers
+    var counts = [];
+    var centers = [];
+    for (var i = 0; i < bucketCount; i++) {
+        counts[ i ] = 0;
+        centers[ i ] = min + i * (max - min) / (bucketCount - 1);
+    }
 
-	// update counts
-	var len = data.length;
-	for (var i = 0; i < len; i++) {
-		var index = parseInt( (data[ i ] - min) / (max - min) * (bucketCount - 1), 10 );
-		counts[ index ]++;
-	}
+    // update counts
+    var len = data.length;
+    for (var i = 0; i < len; i++) {
+        var index = parseInt( (data[ i ] - min) / (max - min) * (bucketCount - 1), 10 );
+        counts[ index ]++;
+    }
 
-	// return a histogram object
-	histogram = {};
-	histogram.counts = counts;
-	histogram.centers = centers;
-	return histogram;
+    // return a histogram object
+    histogram = {};
+    histogram.counts = counts;
+    histogram.centers = centers;
+    return histogram;
 }
 
 // add our custom drawing methods to an HTML5 canvas context
@@ -1683,17 +1789,17 @@ function addDrawMethods(ctx) {
         ctx.fill();
     };
 
-	// draw a circle centered on the given position
-	ctx.drawCircle = function( x, y, radius, stroke, fill ) {
-		ctx.beginPath();
-		ctx.arc(x, y, radius, 0, 6.2831853);
-		if (stroke || typeof stroke == 'undefined') {
-			ctx.stroke();
-		}
-		if (fill || typeof fill == 'undefined') {
-			ctx.fill();
-		}
-	};
+    // draw a circle centered on the given position
+    ctx.drawCircle = function( x, y, radius, stroke, fill ) {
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, 6.2831853);
+        if (stroke || typeof stroke == 'undefined') {
+            ctx.stroke();
+        }
+        if (fill || typeof fill == 'undefined') {
+            ctx.fill();
+        }
+    };
 
     // draw an arc centered on the given position, with the given start/end angles (in radians)
     ctx.drawArc = function (x, y, radius, startAngle, endAngle) {
@@ -1780,11 +1886,11 @@ function setInitTransform(ctx) {
 
 // return a color for the value (assuming a range between min and max)
 function colorSpectrum( value, min, max ) {
-	var range = max - min;
-	var factor = range > 1e-8 ? parseInt( 255 * (value - min) / range, 10 ) : 128;
-	var r = factor;
-	var b = 255 - factor;
-	return "rgb(" + r + ",0," + b + ")";
+    var range = max - min;
+    var factor = range > 1e-8 ? parseInt( 255 * (value - min) / range, 10 ) : 128;
+    var r = factor;
+    var b = 255 - factor;
+    return "rgb(" + r + ",0," + b + ")";
 }
 
 function colorSpectrumObject(value, min, max){
@@ -1922,8 +2028,8 @@ function dateTimeStr( date, showSeconds ) {
 // convert a timestamp (seconds since epoch *local*) to a string
 // normally an epoch timestamp is measured relative to the UTC epoch; we're doing things differently!
 function localTimestampToStr( timestamp, showSeconds ) {
-	//return moment(timestamp * 1000).format('YYYY/M/D H:mm:ss.SSS');
-	return moment(timestamp * 1000).format('YYYY/M/D H:mm:ss');
+    //return moment(timestamp * 1000).format('YYYY/M/D H:mm:ss.SSS');
+    return moment(timestamp * 1000).format('YYYY/M/D H:mm:ss');
 //    var date = new Date( timestamp * 1000 ); // create a date assuming timestamp is in UTC epoch seconds
 //    return dateStrUTC( date ) + " " + timeStrUTC( date, showSeconds ); // convert to string as would be viewed in UTC; this actually local
 }
