@@ -35,15 +35,15 @@ var ProgramEditorView = function(options) {
                                             type: 'text',
                                             class: 'programName'
     });
-	programNameField.keyup( function() {
-		var filename = jQuery('#program-editor-filename').val();
-		filename = Util.filterInvalidCharacters(filename);
-		jQuery('#program-editor-filename').val(filename);
+    programNameField.keyup( function() {
+        var filename = jQuery('#program-editor-filename').val();
+        filename = Util.filterInvalidCharacters(filename);
+        jQuery('#program-editor-filename').val(filename);
     });
-	programNameField.focusout( function() {
-		var filename = jQuery('#program-editor-filename').val();
-		filename = Util.filterWhiteSpaceCharacters(filename);
-		jQuery('#program-editor-filename').val(filename);
+    programNameField.focusout( function() {
+        var filename = jQuery('#program-editor-filename').val();
+        filename = Util.filterWhiteSpaceCharacters(filename);
+        jQuery('#program-editor-filename').val(filename);
     });
     programNameField.appendTo(topbar);            
 

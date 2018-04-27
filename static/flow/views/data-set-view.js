@@ -170,11 +170,11 @@ var DataSetView = function(options) {
     base.loadDataSet = function(dataSet) {
        
         //console.log("[DEBUG] loadDataSet", dataSet);
-		if(dataSet === null) {
+        if(dataSet === null) {
             alert("Error opening dataset. Dataset is null.");
             return false;
         }   
-		if(dataSet.metadata === null) {
+        if(dataSet.metadata === null) {
             alert("Error opening dataset. Dataset metadata is null.");
             return false;
         }   
@@ -236,7 +236,7 @@ var DataSetView = function(options) {
 
 
         recordingStatusPanel.show();
-		return true;
+        return true;
     }
 
     //
