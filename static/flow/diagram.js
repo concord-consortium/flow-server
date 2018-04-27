@@ -227,6 +227,14 @@ function createFlowBlock(blockSpec) {
 				sources.push(pin.sourcePin.block.id);
 			}
 		}
+		var value = this.value;
+		//strip out values from sensors, these should NOT be saved
+		if(this.type == "temperature" ||
+                this.type == "humidity" ||
+                this.type == "light" ||
+                this.type == "soilmoisture" ||
+                this.type == "CO2" )
+				value = null;
 		return {
 			id: this.id,
 			name: this.name,
@@ -239,7 +247,7 @@ function createFlowBlock(blockSpec) {
 			output_type: this.outputType,
 			has_seq: this.hasSeq,
 			params: this.params,
-			value: this.output_type === 'i' ? '' : this.value,  // fix(soon): only really needed for user input blocks; make sure not saving misc images in spec
+			value: this.output_type === 'i' ? '' : value,  // only really needed for user input blocks; make sure not saving misc images or sensor values in spec
 			view: {
 				x: this.view.x,
 				y: this.view.y,

@@ -20,6 +20,21 @@ Util.diagramValidator = function(diagramName){
 
 
 //
+//filter invalid characters
+//
+Util.filterInvalidCharacters = function(str) {
+	 var res = str.replace(/[<>:"/\|?*']/g, "");
+	 return res;
+}
+//
+//filter whitespace
+//
+Util.filterWhiteSpaceCharacters = function(str) {
+	 var res = str.trim();
+	 return res;
+}
+
+//
 // Sort objects that have a "name" property.
 //
 Util.sortByName = function(a, b) {

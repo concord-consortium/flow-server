@@ -382,9 +382,9 @@
     position: absolute;
     top: 0px;
     left: 160px;
-    width: calc(100vw - 190px);
-    height: calc(100vh - 90px);    
-    /*height: 100%;*/
+    width: calc(100vw - 180px);
+   /* height: calc(100vh - 80px);    */
+    height: 100%;
 }
 
 .flowBlock {
