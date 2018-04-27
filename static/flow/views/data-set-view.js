@@ -170,7 +170,14 @@ var DataSetView = function(options) {
     base.loadDataSet = function(dataSet) {
        
         //console.log("[DEBUG] loadDataSet", dataSet);
-
+        if(dataSet === null) {
+            alert("Error opening dataset. Dataset is null.");
+            return false;
+        }   
+        if(dataSet.metadata === null) {
+            alert("Error opening dataset. Dataset metadata is null.");
+            return false;
+        }   
         base.m_dataSet              = dataSet;
         base.m_program              = specToDiagram(dataSet.metadata.program);
         base.m_recordingLocation    = "/" + dataSet.metadata.recording_location;
@@ -229,6 +236,7 @@ var DataSetView = function(options) {
 
 
         recordingStatusPanel.show();
+        return true;
     }
 
     //
@@ -384,7 +392,7 @@ var DataSetView = function(options) {
         
         
         for (var i = 0; i < sequences.length; i++) {
-            if(i!=0){
+            if(sequences[i].name!="metadata"){
                 base.requestServerSequenceData(sequences[i].name, {
                     count: 100000,
                     start_timestamp: start,

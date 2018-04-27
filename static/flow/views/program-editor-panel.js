@@ -330,6 +330,7 @@ var ProgramEditorPanel = function(options) {
                                 inputephemeral.mousedown(function(e) {e.stopPropagation()});
                                 var eventdataephemeral = {blockid:block.id, paramname: "sequence_names", connectedblockid:connectedblockid, divindex:divindexephemeral };
                                 inputephemeral.keyup(eventdataephemeral, _this.paramEntryChanged);
+                                inputephemeral.focusout(eventdata, _this.paramEntryFocusOut);
                             }
                         }
                  
@@ -359,6 +360,7 @@ var ProgramEditorPanel = function(options) {
                     input.mousedown(function(e) {e.stopPropagation()});
                     var eventdata = {blockid:block.id, paramname: param.name, connectedblockid:-1, divindex:divindex};
                     input.keyup(eventdata, _this.paramEntryChanged);
+                    input.focusout(eventdata, _this.paramEntryFocusOut);
                 }                    
             }
         }
@@ -540,6 +542,7 @@ var ProgramEditorPanel = function(options) {
             input.mousedown(function(e) {e.stopPropagation()});
             var eventdata = {blockid:block.id, paramname: param.name};
             input.keyup(eventdata, _this.paramEntryChanged);
+            input.focusout(eventdata, _this.paramEntryFocusOut);
         }
     };
 
@@ -1263,9 +1266,20 @@ var ProgramEditorPanel = function(options) {
     }
     
     //
+    // Triggered when a parameter entry field loses focus
+    //    
+    this.paramEntryFocusOut = function(e) {
+        _this.updateParamFromEntryField(e, true);
+    }
+    
+    //
     // Triggered when a parameter entry field is edited
     //    
     this.paramEntryChanged = function(e) {
+        _this.updateParamFromEntryField(e, false);
+    }
+    
+    this.updateParamFromEntryField = function(e, stripwhitespace) {
         var block = _this.m_diagram.findBlockById(e.data.blockid);
         var paramname = e.data.paramname;
         var connectedblockid = e.data.connectedblockid;
@@ -1274,26 +1288,37 @@ var ProgramEditorPanel = function(options) {
             var param = block.params[i];
             if(paramname == param.name){
                 var defval = param['default'];
-                if(isNaN(defval)){
+                if(isNaN(defval)){ //handle strings first
                     if(paramname == "sequence_names"){
                         var val = $('#b' + block.id + '_bp_' + param.name + divindex).val();
+                        val = Util.filterInvalidCharacters(val);
+                        if(stripwhitespace)
+                            val = Util.filterWhiteSpaceCharacters(val);
+                        $('#b' + block.id + '_bp_' + param.name + divindex).val(val);
                         paramKeyArray = Object.keys(param.value);
                         paramValueArray = Object.values(param.value);
                         param.value[connectedblockid] = val;
                     }
                     else{
                         var val = $('#b' + block.id + '_bp_' + param.name).val();
+                        val = Util.filterInvalidCharacters(val);
+                        if(stripwhitespace)
+                            val = Util.filterWhiteSpaceCharacters(val);
+                        $('#b' + block.id + '_bp_' + param.name).val(val);
                         param.value = val;
                     }
                 }
                 else{
-                    var val = parseFloat($('#b' + block.id + '_bp_' + param.name).val()); // fix(soon): handle non-numeric params?
+                    var str = $('#b' + block.id + '_bp_' + param.name).val();
+                    str = str.replace ( /[^0-9.]/g, '' ); //strip out non-numeric values
+                    $('#b' + block.id + '_bp_' + param.name).val(str); //put stripped back in the input field
+                    var val = parseFloat(str); 
                     if (isNaN(val)) {
                         param.value = param['default'];
+                         $('#b' + block.id + '_bp_' + param.name).val(param.value);
                     } else {
                         param.value = val;
                     }
-                    
                 }
             }
         }
@@ -1598,6 +1623,7 @@ var ProgramEditorPanel = function(options) {
                         input.mousedown(function(e) {e.stopPropagation()});
                         var eventdata = {blockid:_this.m_diagram.blocks[i].id, paramname: "sequence_names", connectedblockid:connectedBlockId, divindex:divindex };
                         input.keyup(eventdata, _this.paramEntryChanged);
+                        input.focusout(eventdata, _this.paramEntryFocusOut);
                     }
                     
                     

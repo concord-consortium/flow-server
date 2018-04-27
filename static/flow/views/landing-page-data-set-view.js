@@ -268,8 +268,8 @@ var LandingPageDataSetView = function(options) {
         viewButton.click(item, function(e) {
             console.log("[DEBUG] View DataSet Button click", e.data);
             var dataSetView = getTopLevelView('data-set-view');
-            dataSetView.loadDataSet(e.data);
-            showTopLevelView('data-set-view');
+            var sucess = dataSetView.loadDataSet(e.data);
+            if(sucess)showTopLevelView('data-set-view');
         });
         
         var livedataiteconnector1  = jQuery('<div>', {class:'liveDataItemConnector'} );
@@ -306,9 +306,9 @@ var LandingPageDataSetView = function(options) {
         }
         btn.click(item, function(e) {
             console.log("[DEBUG] DataSetButton click", e.data);
-             var dataSetView = getTopLevelView('data-set-view');
-            dataSetView.loadDataSet(e.data);
-            showTopLevelView('data-set-view');
+            var dataSetView = getTopLevelView('data-set-view');
+            var success = dataSetView.loadDataSet(e.data);
+            if(success)showTopLevelView('data-set-view');
         });
         btn.appendTo(menuentry);
         
