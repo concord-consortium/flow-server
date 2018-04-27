@@ -23,15 +23,15 @@ Util.diagramValidator = function(diagramName){
 //filter invalid characters
 //
 Util.filterInvalidCharacters = function(str) {
-	 var res = str.replace(/[<>:"/\|?*']/g, "");
-	 return res;
+    var res = str.replace(/[<>:"/\|?*']/g, "");
+    return res;
 }
 //
 //filter whitespace
 //
 Util.filterWhiteSpaceCharacters = function(str) {
-	 var res = str.trim();
-	 return res;
+    var res = str.trim();
+    return res;
 }
 
 //
@@ -72,9 +72,9 @@ Util.addTableRow = function(table, data, tdCss) {
 // Returns local date and time from a UTC string representation
 //
 Util.getLocalDateTime = function(d) {
-	if(d.indexOf('.') != -1) {
-    	d = d.split('.')[0];
-   	}
+    if(d.indexOf('.') != -1) {
+        d = d.split('.')[0];
+       }
     var dateStr = d + " UTC";
     // Safari workaround
     var dateStr = dateStr.replace(/-/g, '/');
@@ -88,14 +88,14 @@ Util.getLocalDateTime = function(d) {
 // Util to get local browser date from a UTC string representation
 //
 Util.getLocalDate = function(d) {
-	return Util.getLocalDateTime(d)[0];
+    return Util.getLocalDateTime(d)[0];
 };
 
 //
 // Util to get local browser date from a UTC string representation
 //
 Util.getLocalTime = function(d) {
-	return Util.getLocalDateTime(d)[1];
+    return Util.getLocalDateTime(d)[1];
 };
 
 
