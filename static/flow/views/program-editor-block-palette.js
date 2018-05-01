@@ -88,6 +88,8 @@ var ProgramEditorBlockPalette = function(options) {
     sensorentrynum++;
     var co2         = createSensorBtn("CO2", "CO2", sensorentrynum);
     sensorentrynum++;
+    var o2        = createSensorBtn("O2", "O2", sensorentrynum);
+    sensorentrynum++;    
     var light       = createSensorBtn("light", "light", sensorentrynum);
     sensorentrynum++;
     var soil        = createSensorBtn("soil moisture", "soilmoisture", sensorentrynum);
@@ -98,6 +100,7 @@ var ProgramEditorBlockPalette = function(options) {
     sensorContent.append(temp);
     sensorContent.append(humidity);
     sensorContent.append(co2);
+    sensorContent.append(o2);
     sensorContent.append(light);
     sensorContent.append(soil);
     sensorContent.append(timer);

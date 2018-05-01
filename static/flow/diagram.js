@@ -233,7 +233,8 @@ function createFlowBlock(blockSpec) {
                 this.type == "humidity" ||
                 this.type == "light" ||
                 this.type == "soilmoisture" ||
-                this.type == "CO2" )
+                this.type == "CO2" ||
+                this.type == "O2")
                 value = null;
         return {
             id: this.id,

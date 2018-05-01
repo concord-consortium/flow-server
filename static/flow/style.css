@@ -1,5 +1,5 @@
 .outlinebox{
-    min-height: 850px;
+    min-height: 870px;
     width:100%;
     padding:10px;
     background-color:#007c88;
@@ -103,7 +103,7 @@
 .menuandcontentholder{
     position: relative;
     height: calc(100vh - 80px);
-    min-height: 780px;
+    min-height: 800px;
     width: 100%; 
     background-color: #ffffff;
 }
@@ -216,17 +216,12 @@
     font-size: 16px;
     font-family: 'museo500', Arial, sans-serif;
     color: white;
-    /*
-    overflow: hidden; 
-    text-align: center;
-    */
 }
 
 .liveDataItemBoxName {
     font-size: 12px;
     font-family: 'museo500', Arial, sans-serif;
     color: white;
-
 }
 .liveDataItemBoxButton {
     font-size: 14px;

@@ -865,7 +865,8 @@ var ProgramEditorPanel = function(options) {
         CO2:            'PPM',
         light:          'lux',
         soilmoisture:   '',
-        timer:          "seconds"
+        timer:          'seconds',
+        O2:             'percent'
     };
 
     //
@@ -881,7 +882,8 @@ var ProgramEditorPanel = function(options) {
                 type == "humidity" ||
                 type == "light" ||
                 type == "soilmoisture" ||
-                type == "CO2" );
+                type == "CO2" ||
+                type == "O2");
     };
 
     //
