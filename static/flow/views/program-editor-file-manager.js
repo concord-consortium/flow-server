@@ -87,6 +87,11 @@ var ProgramEditorFileManager = function(options) {
     saveButton.click( function() {
                            
         var filename = jQuery('#program-editor-filename').val();
+        if(filename == null || filename == "") {
+            alert("Please enter a valid program name.");
+            return;
+        }
+        
         var programSpec = editor.getProgramSpec();
         var programStr = JSON.stringify(programSpec);
 

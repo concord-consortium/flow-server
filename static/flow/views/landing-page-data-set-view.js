@@ -170,7 +170,7 @@ var LandingPageDataSetView = function(options) {
             if(!conf) {
                 return;
             }                
-            
+            stopButton.html('stopping... please wait');
             console.log("[DEBUG] Stopping program", e.data.recording_location);
             
             //stop the program by marking the metadata

@@ -381,7 +381,7 @@ function createPlotter( canvas, multiFrame ) {
 
         for (var i=0; i < this.dataPairs.length; i++) {
             var dataPair = this.dataPairs[i];
-			
+            
             //determine the number of decimal places to use on the axis
             var maxDecimalPlaces = countDecimals(dataPair.yData.max);
             var minDecimalPlaces = countDecimals(dataPair.yData.min);
@@ -389,7 +389,7 @@ function createPlotter( canvas, multiFrame ) {
             if(minDecimalPlaces > maxDecimalPlaces)
                 plotDecimalPlaces = minDecimalPlaces;
             dataPair.yData.decimalPlacesAxis = plotDecimalPlaces; 
-			
+            
             //determine the number of decimal places to use on the data
             var dataDecimalPlaces = countDecimals(dataPair.yData.data);
             var dataIntegerPlaces;
@@ -1464,24 +1464,29 @@ function createFrame( ctx ) {
                 }
 
                 ctx.fillStyle = "#007daf";
-				//refine treatment of decimal places in highlighted value
-				var dataDecimalPlaces = 0;
-				var parts = y.toString().split(".")
-				if (parts.length < 2) {
-					dataDecimalPlaces = 0;
-				} else {
-					dataDecimalPlaces = parts[1].length || 0;
-				}				
-				var dataIntegerPlaces;
-				var value = Math.floor(y);
-				dataIntegerPlaces = value.toString().length;
-				var maxSigFigs = 5;
-				var maxDecimalPlaces = maxSigFigs - dataIntegerPlaces;
-				if(maxDecimalPlaces < 0)
-					maxDecimalPlaces = 0;
-				if(dataDecimalPlaces > maxDecimalPlaces)
-					dataDecimalPlaces = maxDecimalPlaces;
+                //refine treatment of decimal places in highlighted value
+                var dataDecimalPlaces = 0;
+                var parts = y.toString().split(".")
+                if (parts.length < 2) {
+                    dataDecimalPlaces = 0;
+                } else {
+                    dataDecimalPlaces = parts[1].length || 0;
+                }                
+                var dataIntegerPlaces;
+                var value = Math.floor(y);
+                dataIntegerPlaces = value.toString().length;
+                var maxSigFigs = 5;
+                var maxDecimalPlaces = maxSigFigs - dataIntegerPlaces;
+                if(maxDecimalPlaces < 0)
+                    maxDecimalPlaces = 0;
+                if(dataDecimalPlaces > maxDecimalPlaces)
+                    dataDecimalPlaces = maxDecimalPlaces;
                 var text = yData.name + ": " + yData.format( y, dataDecimalPlaces );
+                //prevent overlap with timestamp highlight
+                var boxheight = 20;
+                if((yScreen - offset) < (this.boxMinY + boxheight )){
+                    yScreen = this.boxMinY + 20;
+                }
                 this.drawTextBox( xScreen, yScreen - offset, text );
                 if(!outOfBounds){
                     ctx.drawCircle( xScreen, yScreen, 5 );
