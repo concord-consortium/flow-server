@@ -217,6 +217,10 @@
     font-family: 'museo500', Arial, sans-serif;
     color: white;
 }
+.liveDataItemBoxWarning {
+    font-size: 24px;
+    color: white;
+}
 
 .liveDataItemBoxName {
     font-size: 12px;

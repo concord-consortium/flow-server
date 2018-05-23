@@ -137,10 +137,26 @@ var LandingPageDataSetView = function(options) {
         var livedataitemboxpi  = jQuery('<div>', {class:'liveDataItemBox concordblue'} );
         var livedataitemboxpititle  = jQuery('<div>', {class:'liveDataItemBoxTitle', text:"pi"} );
         var livedataitemboxpiname  = jQuery('<div>', {class:'liveDataItemBoxName', text:controllername} );
-        var stopButton = $('<button>', { class:'liveDataItemBoxButton',   html: 'stop program' } );
+        var buttonid = "liveDataStopButton" + controllername;
+        var stopButton = $('<button>', { id: buttonid, class:'liveDataItemBoxButton',   html: 'stop program' } );
+        //add hidden status indication in case pi is offline
+        var statusid = "liveDataStatusDiv" + controllername;
+        var statusDiv = jQuery('<div>', {id: statusid, class:'liveDataItemBoxTitle'} );
+        statusDiv.html('<span class="liveDataItemBoxWarning glyphicon glyphicon-warning-sign"></span><span class="liveDataItemBoxTitle"> Pi ' + controllername + ' is offline</span>');
         livedataitemboxpititle.appendTo(livedataitemboxpi);   
         livedataitemboxpiname.appendTo(livedataitemboxpi); 
-        stopButton.appendTo(livedataitemboxpi);     
+        stopButton.appendTo(livedataitemboxpi);
+        //is this Pi even online?
+        var editor = getTopLevelView('program-editor-view');
+        var piSelectorPanel = editor.getPiSelectorPanel();
+        var offline = piSelectorPanel.isPiOffline(controllername);
+        if(offline){
+            stopButton.hide();
+        }
+        else{
+            statusDiv.hide();
+        }
+        statusDiv.appendTo(livedataitemboxpi);        
         
         var livedataitemboxprogram  = jQuery('<div>', {class:'liveDataItemBox concordblue'} );
         var livedataitemboxprogramtitle  = jQuery('<div>', {class:'liveDataItemBoxTitle', text:"running program"} );

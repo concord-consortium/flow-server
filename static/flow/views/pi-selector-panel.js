@@ -28,6 +28,57 @@ var PiSelectorPanel = function(options) {
     this.availableControllers = [];
     this.selectedController = null;
     
+    //
+    //function to determine if a pi is online or offline
+    //      
+    this.isPiOffline = function(piName){    
+        var retval = false;
+        //if we have no list of pis chances are we haven't received a response from the server
+        if(this.availableControllers.length == 0){
+            return retval;
+        }
+        //what is the status of pi?
+        for(var i = 0; i < _this.availableControllers.length; i++) {
+            var controller = _this.availableControllers[i];
+            if(controller.name == piName){
+                if(!controller.online) {
+                    retval = true;
+                    return retval;
+                }
+                else{
+                    retval = false;
+                    return retval;
+                }
+            }
+        }
+        return retval;
+    }
+    //
+    // update any running program blocks on landing page based on online/offline pis
+    //
+    this.updateRunningProgramBlocks = function (){
+        if(this.availableControllers.length == 0){
+            return;
+        }
+        //find any running program blocks
+        for(var i = 0; i < _this.availableControllers.length; i++) {
+            var controller = _this.availableControllers[i];
+            var potentialButtonId = "#liveDataStopButton" + controller.name; 
+            var potentialStatusId = "#liveDataStatusDiv" + controller.name;
+            var potentialButton = $(potentialButtonId);
+            var potentialStatusDiv = $(potentialStatusId);
+            if(potentialButton.length && potentialStatusDiv.length){
+                if(!controller.online) {
+                    potentialButton.show();
+                    potentialStatusDiv.hide();
+                }
+                else{
+                    potentialButton.hide();
+                    potentialStatusDiv.show();
+                }
+            }
+        }        
+    }
         
     //
     // AJAX call and handler for listing Pis.
@@ -96,6 +147,8 @@ var PiSelectorPanel = function(options) {
                     
                     if(_this.reselectPi)
                         _this.reselectPreviousPi();
+                    
+                    _this.updateRunningProgramBlocks();
 
                 } else {
                   
