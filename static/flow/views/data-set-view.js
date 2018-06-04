@@ -4,6 +4,13 @@
 var DataSetView = function(options) {
 
     var base = BaseView(options);
+    
+    var savedSequences;
+    var savedStartTime;
+    var sequenceCount = 0;
+    var isLive = false;
+    var updateSequenceTime = 0;
+    var updateSequenceTimer;
 
     // console.log("[DEBUG] DataSetView base", base);
 
@@ -199,6 +206,9 @@ var DataSetView = function(options) {
 
         base.m_plotHandler.plotter.resetReceived();
         
+        isLive = dataSet.metadata.recording;
+        updateSequenceTime = dataSet.metadata.recording_interval * 1000;
+        
         var url = '/ext/flow/list_datasetsequences';
         var data = { filename:      dataSet.name,
                      csrf_token:    g_csrfToken     };        
@@ -261,6 +271,8 @@ var DataSetView = function(options) {
 
     // close the plotter screen and go back to the diagram editor
     function closePlotter() {
+        //turn off timer, turn it on after we get the dataset
+        clearTimeout(updateSequenceTimer);
         showDiagramEditor();
     }
 
@@ -268,7 +280,9 @@ var DataSetView = function(options) {
         sequenceName = data.name;
         var values = data.values;
         var timestamps = data.timestamps;
-
+        var validvalues = [];
+        var validtimestamps = [];
+        
         console.log('received', values.length, 'values');
         console.log('received', timestamps.length, 'timestamps');
         //console.log('timestamps: ', timestamps);
@@ -281,6 +295,10 @@ var DataSetView = function(options) {
             var val = values[i];
             if (val !== null) {
                 values[i] = +val;  // convert to number
+                if(!isNaN(values[i])){
+                    validvalues.push(values[i]);
+                    validtimestamps.push(timestamps[i]);
+                }
             }
         }
 
@@ -298,12 +316,18 @@ var DataSetView = function(options) {
         }
 
         if (dataPair) {
-            dataPair.xData.data = timestamps;  // we are updating the plotter's internal data
-            dataPair.yData.data = values;
+            dataPair.xData.data = validtimestamps;  // we are updating the plotter's internal data
+            dataPair.yData.data = validvalues;
             dataPair.dataReceived = true;
             // indicate to autoBounds to adjust timestamps
             base.m_plotHandler.plotter.autoBounds(true);
             base.m_plotHandler.drawPlot(null, null);
+        }
+        
+        //if we found the final sequence and we are live, set the timer to load again
+        sequenceCount--;
+        if(isLive && sequenceCount == 0){
+            updateSequenceTimer = setInterval(updateSequence, updateSequenceTime);
         }
     }
 
@@ -389,22 +413,50 @@ var DataSetView = function(options) {
 
         var start   = moment(startDate.getTime()).toISOString();
         var end     = moment(endDate.getTime() - 1000).toISOString();
-        
+
+        //save the start time in case we are live and need to request sequence data again
+        savedStartTime = start;    
+        savedSequences = sequences;
+        sequenceCount = 0;
         
         for (var i = 0; i < sequences.length; i++) {
             if(sequences[i].name!="metadata"){
+                sequenceCount++;
                 base.requestServerSequenceData(sequences[i].name, {
                     count: 100000,
                     start_timestamp: start,
                     end_timestamp: end
-                });
-                
+                });   
             }
-            
-            
         }
     }
+    //
+    //update the data view when we are looking at a live recording
+    //
+    function updateSequence() {
+        //turn off timer, turn it on after we get the dataset
+        clearTimeout(updateSequenceTimer);
+        
+        //store the number of sequences that we will request
+        sequenceCount = 0;
 
+        //request dataset     
+        var start   = savedStartTime;
+        var d = new Date();
+        var end = d.toISOString();
+        
+        for (var i = 0; i < savedSequences.length; i++) {
+            if(savedSequences[i].name!="metadata"){
+                sequenceCount++;
+                base.requestServerSequenceData(savedSequences[i].name, {
+                    count: 100000,
+                    start_timestamp: start,
+                    end_timestamp: end
+                });   
+            }
+        }
+    }    
+    
     function selectInterval() {
         if (base.m_plotHandler.intervalSelect) {
             base.m_plotHandler.setIntervalSelect(false);

@@ -1374,6 +1374,47 @@ var ProgramEditorPanel = function(options) {
         }
         return ret;
     }
+    //
+    // check if we have a data storage block
+    //
+    this.programHasDataStorageBlock = function() {
+        var ret = false;
+        for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
+            var block = _this.m_diagram.blocks[i];
+            if(block.type === "data storage") {
+                ret = true;
+                break;
+            }
+        }
+        return ret;
+    }    
+    //
+    // return the name of the recording location in program
+    //
+    this.validSequenceNames = function() {
+        var ret = true;
+        for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
+            var block = _this.m_diagram.blocks[i];
+            if(block.type === "data storage") {
+                for (var x = 0; x < block.params.length; x++) {
+                    var param = block.params[x];                
+                    var val = param.value        
+                    if(param.name=="sequence_names"){
+                        var paramKeyArray = Object.keys(param.value);
+                        var paramValueArray = Object.values(param.value);
+                        for(var x = 0; x < (paramValueArray.length); x++){
+                            if(paramValueArray == ""){
+                                ret = false;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        return ret;
+    }    
 
     //
     // Handle sensor data messages
@@ -1671,7 +1712,13 @@ var ProgramEditorPanel = function(options) {
             }
         } else if (block.type === "data storage"){
             $('#bv_' + block.id).html('');
-        }        
+        } else if (block.type === "relay"){
+            var mag = Math.abs(block.value);
+            if(mag >= 1)
+                $('#bv_' + block.id).html('on');
+            else
+                $('#bv_' + block.id).html('off');
+        }            
         else {
             if (block.value === null) {
                 $('#bv_' + block.id).html('...');
