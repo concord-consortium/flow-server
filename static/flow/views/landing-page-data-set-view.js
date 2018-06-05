@@ -46,9 +46,12 @@ var LandingPageDataSetView = function(options) {
                             recording.push(item);
                         } else {
                             var isEmpty = false;
+                            var isArchived = false;
+                            if(item.metadata && item.metadata.archived)
+                                isArchived = true;
                             if(item.metadata && item.metadata.is_empty && item.metadata.is_empty == true)
                                 isEmpty = true;
-                            if(!isEmpty)
+                            if(!isEmpty && !isArchived)
                                 recorded.push(item);
                         }
                     }
@@ -70,7 +73,17 @@ var LandingPageDataSetView = function(options) {
                         }
                         else{
                             for(var i = 0; i < list.length; i++) {
-                                var btn = createMyDataSetMenuEntry ( list[i], i );
+                                var tooltip = "";
+                                if(list[i].metadata == null || list[i].metadata.displayedName == null){
+                                    //no displayedName indicates old style dataset where displayed name and filename are the same
+                                }
+                                else{
+                                    //displayedName indicates new style dataset where displayed name is stored in metadata and filename is based on creation date and time
+                                    var dateifiedName = list[i].name;
+                                    tooltip = convertDatasetNameToDateString(dateifiedName);
+                                }
+                                
+                                var btn = createMyDataSetMenuEntry ( list[i], tooltip, i );
                                 btn.appendTo(recordeddataholder);
                                 // console.log("[DEBUG] Creating dataset item", items[i]);
                             }                            
@@ -102,6 +115,61 @@ var LandingPageDataSetView = function(options) {
         });
         
     };
+
+    //
+    //take an internal file name saved as a date and convert to a human readable date string
+    //
+    this.convertDatasetNameToDateString = function(internalName){
+        //dataset name is formatted like this: dataset_20180522_164244
+        //we want a date format like this: December 22, 2018 10:55 PM
+        var year = internalName.substring(8, 12);
+        var month = internalName.substring(12, 14);
+        var day = internalName.substring(14, 16);
+        var hour = internalName.substring(17, 19);
+        var min = internalName.substring(19, 21);
+        if(month=="01")
+            month="January";
+        else if(month=="02")
+            month="February";
+        else if(month=="03")
+            month="March";
+        else if(month=="04")
+            month="April";
+        else if(month=="05")
+            month="May";
+        else if(month=="06")
+            month="June";
+        else if(month=="07")
+            month="July";
+        else if(month=="08")
+            month="August";
+        else if(month=="09")
+            month="September";
+        else if(month=="10")
+            month="October";
+        else if(month=="11")
+            month="November";
+        else if(month=="12")
+            month="December";
+        var dayNum = parseInt(day, 10);
+        var hourNum = parseInt(hour, 10);
+        var ampm = "AM";
+        if(hourNum==0)
+            hourNum=12;
+        else if(hourNum==12){
+            ampm = "PM";
+        }
+        else if(hourNum>=13){
+            hourNum-=12;
+            ampm = "PM";
+        }
+        var minNum = parseInt(min, 10);
+        if(min<10)
+            minNum="0" + minNum;
+        
+        var finalstr = month + " " + dayNum + ", " + year + " " + hourNum + ":" + minNum + " " + ampm;
+        return finalstr;
+    }    
     
     //
     //didn't find any datasets, add a menu entry letting the user know there are no datasets available
@@ -207,7 +275,7 @@ var LandingPageDataSetView = function(options) {
                     //
                     // Call API to save metadata.
                     //
-                    var url = '/ext/flow/save_datasetmetadata'  
+                    var url = '/ext/flow/save_dataset_metadata'  
                     var data = {    filename:   filename,
                                     content:    datasetmetadataStr,
                                     csrf_token: g_csrfToken };
@@ -308,17 +376,21 @@ var LandingPageDataSetView = function(options) {
     //
     // create a menu item button to load a saved dataset
     //
-    var createMyDataSetMenuEntry = function(item, index) {
+    var createMyDataSetMenuEntry = function(item, tooltip,  index) {
         var menuentry;
         var btn;
         var filename = item.name;
         if(index%2 == 0){
             menuentry = $('<div>', {id:'dataset'+index, class: 'landingPageMenuEntry menulightgray'});
             btn = $('<button>', { text:filename, class: 'landingPageMenuTextContent menulightgray' } );
+            menuTooltip = $('<span>', {text:tooltip, class: 'tooltiptext'});
+            if(tooltip!="")menuTooltip.appendTo(menuentry);
         }
         else{
             menuentry = $('<div>', {id:'dataset'+index, class: 'landingPageMenuEntry menudarkgray'});
             btn = $('<button>', { text:filename, class: 'landingPageMenuTextContent menudarkgray' } );
+            menuTooltip = $('<span>', {text:tooltip, class: 'tooltiptext'});
+            if(tooltip!="")menuTooltip.appendTo(menuentry);
         }
         btn.click(item, function(e) {
             console.log("[DEBUG] DataSetButton click", e.data);
@@ -332,7 +404,7 @@ var LandingPageDataSetView = function(options) {
         // Add menu
         //
         var menuData = createMenuData();
-        menuData.add('Delete', this.deleteDataset, {datasetname: filename, divid: 'dataset'+index}); 
+        menuData.add('Delete', this.deleteDataset, {metadata: item.metadata, datasetname: filename, divid: 'dataset'+index}); 
         
         var landingPageMenuSubMenuDiv = $('<div>', {text:"", class: 'landingPageMenuSubMenu'}).appendTo(menuentry);
 
@@ -354,17 +426,73 @@ var LandingPageDataSetView = function(options) {
     }
     
     //
-    // Delete dataset
+    // Delete dataset, this version marks metadata as archived
     //
     this.deleteDataset = function(e) {
         var name = e.data.datasetname;
-        var divid = e.data.divid;
-
+        var metadata = e.data.metadata;
+        
         var conf = confirm("Are you sure you want to delete dataset " + name + "?");
 
         if(!conf) {
             return;
         }        
+        
+        if(metadata){
+            metadata.archived = true; //mark the metadata as archived so we know not to display it to the user
+            
+            if(metadata.displayedName == null){
+                //we don't have a displayedName, this is most likely an old version of the dataset that the user is trying to delete
+                metadata.displayedName = name;
+            }
+        }        
+        var metadataStr = JSON.stringify(metadata);        
+        
+        //
+        // Call API to save metadata.
+        //
+        var url = '/ext/flow/save_dataset_metadata'  
+        var data = {    filename:   name,
+                        metadata:   metadataStr,
+                        content:    null,                        
+                        csrf_token: g_csrfToken };
+
+        $.ajax({
+            url:        url,
+            method:     'POST',
+            data:       data,
+            success:    function(data) {
+                var response = JSON.parse(data);
+
+                console.log(
+                    "[DEBUG] delete dataset response", 
+                    response);
+
+                if(response.success) {
+                    alert("Dataset deleted");
+                    showTopLevelView('landing-page-view');  
+                } else {
+                    alert("Error: " + response.message);
+                }
+            },
+            error: function(data) {
+                console.log("[ERROR] Save error", data);
+                //alert('Error saving dataset metadata.')
+            },
+        });         
+    };    
+    
+    //
+    // Delete dataset, this version actually deletes the file
+    //
+    this.deleteDatasetComplete = function(e) {
+        var name = e.data.datasetname;
+        
+        var conf = confirm("Are you sure you want to delete dataset " + name + "?");
+
+        if(!conf) {
+            return;
+        }                
         
         $.ajax({
             url: '/ext/flow/delete_dataset',
@@ -380,8 +508,7 @@ var LandingPageDataSetView = function(options) {
                 console.log("[ERROR] Error deleting dataset " + name);
                 alert("Error deleting dataset " + name)
             }});
-    };    
-    
+    };        
 
     base.show = function() {
         var menucontentholder = jQuery('#'+base.getDivId());

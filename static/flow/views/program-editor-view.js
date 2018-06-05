@@ -54,20 +54,29 @@ var ProgramEditorView = function(options) {
     //
     saveButton.click( function() {
                            
-        var filename = jQuery('#program-editor-filename').val();
-        if(filename == null || filename == "") {
+        var displayedFilename = jQuery('#program-editor-filename').val();
+        if(displayedFilename == null || displayedFilename == "") {
             alert("Please enter a valid program name.");
             return;
         }        
+        var filename = base.getProgramName();
         var programSpec = base.getProgramSpec();
+        programSpec.archived = false;
+        programSpec.displayedName = displayedFilename;
+        programSpec.name = filename;                
         var programStr = JSON.stringify(programSpec);
         console.log("Saving:", programStr);
-
+        var metadata = {};
+        metadata.archived = false;
+        metadata.displayedName = displayedFilename;
+        metadata.name = filename;
+        var metadataStr = JSON.stringify(metadata);
         //
         // Call API to save program.
         //
         var url = '/ext/flow/save_program'
         var data = {    filename:   filename,
+                        metadata:   metadataStr,
                         content:    programStr,
                         csrf_token: g_csrfToken };
 
@@ -234,6 +243,9 @@ var ProgramEditorView = function(options) {
         var diagramSpec = diagramToSpec(diagram);
         return diagramSpec;
     }
+    base.getProgramName = function() { 
+        return programEditorPanel.getProgramName();
+    }    
 
     //
     // Clear the content. Reset editor to initial state.
@@ -312,12 +324,14 @@ var ProgramEditorView = function(options) {
         }
 
         if(params && params.filename) {
-
+            var hasFolderStructure = params.folderstructure;
             var filename    = params.filename;
-
+            var displayedName    = params.displayedName;
             var url = '/ext/flow/load_program'
-
-            var data = {    filename:   filename,
+            var serverfilename = filename;
+            if(hasFolderStructure)
+                serverfilename = serverfilename + "/program";
+            var data = {    filename:   serverfilename,
                             csrf_token: g_csrfToken      };
 
             //
@@ -340,7 +354,7 @@ var ProgramEditorView = function(options) {
 
                         var content = response.content;
                         var programSpec = JSON.parse(content);
-                        nameWidget.val(filename);
+                        nameWidget.val(displayedName);
                         programEditorPanel.loadProgram(programSpec);
 
                         // contentWidget.val(content);
