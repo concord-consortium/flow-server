@@ -194,7 +194,11 @@ var DataSetView = function(options) {
                         base.m_recordingLocation);
 
         info.empty();
-        info.append($('<div>').text("DataSet Name: " + base.m_dataSet.name));
+        var displayedName = base.m_dataSet.name;
+        if(base.m_dataSet.metadata.displayedName){
+            displayedName = base.m_dataSet.metadata.displayedName;
+        }
+        info.append($('<div>').text("DataSet Name: " + displayedName));
         info.append($('<div>').text("Program Name: " + base.m_dataSet.metadata.program.name));
 
         base.m_canvas = document.getElementById('data-set-canvas');

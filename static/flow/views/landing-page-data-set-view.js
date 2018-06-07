@@ -74,16 +74,19 @@ var LandingPageDataSetView = function(options) {
                         else{
                             for(var i = 0; i < list.length; i++) {
                                 var tooltip = "";
+                                var displayedName = "";
                                 if(list[i].metadata == null || list[i].metadata.displayedName == null){
                                     //no displayedName indicates old style dataset where displayed name and filename are the same
+                                    displayedName = list[i].name;
                                 }
                                 else{
                                     //displayedName indicates new style dataset where displayed name is stored in metadata and filename is based on creation date and time
                                     var dateifiedName = list[i].name;
                                     tooltip = convertDatasetNameToDateString(dateifiedName);
+                                    displayedName = list[i].metadata.displayedName;
                                 }
                                 
-                                var btn = createMyDataSetMenuEntry ( list[i], tooltip, i );
+                                var btn = createMyDataSetMenuEntry ( list[i], displayedName, list[i].name, tooltip, i );
                                 btn.appendTo(recordeddataholder);
                                 // console.log("[DEBUG] Creating dataset item", items[i]);
                             }                            
@@ -376,19 +379,19 @@ var LandingPageDataSetView = function(options) {
     //
     // create a menu item button to load a saved dataset
     //
-    var createMyDataSetMenuEntry = function(item, tooltip,  index) {
+    var createMyDataSetMenuEntry = function(item, displayedName, filename, tooltip,  index) {
         var menuentry;
         var btn;
-        var filename = item.name;
+
         if(index%2 == 0){
             menuentry = $('<div>', {id:'dataset'+index, class: 'landingPageMenuEntry menulightgray'});
-            btn = $('<button>', { text:filename, class: 'landingPageMenuTextContent menulightgray' } );
+            btn = $('<button>', { text:displayedName, class: 'landingPageMenuTextContent menulightgray' } );
             menuTooltip = $('<span>', {text:tooltip, class: 'tooltiptext'});
             if(tooltip!="")menuTooltip.appendTo(menuentry);
         }
         else{
             menuentry = $('<div>', {id:'dataset'+index, class: 'landingPageMenuEntry menudarkgray'});
-            btn = $('<button>', { text:filename, class: 'landingPageMenuTextContent menudarkgray' } );
+            btn = $('<button>', { text:displayedName, class: 'landingPageMenuTextContent menudarkgray' } );
             menuTooltip = $('<span>', {text:tooltip, class: 'tooltiptext'});
             if(tooltip!="")menuTooltip.appendTo(menuentry);
         }
