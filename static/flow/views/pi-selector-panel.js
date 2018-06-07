@@ -21,7 +21,7 @@ var PiSelectorPanel = function(options) {
     var currentRecordingLocation;
     var currentControllerPath;
     var currentControllerName;
-        
+
     //
     // Devices: list of available pis and refresh button
     //
@@ -454,7 +454,8 @@ var PiSelectorPanel = function(options) {
             runProgramButton.html('<span class="glyphicon glyphicon-time"></span><span class="deviceRunButtonText">starting program... please wait' + '...</span>');
         }
 
-        var dsName = $('#dataset-name-textfield').val();
+        var dsDisplayedName = "";
+		var dsFileName = "";
         var controller = _this.selectedController;
         var programSpec = editor.getProgramSpec();
 
@@ -471,46 +472,49 @@ var PiSelectorPanel = function(options) {
             runProgramButton.html('<span class="glyphicon glyphicon-play"></span><span class="deviceRunButtonText">run program on ' + controller.name + '</span>');
             return;
         }
+		
+		//create a file name for the dataset based on current date and time
+		var d = new Date();
+		var year = d.getFullYear();
+		var month = d.getMonth() + 1;
+		var day = d.getDate();
+		var hour = d.getHours();
+		var min = d.getMinutes();
+		var sec = d.getSeconds();
+		
+		var potentialName = "dataset" + year;
+		if(month < 10)
+			potentialName = potentialName + "0" + month;
+		else
+			potentialName = potentialName + month;
+		if(day < 10)
+			potentialName = potentialName + "0" + day + "_";
+		else
+			potentialName = potentialName + day + "_";
+		if(hour < 10)
+			potentialName = potentialName + "0" + hour;
+		else
+			potentialName = potentialName + hour;
+		if(min < 10)
+			potentialName = potentialName + "0" + min;
+		else
+			potentialName = potentialName + min;
+		if(sec < 10)
+			potentialName = potentialName + "0" + sec;
+		else
+			potentialName = potentialName + sec;
+		
+		dsFileName = potentialName;
+		
 
         //give the dataset a default name in the case where there is no data storage block and we want to create an empty dataset
-        var dsName = "";
         var haveDsBlock = editor.getProgramEditorPanel().programHasDataStorageBlock();
         if(!haveDsBlock){
-            var d = new Date();
-            var year = d.getFullYear();
-            var month = d.getMonth() + 1;
-            var day = d.getDate();
-            var hour = d.getHours();
-            var min = d.getMinutes();
-            var sec = d.getSeconds();
-            
-            var potentialName = "ds" + year;
-            if(month < 10)
-                potentialName = potentialName + "0" + month;
-            else
-                potentialName = potentialName + month;
-            if(day < 10)
-                potentialName = potentialName + "0" + day + "_";
-            else
-                potentialName = potentialName + day + "_";
-            if(hour < 10)
-                potentialName = potentialName + "0" + hour;
-            else
-                potentialName = potentialName + hour;
-            if(min < 10)
-                potentialName = potentialName + "0" + min;
-            else
-                potentialName = potentialName + min;
-            if(sec < 10)
-                potentialName = potentialName + "0" + sec;
-            else
-                potentialName = potentialName + sec;
-            
-            dsName = potentialName;
+            dsDisplayedName = dsFileName;
         }
         else{
-            dsName = editor.getProgramEditorPanel().getRecordingLocationFromDataBlock();
-            if(dsName == ""){
+            dsDisplayedName = editor.getProgramEditorPanel().getRecordingLocationFromDataBlock();
+            if(dsDisplayedName == ""){
                 alert("Please enter a valid dataset name on the data storage block.");
                 return;
             }    
@@ -562,7 +566,7 @@ var PiSelectorPanel = function(options) {
         _this.currentControllerPath = controller.path;
         _this.currentControllerName = controller.name;
         _this.currentlyRecording = true;
-        _this.currentRecordingLocation = '/testing/student-folders/' + g_user.user_name + '/datasets/' + dsName;
+        _this.currentRecordingLocation = '/testing/student-folders/' + g_user.user_name + '/datasets/' + dsFileName;
         
         //
         // Send message to start recording.
@@ -574,7 +578,7 @@ var PiSelectorPanel = function(options) {
         startRecordingParams.message_type   = 'start_recording';
         startRecordingParams.message_params = 
                     {   rate: recordingRate,
-                        recording_location: '/testing/student-folders/' + g_user.user_name + '/datasets/' + dsName,
+                        recording_location: '/testing/student-folders/' + g_user.user_name + '/datasets/' + dsFileName,
                         diagram:    programSpec,
                         username:   g_user.user_name };
 
