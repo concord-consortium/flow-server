@@ -279,6 +279,14 @@ var DataSetView = function(options) {
         clearTimeout(updateSequenceTimer);
         showDiagramEditor();
     }
+    
+    //
+    //stop live updates
+    //
+    base.stopLiveUpdates = function(){
+        //turn off timer, turn it on after we get the dataset
+        clearTimeout(updateSequenceTimer);
+    }
 
     base.historyResponseHandler = function(data) {
         sequenceName = data.name;
