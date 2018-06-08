@@ -194,8 +194,13 @@ var LandingPageDataSetView = function(options) {
     //create the blocks that convey live dataset information from a currently running program
     //
     var createMyDataSetLiveBlock = function(item) {
-        var filename = item.name;
         var metadata = item.metadata;
+		var filename = "";
+		var displayedFilename = item.name;
+		if(metadata.displayedName)
+			displayedFilename = metadata.displayedName;
+		else
+			displayedFilename = item.name;
         var controllername = metadata.controller_name;
         var programdata = metadata.program;
         var programname = programdata.name;
@@ -345,7 +350,7 @@ var LandingPageDataSetView = function(options) {
 
         var livedataitemboxdata  = jQuery('<div>', {class:'liveDataItemBox concordblue'} );
         var livedataitemboxdatatitle  = jQuery('<div>', {class:'liveDataItemBoxTitle', text:"recording dataset"} );
-        var livedataitemboxdataname  = jQuery('<div>', {class:'liveDataItemBoxName', text:filename} );
+        var livedataitemboxdataname  = jQuery('<div>', {class:'liveDataItemBoxName', text:displayedFilename} );
         var viewButton = $('<button>', { class:'liveDataItemBoxButton',   html: 'view dataset' } );
         livedataitemboxdatatitle.appendTo(livedataitemboxdata);   
         livedataitemboxdataname.appendTo(livedataitemboxdata);
