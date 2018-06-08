@@ -1482,6 +1482,9 @@ var ProgramEditorPanel = function(options) {
             // Check for device blocks for which we did not receive any data
             // and set their values to null.
             //
+			if(_this.m_diagram.blocks == null){
+				return;
+			}
             for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
                 var block = _this.m_diagram.blocks[i];
                 if(_this.isDeviceBlock(block.type)) {
