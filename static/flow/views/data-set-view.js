@@ -331,7 +331,7 @@ var DataSetView = function(options) {
         //if we found the final sequence and we are live, set the timer to load again
         sequenceCount--;
         if(isLive && sequenceCount == 0){
-            updateSequenceTimer = setInterval(updateSequence, updateSequenceTime);
+            updateSequenceTimer = setTimeout(updateSequence, updateSequenceTime);
         }
     }
 
