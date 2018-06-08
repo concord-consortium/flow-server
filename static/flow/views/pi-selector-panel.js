@@ -482,7 +482,7 @@ var PiSelectorPanel = function(options) {
 		var min = d.getMinutes();
 		var sec = d.getSeconds();
 		
-		var potentialName = "dataset" + year;
+		var potentialName = "dataset_" + year;
 		if(month < 10)
 			potentialName = potentialName + "0" + month;
 		else
