@@ -194,7 +194,11 @@ var DataSetView = function(options) {
                         base.m_recordingLocation);
 
         info.empty();
-        info.append($('<div>').text("DataSet Name: " + base.m_dataSet.name));
+        var displayedName = base.m_dataSet.name;
+        if(base.m_dataSet.metadata.displayedName){
+            displayedName = base.m_dataSet.metadata.displayedName;
+        }
+        info.append($('<div>').text("DataSet Name: " + displayedName));
         info.append($('<div>').text("Program Name: " + base.m_dataSet.metadata.program.name));
 
         base.m_canvas = document.getElementById('data-set-canvas');
@@ -275,6 +279,14 @@ var DataSetView = function(options) {
         clearTimeout(updateSequenceTimer);
         showDiagramEditor();
     }
+    
+    //
+    //stop live updates
+    //
+    base.stopLiveUpdates = function(){
+        //turn off timer, turn it on after we get the dataset
+        clearTimeout(updateSequenceTimer);
+    }
 
     base.historyResponseHandler = function(data) {
         sequenceName = data.name;
@@ -327,7 +339,7 @@ var DataSetView = function(options) {
         //if we found the final sequence and we are live, set the timer to load again
         sequenceCount--;
         if(isLive && sequenceCount == 0){
-            updateSequenceTimer = setInterval(updateSequence, updateSequenceTime);
+            updateSequenceTimer = setTimeout(updateSequence, updateSequenceTime);
         }
     }
 

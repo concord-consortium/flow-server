@@ -6,6 +6,7 @@ var ProgramEditorPanel = function(options) {
     this.m_scale        = null;
     this.m_diagram      = null;
     this.m_diagramName  = null;
+    this.m_diagramDisplayedName  = null;
     this.m_modified     = null;
     this.m_svgDrawer    = null;
 
@@ -79,6 +80,8 @@ var ProgramEditorPanel = function(options) {
         if(!programSpec) {
             $('#program-editor-filename').val("untitled program");
             programSpec = { blocks: [] };
+            programSpec.name = this.chooseProgramName();
+            programSpec.displayedName = "untitled program";
         }
 
         //
@@ -97,6 +100,7 @@ var ProgramEditorPanel = function(options) {
         this.m_scale = 1.0;
         this.m_diagram = specToDiagram(programSpec);
         this.m_diagramName = programSpec.name;
+        this.m_diagramDisplayedName = programSpec.displayedName;
 
         //zoomBlocks(this.m_diagram.blocks, this.m_scale);
 
@@ -127,6 +131,44 @@ var ProgramEditorPanel = function(options) {
         m_modified = false;
     };
 
+    this.chooseProgramName = function(){
+        var d = new Date();
+        var year = d.getFullYear();
+        var month = d.getMonth() + 1;
+        var day = d.getDate();
+        var hour = d.getHours();
+        var min = d.getMinutes();
+        var sec = d.getSeconds();
+        
+        var potentialName = "program_" + year;
+        if(month < 10)
+            potentialName = potentialName + "0" + month;
+        else
+            potentialName = potentialName + month;
+        if(day < 10)
+            potentialName = potentialName + "0" + day + "_";
+        else
+            potentialName = potentialName + day + "_";
+        if(hour < 10)
+            potentialName = potentialName + "0" + hour;
+        else
+            potentialName = potentialName + hour;
+        if(min < 10)
+            potentialName = potentialName + "0" + min;
+        else
+            potentialName = potentialName + min;
+        if(sec < 10)
+            potentialName = potentialName + "0" + sec;
+        else
+            potentialName = potentialName + sec;
+        
+        return potentialName;
+    }
+    
+    this.getProgramName = function(){
+        return this.m_diagramName;
+    }
+    
     //
     // Create HTML/DOM elements for a block along with SVG pins.
     //
@@ -1440,6 +1482,9 @@ var ProgramEditorPanel = function(options) {
             // Check for device blocks for which we did not receive any data
             // and set their values to null.
             //
+			if(_this.m_diagram == null){
+				return;
+			}
             for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
                 var block = _this.m_diagram.blocks[i];
                 if(_this.isDeviceBlock(block.type)) {

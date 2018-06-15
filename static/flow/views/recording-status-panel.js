@@ -33,6 +33,7 @@ var RecordingStatusPanel = function(options) {
     buttonPanel.append(closeButton);
 
     closeButton.click( function() {
+        dataSetView.stopLiveUpdates();
         showTopLevelView('landing-page-view');
     });
 

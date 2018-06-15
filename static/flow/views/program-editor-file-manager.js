@@ -39,7 +39,7 @@ var ProgramEditorFileManager = function(options) {
         header.append(title); 
         header.append(chevron); 
         div.append(content);
-
+    
         return div;
     }
     
@@ -86,13 +86,15 @@ var ProgramEditorFileManager = function(options) {
     //
     saveButton.click( function() {
                            
-        var filename = jQuery('#program-editor-filename').val();
-        if(filename == null || filename == "") {
+        var displayedFilename = jQuery('#program-editor-filename').val();
+        if(displayedFilename == null || displayedFilename == "") {
             alert("Please enter a valid program name.");
             return;
         }
-        
+        var filename = editor.getProgramName();
         var programSpec = editor.getProgramSpec();
+        programSpec.archived = false;
+        diagramSpec.displayedName = displayedFilename;        
         var programStr = JSON.stringify(programSpec);
 
         console.log("Saving:", programStr);

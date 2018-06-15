@@ -22,11 +22,10 @@ from rauth              import OAuth2Service
 from main.app                       import app, db
 from main.users.models              import User, OrganizationUser
 from main.resources.models          import Resource, ControllerStatus
-from main.resources.resource_util   import _create_file, find_resource, read_resource
+from main.resources.resource_util   import _create_file, find_resource, read_resource, _create_folders
 from main.extension                 import Extension
 
 from user_management                import get_flow_userinfo, create_flow_user
-
 
 #
 # current global instance of this extension
@@ -238,20 +237,41 @@ def file_operation(operation, type):
                 path = '%s/%s/%s/%s/%s/metadata' % (org_name, 'student-folders', username, type, filename)
             else:
                 path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, type, filename)
+        elif type == 'datasetmeta':	
+            path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, 'datasets', filename)		
+        elif type == 'programmeta':	
+            path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, 'programs', filename)					
         else:
+			
             path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, type, filename)
 
     #
     # Save op
     #
     def _save():
-        content     = request.values.get('content').encode('utf-8')
-        now         = datetime.datetime.now()
-        resource    = _create_file(path, now, now, content)
-        return json.dumps({
-                    'success': True,
-                    'message': 'Saved file %s.' % (filename)
-                })
+		if type == 'programmeta' or type == 'datasetmeta':
+			contentmetadata = request.values.get('metadata').encode('utf-8')
+			now         = datetime.datetime.now()
+			pathm = '%s/%s' % (path, 'metadata')
+			resourcem    = _create_file(pathm, now, now, contentmetadata)
+			return json.dumps({
+						'success': True,
+						'message': 'Saved file metadata %s.' % (pathm)
+					})
+
+		else:
+			content     = request.values.get('content').encode('utf-8')
+			contentmetadata = request.values.get('metadata').encode('utf-8')
+			now         = datetime.datetime.now()
+			_create_folders(path)
+			pathp = '%s/%s' % (path, 'program')
+			pathm = '%s/%s' % (path, 'metadata')
+			resourcep    = _create_file(pathp, now, now, content)
+			resourcem    = _create_file(pathm, now, now, contentmetadata)
+			return json.dumps({
+						'success': True,
+						'message': 'Saved file %s.' % (filename)
+					})
 
     #
     # Load op
@@ -301,7 +321,7 @@ def file_operation(operation, type):
             #
             # For datasets, populate metadata.
             #
-            if type == 'datasets':
+            if type == 'datasets' or type == 'programs':
                 ds_path = path + "/" + child.name
                 file = find_resource(ds_path + "/metadata")
                 if file is not None:
@@ -309,6 +329,13 @@ def file_operation(operation, type):
                     if metadata is not None:
                         metadata = json.loads(metadata)
                         metadata['recording_location'] = ds_path
+            elif type == 'programs':
+                ds_path = path + "/" + child.name
+                file = find_resource(ds_path + "/metadata")
+                if file is not None:
+                    metadata = read_resource(file)
+                    if metadata is not None:
+                        metadata = json.loads(metadata)
 
             items.append({  'name':     child.name,
                             'metadata': metadata    } )
@@ -334,6 +361,13 @@ def file_operation(operation, type):
 @app.route('/ext/flow/save_program', methods=['POST'])
 def save_program():
     return file_operation('save', 'programs')
+	
+#
+# API for saving a program metadata to the rhizo-server
+#
+@app.route('/ext/flow/save_program_metadata', methods=['POST'])
+def save_program_metadata():
+    return file_operation('save', 'programmeta')
 	
 #
 # API for loading (retrieving the contents of) a program 
@@ -382,9 +416,9 @@ def delete_dataset():
 #
 # API for saving dataset metadata to the rhizo-server
 #
-@app.route('/ext/flow/save_datasetmetadata', methods=['POST'])
-def save_datasetmetadata():
-    return file_operation('save', 'datasets')	
+@app.route('/ext/flow/save_dataset_metadata', methods=['POST'])
+def save_dataset_metadata():
+    return file_operation('save', 'datasetmeta')	
 
 #
 # API for listing dataset sequences saved on the rhizo-server
