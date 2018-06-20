@@ -1462,7 +1462,9 @@ var ProgramEditorPanel = function(options) {
     //update blocks when pi is unselected
     //    
     this.piUnselected = function (){
+        //
         // Clear any old sensor data being displayed.
+        // Do this by calling the handler with an empty array of
         // data.
         //            
         _this.handleSensorData(null, { data: [] });
