@@ -123,8 +123,28 @@ function addFilterMethods(block, type) {
     block.computeEMA = function(newValue, boxSize) {
         var avg = 0;
         if (block.lastAverage !== null) {
-            var alpha = boxSize / (boxSize + 1);
-            avg = block.lastAverage * alpha + newValue * (1 - alpha);
+            //incorrect calculation, leave in in case we need to compare methods
+            //var alpha = boxSize / (boxSize + 1);
+            //avg = block.lastAverage * alpha + newValue * (1 - alpha);
+                        
+            if(isNaN(newValue) || newValue==null || newValue==undefined) {
+                //something went wrong and we were passed a bad value
+                //reuse the previous value
+                avg = block.lastAverage;
+            }
+            else{
+                //correct computation of EMA
+                //k = 2/(n+1) or alpha = 2/(boxsize + 1)
+                //ema = current*k + emaPrev * (1-k) or avg = newValue*k + block.lastAverage * (1-alpha)
+                var alpha = 2 / (boxSize + 1);
+                avg = newValue * alpha + block.lastAverage * (1 - alpha);                
+            }
+        }
+        else{
+            //we have no previous EMA, start with an average of existing values
+            //in this case this is just the currentVal (since we only have 1 value)
+            if(newValue!=undefined && newValue!=null && !isNaN(newValue))
+                avg = newValue;
         }
         block.lastAverage = avg;
         return avg;
