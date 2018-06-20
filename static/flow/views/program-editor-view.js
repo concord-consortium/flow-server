@@ -310,7 +310,8 @@ var ProgramEditorView = function(options) {
 
         nameWidget.val('');
         
-        piSelectorPanel.loadPiList();
+        piSelectorPanel.setProgramControlsToNeutral();
+        piSelectorPanel.loadPiList(true);
         piSelectorPanel.exitRunProgramState();
         piSelectorPanel.resetPiSelectionState();
         
