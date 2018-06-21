@@ -180,7 +180,7 @@ var PiSelectorPanel = function(options) {
         for(var val in piMenuData) {
             piMenuDataPrevious[val] = val; //set the list of current values for future comparison
             $('<option />', {value: val, text: piMenuData[val]}).appendTo(deviceDropDownMenu);
-        }
+        }        
     }    
 
     //
@@ -316,17 +316,10 @@ var PiSelectorPanel = function(options) {
     //      
     this.simulateRunProgramState = function(piName, piPath, datasetLocation){
         //add pi to list and select it
-        isPresent = false;
-        for(i=0; i<deviceDropDownMenu.options.length;i++){
-            if(deviceDropDownMenu.options[i].value == piName){
-                isPresent = true;
-                break;
-            }
-        }
-        if(!isPresent){
+        if ( $("#program-editor-devicemenuselect option[value=" + piName + "]").length == 0 ){
             piMenuDataPrevious[piName] = piName;
             $('<option />', {value: piName, text: piName}).appendTo(deviceDropDownMenu);
-        }
+        }        
         
         deviceDropDownMenu.val(piName);
         
