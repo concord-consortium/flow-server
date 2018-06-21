@@ -284,7 +284,7 @@ var ProgramEditorView = function(options) {
         
         var nameWidget      = jQuery('#program-editor-filename');
 
-        nameWidget.val(displayedName);
+        nameWidget.val(programSpec.name);
         
         //piSelectorPanel.loadPiList(); 
         piSelectorPanel.exitRunProgramState();
