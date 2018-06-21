@@ -316,7 +316,18 @@ var PiSelectorPanel = function(options) {
     //      
     this.simulateRunProgramState = function(piName, piPath, datasetLocation){
         //add pi to list and select it
-        $('<option />', {value: piName, text: piName}).appendTo(deviceDropDownMenu);
+        isPresent = false;
+        for(i=0; i<deviceDropDownMenu.options.length;i++){
+            if(deviceDropDownMenu.options[i].value == piName){
+                isPresent = true;
+                break;
+            }
+        }
+        if(!isPresent){
+            piMenuDataPrevious[piName] = piName;
+            $('<option />', {value: piName, text: piName}).appendTo(deviceDropDownMenu);
+        }
+        
         deviceDropDownMenu.val(piName);
         
         //set the state of the run button
