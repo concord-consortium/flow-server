@@ -47,7 +47,7 @@ var ProgramEditorPanel = function(options) {
     
     //recording/running program
     var m_runningProgram = false;
-
+    
     //
     // Return current diagram
     //
@@ -1459,6 +1459,18 @@ var ProgramEditorPanel = function(options) {
     }    
 
     //
+    //update blocks when pi is unselected
+    //    
+    this.piUnselected = function (){
+        //
+        // Clear any old sensor data being displayed.
+        // Do this by calling the handler with an empty array of
+        // data.
+        //            
+        _this.handleSensorData(null, { data: [] });
+    }
+
+    //
     // Handle sensor data messages
     //
     this.handleSensorData = function(timestamp, params) {
@@ -1482,9 +1494,9 @@ var ProgramEditorPanel = function(options) {
             // Check for device blocks for which we did not receive any data
             // and set their values to null.
             //
-			if(_this.m_diagram == null){
-				return;
-			}
+            if(_this.m_diagram == null){
+                return;
+            }
             for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
                 var block = _this.m_diagram.blocks[i];
                 if(_this.isDeviceBlock(block.type)) {

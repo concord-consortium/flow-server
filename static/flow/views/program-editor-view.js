@@ -110,7 +110,7 @@ var ProgramEditorView = function(options) {
      deviceStatus.appendTo(deviceHolder);            
      var deviceMenuHolder  = jQuery('<span>', {class:'deviceMenuHolder'} );
      deviceMenuHolder.appendTo(deviceHolder);     
-     var deviceSelect = $('<select />', {class:'deviceMenuSelect'} );
+     var deviceSelect = $('<select />', {id: 'program-editor-devicemenuselect', class:'deviceMenuSelect'} );
      
       //program start button
      var devicerunHolder  = jQuery('<span>', {class:'deviceRunHolder'} );
@@ -275,6 +275,8 @@ var ProgramEditorView = function(options) {
     //
     base.loadProgramFromSpec = function(params) {
         // console.log("[DEBUG] ProgramEditorView loadProgramFromSpec()", params);
+        var filename    = params.filename;
+        var displayedName    = params.displayedName;
 
         programloaded = true;
         
@@ -310,7 +312,8 @@ var ProgramEditorView = function(options) {
 
         nameWidget.val('');
         
-        piSelectorPanel.loadPiList();
+        piSelectorPanel.setProgramControlsToNeutral();
+        piSelectorPanel.loadPiList(true);
         piSelectorPanel.exitRunProgramState();
         piSelectorPanel.resetPiSelectionState();
         
