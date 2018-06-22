@@ -202,8 +202,8 @@ var LandingPageDataSetView = function(options) {
 		else
 			displayedFilename = item.name;
         var controllername = metadata.controller_name;
-        var programdata = metadata.program;
-        var programname = programdata.name;
+        var programData = metadata.program;
+        var programName = programData.displayedName;
         var isEmpty = false;
         if(metadata.is_empty && metadata.is_empty == true)
             isEmpty = true;
@@ -236,7 +236,7 @@ var LandingPageDataSetView = function(options) {
         
         var livedataitemboxprogram  = jQuery('<div>', {class:'liveDataItemBox concordblue'} );
         var livedataitemboxprogramtitle  = jQuery('<div>', {class:'liveDataItemBoxTitle', text:"running program"} );
-        var livedataitemboxprogramname  = jQuery('<div>', {class:'liveDataItemBoxName', text:programname} );
+        var livedataitemboxprogramname  = jQuery('<div>', {class:'liveDataItemBoxName', text:programName} );
         var viewProgramButton = $('<button>', { class:'liveDataItemBoxButton',   html: 'view program' } );
         livedataitemboxprogramtitle.appendTo(livedataitemboxprogram);   
         livedataitemboxprogramname.appendTo(livedataitemboxprogram);   
@@ -245,7 +245,7 @@ var LandingPageDataSetView = function(options) {
         viewProgramButton.click(item, function(e) {
             console.log("[DEBUG] viewProgramButton click", e.data);
             var editor = getTopLevelView('program-editor-view');
-            editor.loadProgramFromSpec({programdata: programdata});
+            editor.loadProgramFromSpec({programdata: programData});
             
             var piSelectorPanel = editor.getPiSelectorPanel();
             piSelectorPanel.simulateRunProgramState(metadata.controller_name, metadata.controller_path, metadata.recording_location);
