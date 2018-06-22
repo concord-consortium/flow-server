@@ -1083,37 +1083,8 @@ var ProgramEditorPanel = function(options) {
                 y: 35 + offsety,
             }
         };    
-
-        var d = new Date();
-        var year = d.getFullYear();
-        var month = d.getMonth() + 1;
-        var day = d.getDate();
-        var hour = d.getHours();
-        var min = d.getMinutes();
-        var sec = d.getSeconds();
-        
-        
-        var potentialName = "ds" + year;
-        if(month < 10)
-            potentialName = potentialName + "0" + month;
-        else
-            potentialName = potentialName + month;
-        if(day < 10)
-            potentialName = potentialName + "0" + day + "_";
-        else
-            potentialName = potentialName + day + "_";
-        if(hour < 10)
-            potentialName = potentialName + "0" + hour;
-        else
-            potentialName = potentialName + hour;
-        if(min < 10)
-            potentialName = potentialName + "0" + min;
-        else
-            potentialName = potentialName + min;
-        if(sec < 10)
-            potentialName = potentialName + "0" + sec;
-        else
-            potentialName = potentialName + sec;
+        var displayedFilename = jQuery('#program-editor-filename').val();
+        var potentialName = displayedFilename + " dataset";
         
         blockSpec.params = [{
            'name': 'recording_interval',
@@ -1138,6 +1109,42 @@ var ProgramEditorPanel = function(options) {
         //CodapTest.logTopic('Dataflow/ConnectSensor');        
     };
 
+    //
+    // get a dataset name based on the current date and time
+    //
+    this.chooseDatasetDateTimeName = function(name) {
+        var d = new Date();
+        var year = d.getFullYear();
+        var month = d.getMonth() + 1;
+        var day = d.getDate();
+        var hour = d.getHours();
+        var min = d.getMinutes();
+        var sec = d.getSeconds();
+        
+        var potentialName = "ds" + year;
+        if(month < 10)
+            potentialName = potentialName + "0" + month;
+        else
+            potentialName = potentialName + month;
+        if(day < 10)
+            potentialName = potentialName + "0" + day + "_";
+        else
+            potentialName = potentialName + day + "_";
+        if(hour < 10)
+            potentialName = potentialName + "0" + hour;
+        else
+            potentialName = potentialName + hour;
+        if(min < 10)
+            potentialName = potentialName + "0" + min;
+        else
+            potentialName = potentialName + min;
+        if(sec < 10)
+            potentialName = potentialName + "0" + sec;
+        else
+            potentialName = potentialName + sec;    
+        
+        return potentialName;
+    };
 
     
     //
@@ -1459,7 +1466,7 @@ var ProgramEditorPanel = function(options) {
     }    
 
     //
-    //update blocks when pi is unselected
+    // update blocks when pi is unselected
     //    
     this.piUnselected = function (){
         //
@@ -1518,7 +1525,7 @@ var ProgramEditorPanel = function(options) {
             //
             for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
                 _this.displayBlockValue(_this.m_diagram.blocks[i]);
-            }
+            }            
         }
     }
     
