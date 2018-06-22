@@ -82,6 +82,12 @@ var ProgramEditorPanel = function(options) {
             programSpec = { blocks: [] };
             programSpec.name = this.chooseProgramName();
             programSpec.displayedName = "untitled program";
+            programSpec.archived = false;
+        }
+        else if(programSpec.name = "")
+            // if we loaded a program copy stored in dataset metadata, 
+            // then it might not have a valid file name
+            programSpec.name = this.chooseProgramName();
         }
 
         //
