@@ -55,7 +55,7 @@ var PiSelectorPanel = function(options) {
     //
     // update any running program blocks on landing page based on online/offline pis
     //
-    this.updateRunningProgramBlocks = function (){
+    var updateRunningProgramBlocks = function (){
         if(this.availableControllers.length == 0){
             return;
         }
@@ -141,17 +141,17 @@ var PiSelectorPanel = function(options) {
                     }
  
                     if(rebuildMenu)
-                        _this.addPisToMenu();  
+                        addPisToMenu();  
                     else
-                        _this.rebuildPiMenuIfNeeded();  
+                        rebuildPiMenuIfNeeded();  
                     
-                    _this.updateRunningProgramBlocks();
+                    updateRunningProgramBlocks();
 
                 } else {
                     if(rebuildMenu)    
-                        _this.addPisToMenu();    
+                        addPisToMenu();    
                      else
-                        _this.rebuildPiMenuIfNeeded();
+                        rebuildPiMenuIfNeeded();
                     
                     console.log("[ERROR] Error listing controllers", response);
                 }
@@ -159,9 +159,9 @@ var PiSelectorPanel = function(options) {
             },
             error: function(data) {
                 if(rebuildMenu)
-                    _this.addPisToMenu();
+                    addPisToMenu();
                 else
-                    _this.rebuildPiMenuIfNeeded();  
+                    rebuildPiMenuIfNeeded();  
                 
                 console.log("[ERROR] List controllers error", data);
             },
@@ -171,7 +171,7 @@ var PiSelectorPanel = function(options) {
     //
     //add an entry for the pi to the drop down menu
     //
-    this.addPisToMenu = function(){ 
+    var addPisToMenu = function(){ 
         //delete previous menu data
         for (var member in piMenuDataPrevious) delete piMenuDataPrevious[member];
         //clear the dropdown menu list
@@ -208,18 +208,18 @@ var PiSelectorPanel = function(options) {
     //
     //rebuild pi menu 
     //
-    this.rebuildPiMenuIfNeeded = function(){ 
+    var rebuildPiMenuIfNeeded = function(){ 
         //is this the same as the previous list?
         if(JSON.stringify(piMenuData) != JSON.stringify(piMenuDataPrevious)){
-            _this.addPisToMenu();
-            _this.reselectPreviousPi();
+            addPisToMenu();
+            reselectPreviousPi();
         }
     }
     
     //
     //reselect the previously selected pi
     //  
-    this.reselectPreviousPi = function(){
+    var reselectPreviousPi = function(){
         var foundPi = false;
         for(var val in piMenuData) {
             if(piMenuData[val] == _this.currentlySelectedPi){
@@ -230,7 +230,7 @@ var PiSelectorPanel = function(options) {
         }
         if(!foundPi){
             deviceDropDownMenu.val("none");
-            this.selectNoPi();
+            selectNoPi();
         }        
     }
     
@@ -269,7 +269,7 @@ var PiSelectorPanel = function(options) {
     //
     //function to select no pis from the list
     //      
-    this.selectNoPi = function(){
+    var selectNoPi = function(){
         //set state of run program button
         runProgramButton.html('<span class="glyphicon glyphicon-play"></span><span class="deviceRunButtonText">run program</span>');
         runProgramButton.removeClass("rungreen");
@@ -289,7 +289,7 @@ var PiSelectorPanel = function(options) {
     //
     //change editor state to running program
     //     
-    this.enterRunProgramState = function(){
+    var enterRunProgramState = function(){
         editor.getProgramEditorPanel().toggleRunProgramMode(true);
     }
     //
@@ -331,7 +331,7 @@ var PiSelectorPanel = function(options) {
         var contents = $('#program-editor-recordingstatus').text("Running on ");
         deviceDropDownMenu.prop("disabled", true); 
         
-        this.enterRunProgramState();
+        enterRunProgramState();
         
          //save recording values for stopping later on
         _this.currentControllerPath = piPath; //path to the pi, e.g., testing/rpi24
@@ -350,7 +350,7 @@ var PiSelectorPanel = function(options) {
     this.selectPi = function(deviceName) {
         if(deviceName == "none"){ 
             //invalid index, none was probably selected
-            this.selectNoPi();
+            selectNoPi();
             
             return;
         }
@@ -479,7 +479,7 @@ var PiSelectorPanel = function(options) {
             dsDisplayedName = dsFileName;
         }
         else{
-            dsDisplayedName = editor.getProgramEditorPanel().getRecordingLocationFromDataBlock();
+            dsDisplayedName = editor.getProgramEditorPanel().getDataStorageBlockDisplayedName();
             if(dsDisplayedName == ""){
                 alert("Please enter a valid dataset name on the data storage block.");
                 return;
@@ -516,13 +516,14 @@ var PiSelectorPanel = function(options) {
         //
         // Set name on program
         //
-        var name = jQuery('#program-editor-filename').val();
-        //var name = editor.getFileManager().getProgramName();
-        programSpec.name = name;
+        var displayedName = jQuery('#program-editor-filename').val();
+        programSpec.name = ""; //don't have an actual folder location for this "virtual" program
+        programSpec.archived = false;
+        programSpec.displayedName = displayedName;
         //console.log("[DEBUG] Set name: " + programSpec.name);
 
-        if(!programSpec.name || programSpec.name == '') {
-            alert("No name set on program. " + programSpec.name);
+        if(!programSpec.displayedName || programSpec.displayedName == '') {
+            alert("No name set on program. " + programSpec.displayedName);
             runProgramButton.prop("disabled", false); 
             runProgramButton.html('<span class="glyphicon glyphicon-play"></span><span class="deviceRunButtonText">run program on ' + controller.name + '</span>');                        
             return;
@@ -561,7 +562,7 @@ var PiSelectorPanel = function(options) {
                 var contents = $('#program-editor-recordingstatus').text("Running on ");
                 deviceDropDownMenu.prop("disabled", true); 
                 
-                this.enterRunProgramState();
+                enterRunProgramState();
                 
                 this.reselectCurrentPi(); //_this.selectPi(deviceDropDownMenu.val());
             } else {

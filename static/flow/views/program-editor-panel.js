@@ -37,7 +37,6 @@ var ProgramEditorPanel = function(options) {
     //
     // Create div for svg drawer
     //
-    
     var svgWrapper = $('<div>', { css: { } });
     var svgDiv = $('<div>', { class: 'diagramSvgHolder',  id: 'program-holder'} );
     svgWrapper.append(svgDiv);
@@ -80,8 +79,14 @@ var ProgramEditorPanel = function(options) {
         if(!programSpec) {
             $('#program-editor-filename').val("untitled program");
             programSpec = { blocks: [] };
-            programSpec.name = this.chooseProgramName();
+            programSpec.name = this.createDateTimeName("program_");
             programSpec.displayedName = "untitled program";
+            programSpec.archived = false;
+        }
+        else if(programSpec.name == ""){
+            // if we loaded a program copy stored in dataset metadata, 
+            // then it might not have a valid file name
+            programSpec.name = this.createDateTimeName("program_");
         }
 
         //
@@ -131,7 +136,7 @@ var ProgramEditorPanel = function(options) {
         m_modified = false;
     };
 
-    this.chooseProgramName = function(){
+    this.createDateTimeName = function(prefixStr){
         var d = new Date();
         var year = d.getFullYear();
         var month = d.getMonth() + 1;
@@ -140,7 +145,7 @@ var ProgramEditorPanel = function(options) {
         var min = d.getMinutes();
         var sec = d.getSeconds();
         
-        var potentialName = "program_" + year;
+        var potentialName = prefixStr + year;
         if(month < 10)
             potentialName = potentialName + "0" + month;
         else
@@ -287,7 +292,7 @@ var ProgramEditorPanel = function(options) {
         } else if (block.outputType === 'i') {  // image-valued blocks
             $('<img>', {class: 'flowBlockImage', width: 320, height: 240, id: 'bi_' + block.id}).appendTo(blockDiv);
             blockDiv.addClass('flowBlockWithImage');
-            this.appendBlockParametersToBlockDiv(block, blockDiv);
+            appendBlockParametersToBlockDiv(block, blockDiv);
         } else {
             var div = $('<div>', {class: 'flowBlockValueAndUnits noSelect'});
             var initval = "...";
@@ -321,8 +326,6 @@ var ProgramEditorPanel = function(options) {
             if(block.type === 'data storage' || block.type === 'timer'){
                     divflowBlockInputHolder2.appendTo(blockContentDiv);
                 }
-                    
-                //this.appendBlockParametersToBlockDiv(block, divflowBlockInputHolder);
                                 
                 for (var i = 0; i < block.params.length; i++) {
                     var param = block.params[i];                
@@ -501,7 +504,90 @@ var ProgramEditorPanel = function(options) {
         }
         
     };
+    
+    //
+    // add block param values to the block div for later retrieval
+    //
+    var appendBlockParametersToBlockDiv = function(block, blockDiv) {
+        for (var i = 0; i < block.params.length; i++) {
+            var param = block.params[i];
+            //param.value = param['default']; // set value to default value so that we can send a value back to controller if no param entry change
+    
+            var initval = param.value;
+            var displayedParamName = param.name;
+            if(param.name=="period"){
+                displayedParamName = "last";
+            }
+            else if(param.name=="recording_interval"){
+                displayedParamName = "interval";
+            }
+            else if(param.name=="dataset_location"){
+                displayedParamName = "name";
+            }
+            else if(param.name=="seconds_off"){
+                displayedParamName = "off";
+            }
+            else if(param.name=="seconds_on"){
+                displayedParamName = "on";
+            }
+            else{ //if we don't recognize it, skip it for now
+                continue;
+            }
+            $('<div>', {class: 'flowBlockParamLabel noSelect', html: displayedParamName}).appendTo(blockDiv);
+            if(i==0)
+                var input = $('<input>', {class: 'form-control flowBlockInput', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).appendTo(blockDiv);
+            else
+                var input = $('<input>', {class: 'form-control flowBlockInput', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).prependTo(blockDiv);
 
+            input.mousedown(function(e) {e.stopPropagation()});
+            var eventdata = {blockid:block.id, paramname: param.name};
+            input.keyup(eventdata, _this.paramEntryChanged);
+            input.focusout(eventdata, _this.paramEntryFocusOut);
+        }
+    };
+    
+    //
+    // Scale css classes based on current scale value.
+    // Will scale the following css classes:
+    // - flowBlockValueAndUnits
+    // - flowBlockValue
+    // etc. as specified in CLASS_SCALING_TABLE
+    //
+    this.scaleClasses = function() {
+        //
+        // adjust css sizing properties based on scale
+        //
+
+        // allow reset to exactly 1.0 scale if it's slightly off
+        if (this.m_scale > 0.95 && this.m_scale < 1.05) {
+            do_reset = true;
+            this.m_scale = 1.0;
+        } else {
+            do_reset = false;
+        }
+        for (var key in CLASS_SCALING_TABLE) {
+          var node = $("." + key)
+          if (node) {
+            for (var cssProp in CLASS_SCALING_TABLE[key]) {
+                var value = node.css(cssProp);
+                if (value) {
+                    var defaultValue = CLASS_SCALING_TABLE[key][cssProp];
+                    var newValue = Math.round(defaultValue * this.m_scale);
+                    // append "px" if needed
+                    if (value && value.endsWith("px")) {
+                        newValue = "" + newValue + "px";
+                    }
+                    //console.log("scaleClasses: " + key + " - " + cssProp + ": " + value + " -> " + newValue);
+                    node.css(cssProp, newValue);
+                    //$("." + key).css(cssProp, newValue);
+                } else {
+                    //console.log("scaleClasses: skipping " + key + " - " + cssProp);
+                }
+            }
+          }
+        }
+    };
+    
     //
     // Remove the HTML/SVG elements associated with a block
     //
@@ -545,89 +631,6 @@ var ProgramEditorPanel = function(options) {
         line.remember('destPin', destPin);
         line.click(connectionClick);
         destPin.view.svgConn = line;
-    };
-
-    //
-    //
-    //
-    this.appendBlockParametersToBlockDiv = function(block, blockDiv) {
-        for (var i = 0; i < block.params.length; i++) {
-            var param = block.params[i];
-            //param.value = param['default']; // set value to default value so that we can send a value back to controller if no param entry change
-    
-            var initval = param.value;
-            var displayedParamName = param.name;
-            if(param.name=="period"){
-                displayedParamName = "last";
-            }
-            else if(param.name=="recording_interval"){
-                displayedParamName = "interval";
-            }
-            else if(param.name=="dataset_location"){
-                displayedParamName = "name";
-            }
-            else if(param.name=="seconds_off"){
-                displayedParamName = "off";
-            }
-            else if(param.name=="seconds_on"){
-                displayedParamName = "on";
-            }
-            else{ //if we don't recognize it, skip it for now
-                continue;
-            }
-            $('<div>', {class: 'flowBlockParamLabel noSelect', html: displayedParamName}).appendTo(blockDiv);
-            if(i==0)
-                var input = $('<input>', {class: 'form-control flowBlockInput', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).appendTo(blockDiv);
-            else
-                var input = $('<input>', {class: 'form-control flowBlockInput', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).prependTo(blockDiv);
-
-            input.mousedown(function(e) {e.stopPropagation()});
-            var eventdata = {blockid:block.id, paramname: param.name};
-            input.keyup(eventdata, _this.paramEntryChanged);
-            input.focusout(eventdata, _this.paramEntryFocusOut);
-        }
-    };
-
-    //
-    // Scale css classes based on current scale value.
-    // Will scale the following css classes:
-    // - flowBlockValueAndUnits
-    // - flowBlockValue
-    // etc. as specified in CLASS_SCALING_TABLE
-    //
-    this.scaleClasses = function() {
-        //
-        // adjust css sizing properties based on scale
-        //
-
-        // allow reset to exactly 1.0 scale if it's slightly off
-        if (this.m_scale > 0.95 && this.m_scale < 1.05) {
-            do_reset = true;
-            this.m_scale = 1.0;
-        } else {
-            do_reset = false;
-        }
-        for (var key in CLASS_SCALING_TABLE) {
-          var node = $("." + key)
-          if (node) {
-            for (var cssProp in CLASS_SCALING_TABLE[key]) {
-                var value = node.css(cssProp);
-                if (value) {
-                    var defaultValue = CLASS_SCALING_TABLE[key][cssProp];
-                    var newValue = Math.round(defaultValue * this.m_scale);
-                    // append "px" if needed
-                    if (value && value.endsWith("px")) {
-                        newValue = "" + newValue + "px";
-                    }
-                    //console.log("scaleClasses: " + key + " - " + cssProp + ": " + value + " -> " + newValue);
-                    node.css(cssProp, newValue);
-                    //$("." + key).css(cssProp, newValue);
-                } else {
-                    //console.log("scaleClasses: skipping " + key + " - " + cssProp);
-                }
-            }
-          }
-        }
     };
 
     //
@@ -805,28 +808,6 @@ var ProgramEditorPanel = function(options) {
     };
 
     //
-    // Display a dialog with a list of allowed filter types
-    //
-    this.showFilterBlockSelector = function() {
-        var modal = createBasicModal('filterModal', 'Select a Filter', {infoOnly: true});
-        modal.appendTo($('body'));
-        var modalBody = $('#filterModal-body');
-        var filterTypes = [
-            "not", "and", "or", "xor", "nand",
-            "plus", "minus", "times", "divided by", "absolute value",
-            "equals", "not equals", "less than", "greater than",
-            "moving average", "exp moving average"
-        ];
-        for (var i = 0; i < filterTypes.length; i++) {
-            var type = filterTypes[i];
-            var button = $('<button>', {html: type, class: 'btn filter'});
-            button.click(type, this.addFilterBlock);
-            button.appendTo(modalBody);
-        }
-        $('#filterModal').modal('show');
-    };
-
-    //
     // Handle mouse down in pin SVG element
     //
     this.pinMouseDown = function(e) {
@@ -949,7 +930,7 @@ var ProgramEditorPanel = function(options) {
     };
     
     //
-    // Used by addDeviceBlock() to create unique names
+    // Used to create unique names for blocks
     //
     this.getUniqueName = function(name) {
     
@@ -963,7 +944,31 @@ var ProgramEditorPanel = function(options) {
         }
         return name + count;
     };
-
+    //
+    // Used to get intial position x offset for block
+    //
+    this.newBlockXOffset = function() {
+        numb = (_this.m_diagram.blocks.length);
+        if(numb >= 72){
+            numb = numb%72;
+        }
+        var r =  Math.floor((numb)/18);
+        var c =  (numb)%18;
+        var offset = r * 250 + c * 5;
+        return offset;
+    }
+    //
+    // Used to get intial position y offset for block
+    //
+    this.newBlockYOffset = function() {
+        numb = (_this.m_diagram.blocks.length);
+        if(numb >= 72){
+            numb = numb%72;
+        }
+        var c =  (numb)%18;
+        var offset = c * 35;
+        return offset;
+    }    
     //
     // Add a block of the specified type to the program.
     //
@@ -994,26 +999,6 @@ var ProgramEditorPanel = function(options) {
         _this.displayBlock(block);
         CodapTest.logTopic('Dataflow/ConnectSensor');
     };
-    
-    this.newBlockXOffset = function() {
-        numb = (_this.m_diagram.blocks.length);
-        if(numb >= 72){
-            numb = numb%72;
-        }
-        var r =  Math.floor((numb)/18);
-        var c =  (numb)%18;
-        var offset = r * 250 + c * 5;
-        return offset;
-    }
-    this.newBlockYOffset = function() {
-        numb = (_this.m_diagram.blocks.length);
-        if(numb >= 72){
-            numb = numb%72;
-        }
-        var c =  (numb)%18;
-        var offset = c * 35;
-        return offset;
-    }    
     
     //
     // Add a relay block to the diagram
@@ -1108,44 +1093,6 @@ var ProgramEditorPanel = function(options) {
         _this.displayBlock(block);
         //CodapTest.logTopic('Dataflow/ConnectSensor');        
     };
-
-    //
-    // get a dataset name based on the current date and time
-    //
-    this.chooseDatasetDateTimeName = function(name) {
-        var d = new Date();
-        var year = d.getFullYear();
-        var month = d.getMonth() + 1;
-        var day = d.getDate();
-        var hour = d.getHours();
-        var min = d.getMinutes();
-        var sec = d.getSeconds();
-        
-        var potentialName = "ds" + year;
-        if(month < 10)
-            potentialName = potentialName + "0" + month;
-        else
-            potentialName = potentialName + month;
-        if(day < 10)
-            potentialName = potentialName + "0" + day + "_";
-        else
-            potentialName = potentialName + day + "_";
-        if(hour < 10)
-            potentialName = potentialName + "0" + hour;
-        else
-            potentialName = potentialName + hour;
-        if(min < 10)
-            potentialName = potentialName + "0" + min;
-        else
-            potentialName = potentialName + min;
-        if(sec < 10)
-            potentialName = potentialName + "0" + sec;
-        else
-            potentialName = potentialName + sec;    
-        
-        return potentialName;
-    };
-
     
     //
     // Add a timer block to the diagram
@@ -1403,80 +1350,6 @@ var ProgramEditorPanel = function(options) {
         return ret;
     }
     
-    //
-    // return the name of the recording location in program
-    //
-    this.getRecordingLocationFromDataBlock = function() {
-        var ret = "";
-        for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
-            var block = _this.m_diagram.blocks[i];
-            if(block.type === "data storage") {
-                for (var x = 0; x < block.params.length; x++) {
-                    var param = block.params[x];                
-                    var val = param.value        
-                    if(param.name=="dataset_location"){
-                        ret = val;
-                        break;
-                    }
-                }
-            }
-        }
-        return ret;
-    }
-    //
-    // check if we have a data storage block
-    //
-    this.programHasDataStorageBlock = function() {
-        var ret = false;
-        for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
-            var block = _this.m_diagram.blocks[i];
-            if(block.type === "data storage") {
-                ret = true;
-                break;
-            }
-        }
-        return ret;
-    }    
-    //
-    // return the name of the recording location in program
-    //
-    this.validSequenceNames = function() {
-        var ret = true;
-        for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
-            var block = _this.m_diagram.blocks[i];
-            if(block.type === "data storage") {
-                for (var x = 0; x < block.params.length; x++) {
-                    var param = block.params[x];                
-                    var val = param.value        
-                    if(param.name=="sequence_names"){
-                        var paramKeyArray = Object.keys(param.value);
-                        var paramValueArray = Object.values(param.value);
-                        for(var x = 0; x < (paramValueArray.length); x++){
-                            if(paramValueArray == ""){
-                                ret = false;
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-        return ret;
-    }    
-
-    //
-    // update blocks when pi is unselected
-    //    
-    this.piUnselected = function (){
-        //
-        // Clear any old sensor data being displayed.
-        // Do this by calling the handler with an empty array of
-        // data.
-        //            
-        _this.handleSensorData(null, { data: [] });
-    }
-
     //
     // Handle sensor data messages
     //
@@ -1804,12 +1677,9 @@ var ProgramEditorPanel = function(options) {
         }
     }
 
-    /**
-     * zoom blocks
-     * Params:
-     *   blocks
-     *   factor: factor to zoom by, such as 0.7 or 1.3
-     */
+    //
+    // zoom blocks based on UI controls
+    //
     this.zoomBlocks = function(increment) {
         this.m_scale += increment;
         // var blocks = this.m_diagram.blocks;
@@ -1842,6 +1712,82 @@ var ProgramEditorPanel = function(options) {
                 }
             }
         }
+    }
+    
+    //
+    // return the name of the displayed name on the data storage block
+    //
+    this.getDataStorageBlockDisplayedName = function() {
+        var ret = "";
+        for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
+            var block = _this.m_diagram.blocks[i];
+            if(block.type === "data storage") {
+                for (var x = 0; x < block.params.length; x++) {
+                    var param = block.params[x];                
+                    var val = param.value        
+                    if(param.name=="dataset_location"){
+                        ret = val;
+                        break;
+                    }
+                }
+            }
+        }
+        return ret;
+    }
+    
+    //
+    // check if we have a data storage block
+    //
+    this.programHasDataStorageBlock = function() {
+        var ret = false;
+        for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
+            var block = _this.m_diagram.blocks[i];
+            if(block.type === "data storage") {
+                ret = true;
+                break;
+            }
+        }
+        return ret;
+    }  
+    
+    //
+    // check if user-entered sequence names are valid
+    //
+    this.validSequenceNames = function() {
+        var ret = true;
+        for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
+            var block = _this.m_diagram.blocks[i];
+            if(block.type === "data storage") {
+                for (var x = 0; x < block.params.length; x++) {
+                    var param = block.params[x];                
+                    var val = param.value        
+                    if(param.name=="sequence_names"){
+                        var paramKeyArray = Object.keys(param.value);
+                        var paramValueArray = Object.values(param.value);
+                        for(var x = 0; x < (paramValueArray.length); x++){
+                            if(paramValueArray == ""){
+                                ret = false;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        return ret;
+    }    
+
+    //
+    // update blocks when pi is unselected
+    //    
+    this.piUnselected = function (){
+        //
+        // Clear any old sensor data being displayed.
+        // Do this by calling the handler with an empty array of
+        // data.
+        //            
+        _this.handleSensorData(null, { data: [] });
     }
     
     //

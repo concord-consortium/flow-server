@@ -98,4 +98,61 @@ Util.getLocalTime = function(d) {
     return Util.getLocalDateTime(d)[1];
 };
 
+//
+// Util to convert date/time string to human readable form
+// input ex: 20180522_164244
+// output ex: December 22, 2018 10:55 PM
+//
+Util.convertDateTimeStringToHumanReadable = function(dateTimeStr) {
+    var year = dateTimeStr.substring(0, 4);
+    var month = dateTimeStr.substring(4, 6);
+    var day = dateTimeStr.substring(6, 8);
+    var hour = dateTimeStr.substring(9, 11);
+    var min = dateTimeStr.substring(11, 13);
+    
+    if(month=="01")
+        month="January";
+    else if(month=="02")
+        month="February";
+    else if(month=="03")
+        month="March";
+    else if(month=="04")
+        month="April";
+    else if(month=="05")
+        month="May";
+    else if(month=="06")
+        month="June";
+    else if(month=="07")
+        month="July";
+    else if(month=="08")
+        month="August";
+    else if(month=="09")
+        month="September";
+    else if(month=="10")
+        month="October";
+    else if(month=="11")
+        month="November";
+    else if(month=="12")
+        month="December";
+    var dayNum = parseInt(day, 10);
+    var hourNum = parseInt(hour, 10);
+    var ampm = "AM";
+    if(hourNum==0)
+        hourNum=12;
+    else if(hourNum==12){
+        ampm = "PM";
+    }
+    else if(hourNum>=13){
+        hourNum-=12;
+        ampm = "PM";
+    }
+    var minNum = parseInt(min, 10);
+    if(min<10)
+        minNum="0" + minNum;
+    
+    var finalStr = month + " " + dayNum + ", " + year + " " + hourNum + ":" + minNum + " " + ampm;
+    return finalStr;
+
+};
+
 
