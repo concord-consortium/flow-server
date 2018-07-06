@@ -488,19 +488,14 @@ var DataSetView = function(options) {
         var dataPairs = base.m_plotHandler.plotter.dataPairs;
         if (dataPairs.length && dataPairs[0].xData.data.length) {
 
-            var diagram = base.m_program;
-
             // set collection attributes based on current input blocks
             var attrs = [{name: 'seconds', type: 'numeric', precision: 2}, {name: 'timestamp', type: 'date'}];
-            for (var i = 0; i < diagram.blocks.length; i++) {
-                var block = diagram.blocks[i];
-                if (block.inputCount === 0) {
-                    attrs.push({
-                        name: block.name,
-                        type: 'numeric',
-                        precision: 2,
-                    });
-                }
+            for (var i = 0; i < dataPairs.length; i++) {
+                attrs.push({
+                    name: dataPairs[i].yData.name,
+                    type: 'numeric',
+                    precision: 2,
+                });
             }
 
             CodapTest.prepCollection(
