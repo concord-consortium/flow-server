@@ -488,7 +488,7 @@ var DataSetView = function(options) {
         var dataPairs = base.m_plotHandler.plotter.dataPairs;
         if (dataPairs.length && dataPairs[0].xData.data.length) {
 
-            // set collection attributes based on current input blocks
+            // set collection attributes based on sequence data
             var attrs = [{name: 'seconds', type: 'numeric', precision: 2}, {name: 'timestamp', type: 'date'}];
             for (var i = 0; i < dataPairs.length; i++) {
                 attrs.push({
