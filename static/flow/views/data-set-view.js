@@ -199,7 +199,17 @@ var DataSetView = function(options) {
             displayedName = base.m_dataSet.metadata.displayedName;
         }
         info.append($('<div>').text("DataSet Name: " + displayedName));
-        info.append($('<div>').text("Program Name: " + base.m_dataSet.metadata.program.name));
+        var programDisplayedName;
+        if(base.m_dataSet.metadata.program.displayedName == null){
+            //old style dataset where name/displayed name are the same
+            //and displayedName value is null or undefined
+            programDisplayedName = base.m_dataSet.metadata.program.name;
+        }
+        else{
+            //modern style dataset where name/displayed name are unique
+            programDisplayedName = base.m_dataSet.metadata.program.displayedName;
+        }
+        info.append($('<div>').text("Program Name: " + programDisplayedName));   
 
         base.m_canvas = document.getElementById('data-set-canvas');
         base.m_plotHandler = createPlotHandler(base.m_canvas);
@@ -488,19 +498,14 @@ var DataSetView = function(options) {
         var dataPairs = base.m_plotHandler.plotter.dataPairs;
         if (dataPairs.length && dataPairs[0].xData.data.length) {
 
-            var diagram = base.m_program;
-
-            // set collection attributes based on current input blocks
+            // set collection attributes based on sequence data
             var attrs = [{name: 'seconds', type: 'numeric', precision: 2}, {name: 'timestamp', type: 'date'}];
-            for (var i = 0; i < diagram.blocks.length; i++) {
-                var block = diagram.blocks[i];
-                if (block.inputCount === 0) {
-                    attrs.push({
-                        name: block.name,
-                        type: 'numeric',
-                        precision: 2,
-                    });
-                }
+            for (var i = 0; i < dataPairs.length; i++) {
+                attrs.push({
+                    name: dataPairs[i].yData.name,
+                    type: 'numeric',
+                    precision: 2,
+                });
             }
 
             CodapTest.prepCollection(
