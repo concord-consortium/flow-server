@@ -199,7 +199,17 @@ var DataSetView = function(options) {
             displayedName = base.m_dataSet.metadata.displayedName;
         }
         info.append($('<div>').text("DataSet Name: " + displayedName));
-        info.append($('<div>').text("Program Name: " + base.m_dataSet.metadata.program.name));
+        var programDisplayedName;
+        if(base.m_dataSet.metadata.program.displayedName == null){
+            //old style dataset where name/displayed name are the same
+            //and displayedName value is null or undefined
+            programDisplayedName = base.m_dataSet.metadata.program.name;
+        }
+        else{
+            //modern style dataset where name/displayed name are unique
+            programDisplayedName = base.m_dataSet.metadata.program.displayedName;
+        }
+        info.append($('<div>').text("Program Name: " + programDisplayedName));   
 
         base.m_canvas = document.getElementById('data-set-canvas');
         base.m_plotHandler = createPlotHandler(base.m_canvas);
