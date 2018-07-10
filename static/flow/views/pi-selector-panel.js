@@ -516,13 +516,15 @@ var PiSelectorPanel = function(options) {
         //
         // Set name on program
         //
-        var name = jQuery('#program-editor-filename').val();
+        var displayedName = jQuery('#program-editor-filename').val();
         //var name = editor.getFileManager().getProgramName();
-        programSpec.name = name;
+        programSpec.name = ""; //don't have an actual folder location for this "virtual" program
+        programSpec.archived = false;
+        programSpec.displayedName = displayedName;
         //console.log("[DEBUG] Set name: " + programSpec.name);
 
-        if(!programSpec.name || programSpec.name == '') {
-            alert("No name set on program. " + programSpec.name);
+        if(!programSpec.displayedName || programSpec.displayedName == '') {
+            alert("No name set on program. " + programSpec.displayedName);
             runProgramButton.prop("disabled", false); 
             runProgramButton.html('<span class="glyphicon glyphicon-play"></span><span class="deviceRunButtonText">run program on ' + controller.name + '</span>');                        
             return;

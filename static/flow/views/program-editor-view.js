@@ -275,16 +275,15 @@ var ProgramEditorView = function(options) {
     //
     base.loadProgramFromSpec = function(params) {
         // console.log("[DEBUG] ProgramEditorView loadProgramFromSpec()", params);
-        var filename    = params.filename;
-        var displayedName    = params.displayedName;
-
         programloaded = true;
         
         var programSpec = params.programdata;
+        var filename    = programSpec.name;
+        var displayedName    = programSpec.displayedName;
         
         var nameWidget      = jQuery('#program-editor-filename');
 
-        nameWidget.val(programSpec.name);
+        nameWidget.val(displayedName);
         
         //piSelectorPanel.loadPiList(); 
         piSelectorPanel.exitRunProgramState();
