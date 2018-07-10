@@ -87,7 +87,7 @@ var ProgramEditorPanel = function(options) {
             // if we loaded a program copy stored in dataset metadata,
             // or if the name value is null or undefined
             // then it might not have a valid file name
-            programSpec.name = this.createDateTimeName("program_");
+            programSpec.name = this.chooseProgramName();
         }
 
         //
