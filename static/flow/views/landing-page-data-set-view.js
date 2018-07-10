@@ -274,14 +274,14 @@ var LandingPageDataSetView = function(options) {
             stopRecording();
         });        
 
-        var LiveDataItemBoxData  = jQuery('<div>', {class:'liveDataItemBox concordblue'} );
-        var LiveDataItemBoxDataTitle  = jQuery('<div>', {class:'liveDataItemBoxTitle', text:"recording dataset"} );
-        var LiveDataItemBoxDataName  = jQuery('<div>', {class:'liveDataItemBoxName', text:displayedFilename} );
+        var liveDataItemBoxData  = jQuery('<div>', {class:'liveDataItemBox concordblue'} );
+        var liveDataItemBoxDataTitle  = jQuery('<div>', {class:'liveDataItemBoxTitle', text:"recording dataset"} );
+        var liveDataItemBoxDataName  = jQuery('<div>', {class:'liveDataItemBoxName', text:displayedFilename} );
         var viewButton = $('<button>', { class:'liveDataItemBoxButton',   html: 'view dataset' } );
-        LiveDataItemBoxDataTitle.appendTo(LiveDataItemBoxData);   
-        LiveDataItemBoxDataName.appendTo(LiveDataItemBoxData);
+        liveDataItemBoxDataTitle.appendTo(liveDataItemBoxData);   
+        liveDataItemBoxDataName.appendTo(liveDataItemBoxData);
         
-        viewButton.appendTo(LiveDataItemBoxData);         
+        viewButton.appendTo(liveDataItemBoxData);         
     
         viewButton.click(item, function(e) {
             console.log("[DEBUG] View DataSet Button click", e.data);
@@ -302,7 +302,7 @@ var LandingPageDataSetView = function(options) {
         if(!isEmpty) 
             liveDataItemConnector2.appendTo(liveDataItemHolder);   
         if(!isEmpty) 
-            LiveDataItemBoxData.appendTo(liveDataItemHolder);   
+            liveDataItemBoxData.appendTo(liveDataItemHolder);   
         liveDataItemHolder.appendTo(livedataholder);   
         return liveDataItemHolder;
     }
