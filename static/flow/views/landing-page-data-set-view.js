@@ -1,7 +1,7 @@
 //
-// A view representing a main landing page
-// which can display "My Programs", "Recording Now" data
-// and "Previously Recorded" data
+// A vertical menu view which can display saved datasets,
+// and an activity feed showing currently running programs
+// and associated live datasets
 //
 var LandingPageDataSetView = function(options) {
 
@@ -21,7 +21,6 @@ var LandingPageDataSetView = function(options) {
 
         recordeddataholder.empty();
         addLoadingDatasetsToMenu(recordeddataholder);
-        //recordeddataholder.text("Loading recorded data...");
 
         var url = '/ext/flow/list_datasets';
 
@@ -65,7 +64,7 @@ var LandingPageDataSetView = function(options) {
                         if(displayName == "Recording Now"){
                             for(var i = 0; i < list.length; i++) {
                                 livedatatitlebar.text("Currently running programs");
-                                var livedatablock = createMyDataSetLiveBlock ( list[i]);
+                                var livedatablock = createDatasetActivityFeedBlock ( list[i]);
                                 livedatablock.appendTo(livedataholder);
                                 // console.log("[DEBUG] Creating dataset item", items[i]);
                             }
@@ -73,7 +72,7 @@ var LandingPageDataSetView = function(options) {
                         }
                         else{
                             for(var i = 0; i < list.length; i++) {
-                                var tooltip = "";
+                                var toolTip = "";
                                 var displayedName = "";
                                 if(list[i].metadata == null || list[i].metadata.displayedName == null){
                                     //no displayedName indicates old style dataset where displayed name and filename are the same
@@ -82,11 +81,11 @@ var LandingPageDataSetView = function(options) {
                                 else{
                                     //displayedName indicates new style dataset where displayed name is stored in metadata and filename is based on creation date and time
                                     var dateifiedName = list[i].name;
-                                    tooltip = convertDatasetNameToDateString(dateifiedName);
+                                    toolTip = convertDatasetNameToDateString(dateifiedName);
                                     displayedName = list[i].metadata.displayedName;
                                 }
                                 
-                                var btn = createMyDataSetMenuEntry ( list[i], displayedName, list[i].name, tooltip, i );
+                                var btn = createDatasetMenuEntry ( list[i], displayedName, list[i].name, toolTip, i );
                                 btn.appendTo(recordeddataholder);
                                 // console.log("[DEBUG] Creating dataset item", items[i]);
                             }                            
@@ -122,62 +121,18 @@ var LandingPageDataSetView = function(options) {
     //
     //take an internal file name saved as a date and convert to a human readable date string
     //
-    this.convertDatasetNameToDateString = function(internalName){
+    var convertDatasetNameToDateString = function(internalName){
         //dataset name is formatted like this: dataset_20180522_164244
         //we want a date format like this: December 22, 2018 10:55 PM
-        var year = internalName.substring(8, 12);
-        var month = internalName.substring(12, 14);
-        var day = internalName.substring(14, 16);
-        var hour = internalName.substring(17, 19);
-        var min = internalName.substring(19, 21);
-        if(month=="01")
-            month="January";
-        else if(month=="02")
-            month="February";
-        else if(month=="03")
-            month="March";
-        else if(month=="04")
-            month="April";
-        else if(month=="05")
-            month="May";
-        else if(month=="06")
-            month="June";
-        else if(month=="07")
-            month="July";
-        else if(month=="08")
-            month="August";
-        else if(month=="09")
-            month="September";
-        else if(month=="10")
-            month="October";
-        else if(month=="11")
-            month="November";
-        else if(month=="12")
-            month="December";
-        var dayNum = parseInt(day, 10);
-        var hourNum = parseInt(hour, 10);
-        var ampm = "AM";
-        if(hourNum==0)
-            hourNum=12;
-        else if(hourNum==12){
-            ampm = "PM";
-        }
-        else if(hourNum>=13){
-            hourNum-=12;
-            ampm = "PM";
-        }
-        var minNum = parseInt(min, 10);
-        if(min<10)
-            minNum="0" + minNum;
-        
-        var finalstr = month + " " + dayNum + ", " + year + " " + hourNum + ":" + minNum + " " + ampm;
-        return finalstr;
+        dateTimeStr = internalName.slice(8);
+        finalStr = Util.convertDateTimeStringToHumanReadable(dateTimeStr);
+        return finalStr;
     }    
     
     //
     //didn't find any datasets, add a menu entry letting the user know there are no datasets available
     //
-    this.addNoDatasetsToMenu = function(div){    
+    var addNoDatasetsToMenu = function(div){    
         div.empty();
         var emptyButton = $('<div>', {class: 'landingPageMenuEntryNoSelect noSelect menudarkgray'} ).text("no available datasets");
         div.append(emptyButton);
@@ -185,7 +140,7 @@ var LandingPageDataSetView = function(options) {
     //
     //waiting to load datasets, add a menu entry letting the user know we are in the middle of loading
     //
-    this.addLoadingDatasetsToMenu = function(div){    
+     var addLoadingDatasetsToMenu = function(div){    
         div.empty();
         var emptyButton = $('<div>', {class: 'landingPageMenuEntryNoSelect noSelect menudarkgray'} ).text("loading datasets...");
         div.append(emptyButton);
@@ -193,54 +148,54 @@ var LandingPageDataSetView = function(options) {
     //
     //create the blocks that convey live dataset information from a currently running program
     //
-    var createMyDataSetLiveBlock = function(item) {
+    var createDatasetActivityFeedBlock = function(item) {
         var metadata = item.metadata;
-		var filename = "";
-		var displayedFilename = item.name;
-		if(metadata.displayedName)
-			displayedFilename = metadata.displayedName;
-		else
-			displayedFilename = item.name;
-        var controllername = metadata.controller_name;
+        var filename = "";
+        var displayedFilename = item.name;
+        if(metadata.displayedName)
+            displayedFilename = metadata.displayedName;
+        else
+            displayedFilename = item.name;
+        var controllerName = metadata.controller_name;
         var programData = metadata.program;
         var programName = programData.displayedName;
         var isEmpty = false;
         if(metadata.is_empty && metadata.is_empty == true)
             isEmpty = true;
         
-        var livedataitemholder  = jQuery('<div>', {class:'liveDataItemHolder'} );
+        var liveDataItemHolder  = jQuery('<div>', {class:'liveDataItemHolder'} );
         
-        var livedataitemboxpi  = jQuery('<div>', {class:'liveDataItemBox concordblue'} );
-        var livedataitemboxpititle  = jQuery('<div>', {class:'liveDataItemBoxTitle', text:"pi"} );
-        var livedataitemboxpiname  = jQuery('<div>', {class:'liveDataItemBoxName', text:controllername} );
-        var buttonid = "liveDataStopButton" + controllername;
+        var liveDataItemBoxPi  = jQuery('<div>', {class:'liveDataItemBox concordblue'} );
+        var liveDataItemBoxPiTitle  = jQuery('<div>', {class:'liveDataItemBoxTitle', text:"pi"} );
+        var liveDataItemBoxPiName  = jQuery('<div>', {class:'liveDataItemBoxName', text:controllerName} );
+        var buttonid = "liveDataStopButton" + controllerName;
         var stopButton = $('<button>', { id: buttonid, class:'liveDataItemBoxButton',   html: 'stop program' } );
         //add hidden status indication in case pi is offline
-        var statusid = "liveDataStatusDiv" + controllername;
+        var statusid = "liveDataStatusDiv" + controllerName;
         var statusDiv = jQuery('<div>', {id: statusid, class:'liveDataItemBoxTitle'} );
-        statusDiv.html('<span class="liveDataItemBoxWarning glyphicon glyphicon-warning-sign"></span><span class="liveDataItemBoxTitle"> Pi ' + controllername + ' is offline</span>');
-        livedataitemboxpititle.appendTo(livedataitemboxpi);   
-        livedataitemboxpiname.appendTo(livedataitemboxpi); 
-        stopButton.appendTo(livedataitemboxpi);
+        statusDiv.html('<span class="liveDataItemBoxWarning glyphicon glyphicon-warning-sign"></span><span class="liveDataItemBoxTitle"> Pi ' + controllerName + ' is offline</span>');
+        liveDataItemBoxPiTitle.appendTo(liveDataItemBoxPi);   
+        liveDataItemBoxPiName.appendTo(liveDataItemBoxPi); 
+        stopButton.appendTo(liveDataItemBoxPi);
         //is this Pi even online?
         var editor = getTopLevelView('program-editor-view');
         var piSelectorPanel = editor.getPiSelectorPanel();
-        var offline = piSelectorPanel.isPiOffline(controllername);
+        var offline = piSelectorPanel.isPiOffline(controllerName);
         if(offline){
             stopButton.hide();
         }
         else{
             statusDiv.hide();
         }
-        statusDiv.appendTo(livedataitemboxpi);        
+        statusDiv.appendTo(liveDataItemBoxPi);        
         
-        var livedataitemboxprogram  = jQuery('<div>', {class:'liveDataItemBox concordblue'} );
-        var livedataitemboxprogramtitle  = jQuery('<div>', {class:'liveDataItemBoxTitle', text:"running program"} );
-        var livedataitemboxprogramname  = jQuery('<div>', {class:'liveDataItemBoxName', text:programName} );
+        var liveDataItemBoxProgram  = jQuery('<div>', {class:'liveDataItemBox concordblue'} );
+        var liveDataItemBoxProgramTitle  = jQuery('<div>', {class:'liveDataItemBoxTitle', text:"running program"} );
+        var liveDataItemBoxProgramName  = jQuery('<div>', {class:'liveDataItemBoxName', text:programName} );
         var viewProgramButton = $('<button>', { class:'liveDataItemBoxButton',   html: 'view program' } );
-        livedataitemboxprogramtitle.appendTo(livedataitemboxprogram);   
-        livedataitemboxprogramname.appendTo(livedataitemboxprogram);   
-        viewProgramButton.appendTo(livedataitemboxprogram);             
+        liveDataItemBoxProgramTitle.appendTo(liveDataItemBoxProgram);   
+        liveDataItemBoxProgramName.appendTo(liveDataItemBoxProgram);   
+        viewProgramButton.appendTo(liveDataItemBoxProgram);             
         
         viewProgramButton.click(item, function(e) {
             console.log("[DEBUG] viewProgramButton click", e.data);
@@ -316,46 +271,17 @@ var LandingPageDataSetView = function(options) {
             }
             //return;
             */
-            
-            // Send message over websocket and handle response
-            //
-            var execParams = {  
-                    message_type:   'stop_diagram',
-                    message_params: { 
-                        stop_location: e.data.recording_location },
-                    target_folder:  e.data.controller_path,
-                    src_folder:     e.data.controller_path,
-                    response_func:  function(ts, params) {
-                        if(params.success) {
-                            alert("Program stopped.");
-                            base.show();
-                    
-                            var editor = getTopLevelView('program-editor-view');
-                            var piSelectorPanel = editor.getPiSelectorPanel();
-
-
-                            piSelectorPanel.exitRunProgramState();
-                            piSelectorPanel.reselectCurrentPi();
-                            
-                        } else {
-                            alert("Error stopping program: " + params.message);
-                        }
-                    } 
-                };
-
-            var stopDiagram = MessageExecutor(execParams);
-            stopDiagram.execute();
-
+            stopRecording();
         });        
 
-        var livedataitemboxdata  = jQuery('<div>', {class:'liveDataItemBox concordblue'} );
-        var livedataitemboxdatatitle  = jQuery('<div>', {class:'liveDataItemBoxTitle', text:"recording dataset"} );
-        var livedataitemboxdataname  = jQuery('<div>', {class:'liveDataItemBoxName', text:displayedFilename} );
+        var liveDataItemBoxData  = jQuery('<div>', {class:'liveDataItemBox concordblue'} );
+        var liveDataItemBoxDataTitle  = jQuery('<div>', {class:'liveDataItemBoxTitle', text:"recording dataset"} );
+        var liveDataItemBoxDataName  = jQuery('<div>', {class:'liveDataItemBoxName', text:displayedFilename} );
         var viewButton = $('<button>', { class:'liveDataItemBoxButton',   html: 'view dataset' } );
-        livedataitemboxdatatitle.appendTo(livedataitemboxdata);   
-        livedataitemboxdataname.appendTo(livedataitemboxdata);
+        liveDataItemBoxDataTitle.appendTo(liveDataItemBoxData);   
+        liveDataItemBoxDataName.appendTo(liveDataItemBoxData);
         
-        viewButton.appendTo(livedataitemboxdata);         
+        viewButton.appendTo(liveDataItemBoxData);         
     
         viewButton.click(item, function(e) {
             console.log("[DEBUG] View DataSet Button click", e.data);
@@ -364,27 +290,27 @@ var LandingPageDataSetView = function(options) {
             if(sucess)showTopLevelView('data-set-view');
         });
         
-        var livedataiteconnector1  = jQuery('<div>', {class:'liveDataItemConnector'} );
-        var livedataiteconnector2  = jQuery('<div>', {class:'liveDataItemConnector'} );
+        var liveDataItemConnector1  = jQuery('<div>', {class:'liveDataItemConnector'} );
+        var liveDataItemConnector2  = jQuery('<div>', {class:'liveDataItemConnector'} );
         var chevron1 = $('<div>', {class: 'liveDataItemConnectorArrow glyphicon glyphicon-arrow-right'} );
         var chevron2 = $('<div>', {class: 'liveDataItemConnectorArrow glyphicon glyphicon-arrow-right'} );
-        chevron1.appendTo(livedataiteconnector1);
-        chevron2.appendTo(livedataiteconnector2);
-        livedataitemboxpi.appendTo(livedataitemholder);   
-        livedataiteconnector1.appendTo(livedataitemholder);   
-        livedataitemboxprogram.appendTo(livedataitemholder);   
+        chevron1.appendTo(liveDataItemConnector1);
+        chevron2.appendTo(liveDataItemConnector2);
+        liveDataItemBoxPi.appendTo(liveDataItemHolder);   
+        liveDataItemConnector1.appendTo(liveDataItemHolder);   
+        liveDataItemBoxProgram.appendTo(liveDataItemHolder);   
         if(!isEmpty) 
-            livedataiteconnector2.appendTo(livedataitemholder);   
+            liveDataItemConnector2.appendTo(liveDataItemHolder);   
         if(!isEmpty) 
-            livedataitemboxdata.appendTo(livedataitemholder);   
-        livedataitemholder.appendTo(livedataholder);   
-        return livedataitemholder;
+            liveDataItemBoxData.appendTo(liveDataItemHolder);   
+        liveDataItemHolder.appendTo(livedataholder);   
+        return liveDataItemHolder;
     }
     
     //
     // create a menu item button to load a saved dataset
     //
-    var createMyDataSetMenuEntry = function(item, displayedName, filename, tooltip,  index) {
+    var createDatasetMenuEntry = function(item, displayedName, filename, tooltip,  index) {
         var menuentry;
         var btn;
 
@@ -412,7 +338,7 @@ var LandingPageDataSetView = function(options) {
         // Add menu
         //
         var menuData = createMenuData();
-        menuData.add('Delete', this.deleteDataset, {metadata: item.metadata, datasetname: filename, divid: 'dataset'+index}); 
+        menuData.add('Delete', deleteDataset, {metadata: item.metadata, datasetname: filename, divid: 'dataset'+index}); 
         
         var landingPageMenuSubMenuDiv = $('<div>', {text:"", class: 'landingPageMenuSubMenu'}).appendTo(menuentry);
 
@@ -436,7 +362,7 @@ var LandingPageDataSetView = function(options) {
     //
     // Delete dataset, this version marks metadata as archived
     //
-    this.deleteDataset = function(e) {
+    var deleteDataset = function(e) {
         var name = e.data.datasetname;
         var metadata = e.data.metadata;
         
@@ -493,7 +419,7 @@ var LandingPageDataSetView = function(options) {
     //
     // Delete dataset, this version actually deletes the file
     //
-    this.deleteDatasetComplete = function(e) {
+    var deleteDatasetComplete = function(e) {
         var name = e.data.datasetname;
         
         var conf = confirm("Are you sure you want to delete dataset " + name + "?");

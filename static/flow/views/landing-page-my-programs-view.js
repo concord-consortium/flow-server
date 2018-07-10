@@ -1,7 +1,5 @@
 //
-// A view representing a main landing page
-// which can display "My Programs", "Recording Now" data
-// and "Previously Recorded" data
+// A vertical menu view which can display saved programs
 //
 var LandingPageMyProgramsView = function(options) {
 
@@ -73,70 +71,18 @@ var LandingPageMyProgramsView = function(options) {
         
     };
     
-    this.convertProgramNameToDateString = function(programName){
+    var convertProgramNameToDateString = function(programName){
         //program name is formatted like this: program_20180522_164244
         //we want a date format like this: December 22, 2018 10:55 PM
-        var year = programName.substring(8, 12);
-        var month = programName.substring(12, 14);
-        var day = programName.substring(14, 16);
-        var hour = programName.substring(17, 19);
-        var min = programName.substring(19, 21);
-        if(month=="01")
-            month="January";
-        else if(month=="02")
-            month="February";
-        else if(month=="03")
-            month="March";
-        else if(month=="04")
-            month="April";
-        else if(month=="05")
-            month="May";
-        else if(month=="06")
-            month="June";
-        else if(month=="07")
-            month="July";
-        else if(month=="08")
-            month="August";
-        else if(month=="09")
-            month="September";
-        else if(month=="10")
-            month="October";
-        else if(month=="11")
-            month="November";
-        else if(month=="12")
-            month="December";
-        var dayNum = parseInt(day, 10);
-        var hourNum = parseInt(hour, 10);
-        var ampm = "AM";
-        if(hourNum==0)
-            hourNum=12;
-        else if(hourNum==12){
-            ampm = "PM";
-        }
-        else if(hourNum>=13){
-            hourNum-=12;
-            ampm = "PM";
-        }
-        var minNum = parseInt(min, 10);
-        if(min<10)
-            minNum="0" + minNum;
-        
-        var finalstr = month + " " + dayNum + ", " + year + " " + hourNum + ":" + minNum + " " + ampm;
-        return finalstr;
+        dateTimeStr = programName.slice(8);
+        finalStr = Util.convertDateTimeStringToHumanReadable(dateTimeStr);
+        return finalStr;
     }
-    
-    //
-    //didn't find any programs, add a menu entry letting the user know there are no programs available
-    //
-    this.addNoProgramsToMenu = function(div){    
-        div.empty();
-        var emptyButton = $('<div>', {class: 'landingPageMenuEntryNoSelect noSelect menudarkgray'} ).text("no available programs");
-        div.append(emptyButton);
-    }    
+   
     //
     //loading programs, add a menu entry letting the user know we are waiting for programs to load
     //
-    this.addLoadingProgramsToMenu = function(div){    
+    var addLoadingProgramsToMenu = function(div){    
         div.empty();
         var emptyButton = $('<div>', {class: 'landingPageMenuEntryNoSelect noSelect menudarkgray'} ).text("loading programs...");
         div.append(emptyButton);
@@ -174,7 +120,7 @@ var LandingPageMyProgramsView = function(options) {
         // Add menu
         //
         var menuData = createMenuData();
-        menuData.add('Delete', this.deleteProgram, {metadata: metadata, displayedName: displayedName, filename: filename, divid: 'program'+index});
+        menuData.add('Delete', deleteProgram, {metadata: metadata, displayedName: displayedName, filename: filename, divid: 'program'+index});
         
         var landingPageMenuSubMenuDiv = $('<div>', {text:"", class: 'landingPageMenuSubMenu'}).appendTo(menuentry);
 
@@ -199,7 +145,7 @@ var LandingPageMyProgramsView = function(options) {
     //
     // Delete button with handler and callback, this version marks metadata as archived
     //
-    this.deleteProgram = function(e) {
+    var deleteProgram = function(e) {
         var metadata = e.data.metadata;
         var displayedName = e.data.displayedName;
         var filename = e.data.filename;
@@ -257,7 +203,7 @@ var LandingPageMyProgramsView = function(options) {
     //
     // Delete button with handler and callback, this version actually deletes the file
     //
-    this.deleteProgramComplete = function(e) {
+    var deleteProgramComplete = function(e) {
     
         var filename = e.data.programname;
         var divid = e.data.divid;

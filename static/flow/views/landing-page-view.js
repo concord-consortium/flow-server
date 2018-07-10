@@ -1,7 +1,9 @@
 //
 // A view representing a main landing page
-// which can display "My Programs", "Recording Now" data
-// and "Previously Recorded" data
+// which can display saved programs,
+// previously recorded datasets, 
+// an activity feed showing currently running programs
+// and associated live datasets
 //
 var LandingPageView = function(options) {
 
@@ -12,21 +14,21 @@ var LandingPageView = function(options) {
    
     var content = jQuery('#'+base.getDivId());
     
-    var outlinebox  = jQuery('<div>', {class:'outlinebox'} );
+    var outlineBox  = jQuery('<div>', {class:'outlinebox'} );
     
-    outlinebox.appendTo(content);        
+    outlineBox.appendTo(content);        
     
-    var maincontentbox  = jQuery('<div>', {class:'maincontentbox'} );
+    var mainContentBox  = jQuery('<div>', {class:'maincontentbox'} );
                
-    maincontentbox.appendTo(outlinebox);    
+    mainContentBox.appendTo(outlineBox);    
 
-    var topbar  = jQuery('<div>', {class:'topbar'} );
+    var topBar  = jQuery('<div>', {class:'topbar'} );
     
-    topbar.appendTo(maincontentbox);        
+    topBar.appendTo(mainContentBox);        
 
-    var titlebar  = jQuery('<span>', {class:'titlebar noSelect', text:"Dataflow"} );
+    var titleBar  = jQuery('<span>', {class:'titlebar noSelect', text:"Dataflow"} );
         
-    titlebar.appendTo(topbar);    
+    titleBar.appendTo(topBar);    
 
     //
     // Show welcome message
@@ -70,18 +72,18 @@ var LandingPageView = function(options) {
         });
         adminButton.appendTo(welcomeMessage);
     }
-    welcomeMessage.appendTo(topbar);    
+    welcomeMessage.appendTo(topBar);    
     
     //
     // Build the left menu
     //
-    var menuandcontentholder  = jQuery('<div>', {class:'menuandcontentholder'} );
+    var menuAndContentHolder  = jQuery('<div>', {class:'menuandcontentholder'} );
     
-    menuandcontentholder.appendTo(maincontentbox);   
+    menuAndContentHolder.appendTo(mainContentBox);   
 
     //resize div
     base.resizemenuandcontentholder = function() {
-        var contentheight = menutopbuttonholder.height();
+        var contentheight = menuTopButtonHolder.height();
         contentheight = contentheight + $("#landing-page-programs-diagrammenu").height();
         contentheight = contentheight + $("#landing-page-recordeddatasets-diagrammenu").height();
         var windowheight = window.innerHeight - 80;//$(window).height() - 90;
@@ -89,23 +91,23 @@ var LandingPageView = function(options) {
         if(windowheight > contentheight)
             newheight = windowheight;
         
-        menuandcontentholder.height(newheight);
+        menuAndContentHolder.height(newheight);
     }
         
     
-    var menuholder  = jQuery('<div>', {class:'menuholder'} );
+    var menuHolder  = jQuery('<div>', {class:'menuholder'} );
     
-    menuholder.appendTo(menuandcontentholder);    
+    menuHolder.appendTo(menuAndContentHolder);    
     
-    var menutopbuttonholder  = jQuery('<div>', {class:'menutopbuttonholder', id: 'landing-page-menutopbuttonholder'} );
+    var menuTopButtonHolder  = jQuery('<div>', {class:'menutopbuttonholder', id: 'landing-page-menutopbuttonholder'} );
     
-    menutopbuttonholder.appendTo(menuholder);    
+    menuTopButtonHolder.appendTo(menuHolder);    
     
-    var menufilesbutton  = jQuery('<div>', {class:'menutopbuttoninactive menudarkgray noSelect', text:"my stuff"} );
-    menufilesbutton.appendTo(menutopbuttonholder);    
-    var menublocksbutton  = jQuery('<button>', {class:'menutopbutton menumediumgray noSelect', text:"editor"} );
-    menublocksbutton.appendTo(menutopbuttonholder);
-    menublocksbutton.click( function(e) {
+    var menuFilesButton  = jQuery('<div>', {class:'menutopbuttoninactive menudarkgray noSelect', text:"my stuff"} );
+    menuFilesButton.appendTo(menuTopButtonHolder);    
+    var menuBlocksButton  = jQuery('<button>', {class:'menutopbutton menumediumgray noSelect', text:"editor"} );
+    menuBlocksButton.appendTo(menuTopButtonHolder);
+    menuBlocksButton.click( function(e) {
         var editor = getTopLevelView('program-editor-view');
         if(editor.programLoaded() ){
             showTopLevelView('program-editor-view');
@@ -118,107 +120,20 @@ var LandingPageView = function(options) {
     //
     // live data
     //
-    var livedataholder  = jQuery('<div>', {class:'liveDataHolder'} );
-    livedataholder.appendTo(menuandcontentholder);    
-    var livedatatitlebar  = jQuery('<div>', {class:'liveDataTitleBar', text:"currently running"} );
-    livedatatitlebar.appendTo(livedataholder);       
+    var liveDataHolder  = jQuery('<div>', {class:'liveDataHolder'} );
+    liveDataHolder.appendTo(menuAndContentHolder);    
+    var liveDataTitleBar  = jQuery('<div>', {class:'liveDataTitleBar', text:"currently running"} );
+    liveDataTitleBar.appendTo(liveDataHolder);       
     
     
     //
     // programs
     //
     var programsContent = $('<div>');
-    var myprogramsdiv       = jQuery('<div>', { id: 'landing-page-my-programs-view'} );
+    var myProgramsDiv       = jQuery('<div>', { id: 'landing-page-my-programs-view'} );
                                                 
-    myprogramsdiv.appendTo(programsContent);                                                    
-    var myPrograms = LandingPageMyProgramsView({id: 'landing-page-my-programs-view'});    
-
-    var programsheader = createLandingPageMenuSection("programs", programsContent);
-    programsheader.appendTo(menuholder);    
-      
-    //
-    // new program
-    //
-    var newprogramheader = createLandingPageNewProgramMenuEntry();
-    newprogramheader.prependTo(programsContent);   
-
-    
-    //
-    // data
-    //
-    
-    var dataContent = $('<div>');
-    var mydatadiv       = jQuery('<div>', { id: 'landing-page-dataset-view'} );
-                                                    
-    mydatadiv.appendTo(dataContent);                                                    
-    var myDatasets = LandingPageDataSetView({id: 'landing-page-dataset-view', livedataholder: livedataholder});    
-
-    var dataheader = createLandingPageMenuSection("recorded datasets", dataContent);
-    dataheader.appendTo(menuholder);    
-
-    
-/*
-//UNCOMMENT THIS WHEN SHARE IS READY
-    //
-    // share
-    //
-    var shareContent = $('<div>');
-    //deviceContent.append(numeric);
-    //deviceContent.append(plot);
-    var shareheader = createLandingPageMenuSection("share", shareContent);
-    shareheader.appendTo(menuholder);    
-
-    maincontentbox.appendTo(content);    
-*/
-    
-    base.show = function() {
-        console.log("[DEBUG] LandingPageView show()");
-        jQuery('#'+base.getDivId()).show();
-        myPrograms.show();
-        myDatasets.show();
-    }
-
-    return base;
-}
-    //
-    // create the landing page menu section for new program
-    //
-    var createLandingPageNewProgramMenuSection = function(content) {
-        var div = $('<div>', {class: 'diagramMenu'});
-        var header = $('<div>', {class: 'diagramMenuHeader menuwhite'} );
-        var title = $('<div>', {class: 'newProgramMenuTitle noSelect'} ).text("new program");
-        var chevron = $('<div>', {class: 'diagramMenuChevron glyphicon glyphicon-plus', css:{color:'2D758C'}} );
-        
-        header.click( function(e) {
-            var editor = getTopLevelView('program-editor-view');
-            editor.loadProgram();
-        });
-        div.append(header);
-        header.append(title); 
-        header.append(chevron); 
-        div.append(content);
-
-        return div;
-    }
-    //
-    // create the landing page menu entry for new program
-    //	
-    var createLandingPageNewProgramMenuEntry = function() {
-        
-        var menuentry = $('<div>', {class: 'landingPageMenuEntry menuwhite'} );
-        var title = $('<div>', {class: 'landingPageMenuTextContent noSelect', css:{color:'2D758C'}} ).text("new program");
-        var chevron = $('<div>', {class: 'diagramMenuChevron glyphicon glyphicon-plus', css:{color:'2D758C'}} );
-        
-        menuentry.click( function(e) {
-            var editor = getTopLevelView('program-editor-view');
-            editor.loadProgram();
-        });
-
-        menuentry.append(title); 
-        menuentry.append(chevron); 
-
-        return menuentry;
-    }
+    myProgramsDiv.appendTo(programsContent);                                                    
+    var myPrograms = LandingPageMyProgramsView({id: 'landing-page-my-programs-view'});   
 
     //
     // create generic landing page menu sections with collapsable content
@@ -250,6 +165,73 @@ var LandingPageView = function(options) {
 
         return div;
     }
+
+
+    var programsHeader = createLandingPageMenuSection("programs", programsContent);
+    programsHeader.appendTo(menuHolder);    
+      
+    //
+    // create the landing page menu entry for new program
+    //
+    var createLandingPageNewProgramMenuEntry = function() {
+        
+        var menuentry = $('<div>', {class: 'landingPageMenuEntry menuwhite'} );
+        var title = $('<div>', {class: 'landingPageMenuTextContent noSelect', css:{color:'2D758C'}} ).text("new program");
+        var chevron = $('<div>', {class: 'diagramMenuChevron glyphicon glyphicon-plus', css:{color:'2D758C'}} );
+        
+        menuentry.click( function(e) {
+            var editor = getTopLevelView('program-editor-view');
+            editor.loadProgram();
+        });
+
+        menuentry.append(title); 
+        menuentry.append(chevron); 
+
+        return menuentry;
+    }
+    //
+    // new program
+    //	
+    var newProgramHeader = createLandingPageNewProgramMenuEntry();
+    newProgramHeader.prependTo(programsContent);   
+
+    
+    //
+    // data
+    //
+    var dataContent = $('<div>');
+    var myDataDiv       = jQuery('<div>', { id: 'landing-page-dataset-view'} );
+                                                    
+    myDataDiv.appendTo(dataContent);   
+    var myDatasets = LandingPageDataSetView({id: 'landing-page-dataset-view', livedataholder: liveDataHolder});
+
+    var dataHeader = createLandingPageMenuSection("recorded datasets", dataContent);
+    dataHeader.appendTo(menuHolder);    
+
+    
+/*
+//UNCOMMENT THIS WHEN SHARE IS READY
+    //
+    // share
+    //
+    var shareContent = $('<div>');
+    //deviceContent.append(numeric);
+    //deviceContent.append(plot);
+    var shareheader = createLandingPageMenuSection("share", shareContent);
+    shareheader.appendTo(menuHolder);    
+
+    mainContentBox.appendTo(content);    
+*/
+    
+    base.show = function() {
+        console.log("[DEBUG] LandingPageView show()");
+        jQuery('#'+base.getDivId()).show();
+        myPrograms.show();
+        myDatasets.show();
+    }
+
+    return base;
+}
 
     $( window ).resize(function() {
         //resize the landing page view

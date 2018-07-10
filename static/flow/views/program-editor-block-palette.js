@@ -170,13 +170,6 @@ var ProgramEditorBlockPalette = function(options) {
     var simpleavgButton   = createFilterBtn("moving average", entrynum);
     entrynum++;
     var expavgButton   = createFilterBtn("exp moving average", entrynum);
-    
-
-    var filterButton = $('<button>', { css: { width: '100%' } } );
-    filterButton.text('...');
-    filterButton.click( function() {
-        programEditorPanel.showFilterBlockSelector();
-    });
 
     filterContent.append(numericButton);
     filterContent.append(andButton);
