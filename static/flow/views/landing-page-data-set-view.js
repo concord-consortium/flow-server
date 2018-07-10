@@ -189,13 +189,13 @@ var LandingPageDataSetView = function(options) {
         }
         statusDiv.appendTo(liveDataItemBoxPi);        
         
-        var LiveDataItemBoxProgram  = jQuery('<div>', {class:'liveDataItemBox concordblue'} );
-        var LiveDataItemBoxProgramTitle  = jQuery('<div>', {class:'liveDataItemBoxTitle', text:"running program"} );
-        var LiveDataItemBoxProgramName  = jQuery('<div>', {class:'liveDataItemBoxName', text:programName} );
+        var liveDataItemBoxProgram  = jQuery('<div>', {class:'liveDataItemBox concordblue'} );
+        var liveDataItemBoxProgramTitle  = jQuery('<div>', {class:'liveDataItemBoxTitle', text:"running program"} );
+        var liveDataItemBoxProgramName  = jQuery('<div>', {class:'liveDataItemBoxName', text:programName} );
         var viewProgramButton = $('<button>', { class:'liveDataItemBoxButton',   html: 'view program' } );
-        LiveDataItemBoxProgramTitle.appendTo(LiveDataItemBoxProgram);   
-        LiveDataItemBoxProgramName.appendTo(LiveDataItemBoxProgram);   
-        viewProgramButton.appendTo(LiveDataItemBoxProgram);             
+        liveDataItemBoxProgramTitle.appendTo(liveDataItemBoxProgram);   
+        liveDataItemBoxProgramName.appendTo(liveDataItemBoxProgram);   
+        viewProgramButton.appendTo(liveDataItemBoxProgram);             
         
         viewProgramButton.click(item, function(e) {
             console.log("[DEBUG] viewProgramButton click", e.data);
@@ -298,7 +298,7 @@ var LandingPageDataSetView = function(options) {
         chevron2.appendTo(liveDataItemConnector2);
         liveDataItemBoxPi.appendTo(liveDataItemHolder);   
         liveDataItemConnector1.appendTo(liveDataItemHolder);   
-        LiveDataItemBoxProgram.appendTo(liveDataItemHolder);   
+        liveDataItemBoxProgram.appendTo(liveDataItemHolder);   
         if(!isEmpty) 
             liveDataItemConnector2.appendTo(liveDataItemHolder);   
         if(!isEmpty) 
