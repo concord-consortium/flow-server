@@ -579,7 +579,7 @@ var PiSelectorPanel = function(options) {
     //
     // Stop recording
     //
-    this.stopRecording = function() {
+    this.stopRecording = function(refreshCallback) {
 
         //var metadata = dataSetView.getDataSet().metadata;
 
@@ -597,9 +597,10 @@ var PiSelectorPanel = function(options) {
                     response_func:  function(ts, params) {
                     if(params.success) {
                         alert("Program stopped.");
+                        if(typeof refreshCallback === "function")
+                            refreshCallback();
                         
                         this.exitRunProgramState();
-                                
                         this.reselectCurrentPi(); 
 
                     } else {
