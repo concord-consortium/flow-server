@@ -363,8 +363,14 @@ var LandingPageDataSetView = function(options) {
     // Delete dataset, this version marks metadata as archived
     //
     var deleteDataset = function(e) {
-        var name = e.data.datasetname;
         var metadata = e.data.metadata;
+        var name;
+        if(metadata == null || metadata.displayedName == null){
+            name = e.data.datasetname;
+        }
+        else{
+            name = metadata.displayedName
+        }
         
         var conf = confirm("Are you sure you want to delete dataset " + name + "?");
 
