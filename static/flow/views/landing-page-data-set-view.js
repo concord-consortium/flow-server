@@ -271,7 +271,7 @@ var LandingPageDataSetView = function(options) {
             }
             //return;
             */
-            stopRecording();
+            stopRecording(base.show);
         });        
 
         var liveDataItemBoxData  = jQuery('<div>', {class:'liveDataItemBox concordblue'} );
