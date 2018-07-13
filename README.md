@@ -1,23 +1,22 @@
 # Flow-Server
 
-The Manylabs flow system lets people create data flow diagrams that interface with sensors and actuators.
-This repository contains the user interface for viewing and editing data flow diagrams and for viewing
-recorded data. The flow diagrams are executed on a remote computer (e.g. Raspberry Pi) using the 
-[flow](https://github.com/manylabs/flow) program.
+Developed by the Concord Consortium in collaboration with Manylabs, flow system lets people create data 
+flow diagrams that interface with sensors and actuators. This repository contains the user interface for 
+viewing and editing data flow diagrams and for viewing recorded data. The flow diagrams are executed on a 
+remote computer (e.g. Raspberry Pi) using the [flow](https://github.com/manylabs/flow) program.
 
 The flow web app (flow user interface) sends messages to the flow program using a websocket connection.
 The server runs the [rhizo-server](https://github.com/rhizolab/rhizo-server), which receives the messages
 and passes them along to the flow program (which receives the messages via the 
 [rhizo](https://github.com/rhizolab/rhizo) client library).
 
-The web app consists of four screens/pages (currently part of a single-page app to allow embedding within
+The web app consists of five screens/pages (currently part of a single-page app to allow embedding within
 CODAP):
-
-*   a screen for selecting a controller computer (Raspberry Pi)
-*   a screen for displaying the list of diagrams currently on that controller or creating a new diagram on
-    the controller
-*   a diagram editor/viewer
-*   a historical data viewer
+*   a user login screen
+*   a landing page screen containing saved programs, saved datasets, and controller computers (Raspberry Pis) status info
+*   a diagram editor/viewer with controls to connect to and run or stop programs on a controller computer
+*   a historical dataset viewer
+*   an admin screen containing a full list of controller computers and related functions
 
 The python code included with the web app is an extension to the rhizo-server framework that manages a few
 server-side flow-specific tasks, such as getting a list of available controllers and letting students select
@@ -72,10 +71,11 @@ Each block has the following attributes:
 *   `input_count`: the number of input slots/pins for a block; generally all inputs must be connected for a block to have a vluae
 *   `output_count`: the number of output slots/pins for a block; generally this will be 0 or 1
 *   `input_type`/`output_type`: input and output data types: `b` for bool, `n` for number, `i` image
+*   `params`: optional, block-specific parameters which may include: `recording_interval`, `dataset_location`, `sequence_names`, `seconds_on`, `seconds_off`, `period`
 
 ## Coding Conventions
 
-For Javascript code we use tabs (with indentation of 4) and camel case.
+For Javascript code we use 4 spaces for indentation and camel case.
 For Python code we aim to mostly use PEP8 conventions.
 All data passed via the network (include messages and diagram specs) use underscores rather than camel case.
 Typically we use two blank lines between top-level code blocks (in both JS and Python) and have one blank line at the end of each file.
