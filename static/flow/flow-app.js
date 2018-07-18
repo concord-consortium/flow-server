@@ -4,22 +4,14 @@
 // initialize the app
 //
 function initFlowApp() {
-    //if(g_featuresEnabled) {
-        registerTopLevelView(LoginPageView({id: 'login-page-view'}));
-        registerTopLevelView(LandingPageView({id: 'landing-page-view'}));
-        registerTopLevelView(ProgramEditorView({id: 'program-editor-view'}));
-        registerTopLevelView(AdminView({id: 'admin-view'}));
-        registerTopLevelView(DataSetView({id: 'data-set-view'}));
+    registerTopLevelView(LoginPageView({id: 'login-page-view'}));
+    registerTopLevelView(LandingPageView({id: 'landing-page-view'}));
+    registerTopLevelView(ProgramEditorView({id: 'program-editor-view'}));
+    registerTopLevelView(AdminView({id: 'admin-view'}));
+    registerTopLevelView(DataSetView({id: 'data-set-view'}));
 
-        // showTopLevelView('landing-page-view');
-        showTopLevelView('login-page-view');
-
-    //} else {
-        //
-        // Legacy flow. Delete this when DF2.0 UI is ready.
-        //
-	    //showControllerSelector();
-    //}
+    // showTopLevelView('landing-page-view');
+    showTopLevelView('login-page-view');
 }
 
 //
