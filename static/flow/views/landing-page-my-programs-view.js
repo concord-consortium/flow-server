@@ -14,7 +14,6 @@ var LandingPageMyProgramsView = function(options) {
         //console.log("[DEBUG] loadPrograms loading My Programs...");
 
         div.empty();
-        //div.text("Loading My Programs...");
         addLoadingProgramsToMenu(div);
         
         var url = '/ext/flow/list_programs';
@@ -58,7 +57,7 @@ var LandingPageMyProgramsView = function(options) {
                     }
                     //resize the landing page view
                     var lpv = getTopLevelView('landing-page-view');
-                    lpv.resizemenuandcontentholder();
+                    lpv.resizeMenuAndContentHolder();
 
                 } else {
                     console.log("[ERROR] Error listing programs", response);
@@ -84,7 +83,7 @@ var LandingPageMyProgramsView = function(options) {
     //
     var addLoadingProgramsToMenu = function(div){    
         div.empty();
-        var emptyButton = $('<div>', {class: 'landingPageMenuEntryNoSelect noSelect menudarkgray'} ).text("loading programs...");
+        var emptyButton = $('<div>', {class: 'landingPageMenuEntryNoSelect noSelect container-light-gray'} ).text("loading programs...");
         div.append(emptyButton);
     }    
     
@@ -94,18 +93,10 @@ var LandingPageMyProgramsView = function(options) {
     var createMyProgramBtn = function(metadata, displayedName, filename, tooltip, index) {
         var menuentry;
         var btn;
-        if(index%2 == 0){
-            menuentry = $('<div>', {id:'program'+index, class: 'landingPageMenuEntry menulightgray'});
-            btn = $('<button>', { text:displayedName, class: 'landingPageMenuTextContent menulightgray' } );
-            menuTooltip = $('<span>', {text:tooltip, class: 'tooltiptext'});
-            if(tooltip!="")menuTooltip.appendTo(menuentry);
-        }
-        else{
-            menuentry = $('<div>', {id:'program'+index, class: 'landingPageMenuEntry menudarkgray'});
-            btn = $('<button>', { text:displayedName, class: 'landingPageMenuTextContent menudarkgray' } );
-            menuTooltip = $('<span>', {text:tooltip, class: 'tooltiptext'});
-            if(tooltip!="")menuTooltip.appendTo(menuentry);            
-        }
+        menuentry = $('<div>', {id:'program'+index, class: 'landingPageMenuEntry container-light-gray'});
+        btn = $('<div>', { text:displayedName, class: 'landingPageMenuTextContent' } );
+        menuTooltip = $('<span>', {text:tooltip, class: 'tooltiptext'});
+        if(tooltip!="")menuTooltip.appendTo(menuentry);
         btn.click(name, function(e) {
             //console.log("[DEBUG] MyProgramBtn click", filename);
             var folderstructure = true;
@@ -133,15 +124,15 @@ var LandingPageMyProgramsView = function(options) {
             'aria-expanded': 'true',
         }).appendTo(menuDiv);
     
-        //$('<div>', {class: 'landingPageMenuIcon glyphicon glyphicon-option-vertical noSelect', 'aria-hidden': 'true'}).appendTo(menuInnerDiv);
-        $('<div>', {class: 'landingPageMenuIcon glyphicon glyphicon-align-justify noSelect', 'aria-hidden': 'true'}).appendTo(menuInnerDiv);
+        var menuIcon = $('<div>', {class: 'landingPageMenuIcon'} );
+        menuIcon.prepend('<img class="landingPageMenuImage" src="flow-server/static/flow/images/icon-menu.png">')    
+        menuIcon.appendTo(menuInnerDiv);
         
         createDropDownList({menuData: menuData}).appendTo(menuDiv);
 
         return menuentry;
     }
     
-        
     //
     // Delete button with handler and callback, this version marks metadata as archived
     //
@@ -150,110 +141,66 @@ var LandingPageMyProgramsView = function(options) {
         var displayedName = e.data.displayedName;
         var filename = e.data.filename;
         var divid = e.data.divid;
-
-        var conf = confirm("Are you sure you want to delete " + displayedName + "?");
-
-        if(!conf) {
-            return;
-        }
         
-        if(metadata){
-            metadata.archived = true;
-        }
-
-        var metadataStr = JSON.stringify(metadata);
-        //
-        // Call API to save program.
-        //
-        var url = '/ext/flow/save_program_metadata'
-        var data = {    filename:   filename,
-                        metadata:   metadataStr,
-                        content:    null,
-                        csrf_token: g_csrfToken };
-
-        $.ajax({
-            url:        url,
-            method:     'POST',
-            data:       data,
-            success:    function(data) {
-                var response = JSON.parse(data);
-
-                console.log(
-                    "[DEBUG] Delete program response", 
-                    response);
-
-                if(response.success) {
-                    //$( '#' + divid ).remove(); //this is probably not needed
-                    alert("Program deleted");
-                    showTopLevelView('landing-page-view');
-
-                } else {
-                    alert("Error: " + response.message);
+        modalConfirm({
+            title: 'Delete Program', 
+            'prompt': 'Are you sure you want to delete program \"' + displayedName + '\"?', 
+            yesFunc: function() {
+                if(metadata){
+                    metadata.archived = true;
                 }
-            },
-            error: function(data) {
-                console.log("[ERROR] Delete error", data);
-                alert('Error deleting program.')
-            },
-        });        
 
-    };        
-    
-        
-    //
-    // Delete button with handler and callback, this version actually deletes the file
-    //
-    var deleteProgramComplete = function(e) {
-    
-        var filename = e.data.programname;
-        var divid = e.data.divid;
+                var metadataStr = JSON.stringify(metadata);
+                //
+                // Call API to save program.
+                //
+                var url = '/ext/flow/save_program_metadata'
+                var data = {    filename:   filename,
+                                metadata:   metadataStr,
+                                content:    null,
+                                csrf_token: g_csrfToken };
 
-        var conf = confirm("Are you sure you want to delete " + filename + "?");
+                $.ajax({
+                    url:        url,
+                    method:     'POST',
+                    data:       data,
+                    success:    function(data) {
+                        var response = JSON.parse(data);
 
-        if(!conf) {
-            return;
-        }
+                        console.log(
+                            "[DEBUG] Delete program response", 
+                            response);
 
-        //
-        // After one use of the CSRF token in a POST
-        // request, it is no longer accepted.
-        // How to fix this? Pass a new one back 
-        // to the client and then reset the
-        // g_csrfToken value here? :(
-        //
-        var url = '/ext/flow/delete_program'
-        var data = { filename:      filename,
-                     csrf_token:    g_csrfToken     };
+                        if(response.success) {
+                            modalAlert({
+                                title: 'Program Deleted', 
+                                message: 'Program \"' + displayedName + '\" deleted.', 
+                                nextFunc: function() {
+                                    showTopLevelView('landing-page-view');
+                             }});
 
-        $.ajax({
-            url:        url,
-            method:     'POST',
-            data:       data,
-            success:    function(data) {
+                        } else {
+                            modalAlert({
+                                title: 'Program Deletion Error', 
+                                message: "Error: " + response.message, 
+                                nextFunc: function() {
+                             }});
+                        }
+                    },
+                    error: function(data) {
+                        console.log("[ERROR] Delete error", data);
+                        modalAlert({
+                            title: 'Program Deletion Error', 
+                            message: "Error deleting program.", 
+                            nextFunc: function() {
+                         }});
+                    },
+                }); 
+                
+            } 
+        });       
 
-                var response = JSON.parse(data);
-
-                console.log(
-                    "[DEBUG] Delete program response", 
-                    response);
-
-                if(response.success) {
-                    //$( '#' + divid ).remove(); //this is probably not needed
-                    alert("Program deleted");
-                    showTopLevelView('landing-page-view');
-
-                } else {
-                    alert("Error: " + response.message);
-                }
-            },
-            error: function(data) {
-                console.log("[ERROR] Delete error", data);
-                alert('Error deleting program.')
-            },
-        });
-
-    };    
-    
+    };             
 
     base.show = function() {
         var content = jQuery('#'+base.getDivId());

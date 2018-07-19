@@ -41,8 +41,8 @@ var ProgramEditorPanel = function(options) {
     var svgDiv = $('<div>', { class: 'diagramSvgHolder',  id: 'program-holder'} );
     svgWrapper.append(svgDiv);
     this.container.append(svgWrapper);
-    var holderoffsetx = 170;
-    var holderoffsety = 70;
+    var holderoffsetx = 180;
+    var holderoffsety = 60;
     
     //recording/running program
     var m_runningProgram = false;
@@ -55,7 +55,7 @@ var ProgramEditorPanel = function(options) {
     //
     // Load a diagram from a spec dictionary into the UI editor
     //
-    this.loadProgram = function(programSpec) {
+    this.loadProgram = function(programSpec, displayedName) {
 
         if(this.m_svgDrawer == null) {
             this.m_svgDrawer = SVG('program-holder');
@@ -77,10 +77,10 @@ var ProgramEditorPanel = function(options) {
         // Default empty program
         //
         if(!programSpec) {
-            $('#program-editor-filename').val("untitled program");
+            $('#program-editor-filename').val(displayedName);
             programSpec = { blocks: [] };
             programSpec.name = this.createDateTimeName("program_");
-            programSpec.displayedName = "untitled program";
+            programSpec.displayedName = displayedName;
             programSpec.archived = false;
         }
         else if(programSpec.name == null || programSpec.name == ""){
@@ -214,7 +214,7 @@ var ProgramEditorPanel = function(options) {
             blockContentDiv = $('<div>', {class: 'flowBlockContent', id: 'bcon_' + block.id});
         }            
         else if (block.type === 'timer') {
-            blockDiv.addClass('complimentaryviolet');
+            blockDiv.addClass('concordgreen');
             blockContentDiv = $('<div>', {class: 'flowBlockContent flowBlockContentTimer', id: 'bcon_' + block.id});
         }  
         else if (block.type === 'data storage') {
@@ -1047,8 +1047,12 @@ var ProgramEditorPanel = function(options) {
             }
         }    
         if(!dataStorageBlockAllowed) {
-            alert("Only one data storage block allowed per program.");
-            return;
+            modalAlert({
+                title: 'Program Warning', 
+                message: "Only one data storage block allowed per program.",
+                nextFunc: function() {
+             }});            
+            return false;            
         }        
         
         var offsetx = _this.newBlockXOffset();
@@ -1140,11 +1144,10 @@ var ProgramEditorPanel = function(options) {
     //
     // Add a filter block to the diagram
     //
-    this.addFilterBlock = function(e) {
+    this.addFilterBlock = function(type) {
         var offsetx = _this.newBlockXOffset();
         var offsety = _this.newBlockYOffset();
         
-        var type = e.data;
         $('#filterModal').modal('hide');
         var blockSpec = {
             name: type,
