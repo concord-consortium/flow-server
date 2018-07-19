@@ -678,9 +678,9 @@ var PiSelectorPanel = function(options) {
 
         console.log("[DEBUG] Stopping program", _this.currentRecordingLocation);
     
-        if(_this.currentRecordingLocation == null)
+        if(recordingLocation != null)
             _this.currentRecordingLocation = recordingLocation;
-        if(_this.currentControllerPath == null)
+        if(controllerPath != null)
             _this.currentControllerPath = controllerPath;
         
         //
