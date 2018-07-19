@@ -180,8 +180,8 @@ var LandingPageDataSetView = function(options) {
         //main holder for activity feed item
         var liveDataItemHolder  = jQuery('<div>', {class:'live-data-item-holder'} );
         
-        var LiveDataItemBoxProgramTitle  = jQuery('<div>', {class:'live-data-item-title', text:programName} );
-        LiveDataItemBoxProgramTitle.appendTo(liveDataItemHolder);    
+        var liveDataItemBoxProgramTitle  = jQuery('<div>', {class:'live-data-item-title', text:programName} );
+        liveDataItemBoxProgramTitle.appendTo(liveDataItemHolder);    
         
         //device section
         var liveDataItemBoxPi  = jQuery('<div>', {class:'live-data-item-box'} );
@@ -203,8 +203,8 @@ var LandingPageDataSetView = function(options) {
         var warningIcon = $('<img class="warning-icon">'); 
         warningIcon.attr('src', "flow-server/static/flow/images/icon-warning.png");
         warningIcon.appendTo(statusDiv);    
-        var statsuText = "Offline";
-        var statusMessage  = jQuery('<span>', {class:'noSelect', text:statsuText} );        
+        var statusText = "Offline";
+        var statusMessage  = jQuery('<span>', {class:'noSelect', text:statusText} );        
         statusMessage.appendTo(statusDiv); 
         
         liveDataItemBoxPiName.appendTo(liveDataItemBoxPi); 
@@ -259,58 +259,7 @@ var LandingPageDataSetView = function(options) {
                     stopButton.prop("disabled", true);
                     stopButton.addClass("noHover");
                     console.log("[DEBUG] Stopping program", e.data.recording_location);
-                    
-                    //stop the program by marking the metadata
-                    //at present we are NOT using this method, but we may return to it based on future design decisions
-                    /*
-                    for(var i = 0; i < recordingData.length; i++) {
-                        if(e.data.recording_location == recordingData[i].metadata.recording_location){
-                            console.log("[DEBUG] found dataset to stop");
-                            
-                            //update the metadata
-                            recordingData[i].metadata.recording = false;
-                            
-                            var filename = recordingData[i].name;
-                            var datasetmetadataStr = JSON.stringify(recordingData[i].metadata);
-
-                            console.log("Saving:", datasetmetadataStr);
-
-                            //
-                            // Call API to save metadata.
-                            //
-                            var url = '/ext/flow/save_dataset_metadata'  
-                            var data = {    filename:   filename,
-                                            content:    datasetmetadataStr,
-                                            csrf_token: g_csrfToken };
-
-                            $.ajax({
-                                url:        url,
-                                method:     'POST',
-                                data:       data,
-                                success:    function(data) {
-                                    var response = JSON.parse(data);
-
-                                    console.log(
-                                        "[DEBUG] Save dataset metadata response", 
-                                        response);
-
-                                    if(response.success) {
-                                        //alert("Dataset metadata saved");
-                                    } else {
-                                        //alert("Error: " + response.message);
-                                    }
-                                },
-                                error: function(data) {
-                                    console.log("[ERROR] Save error", data);
-                                    //alert('Error saving dataset metadata.')
-                                },
-                            });                            
-                            
-                        }
-                        break;
-                    }
-                    //return;
-                    */
+                   
                     stopRecording(base.show, e.data.recording_location, e.data.controller_path);                
                 }
             });
@@ -324,8 +273,9 @@ var LandingPageDataSetView = function(options) {
         liveDataItemBoxProgramIcon.attr("width","145");
         liveDataItemBoxProgramIcon.appendTo(liveDataItemBoxData);    
         //name of the dataset        
-        if(displayedFilename==null || displayedFilename=="")
+        if(displayedFilename==null || displayedFilename==""){
             displayedFilename="Untitled Dataset";       
+        }
         var liveDataItemBoxDataName  = jQuery('<div>', {class:'live-data-item-box-name', text:displayedFilename} );
         var viewButton = $('<button>', { class:'live-data-item-box-button center',   html: 'view dataset' } );
         liveDataItemBoxDataName.appendTo(liveDataItemBoxData);
@@ -364,10 +314,8 @@ var LandingPageDataSetView = function(options) {
     // create a menu item button to load a saved dataset
     //
     var createDatasetMenuEntry = function(item, displayedName, filename, tooltip,  index) {
-        var menuentry;
-        var btn;
-        menuentry = $('<div>', {id:'dataset'+index, class: 'landingPageMenuEntry container-light-gray'});
-        btn = $('<div>', { text:displayedName, class: 'landingPageMenuTextContent' } );
+        var menuentry = $('<div>', {id:'dataset'+index, class: 'landingPageMenuEntry container-light-gray'});
+        var btn = $('<div>', { text:displayedName, class: 'landingPageMenuTextContent' } );
         menuTooltip = $('<span>', {text:tooltip, class: 'tooltiptext'});
         if(tooltip!="")menuTooltip.appendTo(menuentry);
         btn.click(item, function(e) {
@@ -410,7 +358,7 @@ var LandingPageDataSetView = function(options) {
     var deleteDataset = function(e) {
         var metadata = e.data.metadata;
         var displayedName;
-		var fileName = e.data.datasetname;
+        var fileName = e.data.datasetname;
         if(metadata == null || metadata.displayedName == null){
             displayedName = e.data.datasetname;
         }

@@ -370,7 +370,7 @@ var ProgramEditorView = function(options) {
         //
         // If no program to load, create a new program
         //
-        if(!params.filename) {//if(!params) {
+        if(!params.filename) {
             programEditorPanel.loadProgram(null, params.displayedName);
             showTopLevelView('program-editor-view');
             return;

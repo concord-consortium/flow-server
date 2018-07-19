@@ -157,9 +157,10 @@ var DataSetView = function(options) {
         //
         // Set currently recording status
         //
-        recStatus.html(recording ? 
-                        '<i>Currently Recording</i>' :
-                        '<i>Not Recording</i>' );
+        recStatus.html(recording
+          ? '<i>Currently Recording</i>'
+          : '<i>Not Recording</i>' );
+
         piName.text("Device: " + base.m_dataSet.metadata.controller_name);
 
         //
@@ -463,11 +464,9 @@ var DataSetView = function(options) {
         if (base.m_plotHandler.intervalSelect) {
             base.m_plotHandler.setIntervalSelect(false);
             $('#data-set-select-interval').html('Select Interval');
-            //$('#data-set-select-interval').removeClass('btn-info');
         } else {
             base.m_plotHandler.setIntervalSelect(true);
             $('#data-set-select-interval').html('Done with Interval Selection');
-            //$('#data-set-select-interval').addClass('btn-info');
             CodapTest.logTopic('Dataflow/StartSelectDataToExport');
         }
     }
@@ -477,9 +476,6 @@ var DataSetView = function(options) {
         var timeThresh = 0.4;  // seconds
         var dataPairs = base.m_plotHandler.plotter.dataPairs;
         if (dataPairs.length && dataPairs[0].xData.data.length) {
-
-            var diagram = base.m_program;
-
             // set collection attributes based on sequence data
             var attrs = [{name: 'seconds', type: 'numeric', precision: 2}, {name: 'timestamp', type: 'date'}];
             for (var i = 0; i < dataPairs.length; i++) {

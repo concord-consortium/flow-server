@@ -103,13 +103,7 @@ var PiSelectorPanel = function(options) {
     //
     this.loadPiList = function(rebuildMenu) {
         // console.log("[DEBUG] loadPiList loading...");
-        
-        //clear dropdown menu data and list of available controllers
-        //WTD WTD WTD could these all live in setProgramControlsToNeutral() or delayed?
-        //for (var member in piMenuData) delete piMenuData[member];
-        //piMenuData["none"] = "none";
-        //_this.availableControllers = [];
-        
+
         var url = '/ext/flow/controllers';
 
         $.ajax({
@@ -122,11 +116,11 @@ var PiSelectorPanel = function(options) {
                 console.log("[DEBUG] List controllers response", response);
 
                 if(response.success) {
-
+                    //we got the list of pis, clear existing list
                     for (var member in piMenuData) delete piMenuData[member];
                     piMenuData["none"] = "none";
-                    _this.availableControllers = [];
-        
+                    
+                    _this.availableControllers = [];        
                     _this.availableControllers = response.controllers;
                     _this.availableControllers.sort(Util.sortByName);
 
@@ -134,7 +128,7 @@ var PiSelectorPanel = function(options) {
                                 _this.availableControllers);
 
                     //
-                    //add all pi not in recording state to drop down select menu.
+                    //add all pi not in recording state to drop down menu.
                     //
                     for(var i = 0; i < _this.availableControllers.length; i++) {
                         var controller = _this.availableControllers[i];
@@ -147,9 +141,6 @@ var PiSelectorPanel = function(options) {
                         }
                         piMenuData[controller.name] = controller.name;
                     }
-//piMenuData["RPi01"] = "RPi01";
-//piMenuData["RPi02"] = "RPi02";
-//piMenuData["RPi03"] = "RPi03";
                     if(rebuildMenu)
                         addPisToMenu();  
                     else
@@ -281,8 +272,6 @@ var PiSelectorPanel = function(options) {
         // not needed if we regen the list
         deviceSelectedText.text("none");
         
-        //set up everything else in the UI
-        //set state of run program button
         updateProgramButtons(true, false, false);
         
         //stop listening for messages from any existing Pi
@@ -356,7 +345,6 @@ var PiSelectorPanel = function(options) {
     var exitRunProgramState = function(){
         _this.currentlyRecording = false;
 
-        //update button
         updateProgramButtons(false, false, false);
         
         //enable drop down
@@ -395,7 +383,6 @@ var PiSelectorPanel = function(options) {
         deviceSelectedText.text(piName);
         var haveDsBlock = editor.getProgramEditorPanel().programHasDataStorageBlock();
         
-        //set the state of the run button
         updateProgramButtons(false, true, haveDsBlock);
         
         var contents = $('#program-editor-recordingstatus').text("Running on ");
@@ -499,7 +486,6 @@ var PiSelectorPanel = function(options) {
                 title: 'Cannot Run Program', 
                 message: "No Pi selected.", 
                 nextFunc: function() {
-                    //update button
                     updateProgramButtons(false, false, false);            
                 }});    
             return;        
@@ -510,7 +496,6 @@ var PiSelectorPanel = function(options) {
                 title: 'Cannot Run Program',
                 message: "Cannot find program.",
                 nextFunc: function() {
-                    //update button
                     updateProgramButtons(false, false, false);
                 }});    
             return;                    
@@ -562,7 +547,6 @@ var PiSelectorPanel = function(options) {
                     title: 'Cannot Run Program', 
                     message: "Please enter a valid dataset name on the data storage block.", 
                     nextFunc: function() { 
-                        //update button
                         updateProgramButtons(false, false, false);                    
                     }});    
                 return;    
@@ -574,7 +558,6 @@ var PiSelectorPanel = function(options) {
                     title: 'Cannot Run Program', 
                     message: "Please enter a valid name for each type connected to the data storage block.", 
                     nextFunc: function() {    
-                        //update button
                         updateProgramButtons(false, false, false);
                     }});    
                 return;    
@@ -600,7 +583,6 @@ var PiSelectorPanel = function(options) {
                 title: 'Cannot Run Program', 
                 message: "Error: The following blocks do not have available sensors on " + controller.name + ":" + names, 
                 nextFunc: function() {    
-                    //update button
                     updateProgramButtons(false, false, false);              
                 }});    
             return;                
@@ -620,7 +602,6 @@ var PiSelectorPanel = function(options) {
                 title: 'Cannot Run Program', 
                 message: "No name set on program.",
                 nextFunc: function() {    
-                    //update button
                     updateProgramButtons(false, false, false);             
                 }});                        
             return;
@@ -666,7 +647,6 @@ var PiSelectorPanel = function(options) {
                 
                 modalAlert({title: 'Run Program', message: 'Program is now running on ' + controller.name, nextFunc: function() {
                     console.log("Program is now running on " + controller.name, params);
-                    //update button
                     updateProgramButtons(false, true, haveDsBlock);
                     
                     deviceSelectionContainer.prop("disabled", true);      
@@ -682,7 +662,6 @@ var PiSelectorPanel = function(options) {
                     title: 'Program Run Error', 
                     message: "Error running program on " + controller.name + ": " + params.message,
                     nextFunc: function() {    
-                        //update button
                         updateProgramButtons(false, false, false);                                   
                     }});                        
             }

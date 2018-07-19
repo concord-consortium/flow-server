@@ -96,8 +96,9 @@ var LandingPageView = function(options) {
         topbarHeight = $("#landing-page-topbar").outerHeight();
         usableHeight = windowHeight - topbarHeight;
         var newHeight = contentHeight;
-        if(usableHeight > contentHeight)
+        if(usableHeight > contentHeight){
             newHeight = usableHeight;
+        }
         
         menuAndContentHolder.height(newHeight);
     }
@@ -173,7 +174,7 @@ var LandingPageView = function(options) {
         var header = $('<div>', {class: 'menu-header container-dark-gray'} );
         var title = $('<div>', {class: 'menu-title noSelect'} ).text(name);
         var chevron = $('<div>', {class: 'diagram-menu-chevron noSelect'} );
-        var img = $('<img>'); //Equivalent: $(document.createElement('img'))
+        var img = $('<img>');
         img.attr('src', "flow-server/static/flow/images/icon-arrow.png");
         img.appendTo(chevron);            
 
