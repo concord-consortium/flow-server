@@ -313,6 +313,14 @@ def file_operation(operation, type):
                     if metadata is not None:
                         metadata = json.loads(metadata)
                         metadata['recording_location'] = ds_path
+            elif type == 'sequences':
+                if child.name == 'metadata':
+                    ds_path = path + "/" + child.name
+                    file = find_resource(ds_path)
+                    if file is not None:
+                        metadata = read_resource(file)
+                        if metadata is not None:
+                            metadata = json.loads(metadata)
             elif type == 'programs':
                 ds_path = path + "/" + child.name
                 file = find_resource(ds_path + "/metadata")
