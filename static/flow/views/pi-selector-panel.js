@@ -378,7 +378,7 @@ var PiSelectorPanel = function(options) {
         var isPresent = false;
         for(var val in piMenuData) {
             if(val == piName){
-                isPresent = false;
+                isPresent = true;
                 break;
             }
         }          
