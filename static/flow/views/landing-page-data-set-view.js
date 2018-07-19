@@ -6,21 +6,34 @@
 var LandingPageDataSetView = function(options) {
 
     var base = BaseView(options);
-    var livedataholder = options.livedataholder;
+    var liveDataHolder = options.liveDataHolder;
+    var dataSetView = options.dataSetView;
     var recordingData = [];
+    
+    var loadDataSet = function(dataset){
+        var success = dataSetView.loadDataSet(dataset);
+        if(success)showDataSetView();
+    }
+    
+    var showDataSetView = function(){
+        dataSetView.show();
+        liveDataHolder.hide();
+    }
+    
+    
     //
     // AJAX call and handler for updating "Recording Now" and 
     // "Previously Recorded" div.
     //
-    var loadDataSets = function(recordeddataholder, livedataholder) {
+    var loadDataSets = function(recordedDataHolder, liveDataHolder) {
 
         // console.log("[DEBUG] loading recorded data...");
-        livedataholder.empty();
-        var livedatatitlebar  = jQuery('<div>', {class:'liveDataTitleBar', text:"You don't have any running programs. Click \"new program\" to get started."} );
-        livedatatitlebar.appendTo(livedataholder);        
+        liveDataHolder.empty();
+        var livedatatitlebar  = jQuery('<div>', {class:'live-data-title-bar', text:"You don't have any running programs. Click \"New Program\" to get started."} );
+        livedatatitlebar.appendTo(liveDataHolder);        
 
-        recordeddataholder.empty();
-        addLoadingDatasetsToMenu(recordeddataholder);
+        recordedDataHolder.empty();
+        addLoadingDatasetsToMenu(recordedDataHolder);
 
         var url = '/ext/flow/list_datasets';
 
@@ -55,7 +68,7 @@ var LandingPageDataSetView = function(options) {
                         }
                     }
                     recordingData = recording;
-                    recordeddataholder.empty();
+                    recordedDataHolder.empty();
                     
                     var createDataSetList = function(displayName, list) {
                         if(list.length == 0) {
@@ -65,7 +78,7 @@ var LandingPageDataSetView = function(options) {
                             for(var i = 0; i < list.length; i++) {
                                 livedatatitlebar.text("Currently running programs");
                                 var livedatablock = createDatasetActivityFeedBlock ( list[i]);
-                                livedatablock.appendTo(livedataholder);
+                                livedatablock.appendTo(liveDataHolder);
                                 // console.log("[DEBUG] Creating dataset item", items[i]);
                             }
                             
@@ -86,32 +99,31 @@ var LandingPageDataSetView = function(options) {
                                 }
                                 
                                 var btn = createDatasetMenuEntry ( list[i], displayedName, list[i].name, toolTip, i );
-                                btn.appendTo(recordeddataholder);
+                                btn.appendTo(recordedDataHolder);
                                 // console.log("[DEBUG] Creating dataset item", items[i]);
                             }                            
                         }
-                            
                     }
 
                     createDataSetList("Recording Now", recording);
                     createDataSetList("Previously Recorded", recorded);
                     
                     if(recording.length == 0 && recorded.length == 0) {
-                        addNoDatasetsToMenu(recordeddataholder);
+                        addNoDatasetsToMenu(recordedDataHolder);
                     }
                     
                     //resize the landing page view
                     var lpv = getTopLevelView('landing-page-view');
-                    lpv.resizemenuandcontentholder();
+                    lpv.resizeMenuAndContentHolder();
 
 
                 } else {
-                    addNoDatasetsToMenu(recordeddataholder);
+                    addNoDatasetsToMenu(recordedDataHolder);
                     console.log("[ERROR] Error listing datasets", response);
                 }
             },
             error: function(data) {
-                addNoDatasetsToMenu(recordeddataholder);
+                addNoDatasetsToMenu(recordedDataHolder);
                 console.log("[ERROR] List datasets error", data);
             },
         });
@@ -134,7 +146,7 @@ var LandingPageDataSetView = function(options) {
     //
     var addNoDatasetsToMenu = function(div){    
         div.empty();
-        var emptyButton = $('<div>', {class: 'landingPageMenuEntryNoSelect noSelect menudarkgray'} ).text("no available datasets");
+        var emptyButton = $('<div>', {class: 'landingPageMenuEntryNoSelect noSelect container-light-gray'} ).text("no available datasets");
         div.append(emptyButton);
     }
     //
@@ -142,7 +154,7 @@ var LandingPageDataSetView = function(options) {
     //
      var addLoadingDatasetsToMenu = function(div){    
         div.empty();
-        var emptyButton = $('<div>', {class: 'landingPageMenuEntryNoSelect noSelect menudarkgray'} ).text("loading datasets...");
+        var emptyButton = $('<div>', {class: 'landingPageMenuEntryNoSelect noSelect container-light-gray'} ).text("loading datasets...");
         div.append(emptyButton);
     }
     //
@@ -159,25 +171,45 @@ var LandingPageDataSetView = function(options) {
         var controllerName = metadata.controller_name;
         var programData = metadata.program;
         var programName = programData.displayedName;
+        if(programName==null || programName=="")
+            programName="Untitled Program";        
         var isEmpty = false;
         if(metadata.is_empty && metadata.is_empty == true)
             isEmpty = true;
         
-        var liveDataItemHolder  = jQuery('<div>', {class:'liveDataItemHolder'} );
+        //main holder for activity feed item
+        var liveDataItemHolder  = jQuery('<div>', {class:'live-data-item-holder'} );
         
-        var liveDataItemBoxPi  = jQuery('<div>', {class:'liveDataItemBox concordblue'} );
-        var liveDataItemBoxPiTitle  = jQuery('<div>', {class:'liveDataItemBoxTitle', text:"pi"} );
-        var liveDataItemBoxPiName  = jQuery('<div>', {class:'liveDataItemBoxName', text:controllerName} );
+        var LiveDataItemBoxProgramTitle  = jQuery('<div>', {class:'live-data-item-title', text:programName} );
+        LiveDataItemBoxProgramTitle.appendTo(liveDataItemHolder);    
+        
+        //device section
+        var liveDataItemBoxPi  = jQuery('<div>', {class:'live-data-item-box'} );
+        //image icon
+        var liveDataItemBoxPiIcon = $('<img class="center">'); 
+        liveDataItemBoxPiIcon.attr('src', "flow-server/static/flow/images/icon-device.png");
+        liveDataItemBoxPiIcon.attr("width","145");
+        liveDataItemBoxPiIcon.appendTo(liveDataItemBoxPi);    
+        //name of the Pi
+        var liveDataItemBoxPiName  = jQuery('<div>', {class:'live-data-item-box-name', text:controllerName} );
+        //stop button
         var buttonid = "liveDataStopButton" + controllerName;
-        var stopButton = $('<button>', { id: buttonid, class:'liveDataItemBoxButton',   html: 'stop program' } );
+        var stopButton = $('<button>', { id: buttonid, class:'live-data-item-box-button center',   html: 'stop program' } );
+        
         //add hidden status indication in case pi is offline
         var statusid = "liveDataStatusDiv" + controllerName;
-        var statusDiv = jQuery('<div>', {id: statusid, class:'liveDataItemBoxTitle'} );
-        statusDiv.html('<span class="liveDataItemBoxWarning glyphicon glyphicon-warning-sign"></span><span class="liveDataItemBoxTitle"> Pi ' + controllerName + ' is offline</span>');
-        liveDataItemBoxPiTitle.appendTo(liveDataItemBoxPi);   
+        var statusDiv = jQuery('<div>', {id: statusid, class:'live-data-item-box-warning'} );
+        //warning icon
+        var warningIcon = $('<img class="warning-icon">'); 
+        warningIcon.attr('src', "flow-server/static/flow/images/icon-warning.png");
+        warningIcon.appendTo(statusDiv);    
+        var statsuText = "Offline";
+        var statusMessage  = jQuery('<span>', {class:'noSelect', text:statsuText} );        
+        statusMessage.appendTo(statusDiv); 
+        
         liveDataItemBoxPiName.appendTo(liveDataItemBoxPi); 
         stopButton.appendTo(liveDataItemBoxPi);
-        //is this Pi even online?
+        //is this Pi online?
         var editor = getTopLevelView('program-editor-view');
         var piSelectorPanel = editor.getPiSelectorPanel();
         var offline = piSelectorPanel.isPiOffline(controllerName);
@@ -187,13 +219,19 @@ var LandingPageDataSetView = function(options) {
         else{
             statusDiv.hide();
         }
-        statusDiv.appendTo(liveDataItemBoxPi);        
+        statusDiv.appendTo(liveDataItemBoxPi);   
+
         
-        var liveDataItemBoxProgram  = jQuery('<div>', {class:'liveDataItemBox concordblue'} );
-        var liveDataItemBoxProgramTitle  = jQuery('<div>', {class:'liveDataItemBoxTitle', text:"running program"} );
-        var liveDataItemBoxProgramName  = jQuery('<div>', {class:'liveDataItemBoxName', text:programName} );
-        var viewProgramButton = $('<button>', { class:'liveDataItemBoxButton',   html: 'view program' } );
-        liveDataItemBoxProgramTitle.appendTo(liveDataItemBoxProgram);   
+        //program section
+        var liveDataItemBoxProgram  = jQuery('<div>', {class:'live-data-item-box'} );
+        //image icon
+        var liveDataItemBoxProgramIcon = $('<img class="center">'); 
+        liveDataItemBoxProgramIcon.attr('src', "flow-server/static/flow/images/icon-program.png");
+        liveDataItemBoxProgramIcon.attr("width","145");
+        liveDataItemBoxProgramIcon.appendTo(liveDataItemBoxProgram);    
+        //name of the program
+        var liveDataItemBoxProgramName  = jQuery('<div>', {class:'live-data-item-box-name', text:programName} );
+        var viewProgramButton = $('<button>', { class:'live-data-item-box-button center',   html: 'view program' } );
         liveDataItemBoxProgramName.appendTo(liveDataItemBoxProgram);   
         viewProgramButton.appendTo(liveDataItemBoxProgram);             
         
@@ -203,7 +241,7 @@ var LandingPageDataSetView = function(options) {
             editor.loadProgramFromSpec({programdata: programData});
             
             var piSelectorPanel = editor.getPiSelectorPanel();
-            piSelectorPanel.simulateRunProgramState(metadata.controller_name, metadata.controller_path, metadata.recording_location);
+            piSelectorPanel.simulateRunProgramState(e.data);
             
         });
             
@@ -211,91 +249,106 @@ var LandingPageDataSetView = function(options) {
         // Stop recording
         //
         stopButton.click(metadata, function(e) {
-            
-            var conf = confirm("Are you sure you want to stop the program?");
 
-            if(!conf) {
-                return;
-            }                
-            stopButton.html('stopping... please wait');
-            console.log("[DEBUG] Stopping program", e.data.recording_location);
-            
-            //stop the program by marking the metadata
-            //at present we are NOT using this method, but we may return to it based on future design decisions
-            /*
-            for(var i = 0; i < recordingData.length; i++) {
-                if(e.data.recording_location == recordingData[i].metadata.recording_location){
-                    console.log("[DEBUG] found dataset to stop");
+            modalConfirm({
+                title: 'Stop Program', 
+                'prompt': 'Are you sure you want to stop the program?', 
+                yesFunc: function() {    
+
+                    stopButton.html('stopping program');
+                    stopButton.prop("disabled", true);
+                    stopButton.addClass("noHover");
+                    console.log("[DEBUG] Stopping program", e.data.recording_location);
                     
-                    //update the metadata
-                    recordingData[i].metadata.recording = false;
-                    
-                    var filename = recordingData[i].name;
-                    var datasetmetadataStr = JSON.stringify(recordingData[i].metadata);
+                    //stop the program by marking the metadata
+                    //at present we are NOT using this method, but we may return to it based on future design decisions
+                    /*
+                    for(var i = 0; i < recordingData.length; i++) {
+                        if(e.data.recording_location == recordingData[i].metadata.recording_location){
+                            console.log("[DEBUG] found dataset to stop");
+                            
+                            //update the metadata
+                            recordingData[i].metadata.recording = false;
+                            
+                            var filename = recordingData[i].name;
+                            var datasetmetadataStr = JSON.stringify(recordingData[i].metadata);
 
-                    console.log("Saving:", datasetmetadataStr);
+                            console.log("Saving:", datasetmetadataStr);
 
-                    //
-                    // Call API to save metadata.
-                    //
-                    var url = '/ext/flow/save_dataset_metadata'  
-                    var data = {    filename:   filename,
-                                    content:    datasetmetadataStr,
-                                    csrf_token: g_csrfToken };
+                            //
+                            // Call API to save metadata.
+                            //
+                            var url = '/ext/flow/save_dataset_metadata'  
+                            var data = {    filename:   filename,
+                                            content:    datasetmetadataStr,
+                                            csrf_token: g_csrfToken };
 
-                    $.ajax({
-                        url:        url,
-                        method:     'POST',
-                        data:       data,
-                        success:    function(data) {
-                            var response = JSON.parse(data);
+                            $.ajax({
+                                url:        url,
+                                method:     'POST',
+                                data:       data,
+                                success:    function(data) {
+                                    var response = JSON.parse(data);
 
-                            console.log(
-                                "[DEBUG] Save dataset metadata response", 
-                                response);
+                                    console.log(
+                                        "[DEBUG] Save dataset metadata response", 
+                                        response);
 
-                            if(response.success) {
-                                //alert("Dataset metadata saved");
-                            } else {
-                                //alert("Error: " + response.message);
-                            }
-                        },
-                        error: function(data) {
-                            console.log("[ERROR] Save error", data);
-                            //alert('Error saving dataset metadata.')
-                        },
-                    });                            
-                    
+                                    if(response.success) {
+                                        //alert("Dataset metadata saved");
+                                    } else {
+                                        //alert("Error: " + response.message);
+                                    }
+                                },
+                                error: function(data) {
+                                    console.log("[ERROR] Save error", data);
+                                    //alert('Error saving dataset metadata.')
+                                },
+                            });                            
+                            
+                        }
+                        break;
+                    }
+                    //return;
+                    */
+                    stopRecording(base.show, e.data.recording_location, e.data.controller_path);                
                 }
-                break;
-            }
-            //return;
-            */
-            stopRecording(base.show);
+            });
         });        
 
-        var liveDataItemBoxData  = jQuery('<div>', {class:'liveDataItemBox concordblue'} );
-        var liveDataItemBoxDataTitle  = jQuery('<div>', {class:'liveDataItemBoxTitle', text:"recording dataset"} );
-        var liveDataItemBoxDataName  = jQuery('<div>', {class:'liveDataItemBoxName', text:displayedFilename} );
-        var viewButton = $('<button>', { class:'liveDataItemBoxButton',   html: 'view dataset' } );
-        liveDataItemBoxDataTitle.appendTo(liveDataItemBoxData);   
+        //dataset section
+        var liveDataItemBoxData  = jQuery('<div>', {class:'live-data-item-box'} );
+        //image icon
+        var liveDataItemBoxProgramIcon = $('<img class="center">'); 
+        liveDataItemBoxProgramIcon.attr('src', "flow-server/static/flow/images/icon-graph.png");
+        liveDataItemBoxProgramIcon.attr("width","145");
+        liveDataItemBoxProgramIcon.appendTo(liveDataItemBoxData);    
+        //name of the dataset        
+        if(displayedFilename==null || displayedFilename=="")
+            displayedFilename="Untitled Dataset";       
+        var liveDataItemBoxDataName  = jQuery('<div>', {class:'live-data-item-box-name', text:displayedFilename} );
+        var viewButton = $('<button>', { class:'live-data-item-box-button center',   html: 'view dataset' } );
         liveDataItemBoxDataName.appendTo(liveDataItemBoxData);
         
         viewButton.appendTo(liveDataItemBoxData);         
     
         viewButton.click(item, function(e) {
             console.log("[DEBUG] View DataSet Button click", e.data);
-            var dataSetView = getTopLevelView('data-set-view');
-            var sucess = dataSetView.loadDataSet(e.data);
-            if(sucess)showTopLevelView('data-set-view');
+            loadDataSet(e.data);
         });
         
-        var liveDataItemConnector1  = jQuery('<div>', {class:'liveDataItemConnector'} );
-        var liveDataItemConnector2  = jQuery('<div>', {class:'liveDataItemConnector'} );
-        var chevron1 = $('<div>', {class: 'liveDataItemConnectorArrow glyphicon glyphicon-arrow-right'} );
-        var chevron2 = $('<div>', {class: 'liveDataItemConnectorArrow glyphicon glyphicon-arrow-right'} );
-        chevron1.appendTo(liveDataItemConnector1);
-        chevron2.appendTo(liveDataItemConnector2);
+        var liveDataItemConnector1  = jQuery('<div>', {class:'live-data-item-connector'} );
+        var liveDataItemConnector2  = jQuery('<div>', {class:'live-data-item-connector'} );
+        
+        var arrow1 = $('<img class="center">'); 
+        arrow1.attr('src', "flow-server/static/flow/images/icon-arrow-connector.png");
+        arrow1.attr("width","50");
+        arrow1.appendTo(liveDataItemConnector1);    
+        var arrow2 = $('<img class="center">'); 
+        arrow2.attr('src', "flow-server/static/flow/images/icon-arrow-connector.png");
+        arrow2.attr("width","50");
+        arrow2.appendTo(liveDataItemConnector2);
+        
         liveDataItemBoxPi.appendTo(liveDataItemHolder);   
         liveDataItemConnector1.appendTo(liveDataItemHolder);   
         liveDataItemBoxProgram.appendTo(liveDataItemHolder);   
@@ -303,7 +356,7 @@ var LandingPageDataSetView = function(options) {
             liveDataItemConnector2.appendTo(liveDataItemHolder);   
         if(!isEmpty) 
             liveDataItemBoxData.appendTo(liveDataItemHolder);   
-        liveDataItemHolder.appendTo(livedataholder);   
+        liveDataItemHolder.appendTo(liveDataHolder);   
         return liveDataItemHolder;
     }
     
@@ -313,24 +366,13 @@ var LandingPageDataSetView = function(options) {
     var createDatasetMenuEntry = function(item, displayedName, filename, tooltip,  index) {
         var menuentry;
         var btn;
-
-        if(index%2 == 0){
-            menuentry = $('<div>', {id:'dataset'+index, class: 'landingPageMenuEntry menulightgray'});
-            btn = $('<button>', { text:displayedName, class: 'landingPageMenuTextContent menulightgray' } );
-            menuTooltip = $('<span>', {text:tooltip, class: 'tooltiptext'});
-            if(tooltip!="")menuTooltip.appendTo(menuentry);
-        }
-        else{
-            menuentry = $('<div>', {id:'dataset'+index, class: 'landingPageMenuEntry menudarkgray'});
-            btn = $('<button>', { text:displayedName, class: 'landingPageMenuTextContent menudarkgray' } );
-            menuTooltip = $('<span>', {text:tooltip, class: 'tooltiptext'});
-            if(tooltip!="")menuTooltip.appendTo(menuentry);
-        }
+        menuentry = $('<div>', {id:'dataset'+index, class: 'landingPageMenuEntry container-light-gray'});
+        btn = $('<div>', { text:displayedName, class: 'landingPageMenuTextContent' } );
+        menuTooltip = $('<span>', {text:tooltip, class: 'tooltiptext'});
+        if(tooltip!="")menuTooltip.appendTo(menuentry);
         btn.click(item, function(e) {
             console.log("[DEBUG] DataSetButton click", e.data);
-            var dataSetView = getTopLevelView('data-set-view');
-            var success = dataSetView.loadDataSet(e.data);
-            if(success)showTopLevelView('data-set-view');
+            loadDataSet(e.data);
         });
         btn.appendTo(menuentry);
         
@@ -351,7 +393,10 @@ var LandingPageDataSetView = function(options) {
             'aria-expanded': 'true',
         }).appendTo(menuDiv);
     
-        $('<div>', {class: 'landingPageMenuIcon glyphicon glyphicon-align-justify noSelect', 'aria-hidden': 'true'}).appendTo(menuInnerDiv);
+        //$('<div>', {class: 'landingPageMenuIcon glyphicon glyphicon-align-justify noSelect', 'aria-hidden': 'true'}).appendTo(menuInnerDiv);
+        var menuIcon = $('<div>', {class: 'landingPageMenuIcon'} );
+        menuIcon.prepend('<img class="landingPageMenuImage" src="flow-server/static/flow/images/icon-menu.png">')    
+        menuIcon.appendTo(menuInnerDiv);
           
         createDropDownList({menuData: menuData}).appendTo(menuDiv);
 
@@ -372,87 +417,72 @@ var LandingPageDataSetView = function(options) {
             name = metadata.displayedName
         }
         
-        var conf = confirm("Are you sure you want to delete dataset " + name + "?");
+        modalConfirm({
+            title: 'Delete Dataset', 
+            'prompt': 'Are you sure you want to delete dataset ' + name + '?', 
+            yesFunc: function() {    
+                if(metadata){
+                    metadata.archived = true; //mark the metadata as archived so we know not to display it to the user
+                    
+                    if(metadata.displayedName == null){
+                        //we don't have a displayedName, this is most likely an old version of the dataset that the user is trying to delete
+                        metadata.displayedName = name;
+                    }
+                }        
+                var metadataStr = JSON.stringify(metadata);        
+                
+                //
+                // Call API to save metadata.
+                //
+                var url = '/ext/flow/save_dataset_metadata'  
+                var data = {    filename:   name,
+                                metadata:   metadataStr,
+                                content:    null,                        
+                                csrf_token: g_csrfToken };
 
-        if(!conf) {
-            return;
-        }        
-        
-        if(metadata){
-            metadata.archived = true; //mark the metadata as archived so we know not to display it to the user
-            
-            if(metadata.displayedName == null){
-                //we don't have a displayedName, this is most likely an old version of the dataset that the user is trying to delete
-                metadata.displayedName = name;
+                $.ajax({
+                    url:        url,
+                    method:     'POST',
+                    data:       data,
+                    success:    function(data) {
+                        var response = JSON.parse(data);
+
+                        console.log(
+                            "[DEBUG] delete dataset response", 
+                            response);
+
+                        if(response.success) {
+                            modalAlert({
+                                title: 'Dataset Deleted', 
+                                message: 'Dataset \"' + name + '\" deleted.', 
+                                nextFunc: function() {
+                                    showTopLevelView('landing-page-view');
+                             }});
+                        } else {
+                            modalAlert({
+                                title: 'Dataset Deletion Error', 
+                                message: "Error: " + response.message, 
+                                nextFunc: function() {
+                             }});
+                        }
+                    },
+                    error: function(data) {
+                        console.log("[ERROR] Save error", data);
+                        modalAlert({
+                            title: 'Dataset Deletion Error', 
+                            message: "Error deleting dataset.", 
+                            nextFunc: function() {
+                         }});
+                    },
+                }); 
             }
-        }        
-        var metadataStr = JSON.stringify(metadata);        
-        
-        //
-        // Call API to save metadata.
-        //
-        var url = '/ext/flow/save_dataset_metadata'  
-        var data = {    filename:   name,
-                        metadata:   metadataStr,
-                        content:    null,                        
-                        csrf_token: g_csrfToken };
 
-        $.ajax({
-            url:        url,
-            method:     'POST',
-            data:       data,
-            success:    function(data) {
-                var response = JSON.parse(data);
-
-                console.log(
-                    "[DEBUG] delete dataset response", 
-                    response);
-
-                if(response.success) {
-                    alert("Dataset deleted");
-                    showTopLevelView('landing-page-view');  
-                } else {
-                    alert("Error: " + response.message);
-                }
-            },
-            error: function(data) {
-                console.log("[ERROR] Save error", data);
-                //alert('Error saving dataset metadata.')
-            },
-        });         
-    };    
-    
-    //
-    // Delete dataset, this version actually deletes the file
-    //
-    var deleteDatasetComplete = function(e) {
-        var name = e.data.datasetname;
-        
-        var conf = confirm("Are you sure you want to delete dataset " + name + "?");
-
-        if(!conf) {
-            return;
-        }                
-        
-        $.ajax({
-            url: '/ext/flow/delete_dataset',
-            data: { filename:   name,
-                    csrf_token: g_csrfToken },
-            method: 'POST',
-            success: function(data) {
-                //$( '#' + divid ).remove(); //this is probably not needed
-                alert("Deleted dataset " + name);
-                showTopLevelView('landing-page-view');  
-            },
-            error: function(data) {
-                console.log("[ERROR] Error deleting dataset " + name);
-                alert("Error deleting dataset " + name)
-            }});
-    };        
+        });             
+    };          
 
     base.show = function() {
         var menucontentholder = jQuery('#'+base.getDivId());
-        loadDataSets(menucontentholder, livedataholder);
+        loadDataSets(menucontentholder, liveDataHolder);
     }
 
     return base;

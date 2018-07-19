@@ -4,6 +4,7 @@
 var DataSetView = function(options) {
 
     var base = BaseView(options);
+    var liveDataHolder = options.liveDataHolder;
     
     var savedSequences;
     var savedStartTime;
@@ -27,126 +28,67 @@ var DataSetView = function(options) {
     VERTICAL_MARGIN                = 80;   // px
     HORIZONTAL_MARGIN           = 100;  // px
     
-    //
-    // create the main content boxes and top bar
-    //
+    var datasetTopbar = $('<div>', { class: 'dataset-info-topbar' });
+    var datasetName = $('<div>', { class: 'dataset-info-text dataset-info-text-title' }).text('Dataset Name: ');
+
+    var closeButton = $('<button>', {   html: 'Close' , class: 'dataflow-button dataset-view-close-button'} );
+    closeButton.click(function(e) {
+        base.hide();
+        liveDataHolder.show();
+    });
+    datasetTopbar.append(datasetName);
+    datasetTopbar.append(closeButton);
     
-    var outlinebox  = jQuery('<div>', {class:'outlinebox'} );
+    var datasetDetailsButton = $('<div>', { class: 'dataset-info-text dataset-view-details-button noSelect' });
+    var datasetDetails = $('<span>', { class: 'dataset-view-details-text' }).text('Dataset Details');
+    datasetDetailsButton.append(datasetDetails);
+    var img = $('<img>', { class: 'dataset-view-details-icon' }); 
+    img.attr('src', "flow-server/static/flow/images/icon-arrow-right.png");
+    datasetDetailsButton.append(img);
     
-    outlinebox.appendTo(content);        
-    
-    var maincontentbox  = jQuery('<div>', {class:'maincontentbox'} );    
-               
-    maincontentbox.appendTo(outlinebox);    
+    var detailsDiv = $('<div>', { class: 'dataset-info-details'});
+    var programName = $('<div>', { class: 'dataset-info-text' }).text('Program Name: ');    
+    var recStatus   = $('<div>', { class: 'dataset-info-text' }).html('<i>Unknown Status</i>');
+    var piName      = $('<div>', { class: 'dataset-info-text' }).text('Device: ');
+    var startTime   = $('<div>', { class: 'dataset-info-text' }).text('N/A');
+    var endTime     = $('<div>', { class: 'dataset-info-text' }).text('N/A');
 
-    var topbar  = jQuery('<div>', {class:'topbar'} );
-    
-    topbar.appendTo(maincontentbox);        
-
-    var titlebar  = jQuery('<span>', {class:'titlebar noSelect', text:"Dataflow"} );
-        
-    titlebar.appendTo(topbar);    
-
-    
-    //
-    // Show welcome message
-    //
-    var welcomeMessage = jQuery('<div>', { css: {   position: 'absolute',
-                                                    paddingRight: '5px',
-                                                    display: 'inline-block',
-                                                    fontSize: '12px',
-                                                    whiteSpace: 'nowrap',
-                                                    top: '40px',
-                                                    right: '20px' } } );
-    var welcomeText = jQuery('<span>');
-
-    var signOut = jQuery('<a>', { href: '/ext/flow/logout' } );
-    signOut.text('logout');
-
-    if(g_user != null) {
-        welcomeText.text('Welcome, ' + g_user.full_name + '!');
-        welcomeMessage.append(welcomeText);
-        welcomeMessage.append(jQuery('<span>').text(' '));
-        welcomeMessage.append(signOut);
-        var spacing = jQuery('<span>', { css: { 
-                                    paddingRight: '5px'} } );
-        spacing.text(' ');
-        welcomeMessage.append(spacing);
-
-    } else {
-        welcomeText.text('You are not logged in.');
-        welcomeMessage.append(welcomeText);
+    var showDetails = false;
+    var showHideDatasetDeails = function(showDetails) {
+        if(showDetails){
+            img.attr('src', "flow-server/static/flow/images/icon-arrow.png");
+            detailsDiv.show();
+        }
+        else{
+            img.attr('src', "flow-server/static/flow/images/icon-arrow-right.png");
+            detailsDiv.hide();
+        }
     }
-
-    //
-    // Add admin button to welcome message
-    //
-    if(g_user != null && g_user.isAdmin) {
-        var adminButton = $('<button>', {   html: 'Admin' } );
-        adminButton.css('font-size','10px');
-
-        adminButton.click(function(e) {
-            showTopLevelView('admin-view');
-        });
-        adminButton.appendTo(welcomeMessage);
-    }
-    welcomeMessage.appendTo(topbar);    
+    datasetDetailsButton.click( function(e) {
+        showDetails = !showDetails;
+        showHideDatasetDeails(showDetails);
+    });
+    content.append(datasetTopbar);
+    content.append(datasetDetailsButton);
+    content.append(detailsDiv);
     
-    //
-    // Build the menu and content holder
-    //
-    var menuandcontentholder  = jQuery('<div>', {class:'menuandcontentholder'} );
+    detailsDiv.append(programName);
+    detailsDiv.append(recStatus);
+    detailsDiv.append(piName);
+    detailsDiv.append(startTime);
+    detailsDiv.append(endTime);
+
     
-    menuandcontentholder.appendTo(maincontentbox);    
-    
-
-    //
-    // Create the left panel 
-    //
-    var leftPanel       = jQuery('<div>',
-                            {   id: 'data-view-left-panel',
-                                css: {  // position: 'absolute',
-                                        width: '100%' } } );
-
-    //
-    // Create the right panel
-    //
-    var rightPanel      = jQuery('<div>',
-                                {   id: 'data-view-right-panel',
-                                    css: { width: '100%' } });
-
-    //
-    // Create main table and add all of our components
-    //
-    var mainTable = jQuery('<table>', { css: { width: '100%' } });
-
-    var info = $('<div>', { id: 'data-set-info',
-                            css: { padding: '2px' } } );
-    leftPanel.append(info);
-
     var canvas = $('<canvas>', { id: 'data-set-canvas' } );
-    leftPanel.append(canvas);
-
+    content.append(canvas);
 
     //
     // View Program and Export buttons
     //
-    var bTable      = $('<table>', { css: { width: '100%', padding: '2px' } });
-    var tr          = $('<tr>');
-    var leftTd      = $('<td>', { css: { textAlign: 'left', padding: '2px' } });
-    var rightTd     = $('<td>', { css: { textAlign: 'right', padding: '2px' } });
-    var viewProgBtn = $('<button>').text('View Program');
-    var selectIntervalBtn = $('<button>', {id: 'data-set-select-interval'}).text('Select Interval');
-    
-    var exportBtn   = $('<button>').text('Export to CODAP');
-    bTable.append(tr)
-    tr.append(leftTd);
-    //remove for now
-    //leftTd.append(viewProgBtn);
-    if(g_useCodap)leftTd.append(selectIntervalBtn);
-    tr.append(rightTd);
-    if(g_useCodap)rightTd.append(exportBtn);
-    leftPanel.append(bTable);
+    var selectIntervalBtn = $('<button>', {id: 'data-set-select-interval', class: 'dataflow-button dataset-codap-button'}).text('Select Interval');    
+    var exportBtn   = $('<button>', {class: 'dataflow-button dataset-codap-button'}).text('Export to CODAP');
+    if(g_useCodap)content.append(selectIntervalBtn); 
+    if(g_useCodap)content.append(exportBtn);
     
     selectIntervalBtn.click( function(e) {
         selectInterval();
@@ -155,34 +97,27 @@ var DataSetView = function(options) {
         exploreRecordedDataInCODAP();
     });
 
-    //
-    // Panel on right (indicates status like "Currently Recording" etc.)
-    //
-    var recordingStatusPanel = RecordingStatusPanel(
-                                                {   container:      rightPanel,
-                                                    dataSetView:    base });
 
-    Util.addTableRow(   mainTable, 
-                        [ leftPanel, rightPanel ],
-                        {   // paddingTop:     '10px',
-                            verticalAlign:  'top' } );
 
-    // content.append(mainTable);
-    menuandcontentholder.append(mainTable);
-
- 
-    //
     // Load a dataset and initialize view.
     //
     base.loadDataSet = function(dataSet) {
        
         //console.log("[DEBUG] loadDataSet", dataSet);
         if(dataSet === null) {
-            alert("Error opening dataset. Dataset is null.");
+            modalAlert({
+                title: 'Dataset Load Error', 
+                message: "Error opening dataset. Dataset is null.",
+                nextFunc: function() {
+             }});            
             return false;
         }   
         if(dataSet.metadata === null) {
-            alert("Error opening dataset. Dataset metadata is null.");
+            modalAlert({
+                title: 'Dataset Load Error', 
+                message: "Error opening dataset. Dataset metadata is null.",
+                nextFunc: function() {
+             }});            
             return false;
         }   
         base.m_dataSet              = dataSet;
@@ -192,13 +127,17 @@ var DataSetView = function(options) {
         console.log("[DEBUG] loadDataSet", 
                         base.m_program, 
                         base.m_recordingLocation);
+                        
+        $('#data-set-select-interval').html('Select Interval');                        
+                        
+        showDetails = false;
+        showHideDatasetDeails(showDetails);
 
-        info.empty();
         var displayedName = base.m_dataSet.name;
         if(base.m_dataSet.metadata.displayedName){
             displayedName = base.m_dataSet.metadata.displayedName;
         }
-        info.append($('<div>').text("DataSet Name: " + displayedName));
+        datasetName.text(displayedName);
         var programDisplayedName;
         if(base.m_dataSet.metadata.program.displayedName == null){
             //old style dataset where name/displayed name are the same
@@ -209,7 +148,42 @@ var DataSetView = function(options) {
             //modern style dataset where name/displayed name are unique
             programDisplayedName = base.m_dataSet.metadata.program.displayedName;
         }
-        info.append($('<div>').text("Program Name: " + programDisplayedName));   
+        programName.text("Program Name: " + programDisplayedName);        
+        
+        var recording   = base.m_dataSet.metadata.recording;
+        var start       = base.m_dataSet.metadata.start_time;
+        var end         = base.m_dataSet.metadata.end_time;
+        
+        //
+        // Set currently recording status
+        //
+        recStatus.html(recording ? 
+                        '<i>Currently Recording</i>' :
+                        '<i>Not Recording</i>' );
+        piName.text("Device: " + base.m_dataSet.metadata.controller_name);
+
+        //
+        // Show start time
+        //
+        var startStr = "Started: N/A";
+        if(start){
+            startStr = "Started: " + Util.getLocalDate(start) + ", " +
+                        Util.getLocalTime(start);
+        }
+        startTime.html(startStr);
+            
+
+        //
+        // Show end time
+        //
+        var endStr = "Ended: N/A";
+        if(end) {
+            endStr = "Ended: " + Util.getLocalDate(end) + ", " +
+                     Util.getLocalTime(end);
+            
+        }
+        endTime.html(endStr);    
+        
 
         base.m_canvas = document.getElementById('data-set-canvas');
         base.m_plotHandler = createPlotHandler(base.m_canvas);
@@ -225,7 +199,7 @@ var DataSetView = function(options) {
         
         var url = '/ext/flow/list_datasetsequences';
         var data = { filename:      dataSet.name,
-                     csrf_token:    g_csrfToken     };        
+                     csrf_token:    g_csrfToken     };
 
         $.ajax({
             url: url,
@@ -240,6 +214,15 @@ var DataSetView = function(options) {
                    
                     var items = response.items;
                     for(var i = 0; i < items.length; i++) {
+                        if(items[i].name == "metadata" && base.m_dataSet.metadata.start_time==null){
+                            //handle case where user does following:
+                            //1. starts recording datasetv
+                            //2. chooses to view data from editor, load from constructed dataset info built in flow-server
+                            //3. since flow client actually started the recording, flow-server does not know start time
+                            //4. possible to retrieve the start time now that we have the actual metadata from the server
+                            if(items[i].metadata.start_time!=null)
+                                base.m_dataSet.metadata.start_time = items[i].metadata.start_time;
+                        }
                         console.log("[DEBUG] List sequences", items[i]);
                     }
                     //
@@ -257,9 +240,6 @@ var DataSetView = function(options) {
             },
         });
         
-
-
-        recordingStatusPanel.show();
         return true;
     }
 
@@ -483,11 +463,11 @@ var DataSetView = function(options) {
         if (base.m_plotHandler.intervalSelect) {
             base.m_plotHandler.setIntervalSelect(false);
             $('#data-set-select-interval').html('Select Interval');
-            $('#data-set-select-interval').removeClass('btn-info');
+            //$('#data-set-select-interval').removeClass('btn-info');
         } else {
             base.m_plotHandler.setIntervalSelect(true);
             $('#data-set-select-interval').html('Done with Interval Selection');
-            $('#data-set-select-interval').addClass('btn-info');
+            //$('#data-set-select-interval').addClass('btn-info');
             CodapTest.logTopic('Dataflow/StartSelectDataToExport');
         }
     }
@@ -497,6 +477,8 @@ var DataSetView = function(options) {
         var timeThresh = 0.4;  // seconds
         var dataPairs = base.m_plotHandler.plotter.dataPairs;
         if (dataPairs.length && dataPairs[0].xData.data.length) {
+
+            var diagram = base.m_program;
 
             // set collection attributes based on sequence data
             var attrs = [{name: 'seconds', type: 'numeric', precision: 2}, {name: 'timestamp', type: 'date'}];

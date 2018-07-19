@@ -1,158 +1,263 @@
-.outlinebox{
-    min-height: 870px;
+/*
+* — Primary Holder —
+*/
+.main-content-box{
     width:100%;
-    padding:10px;
-    background-color:#007c88;
+    height:100%;
+    background-color:#ffffff;
 }
-.maincontentbox{
-    width:100%;
-    height:100%
-    background-color: #ffffff
+.dataflow-button {
+    -webkit-transition-duration: 0.2s; /* Safari */
+    transition-duration: 0.2s;
+    width: 60px;
+    height: 28px;
+    line-height:28px;
+    font-size: 14px;
+    font-family: 'museo300', Arial, sans-serif;
+    text-align: center;    
+    background-color: white;
+    color: #313131;
+    border-radius: 8px;
+    border: 1px solid #F5F5F5;
+    box-shadow: 1px 1px 3px #C0C0C0;
 }
+.dataflow-button:hover {
+    background-color:  rgba(111, 198, 218, 0.1);
+}
+
+/*
+* — Top Bar —
+*/
 .topbar{
+    display: flex;
+    align-items: stretch;
     width:100%;
     height: 60px;
-    padding-left: 30px;
+    padding-left: 15px;
     padding-right: 10px;
     padding-top: 5px;
     padding-bottom: 5px;
-    background-color: #f1f2f2;
-}
-.titlebar{
-    line-height:60px;
-    text-align: left;
-    font-size: 22px;
-    font-family: 'museo500', Arial, sans-serif;
-    background-color: #f1f2f2;
-}
-.titlebarLink{
-    cursor: pointer;
-}
-.titlebarLink:hover {
-    opacity: .8;
-}
-.programName{
-    margin-left: 44px;
-    height: 25px;
-    width: 200px;
-    line-height:50px;
-    text-align: left;
-    font-size: 16px;
-    font-family: 'museo500', Arial, sans-serif;
-    background-color: #f1f2f2;
-    border: 1px solid #ccc;
-}
-.programName:hover {
-    border: 1px solid #aaa;
-}
-.programName:focus {
-    border: 1px solid #0094FF;
-}
-.topBarIcon {
-    padding-top: 2px;
-    padding-bottom: 2px;
-    padding-right: 2px;
-    padding-left: 2px;
-    margin-right: 2px;
-    margin-left: 4px;
-    font-size: 16px;
-    color: #404040;
-    height: 32px;
-    width: 32px;
-}
-.topBarFileText {
-    margin-top: 5px;
-    padding-bottom: 5px;
-    margin-right: 5px;
-    font-size: 14px;
-    color: #000000;
-    line-height: 30px;
-}
-.topBarFileEntry {
-    margin-right: 5px;
-    font-size: 12px;
-    color: #000000;
-}
-.deviceHolder {
-    margin-left: 50px;
-}
-.deviceRunHolder {
-    margin-left: 50px;
-}
-.deviceRunButton {
-    height: 32px;
-    /*border-radius: 4px;*/
-}
-.deviceRunButtonText {
-    margin-left:4px;
-    font-size: 16px;
-    font-family: 'museo500', Arial, sans-serif;
-}
-.deviceStatus {
-    font-size: 16px;
-    font-family: 'museo500', Arial, sans-serif;
-}
-.deviceMenuHolder {
-    font-size: 16px;
-    font-family: 'museo500', Arial, sans-serif;
-}
-.deviceMenuSelectDisabled {
-    color: #A0A0A0;
+    background-color: #F5F5F5;
 }
 
-.menuandcontentholder{
+/*
+* — Top bar icon and title —
+*/
+.topbar-title{
+    line-height:60px;
+    background-color: #F5F5F5; 
+    min-width:100px;
+}
+.topbar-icon{
+    margin-right:10px;
+    margin-bottom:5px;
+}
+.topbar-text{
+    line-height:60px;
+    text-align: left;
+    font-size: 16px;
+    font-family: 'museo300', Arial, sans-serif;
+}
+.topbar-title-link{
+    cursor: pointer;
+    width: 100px;
+}
+.topbar-title-link:hover {
+    opacity: .5;
+}
+.topbar-login{
+    line-height:60px;
+    background-color: #F5F5F5; 
+    margin-left: auto;
+}
+.topbar-login-text{
+    font-size: 12px;
+}
+
+/*
+* — Top bar save program —
+*/
+.topbar-save{
+    line-height:60px;
+    background-color: #F5F5F5; 
+    margin-left: 70px;
+    width: 230px;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    min-width:230px;
+}
+.topbar-icon-save{
+    margin-bottom:1px;
+    cursor: pointer;
+}
+.topbar-save-program-name{
+    margin-right: 8px;
+    height: 25px;
+    width: 200px;
+    text-align: left;
+    font-size: 16px;
+    font-family: 'museo300', Arial, sans-serif;
+    background-color: transparent;
+    border: 0px;
+}
+.topbar-save-program-name:hover {
+    border: 1px solid #aaa;
+}
+.topbar-save-program-name:focus {
+    border: 1px solid #6FC6DA;
+}
+.menu-icon{
+    margin-right:10px;
+    margin-bottom:5px;
+}
+
+/*
+* — Pi Top Controls to Select a Pi
+*/
+.topbar-device-select{
+    background-color: #F5F5F5; 
+    margin-left: 50px;
+    width: 200px;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    min-width:200px;
+}
+.topbar-underline-box{
+    border-bottom: 2px solid #6FC6DA;
+}
+.topbar-device-select-button{
+    cursor:pointer;
+}
+.topbar-device-select-button:hover{
+    opacity: .5;
+}
+.topbar-device-select-text{
+    line-height: 25px;
+    text-align: left;
+    font-size: 16px;
+    font-family: 'museo300', Arial, sans-serif;
+    margin-right:10px;
+}
+.topbar-device-select-arrow{
+    float: right;
+    margin-top: 10px;
+}
+.topbar-dropdown{
+    height: 28px;
+}
+
+/*
+* — Pi Top Controls to run/stop/view
+*/
+.topbar-device-control {
+    margin-left: 20px;
+    min-width:210px;
+}
+.topbar-run-button {
+    margin: 0 auto;
+    -webkit-transition-duration: 0.2s; /* Safari */
+    transition-duration: 0.2s;    
+    width: 90px;
+    height: 28px;
+    margin-top: 16px;    
+    margin-right: 8px;    
+    font-size: 16px;
+    font-family: 'museo300', Arial, sans-serif;
+    text-align: center;    
+    background-color: #6FC6DA;
+    color: #FFFFFF;
+    border-radius: 8px;
+    border: 2px solid #41BCD8;
+    box-shadow: 1px 1px 3px #C0C0C0;
+    cursor:pointer;
+}
+.topbar-run-button:hover {
+    background-color: #41BCD8;
+}
+.topbar-stop-button {
+    border: 2px solid #E84900;
+    background-color: #EA6D2F;
+}
+.topbar-stop-button:hover {
+    background-color: #E84900;
+}
+.topbar-view-button {
+    width: 100px;
+    border: 2px solid #F7911D;
+    background-color: #F8AB4E;
+}
+.topbar-view-button:hover {
+    background-color: #F7911D;
+}
+.button-disabled {
+    box-shadow: 0px 0px 0px #C0C0C0;
+    border: 0px solid #41BCD8;
+}
+/*
+* — Main Display Region —
+*/
+.menu-and-content-holder{
     position: relative;
-    height: calc(100vh - 80px);
-    min-height: 800px;
+    height: calc(100vh - 60px);
     width: 100%; 
     background-color: #ffffff;
 }
-.menuandcontentholderoverlay{
+.menu-and-content-holder-program{
+    min-height: 975px;
+}
+.menu-and-content-holder-overlay{
     position: absolute;
     top:0;
     left:0;
     width:100%;
     height:100%;
-    background: rgba(0,0,0,.25);
+    background: rgba(255,255,255,.5);
     z-index: 999;
     display: none;
 }
-.overlaydisplay{
-    font-size: 18px;
+.overlay-lock{
+    font-size: 16px;
     font-family: 'museo500', Arial, sans-serif;
-    /*margin: auto;*/
     position: absolute;
-    left: 160px;
-    margin-left: 10px;
-    margin-top: 6px;
-
+    left: 180px;
+    margin: 0px;    
+    width: 100%;
+    padding-left:10px;
+    padding-top:3px;
+    padding-bottom:3px;
+    color:#EA6D2F;
+    background: rgba(234,109,47,.25);
 }
-.menuholder{
+.diagramSvgHolder {
+    position: absolute;
+    top: 0px;
+    left: 180px;
+    width: calc(100vw - 180px);
+    height: 100%;
+}
+/*
+* — Left Menu —
+*/
+.menu-holder{
     width: 270px; 
     height: 100%; 
-    /*height: calc(100% - 60px);*/
     z-index: 100; 
-    background-color: #f1f2f2;
     display: inline-block;
     float:left;
 }
-.menuholderprogram{
-    width: 160px; 
+.menu-holder-program{
+    width: 180px;  /*wtd wtd wtd code changes*/
 }
-.menurightholder{
-    width: 220px; 
-    z-index: 100; 
-    background-color: #f1f2f2;
-    position: absolute;
-    top: 0px;
-    right: 0px;
+.menu-separator{
+    width:100%;
+    height: 10px;
 }
-.menutopbuttonholder{
+.menu-top-button-holder{
     width:100%;
     height: 30px;
 }
-.menutopbutton{
-    -webkit-transition-duration: 0.4s; /* Safari */
+.menu-top-button{
+    -webkit-transition-duration: 0.1s; /* Safari */
     transition-duration: 0.1s;
     border:none;
     width:50%;
@@ -166,11 +271,10 @@
     font-family: 'museo500', Arial, sans-serif;
     cursor: pointer;
 }
-.menutopbutton:hover {
-    background-color: #e5f1fb;
+.menu-top-button:hover {
+    background-color:  rgba(111, 198, 218, 0.1);
 }
-.menutopbuttoninactive
-{
+.menu-top-button-inactive{
     width:50%;
     height:100%;
     padding-left: 10px;
@@ -181,92 +285,65 @@
     font-size: 14px;
     font-family: 'museo500', Arial, sans-serif;
 }
-.liveDataHolder {
+.menu-section {
+    width: 100%;
+    cursor: pointer;
+}
+.menu-header {
     display: inline-block;
-    position: absolute;
-    left: 300px;
-    top: 30px;
-
+    height: 30px;
+    width: 100%;
 }
-.liveDataTitleBar {
-    font-size: 16px;
-    font-family: 'museo500', Arial, sans-serif;
-    margin-bottom: 15px;
+.menu-header:hover {
+    background-color:  rgba(111, 198, 218, 0.1);
 }
-.liveDataItemHolder {
-    width: 700px;
-    height: 70px;
-    margin-top: 20px;
-    margin-bottom: 20px;
-}
-.liveDataItemBox {
-    vertical-align: top;
+.menu-header-editor {
     display: inline-block;
-    border: 1px solid #025969;
-    width: 220px;
-    height: 80px;
+    height: 30px;
+    width: 100%;
+}
+.menu-header-editor:hover {
+    opacity: .8;
+}
+.menu-title {
+    display: inline-block;
+    padding-top:6px;
+    padding-bottom:10px;
+    padding-left:10px;
+    color: #313131;
+    height: 30px;
     font-size: 14px;
-    font-family: 'museo500', Arial, sans-serif;
-    padding-top: 4px;
-    padding-left: 8px;
-    padding-bottom: 2px;
-    padding-right: 8px;
+    font-family: 'museo300', Arial, sans-serif;
 }
-.liveDataItemBoxTitle {
-    font-size: 16px;
-    font-family: 'museo500', Arial, sans-serif;
-    color: white;
+.menu-title-editor {
+    color: #FFFFFF;
 }
-.liveDataItemBoxWarning {
-    font-size: 24px;
-    color: white;
-}
-
-.liveDataItemBoxName {
+.diagram-menu-chevron {
+    display: inline-block;
+    float: right;
+    padding-top:10px;
+    padding-bottom:4px;
+    padding-right:6px;
     font-size: 12px;
-    font-family: 'museo500', Arial, sans-serif;
-    color: white;
 }
-.liveDataItemBoxButton {
-    font-size: 14px;
-    font-family: 'museo500', Arial, sans-serif;
-    text-align: center;
-}
-
-.liveDataItemConnector {
-    vertical-align: middle;
-    margin-top: 30px;
-    display: inline-block;
-    width: 20px;
-    background-color: #ffffff;
-}
-.liveDataItemConnectorArrow {
-    color: #999;
-    font-size: 20px;
-}
-
-.newProgramMenuTitle {
-    display: inline-block;
-    padding-top:5px;
-    padding-bottom:5px;
-    padding-left:10px;
-    color: #007c88;
+.diagram-menu-entry {
+    text-align: left;
+    padding-top:2px;
+    padding-bottom:2px;
+    padding-left:15px;
+    width: 100%;    
     height: 30px;
+    line-height: 30px;
+    border:0px;
     font-size: 14px;
-    font-family: 'museo500', Arial, sans-serif;
+    font-family: 'museo300', Arial, sans-serif;
 }
-.diagramMenuEntryWithGlyph {
-    display: inline-block;
-    padding-top:5px;
-    padding-bottom:5px;
-    padding-left:10px;
-    color: #000000;
-    height: 30px;
-    font-size: 14px;
-    font-family: 'museo500', Arial, sans-serif;
+.diagram-menu-entry:hover {
+    background-color:  rgba(111, 198, 218, 0.1);
 }
-
 .landingPageMenuEntry {
+    -webkit-transition-duration: 0.2s; /* Safari */
+    transition-duration: 0.2s;    
     text-align: left;
     width: 100%;    
     height: 30px;
@@ -275,23 +352,25 @@
 .landingPageMenuEntry .tooltiptext {
     visibility: hidden;
     width: 210px;
-	height: 30px;
-	line-height: 30px;
+    height: 30px;
+    line-height: 30px;
     background-color: white;
-    color: black;
+    color: #313131;
     text-align: center;
     border-radius: 2px;
-  	border-width: 1px;
-  	border-style: solid;
-  	border-color: #c0c0c0;
+      border-width: 1px;
+      border-style: solid;
+      border-color: #c0c0c0;
     padding: 2px 0;
-	font-family: 'museo500', Arial, sans-serif;
+    font-family: 'museo300', Arial, sans-serif;
     /* Position the tooltip */
     position: absolute;
-	left:270px;
+    left:270px;
     z-index: 1;
 }
-
+.landingPageMenuEntry:hover {
+    background-color:  rgba(111, 198, 218, 0.1);
+}
 .landingPageMenuEntry:hover .tooltiptext {
     visibility: visible;
 }
@@ -299,24 +378,39 @@
     padding-left: 15px;
     display: inline-block;
     text-align: left;
-    width: 250px;
+    width: 235px;
     height: 100%;
+    font-family: 'museo300', Arial, sans-serif;
     font-size: 14px;
-    font-family: 'museo500', Arial, sans-serif;
+    line-height: 30px;
     border: 0;
     white-space: nowrap;
     text-overflow: ellipsis;
-    overflow: hidden;    
+    overflow: hidden;
+    color: #313131;
 }
 .landingPageMenuSubMenu {
     display: inline-block;
+    float: right;
     width: 20px;
-    height: 50%;
 }
 .landingPageMenuIcon {
     height: 100%;
     font-size: 12px;
-    color: #808080;
+    color: #313131; /*color: #808080;*/
+    line-height: 30px;
+}
+.landingPageMenuImage {
+   max-height: 100%;  
+    max-width: 100%; 
+    width: auto;
+    height: auto;
+    position: absolute;  
+    top: 0;  
+    bottom: 0;  
+    left: 0;  
+    right: 0;  
+    margin: auto;
 }
 .landingPageMenuEntryNoSelect {
     text-align: left;
@@ -330,85 +424,160 @@
     font-family: 'museo500', Arial, sans-serif;
     cursor: default;
 }
-
-.diagramMenu {
-    width: 100%;
+/*
+* — Activity Feed —
+*/
+.dataset-view {
+    display:none;
+    margin-left:270px;
+    padding-top:30px;
+}
+.dataset-info-topbar {
+    display: flex;
+    align-items: stretch;
+    width:100%;
+}
+.dataset-view-close-button {
+    margin-left: auto;
+    margin-right:30px;
+}
+.dataset-info-text {
+    font-size: 16px;
+    font-family: 'museo300', Arial, sans-serif;
+    padding: 1px;
+    color: #313131;
+    margin-left: 30px;
+}
+.dataset-info-text-title {
+    font-size: 20px;
+}
+.dataset-view-details-button {
+    color: #6FC6DA;
+    width: 180px;
+}
+.dataset-view-details-button:hover {
+    color: #41BCD8;
     cursor: pointer;
+}
+.dataset-view-details-text {
+    margin-right: 12px;
+}
+.dataset-view-details-icon {
+    padding-bottom:5px;;
+}
+.dataset-info-details {
+    display:none;
+}
+.dataset-codap-button {
+    width: 200px;
+    margin-left: 30px;
+}
+
+/*
+* — Activity Feed —
+*/
+.center{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;    
+}
+.live-data-holder {
+    display: inline-block;
+    position: absolute;
+    left: 300px;
+    top: 30px;
+}
+.live-data-title-bar {
+    font-size: 16px;
+    font-family: 'museo300', Arial, sans-serif;
+    margin-bottom: 15px;
+    color: #313131;
+}
+.live-data-item-holder {
+    width: 740px;
+    height: 240px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #F5F5F5;
+    box-shadow: 2px 2px 3px #C0C0C0;
+}
+.live-data-item-title {
+    font-size: 16px;
+    font-family: 'museo300', Arial, sans-serif;
+    color: #007C88;
+    margin-top: 10px;
+    margin-left: 10px;    
+    margin-bottom: 5px;    
+}
+.live-data-item-date {
+    font-size: 14px;
+    font-family: 'museo300', Arial, sans-serif;
+    color: #007C88;
+}
+.live-data-item-box {
+    vertical-align: top;
+    display: inline-block;
+    width: 200px;
+    height: 200px;
+    font-size: 14px;
+    font-family: 'museo300', Arial, sans-serif;
+    padding-top: 6px;
+    padding-left: 2px;
+    padding-bottom: 6px;
+    padding-right: 2px;
+}
+.live-data-item-box-warning {
+    font-size: 16px;
+    color: #e16d2f;
+    margin-left:55px;
+}
+.warning-icon{
+    vertical-align:middle;
+    margin-right:5px;
+    margin-bottom:5px;
+}
+.live-data-item-box-name {
+    text-align: center;
+    font-size: 14px;
+    font-family: 'museo500', Arial, sans-serif;
+    color: #313131;
+    margin-top: 8px;
+    margin-left: 2px;
+    margin-bottom: 8px;
+    margin-right: 2px;    
+}
+.live-data-item-box-button {
+    -webkit-transition-duration: 0.2s; /* Safari */
+    transition-duration: 0.2s;    
+    width: 145px;
+    height: 40px;    
+    font-size: 15px;
+    font-family: 'museo300', Arial, sans-serif;
+    text-align: center;    
+    background-color: white;
+    color: #313131;
+    border-radius: 8px;
+    border: 1px solid #F5F5F5;
+    box-shadow: 1px 1px 3px #C0C0C0;
+}
+.live-data-item-box-button:hover {
+    background-color:  rgba(111, 198, 218, 0.1);
+}
+.live-data-item-connector {
+    vertical-align: middle;
+    margin-top: 60px;
+    margin-left: 5px;
+    margin-bottom: 5px;
+    margin-right: 2px;        
+    display: inline-block;
+    width: 60px;
+    background-color: #ffffff;
     
 }
-.diagramZoomBlock {
-    width: 100%;
-    cursor: pointer;
-    float:right;
-}
-.diagramMenuHeader {
-    display: inline-block;
-    height: 30px;
-    width: 100%;
-}
-.diagramMenuHeader:hover {
-    opacity: .8;
-}
-.diagramMenuHeaderNoSelect {
-    display: inline-block;
-    height: 30px;
-    width: 100%;
-    cursor: default;
-}
-.diagramMenuTitle {
-    display: inline-block;
-    padding-top:6px;
-    padding-bottom:10px;
-    padding-left:10px;
-    color: #ffffff;
-    height: 30px;
-    font-size: 14px;
-    font-family: 'museo500', Arial, sans-serif;
-}
-.diagramMenuChevron {
-    display: inline-block;
-    float: right;
-    padding-top:10px;
-    padding-bottom:4px;
-    padding-right:6px;
-    color: #ffffff;
-    font-size: 12px;
-}
-.diagramMenuEntry {
-    text-align: left;
-    padding-top:2px;
-    padding-bottom:2px;
-    padding-left:15px;
-    width: 100%;    
-    height: 25px;
-    border:0px;
-    font-size: 14px;
-    font-family: 'museo500', Arial, sans-serif;
-}
-.diagramMenuEntry:hover {
-    opacity: .8;
-}
-.diagramMenuEntryNoSelect {
-    text-align: left;
-    padding-top:2px;
-    padding-bottom:2px;
-    padding-left:10px;
-    width: 100%;    
-    height: 25px;
-    border:0px;
-    font-size: 14px;
-    font-family: 'museo500', Arial, sans-serif;
-    cursor: default;
-}
-.diagramSvgHolder {
-    position: absolute;
-    top: 0px;
-    left: 160px;
-    width: calc(100vw - 180px);
-   /* height: calc(100vh - 80px);    */
-    height: 100%;
-}
 
+/*
+* — Flow Blocks —
+*/
 .flowBlock {
     position: absolute;
     cursor: move;
@@ -469,7 +638,6 @@
     width: 182px;
     height: 64px
 }
-
 .flowBlockWithPlot {
     width: 330px;
     height: 150px;
@@ -518,29 +686,23 @@
     float: right;
     color: #ffffff;
     height: 32px;
-    /*
-    margin-right: 2px;
-    padding-left: 2px;
-    padding-right: 2px;*/
 }
 .flowBlockValue {
     font-size: 14px;
     line-height: 32px;
     height: 32px;
-}
+}    
 .flowBlockUnits {
     font-size: 12px;
     line-height: 32px;
     height: 32px;
 }
-
 .flowBlockPlotCanvas {
     display: inline-block;
     width: 300px;
     height: 150px;
     cursor: pointer;
 }
-
 .flowBlockImage {
     margin-bottom: 2px;
 }
@@ -582,6 +744,9 @@
     color: #ffffff;;
 }
 
+/*
+* — 1.0 layout —
+*/
 .timeframe-label {
     display: inline-block;
     padding: 10px;
@@ -610,6 +775,9 @@ button.filter {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+.noHover{
+    pointer-events: none;
 }
 .flowPanel {
     display: none;
@@ -651,6 +819,9 @@ button.filter {
     padding: 0px;
 }
 
+/*
+* — Admin —
+*/
 .circle { 
     width:                1%;
     padding:            10px 11px;
@@ -658,43 +829,9 @@ button.filter {
     border-radius:        25px;
 }
 
-.circle-button {
-    // width:              100%;
-    height:             auto;
-    padding:            30%;
-    padding-left:       15%;
-    border-radius:      95%;
-    font-size:          15px;
-    cursor:             pointer;
-}
-
-.square-button {
-    width:              100px;
-    height:             100px;
-    padding:            2%;
-    cursor:             pointer;
-}
-
-.red { 
-    background-color:   red;
-}
-
-.green { 
-    background-color:   lightgreen;
-}
-
-.blue { 
-    background-color:   blue;
-}
-
-.yellow { 
-    background-color:   yellow;
-}
-
-.orange { 
-    background-color:   orange;
-}
-
+/*
+* — Colors —
+*/
 .concordgreen { 
     background-color: #2da343;
 }
@@ -722,12 +859,6 @@ button.filter {
 .uiyellow { 
     background-color: #edbc32;
 }
-.rungreen { 
-    background-color: #00BF5F;
-}
-.stopred { 
-    background-color: #FF6767;
-}
 .menuwhite { 
     background-color: #ffffff;
 }
@@ -747,46 +878,22 @@ button.filter {
     background-color: #808080;
 }
 
-.vertical-line {
-    width:              2px;
-    background-color:   black;
-    height:             100%;
-    display:            inline-block;
-
+.container-light-gray { 
+    background-color: #F5F5F5;
+}
+.container-dark-gray { 
+    background-color: #E1E1E1;
+}
+.container-blue-highlight { 
+    background-color: #E7F0F2;
+}
+.container-blue-select { 
+    background-color: #DAECF0;
 }
 
-/**
- *
- * Colors from mockups
- *
- */
-.color-recording-now-icon {
-    background-color: #51a04f;
-}
-
-.color-recorded-previous-icon {
-    background-color: #83c4d7;
-}
-
-.color-my-programs-icon {
-    background-color: #538ea9;
-}
-
-.color-connect-to-pi-button {
-    color:              black;
-    background-color:   #83c4d7;
-}
-
-.color-start-recording-button {
-    color:              black;
-    background-color: #b6dee8;
-}
-
-.color-stop-recording-button {
-    color:              black;
-    background-color: #83c4d7;
-}
-
+/*
+* — Fonts —
+*/
 @font-face {
     font-family: 'museo500';
     src: url('fonts/museo500-regular-webfont.woff2') format('woff2'),
@@ -795,6 +902,14 @@ button.filter {
          url("fonts/Museo500-Regular.otf") format("opentype"),
     font-weight: normal;
     font-style: normal;
-
+}
+@font-face {
+    font-family: 'museo300';
+    src: url('fonts/museo300-regular-webfont.woff2') format('woff2'),
+         url('fonts/museo300-regular-webfont.woff') format('woff');
+         url('fonts/museo300-regular-webfont.woff') format('opentype');
+         url("fonts/Museo300-Regular.otf") format("opentype"),
+    font-weight: normal;
+    font-style: normal;
 }
 
