@@ -409,24 +409,25 @@ var LandingPageDataSetView = function(options) {
     //
     var deleteDataset = function(e) {
         var metadata = e.data.metadata;
-        var name;
+        var displayedName;
+		var fileName = e.data.datasetname;
         if(metadata == null || metadata.displayedName == null){
-            name = e.data.datasetname;
+            displayedName = e.data.datasetname;
         }
         else{
-            name = metadata.displayedName
+            displayedName = metadata.displayedName
         }
         
         modalConfirm({
             title: 'Delete Dataset', 
-            'prompt': 'Are you sure you want to delete dataset ' + name + '?', 
+            'prompt': 'Are you sure you want to delete dataset \"' + displayedName + '\"?', 
             yesFunc: function() {    
                 if(metadata){
                     metadata.archived = true; //mark the metadata as archived so we know not to display it to the user
                     
                     if(metadata.displayedName == null){
                         //we don't have a displayedName, this is most likely an old version of the dataset that the user is trying to delete
-                        metadata.displayedName = name;
+                        metadata.displayedName = displayedName;
                     }
                 }        
                 var metadataStr = JSON.stringify(metadata);        
@@ -435,7 +436,7 @@ var LandingPageDataSetView = function(options) {
                 // Call API to save metadata.
                 //
                 var url = '/ext/flow/save_dataset_metadata'  
-                var data = {    filename:   name,
+                var data = {    filename:   fileName,
                                 metadata:   metadataStr,
                                 content:    null,                        
                                 csrf_token: g_csrfToken };
@@ -454,7 +455,7 @@ var LandingPageDataSetView = function(options) {
                         if(response.success) {
                             modalAlert({
                                 title: 'Dataset Deleted', 
-                                message: 'Dataset \"' + name + '\" deleted.', 
+                                message: 'Dataset \"' + displayedName + '\" deleted.', 
                                 nextFunc: function() {
                                     showTopLevelView('landing-page-view');
                              }});

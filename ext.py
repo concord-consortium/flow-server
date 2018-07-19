@@ -297,15 +297,15 @@ def file_operation(operation, type):
     def _list():
         resource    = find_resource(path)
         children    = Resource.query.filter(Resource.parent_id == resource.id, Resource.deleted == False)
-
-        items = []
+        items = []		
+		
         for child in children:
             metadata = None
 
             #
             # For datasets, populate metadata.
             #
-            if type == 'datasets' or type == 'programs':
+            if type == 'datasets':
                 ds_path = path + "/" + child.name
                 file = find_resource(ds_path + "/metadata")
                 if file is not None:
