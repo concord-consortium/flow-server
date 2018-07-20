@@ -1484,10 +1484,11 @@ function createFrame( ctx ) {
                 var text = yData.name + ": " + yData.format( y, dataDecimalPlaces );
                 //prevent overlap with timestamp highlight
                 var boxheight = 20;
+                var yScreenBox = yScreen;
                 if((yScreen - offset) < (this.boxMinY + boxheight )){
-                    yScreen = this.boxMinY + 20;
+                    yScreenBox = this.boxMinY + 20;
                 }
-                this.drawTextBox( xScreen, yScreen - offset, text );
+                this.drawTextBox( xScreen, yScreenBox - offset, text );
                 if(!outOfBounds){
                     ctx.drawCircle( xScreen, yScreen, 5 );
                 }else{
