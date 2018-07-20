@@ -675,13 +675,13 @@ var PiSelectorPanel = function(options) {
     // Stop recording
     //
     this.stopRecording = function(refreshCallback, recordingLocation, controllerPath) {
-
-        console.log("[DEBUG] Stopping program", _this.currentRecordingLocation);
     
         if(recordingLocation != null)
             _this.currentRecordingLocation = recordingLocation;
         if(controllerPath != null)
             _this.currentControllerPath = controllerPath;
+
+        console.log("[DEBUG] Stopping program", _this.currentRecordingLocation);
         
         //
         // Send message over websocket and handle response
