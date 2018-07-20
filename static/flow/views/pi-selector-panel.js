@@ -675,13 +675,23 @@ var PiSelectorPanel = function(options) {
     // Stop recording
     //
     this.stopRecording = function(refreshCallback, recordingLocation, controllerPath) {
-
-        console.log("[DEBUG] Stopping program", _this.currentRecordingLocation);
     
-        if(_this.currentRecordingLocation == null)
-            _this.currentRecordingLocation = recordingLocation;
-        if(_this.currentControllerPath == null)
-            _this.currentControllerPath = controllerPath;
+        var stopRecordingLocation = _this.currentRecordingLocation;
+        var stopControllerPath = _this.currentControllerPath;
+        var resetDeviceControls = true;
+        
+        //typically stop program via controller information currently configured in the editor
+        //if user request to stop program from some other dataflow component (activity feed, dataview)
+        //be sure to use controller information from function params and maintain editor UI state
+        if(recordingLocation != null && controllerPath != null){
+            stopRecordingLocation = recordingLocation;
+            stopControllerPath = controllerPath;
+            if(stopControllerPath != _this.currentControllerPath){
+                resetDeviceControls = false;
+            }
+        }
+
+        console.log("[DEBUG] Stopping program", stopRecordingLocation);
         
         //
         // Send message over websocket and handle response
@@ -689,25 +699,28 @@ var PiSelectorPanel = function(options) {
         var execParams = {  
                 message_type:   'stop_diagram',
                 message_params: { 
-                    stop_location: _this.currentRecordingLocation },
-                    target_folder:  _this.currentControllerPath,
-                    src_folder:     _this.currentControllerPath,
+                    stop_location: stopRecordingLocation },
+                    target_folder:  stopControllerPath,
+                    src_folder:     stopControllerPath,
                     response_func:  function(ts, params) {
                     if(params.success) {
                         modalAlert({title: 'Stop Program', message: 'Program stopped', nextFunc: function() {
                             if(typeof refreshCallback === "function")
                                 refreshCallback();
-                            
-                            exitRunProgramState();
-                            reselectCurrentPi(); 
+                            if(resetDeviceControls){
+                                exitRunProgramState();
+                                reselectCurrentPi(); 
+                            }
                         }});                        
                     } else {
-                        //failed to stop, restore stop button
-                        runProgramButton.html('stop');
-                        runProgramButton.prop("disabled", false); 
-                        runProgramButton.removeClass("button-disabled noHover");
-                        viewDataButton.prop("disabled", false); 
-                        viewDataButton.removeClass("button-disabled noHover");        
+                        if(resetDeviceControls){
+                            //failed to stop, restore stop button
+                            runProgramButton.html('stop');
+                            runProgramButton.prop("disabled", false); 
+                            runProgramButton.removeClass("button-disabled noHover");
+                            viewDataButton.prop("disabled", false); 
+                            viewDataButton.removeClass("button-disabled noHover");   
+                        }                        
             
                         modalAlert({
                             title: 'Program Stop Error', 
