@@ -87,7 +87,7 @@ def flow_app():
 
     flow_user = None
     if current_user.is_authenticated:
-        flow_user = { 
+        flow_user = {
                 'user_name':        current_user.user_name,
                 'full_name':        current_user.full_name,
                 'email_address':    current_user.email_address,
@@ -185,7 +185,7 @@ def file_operation(operation, type):
             'success': False,
             'message': 'User not authenticated.'
         })
- 
+
     filename    = request.values.get('filename')
 
     if operation in ['save', 'load', 'delete'] and filename is None or filename == '':
@@ -221,12 +221,12 @@ def file_operation(operation, type):
                 path = '%s/%s/%s/%s/%s/metadata' % (org_name, 'student-folders', username, type, filename)
             else:
                 path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, type, filename)
-        elif type == 'datasetmeta':	
-            path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, 'datasets', filename)		
-        elif type == 'programmeta':	
-            path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, 'programs', filename)					
+        elif type == 'datasetmeta':
+            path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, 'datasets', filename)
+        elif type == 'programmeta':
+            path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, 'programs', filename)
         else:
-			
+
             path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, type, filename)
 
     #
@@ -265,7 +265,7 @@ def file_operation(operation, type):
         data        = read_resource(resource)
         if data is not None:
             data = data.decode('utf-8')
-        
+
         return json.dumps({
                     'success': True,
                     'message': 'Loaded file %s.' % (resource.name),
@@ -297,8 +297,8 @@ def file_operation(operation, type):
     def _list():
         resource    = find_resource(path)
         children    = Resource.query.filter(Resource.parent_id == resource.id, Resource.deleted == False)
-        items = []		
-		
+        items = []
+
         for child in children:
             metadata = None
 
@@ -353,16 +353,16 @@ def file_operation(operation, type):
 @app.route('/ext/flow/save_program', methods=['POST'])
 def save_program():
     return file_operation('save', 'programs')
-	
+
 #
 # API for saving a program metadata to the rhizo-server
 #
 @app.route('/ext/flow/save_program_metadata', methods=['POST'])
 def save_program_metadata():
     return file_operation('save', 'programmeta')
-	
+
 #
-# API for loading (retrieving the contents of) a program 
+# API for loading (retrieving the contents of) a program
 # from the rhizo-server
 #
 @app.route('/ext/flow/load_program', methods=['POST'])
@@ -397,7 +397,7 @@ def list_datasets():
 @app.route('/ext/flow/load_dataset', methods=['POST'])
 def load_dataset():
     return file_operation('load', 'datasets')
- 
+
 #
 # API for deleting a named dataset
 #
@@ -410,24 +410,24 @@ def delete_dataset():
 #
 @app.route('/ext/flow/save_dataset_metadata', methods=['POST'])
 def save_dataset_metadata():
-    return file_operation('save', 'datasetmeta')	
+    return file_operation('save', 'datasetmeta')
 
 #
 # API for listing dataset sequences saved on the rhizo-server
 #
 @app.route('/ext/flow/list_datasetsequences', methods=['POST'])
 def list_datasetsequences():
-    return file_operation('list', 'sequences')	
+    return file_operation('list', 'sequences')
 
-	
+
 #
 # Create portal oauth service
 #
 def get_portal_oauth():
 
-    portal_base         = current_app.config.get('FLOW_PORTAL_SITE')
-    client_id           = current_app.config.get('FLOW_PORTAL_SSO_CLIENT_ID')
-    client_secret       = current_app.config.get('FLOW_PORTAL_SSO_CLIENT_SECRET')
+    portal_base         = os.environ.get('FLOW_PORTAL_SITE', current_app.config.get('FLOW_PORTAL_SITE'))
+    client_id           = os.environ.get('FLOW_PORTAL_SSO_CLIENT_ID', current_app.config.get('FLOW_PORTAL_SSO_CLIENT_ID'))
+    client_secret       = os.environ.get('FLOW_PORTAL_SSO_CLIENT_SECRET', current_app.config.get('FLOW_PORTAL_SSO_CLIENT_SECRET'))
     authorize_url       = '%s/auth/concord_id/authorize' % (portal_base)
     access_token_url    = '%s/auth/concord_id/access_token' % (portal_base)
 
@@ -444,7 +444,7 @@ def get_portal_oauth():
 
 #
 # SSO Client Login
-# 
+#
 @app.route('/ext/flow/login')
 def sso_login():
 
@@ -530,13 +530,13 @@ def authorized():
 
         else:
             #
-            # User exists but this is not an SSO user. 
-            # Do not allow login for this user from 
+            # User exists but this is not an SSO user.
+            # Do not allow login for this user from
             # the SSO provider.
             #
             print("User %s not an SSO user." % (username))
             return redirect(url_for('flow_app', features=1))
-    
+
     else:
         #
         # There does not yet exist a user for this SSO provider account.
@@ -597,10 +597,10 @@ def get_user():
                                 'full_name':        user.full_name,
                                 'is_sso':       is_sso,
                                 'is_admin':     (user.role == User.SYSTEM_ADMIN)
-                            } 
+                            }
             })
 
-    
+
 #
 # Set user info
 #
@@ -628,7 +628,7 @@ def set_user():
                 'message':  'User not found' })
 
     data = request.values.get('data')
-    
+
     if data is None:
         return json.dumps({
                 'success':  False,
