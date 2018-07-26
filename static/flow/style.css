@@ -14,7 +14,7 @@
     line-height:28px;
     font-size: 14px;
     font-family: 'museo300', Arial, sans-serif;
-    text-align: center;    
+    text-align: center;
     background-color: white;
     color: #313131;
     border-radius: 8px;
@@ -45,7 +45,7 @@
 */
 .topbar-title{
     line-height:60px;
-    background-color: #F5F5F5; 
+    background-color: #F5F5F5;
     min-width:100px;
 }
 .topbar-icon{
@@ -67,7 +67,7 @@
 }
 .topbar-login{
     line-height:60px;
-    background-color: #F5F5F5; 
+    background-color: #F5F5F5;
     margin-left: auto;
 }
 .topbar-login-text{
@@ -79,7 +79,7 @@
 */
 .topbar-save{
     line-height:60px;
-    background-color: #F5F5F5; 
+    background-color: #F5F5F5;
     margin-left: 70px;
     width: 230px;
     margin-top: 15px;
@@ -115,7 +115,7 @@
 * — Pi Top Controls to Select a Pi
 */
 .topbar-device-select{
-    background-color: #F5F5F5; 
+    background-color: #F5F5F5;
     margin-left: 50px;
     width: 200px;
     margin-top: 15px;
@@ -156,14 +156,14 @@
 .topbar-run-button {
     margin: 0 auto;
     -webkit-transition-duration: 0.2s; /* Safari */
-    transition-duration: 0.2s;    
+    transition-duration: 0.2s;
     width: 90px;
     height: 28px;
-    margin-top: 16px;    
-    margin-right: 8px;    
+    margin-top: 16px;
+    margin-right: 8px;
     font-size: 16px;
     font-family: 'museo300', Arial, sans-serif;
-    text-align: center;    
+    text-align: center;
     background-color: #6FC6DA;
     color: #FFFFFF;
     border-radius: 8px;
@@ -199,7 +199,7 @@
 .menu-and-content-holder{
     position: relative;
     height: calc(100vh - 60px);
-    width: 100%; 
+    width: 100%;
     background-color: #ffffff;
 }
 .menu-and-content-holder-program{
@@ -220,7 +220,7 @@
     font-family: 'museo500', Arial, sans-serif;
     position: absolute;
     left: 180px;
-    margin: 0px;    
+    margin: 0px;
     width: 100%;
     padding-left:10px;
     padding-top:3px;
@@ -239,9 +239,9 @@
 * — Left Menu —
 */
 .menu-holder{
-    width: 270px; 
-    height: 100%; 
-    z-index: 100; 
+    width: 270px;
+    height: 100%;
+    z-index: 100;
     display: inline-block;
     float:left;
 }
@@ -331,7 +331,7 @@
     padding-top:2px;
     padding-bottom:2px;
     padding-left:15px;
-    width: 100%;    
+    width: 100%;
     height: 30px;
     line-height: 30px;
     border:0px;
@@ -341,15 +341,15 @@
 .diagram-menu-entry:hover {
     background-color:  rgba(111, 198, 218, 0.1);
 }
-.landingPageMenuEntry {
+.landing-page-menu-entry {
     -webkit-transition-duration: 0.2s; /* Safari */
-    transition-duration: 0.2s;    
+    transition-duration: 0.2s;
     text-align: left;
-    width: 100%;    
+    width: 100%;
     height: 30px;
     line-height: 30px;
 }
-.landingPageMenuEntry .tooltiptext {
+.landing-page-menu-entry .tooltiptext {
     visibility: hidden;
     width: 210px;
     height: 30px;
@@ -358,9 +358,9 @@
     color: #313131;
     text-align: center;
     border-radius: 2px;
-      border-width: 1px;
-      border-style: solid;
-      border-color: #c0c0c0;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #c0c0c0;
     padding: 2px 0;
     font-family: 'museo300', Arial, sans-serif;
     /* Position the tooltip */
@@ -368,13 +368,13 @@
     left:270px;
     z-index: 1;
 }
-.landingPageMenuEntry:hover {
+.landing-page-menu-entry:hover {
     background-color:  rgba(111, 198, 218, 0.1);
 }
-.landingPageMenuEntry:hover .tooltiptext {
+.landing-page-menu-entry:hover .tooltiptext {
     visibility: visible;
 }
-.landingPageMenuTextContent {
+.landing-page-menu-entry-text {
     padding-left: 15px;
     display: inline-block;
     text-align: left;
@@ -389,35 +389,29 @@
     overflow: hidden;
     color: #313131;
 }
-.landingPageMenuSubMenu {
+.landing-page-menu-entry-sub-menu {
     display: inline-block;
     float: right;
     width: 20px;
 }
-.landingPageMenuIcon {
-    height: 100%;
-    font-size: 12px;
-    color: #313131; /*color: #808080;*/
-    line-height: 30px;
-}
-.landingPageMenuImage {
-   max-height: 100%;  
-    max-width: 100%; 
+.landing-page-menu-image {
+    max-height: 100%;
+    max-width: 100%;
     width: auto;
     height: auto;
-    position: absolute;  
-    top: 0;  
-    bottom: 0;  
-    left: 0;  
-    right: 0;  
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
     margin: auto;
 }
-.landingPageMenuEntryNoSelect {
+.landing-page-menu-entry-message {
     text-align: left;
     padding-top:2px;
     padding-bottom:2px;
     padding-left:15px;
-    width: 100%;    
+    width: 100%;
     height: 25px;
     border:0px;
     font-size: 14px;
@@ -479,7 +473,7 @@
 .center{
     display: block;
     margin-left: auto;
-    margin-right: auto;    
+    margin-right: auto;
 }
 .live-data-holder {
     display: inline-block;
@@ -506,8 +500,8 @@
     font-family: 'museo300', Arial, sans-serif;
     color: #007C88;
     margin-top: 10px;
-    margin-left: 10px;    
-    margin-bottom: 5px;    
+    margin-left: 10px;
+    margin-bottom: 5px;
 }
 .live-data-item-date {
     font-size: 14px;
@@ -544,16 +538,16 @@
     margin-top: 8px;
     margin-left: 2px;
     margin-bottom: 8px;
-    margin-right: 2px;    
+    margin-right: 2px;
 }
 .live-data-item-box-button {
     -webkit-transition-duration: 0.2s; /* Safari */
-    transition-duration: 0.2s;    
+    transition-duration: 0.2s;
     width: 145px;
-    height: 40px;    
+    height: 40px;
     font-size: 15px;
     font-family: 'museo300', Arial, sans-serif;
-    text-align: center;    
+    text-align: center;
     background-color: white;
     color: #313131;
     border-radius: 8px;
@@ -568,11 +562,11 @@
     margin-top: 60px;
     margin-left: 5px;
     margin-bottom: 5px;
-    margin-right: 2px;        
+    margin-right: 2px;
     display: inline-block;
     width: 60px;
     background-color: #ffffff;
-    
+
 }
 
 /*
@@ -679,7 +673,7 @@
     line-height: 36px;
     height:36px;
     margin-left: 2px;
-    
+
 }
 .flowBlockValueAndUnits {
     display: inline-block;
@@ -691,7 +685,7 @@
     font-size: 14px;
     line-height: 32px;
     height: 32px;
-}    
+}
 .flowBlockUnits {
     font-size: 12px;
     line-height: 32px;
@@ -822,7 +816,7 @@ button.filter {
 /*
 * — Admin —
 */
-.circle { 
+.circle {
     width:                1%;
     padding:            10px 11px;
     margin:                0 auto;
@@ -832,62 +826,62 @@ button.filter {
 /*
 * — Colors —
 */
-.concordgreen { 
+.concordgreen {
     background-color: #2da343;
 }
-.complimentaryviolet { 
+.complimentaryviolet {
     background-color: #af3071;
 }
-.complimentarydarkviolet { 
+.complimentarydarkviolet {
     background-color: #941857;
 }
-.concordlightblue { 
+.concordlightblue {
     background-color: #6fc6da;
 }
-.concordblue { 
+.concordblue {
     background-color: #0592af;
 }
-.concorddarkblue { 
+.concorddarkblue {
     background-color: #007c88;
 }
-.concordorange { 
+.concordorange {
     background-color: #e16d2f;
 }
-.concordgold { 
+.concordgold {
     background-color: #ffc320;
 }
-.uiyellow { 
+.uiyellow {
     background-color: #edbc32;
 }
-.menuwhite { 
+.menuwhite {
     background-color: #ffffff;
 }
-.menulightgray { 
+.menulightgray {
     background-color: #f5f5f5;
 }
-.menumediumgray { 
+.menumediumgray {
     background-color: #e1e1e1;
 }
-.menudarkgray { 
+.menudarkgray {
     background-color: #cdcdcd;
 }
-.menuverydarkgray { 
+.menuverydarkgray {
     background-color: #313131;
 }
-.debuggray { 
+.debuggray {
     background-color: #808080;
 }
 
-.container-light-gray { 
+.container-light-gray {
     background-color: #F5F5F5;
 }
-.container-dark-gray { 
+.container-dark-gray {
     background-color: #E1E1E1;
 }
-.container-blue-highlight { 
+.container-blue-highlight {
     background-color: #E7F0F2;
 }
-.container-blue-select { 
+.container-blue-select {
     background-color: #DAECF0;
 }
 
