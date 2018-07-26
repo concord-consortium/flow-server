@@ -279,7 +279,7 @@ var ProgramEditorPanel = function(options) {
         }
 
         if (block.type === 'number_entry') {
-            var input = $('<input>', {class: 'form-control flowBlockInput', type: 'text', id: 'bv_' + block.id}).appendTo(blockContentDiv);
+            var input = $('<input>', {class: 'form-control flow-block-input', type: 'text', id: 'bv_' + block.id}).appendTo(blockContentDiv);
             if (block.value !== null) {
                 input.val(block.value);
             }
@@ -314,16 +314,16 @@ var ProgramEditorPanel = function(options) {
         
             div.appendTo(blockContentDiv);
             
-            if (block.type === 'exponential moving average' || block.type === 'simple moving average' || block.type === 'timer' || block.type === 'data storage') {//if (block.type === 'number_display_and_input') {
+            if (block.type === 'exponential moving average' || block.type === 'simple moving average' || block.type === 'timer' || block.type === 'data storage') {
                 namediv.addClass('flowBlockNameLong');
                 var divdivider = $('<div>', {css:{backgroundColor:'FFFFFF'}, width:182, height:1});
-                divdivider.addClass('noSelect flowBlockInputHolderMargin');
+                divdivider.addClass('noSelect flow-block-input-holder-margin');
                 divdivider.appendTo(blockContentDiv);
-                var divflowBlockInputHolder = $('<div>', {class: 'flowBlockInputHolder flowBlockInputHolderMargin'});
+                var divflowBlockInputHolder = $('<div>', {class: 'flow-block-input-holder flow-block-input-holder-margin'});
                 divflowBlockInputHolder.appendTo(blockContentDiv);
 
-                var divflowBlockInputHolder2 = $('<div>', {class: 'flowBlockInputHolder flowBlockInputHolderMargin'});
-                var divflowBlockInputHolder3 = $('<div>', {class: 'flowBlockInputHolder flowBlockInputHolderMargin ephemeralDiv'});
+                var divflowBlockInputHolder2 = $('<div>', {class: 'flow-block-input-holder flow-block-input-holder-margin'});
+                var divflowBlockInputHolder3 = $('<div>', {class: 'flow-block-input-holder flow-block-input-holder-margin ephemeral-div'});
             if(block.type === 'data storage' || block.type === 'timer'){
                     divflowBlockInputHolder2.appendTo(blockContentDiv);
                 }
@@ -336,18 +336,19 @@ var ProgramEditorPanel = function(options) {
                     var divindex = 1;
                     if(param.name=="period"){
                         displayedParamName = "last";
-                        $('<div>', {class: 'flowBlockParamLabel noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder);                    
-                        input = $('<input>', {class: 'form-control flowBlockInput', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).prependTo(divflowBlockInputHolder);
+                        $('<div>', {class: 'flow-block-param-label noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder);                    
+                        input = $('<input>', {class: 'form-control flow-block-input', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).appendTo(divflowBlockInputHolder);
                     }
                     else if(param.name=="recording_interval"){
                         displayedParamName = "interval";
-                        $('<div>', {class: 'flowBlockParamLabel noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder);                    
-                        input = $('<input>', {class: 'form-control flowBlockInput', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).prependTo(divflowBlockInputHolder);
+                        $('<div>', {class: 'flow-block-param-label noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder);                    
+                        $('<div>', {class: 'flow-block-param-label flow-block-param-label-units noSelect', html: "sec"}).appendTo(divflowBlockInputHolder);    
+                        input = $('<input>', {class: 'form-control flow-block-input', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).appendTo(divflowBlockInputHolder); 
                     }
                     else if(param.name=="dataset_location"){
                         displayedParamName = "name";
-                        $('<div>', {class: 'flowBlockParamLabel noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder2);                    
-                        input = $('<input>', {class: 'form-control flowBlockInput flowBlockInputLong', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).prependTo(divflowBlockInputHolder2);
+                        $('<div>', {class: 'flow-block-param-label noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder2);                    
+                        input = $('<input>', {class: 'form-control flow-block-input flow-block-input-long', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).appendTo(divflowBlockInputHolder2);
                     }
                     else if(param.name=="sequence_names"){
                         //if loading from file, this might be populated
@@ -366,12 +367,12 @@ var ProgramEditorPanel = function(options) {
                                     }
                                 }
                                 //make a new div to show sequence info
-                                var divflowBlockInputHolderEphemeral = $('<div>', {class: 'flowBlockInputHolder flowBlockInputHolderMargin ephemeralDiv'});
+                                var divflowBlockInputHolderEphemeral = $('<div>', {class: 'flowBlockInputHolder flow-block-input-holder-margin ephemeral-div'});
                                 divflowBlockInputHolderEphemeral.appendTo(blockContentDiv);
                                 
-                                $('<div>', {class: 'flowBlockParamLabel noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolderEphemeral);    
+                                $('<div>', {class: 'flow-block-param-label noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolderEphemeral);    
                                 var divindexephemeral = x+1;                                        
-                                var inputephemeral = $('<input>', {class: 'form-control flowBlockInput flowBlockInputLong', type: 'text', id: 'b' + block.id + '_bp_' + "sequence_names" + divindexephemeral, value: initval}).prependTo(divflowBlockInputHolderEphemeral);
+                                var inputephemeral = $('<input>', {class: 'form-control flow-block-input flow-block-input-long', type: 'text', id: 'b' + block.id + '_bp_' + "sequence_names" + divindexephemeral, value: initval}).appendTo(divflowBlockInputHolderEphemeral);
                                 
                                 inputephemeral.mousedown(function(e) {e.stopPropagation()});
                                 var eventdataephemeral = {blockid:block.id, paramname: "sequence_names", connectedblockid:connectedblockid, divindex:divindexephemeral };
@@ -381,22 +382,22 @@ var ProgramEditorPanel = function(options) {
                         }
                  
                         divflowBlockInputHolder3.appendTo(blockContentDiv);
-                        $('<div>', {class: 'flowBlockParamLabel noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder3);   
+                        $('<div>', {class: 'flow-block-param-label noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder3);   
                         initval = "";//"data type" + (paramValueArray.length + 1);
                         divindex = paramValueArray.length + 1;
-                        input = $('<input>', {class: 'form-control flowBlockInput flowBlockInputLong', type: 'text', id: 'b' + block.id + '_bp_' + param.name + (paramValueArray.length + 1), value: initval}).prependTo(divflowBlockInputHolder3);
+                        input = $('<input>', {class: 'form-control flow-block-input flow-block-input-long', type: 'text', id: 'b' + block.id + '_bp_' + param.name + (paramValueArray.length + 1), value: initval}).appendTo(divflowBlockInputHolder3);
         
                         
                     }                    
                     else if(param.name=="seconds_off"){
                         displayedParamName = "seconds off";
-                        $('<div>', {class: 'flowBlockParamLabel noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder2);                    
-                        input = $('<input>', {class: 'form-control flowBlockInput', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).prependTo(divflowBlockInputHolder2);
+                        $('<div>', {class: 'flow-block-param-label noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder2);                    
+                        input = $('<input>', {class: 'form-control flow-block-input', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).appendTo(divflowBlockInputHolder2);
                     }
                     else if(param.name=="seconds_on"){
                         displayedParamName = "seconds on";
-                        $('<div>', {class: 'flowBlockParamLabel noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder);                    
-                        input = $('<input>', {class: 'form-control flowBlockInput', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).prependTo(divflowBlockInputHolder);
+                        $('<div>', {class: 'flow-block-param-label noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder);                    
+                        input = $('<input>', {class: 'form-control flow-block-input', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).appendTo(divflowBlockInputHolder);
 
                     }
                     else{ 
@@ -534,11 +535,11 @@ var ProgramEditorPanel = function(options) {
             else{ //if we don't recognize it, skip it for now
                 continue;
             }
-            $('<div>', {class: 'flowBlockParamLabel noSelect', html: displayedParamName}).appendTo(blockDiv);
+            $('<div>', {class: 'flow-block-param-label noSelect', html: displayedParamName}).appendTo(blockDiv);
             if(i==0)
-                var input = $('<input>', {class: 'form-control flowBlockInput', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).appendTo(blockDiv);
+                var input = $('<input>', {class: 'form-control flow-block-input', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).appendTo(blockDiv);
             else
-                var input = $('<input>', {class: 'form-control flowBlockInput', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).prependTo(blockDiv);
+                var input = $('<input>', {class: 'form-control flow-block-input', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).prependTo(blockDiv);
 
             input.mousedown(function(e) {e.stopPropagation()});
             var eventdata = {blockid:block.id, paramname: param.name};
@@ -1402,7 +1403,7 @@ var ProgramEditorPanel = function(options) {
             //
             for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
                 _this.displayBlockValue(_this.m_diagram.blocks[i]);
-            }            
+            }              
         }
     }
     
@@ -1576,11 +1577,11 @@ var ProgramEditorPanel = function(options) {
                     _this.m_diagram.blocks[i].view.h = newDivHeight;
                     
                     //remove all existing ephemeral divs 
-                    $('.ephemeralDiv').remove()
+                    $('.ephemeral-div').remove()
                     //create divs
                     for(var x = 0; x < (newPinCount); x++){
                         //make a new div to show sequence info
-                        var divflowBlockInputHolder = $('<div>', {class: 'flowBlockInputHolder flowBlockInputHolderMargin ephemeralDiv'});
+                        var divflowBlockInputHolder = $('<div>', {class: 'flow-block-input-holder flow-block-input-holder-margin ephemeral-div'});
                         $("#bcon_" + _this.m_diagram.blocks[i].id ).append(divflowBlockInputHolder);
                         var displayedParamName = "type";
                         var initval = "";//"data type" + (x+1);
@@ -1600,9 +1601,9 @@ var ProgramEditorPanel = function(options) {
                             initval = paramValueArray[pindex];
                         }
                         
-                        $('<div>', {class: 'flowBlockParamLabel noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder);    
-                        var divindex = x+1;                                        
-                        var input = $('<input>', {class: 'form-control flowBlockInput flowBlockInputLong', type: 'text', id: 'b' + _this.m_diagram.blocks[i].id + '_bp_' + "sequence_names" + divindex, value: initval}).prependTo(divflowBlockInputHolder);
+                        $('<div>', {class: 'flow-block-param-label noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder);
+                        var divindex = x+1;
+                        var input = $('<input>', {class: 'form-control flow-block-input flow-block-input-long', type: 'text', id: 'b' + _this.m_diagram.blocks[i].id + '_bp_' + "sequence_names" + divindex, value: initval}).prependTo(divflowBlockInputHolder);
                         
                         input.mousedown(function(e) {e.stopPropagation()});
                         var eventdata = {blockid:_this.m_diagram.blocks[i].id, paramname: "sequence_names", connectedblockid:connectedBlockId, divindex:divindex };
