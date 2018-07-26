@@ -33,7 +33,7 @@ var LandingPageDataSetView = function(options) {
         livedatatitlebar.appendTo(liveDataHolder);
 
         recordedDataHolder.empty();
-        addLoadingDatasetsToMenu(recordedDataHolder);
+        addDatasetMessageToMenu(recordedDataHolder, "loading datasets...");
 
         var url = "/ext/flow/list_datasets";
 
@@ -112,7 +112,7 @@ var LandingPageDataSetView = function(options) {
                     createDataSetList("Previously Recorded", recorded);
 
                     if (recording.length == 0 && recorded.length == 0) {
-                        addNoDatasetsToMenu(recordedDataHolder);
+                        addDatasetMessageToMenu(recordedDataHolder, "no available datasets");
                     }
 
                     //resize the landing page view
@@ -121,12 +121,12 @@ var LandingPageDataSetView = function(options) {
 
 
                 } else {
-                    addNoDatasetsToMenu(recordedDataHolder);
+                    addDatasetMessageToMenu(recordedDataHolder, "no available datasets");
                     console.log("[ERROR] Error listing datasets", response);
                 }
             },
             error: function(data) {
-                addNoDatasetsToMenu(recordedDataHolder);
+                addDatasetMessageToMenu(recordedDataHolder, "no available datasets");
                 console.log("[ERROR] List datasets error", data);
             },
         });
@@ -145,19 +145,11 @@ var LandingPageDataSetView = function(options) {
     }
 
     //
-    //didn't find any datasets, add a menu entry letting the user know there are no datasets available
+    //add a menu entry informing user of dataset load status
     //
-    var addNoDatasetsToMenu = function(div) {
+     var addDatasetMessageToMenu = function(div, message) {
         div.empty();
-        var emptyButton = $("<div>", {class: "landing-page-menu-entry-message noSelect container-light-gray"} ).text("no available datasets");
-        div.append(emptyButton);
-    }
-    //
-    //waiting to load datasets, add a menu entry letting the user know we are in the middle of loading
-    //
-     var addLoadingDatasetsToMenu = function(div) {
-        div.empty();
-        var emptyButton = $("<div>", {class: "landing-page-menu-entry-message noSelect container-light-gray"} ).text("loading datasets...");
+        var emptyButton = $("<div>", {class: "landing-page-menu-entry-message noSelect container-light-gray"} ).text(message);
         div.append(emptyButton);
     }
     //

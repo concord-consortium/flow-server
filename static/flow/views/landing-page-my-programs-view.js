@@ -14,7 +14,7 @@ var LandingPageMyProgramsView = function(options) {
         //console.log("[DEBUG] loadPrograms loading My Programs...");
 
         div.empty();
-        addLoadingProgramsToMenu(div);
+        addProgramMessageToMenu(div, "loading programs...");
 
         var url = "/ext/flow/list_programs";
         var data = { csrf_token: g_csrfToken };
@@ -60,10 +60,12 @@ var LandingPageMyProgramsView = function(options) {
                     lpv.resizeMenuAndContentHolder();
 
                 } else {
+                    addProgramMessageToMenu(div, "Error loading programs");
                     console.log("[ERROR] Error listing programs", response);
                 }
             },
             error: function(data) {
+                addProgramMessageToMenu(div, "Error loading programs");
                 console.log("[ERROR] List programs error", data);
             },
         });
@@ -79,11 +81,11 @@ var LandingPageMyProgramsView = function(options) {
     }
 
     //
-    //loading programs, add a menu entry letting the user know we are waiting for programs to load
+    //add a menu entry informing user of program load status
     //
-    var addLoadingProgramsToMenu = function(div) {
+    var addProgramMessageToMenu = function(div, message) {
         div.empty();
-        var emptyButton = $("<div>", {class: "landing-page-menu-entry-message noSelect container-light-gray"} ).text("loading programs...");
+        var emptyButton = $("<div>", {class: "landing-page-menu-entry-message noSelect container-light-gray"} ).text(message);
         div.append(emptyButton);
     }
 
