@@ -827,9 +827,9 @@ button.filter {
 * — fullscreen —
 */
 .fullscreen-container {
-    position:absolute;
-    bottom:0;
-    right:0;
+    position: fixed;
+    bottom: 0;
+    right: 0;
 }
 #fullscreen-button {
   margin: 5px;
