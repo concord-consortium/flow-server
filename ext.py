@@ -98,6 +98,7 @@ def flow_app():
     return flow_extension.render_template('flow-app.html',
         controllers_json = json.dumps(controller_infos),
         use_codap = (request.args.get('use_codap', 0) or request.args.get('codap', 0)),
+        use_fullscreen = (request.args.get('fullscreen', 0)),
         flow_user               = json.dumps(flow_user),
         rhizo_server_version    = rhizo_server_version,
         flow_server_version     = flow_server_version
@@ -221,41 +222,41 @@ def file_operation(operation, type):
                 path = '%s/%s/%s/%s/%s/metadata' % (org_name, 'student-folders', username, type, filename)
             else:
                 path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, type, filename)
-        elif type == 'datasetmeta':	
-            path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, 'datasets', filename)		
-        elif type == 'programmeta':	
-            path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, 'programs', filename)					
+        elif type == 'datasetmeta': 
+            path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, 'datasets', filename)     
+        elif type == 'programmeta': 
+            path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, 'programs', filename)                 
         else:
-			
+            
             path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, type, filename)
 
     #
     # Save op
     #
     def _save():
-		if type == 'programmeta' or type == 'datasetmeta':
-			contentmetadata = request.values.get('metadata').encode('utf-8')
-			now         = datetime.datetime.now()
-			pathm = '%s/%s' % (path, 'metadata')
-			resourcem    = _create_file(pathm, now, now, contentmetadata)
-			return json.dumps({
-						'success': True,
-						'message': 'Saved file metadata %s.' % (pathm)
-					})
+        if type == 'programmeta' or type == 'datasetmeta':
+            contentmetadata = request.values.get('metadata').encode('utf-8')
+            now         = datetime.datetime.now()
+            pathm = '%s/%s' % (path, 'metadata')
+            resourcem    = _create_file(pathm, now, now, contentmetadata)
+            return json.dumps({
+                        'success': True,
+                        'message': 'Saved file metadata %s.' % (pathm)
+                    })
 
-		else:
-			content     = request.values.get('content').encode('utf-8')
-			contentmetadata = request.values.get('metadata').encode('utf-8')
-			now         = datetime.datetime.now()
-			_create_folders(path)
-			pathp = '%s/%s' % (path, 'program')
-			pathm = '%s/%s' % (path, 'metadata')
-			resourcep    = _create_file(pathp, now, now, content)
-			resourcem    = _create_file(pathm, now, now, contentmetadata)
-			return json.dumps({
-						'success': True,
-						'message': 'Saved file %s.' % (filename)
-					})
+        else:
+            content     = request.values.get('content').encode('utf-8')
+            contentmetadata = request.values.get('metadata').encode('utf-8')
+            now         = datetime.datetime.now()
+            _create_folders(path)
+            pathp = '%s/%s' % (path, 'program')
+            pathm = '%s/%s' % (path, 'metadata')
+            resourcep    = _create_file(pathp, now, now, content)
+            resourcem    = _create_file(pathm, now, now, contentmetadata)
+            return json.dumps({
+                        'success': True,
+                        'message': 'Saved file %s.' % (filename)
+                    })
 
     #
     # Load op
@@ -297,8 +298,8 @@ def file_operation(operation, type):
     def _list():
         resource    = find_resource(path)
         children    = Resource.query.filter(Resource.parent_id == resource.id, Resource.deleted == False)
-        items = []		
-		
+        items = []      
+        
         for child in children:
             metadata = None
 
@@ -353,14 +354,14 @@ def file_operation(operation, type):
 @app.route('/ext/flow/save_program', methods=['POST'])
 def save_program():
     return file_operation('save', 'programs')
-	
+    
 #
 # API for saving a program metadata to the rhizo-server
 #
 @app.route('/ext/flow/save_program_metadata', methods=['POST'])
 def save_program_metadata():
     return file_operation('save', 'programmeta')
-	
+    
 #
 # API for loading (retrieving the contents of) a program 
 # from the rhizo-server
@@ -410,16 +411,16 @@ def delete_dataset():
 #
 @app.route('/ext/flow/save_dataset_metadata', methods=['POST'])
 def save_dataset_metadata():
-    return file_operation('save', 'datasetmeta')	
+    return file_operation('save', 'datasetmeta')    
 
 #
 # API for listing dataset sequences saved on the rhizo-server
 #
 @app.route('/ext/flow/list_datasetsequences', methods=['POST'])
 def list_datasetsequences():
-    return file_operation('list', 'sequences')	
+    return file_operation('list', 'sequences')  
 
-	
+    
 #
 # Create portal oauth service
 #

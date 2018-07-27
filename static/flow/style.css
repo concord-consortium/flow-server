@@ -824,6 +824,32 @@ button.filter {
 }
 
 /*
+* — fullscreen —
+*/
+.fullscreen-container {
+    position:absolute;
+    bottom:0;
+    right:0;
+}
+#fullscreen-button {
+  margin: 5px;
+  width: 42px;
+  height: 42px;
+  background: no-repeat url(./images/fullscreen.svg) center/100%;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+#fullscreen-button:hover {
+  background-size: 105%;
+  box-shadow: 0 0 2px #D09845;
+}
+
+#fullscreen-button.exit {
+  background: no-repeat url(./images/fullscreen-exit.svg) center/100%;
+}
+
+/*
 * — Colors —
 */
 .concordgreen {
