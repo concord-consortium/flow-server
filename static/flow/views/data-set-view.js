@@ -286,6 +286,14 @@ var DataSetView = function(options) {
         var validvalues = [];
         var validtimestamps = [];
         
+        if(timestamps == null || values == null) {
+            // if we couldn't get a valid timestamp or value object,
+            // something went terribly wrong and sequence is invalid
+            // i.e., sequence has name="" and we tried to read the
+            // contents of the dataset folder as if it were a sequence folder
+            return;
+        }
+        
         console.log('received', values.length, 'values');
         console.log('received', timestamps.length, 'timestamps');
         //console.log('timestamps: ', timestamps);
