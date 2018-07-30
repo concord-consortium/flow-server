@@ -112,7 +112,7 @@ var LandingPageDataSetView = function(options) {
                     createDataSetList("Previously Recorded", recorded);
 
                     if (recording.length == 0 && recorded.length == 0) {
-                        addDatasetMessageToMenu(recordedDataHolder, "no available datasets");
+                        addDatasetMessageToMenu(recordedDataHolder, "No available datasets");
                     }
 
                     //resize the landing page view
@@ -121,12 +121,12 @@ var LandingPageDataSetView = function(options) {
 
 
                 } else {
-                    addDatasetMessageToMenu(recordedDataHolder, "no available datasets");
+                    addDatasetMessageToMenu(recordedDataHolder, "Error loading datasets");
                     console.log("[ERROR] Error listing datasets", response);
                 }
             },
             error: function(data) {
-                addDatasetMessageToMenu(recordedDataHolder, "no available datasets");
+                addDatasetMessageToMenu(recordedDataHolder, "Error loading datasets");
                 console.log("[ERROR] List datasets error", data);
             },
         });
