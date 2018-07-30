@@ -3,17 +3,18 @@
 //
 var FullScreenWidget = function() {
 
-    //var fullscreenContainer = jQuery('<div>', {class:'fullscreen-container'} );
     var fullscreenContainer = jQuery('#fullscreen-widget');
     var fullscreenButton  = jQuery('<div>', {id:'fullscreen-button'} );
     fullscreenButton.appendTo(fullscreenContainer);
-    //fullscreenContainer.appendTo(menuAndContentHolder);
     var fullscreen = false;
     fullscreenButton.click(function(e) {
         if (screenfull.enabled) {
             screenfull.toggle();
         }
     });
+    //
+    // function to enter or exit fullscreen
+    //
     function requestFullScreen(element) {
         // Supports most browsers and their versions.
         var requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullScreen;
