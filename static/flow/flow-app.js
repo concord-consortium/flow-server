@@ -8,13 +8,7 @@ function initFlowApp() {
     registerTopLevelView(LandingPageView({id: 'landing-page-view'}));
     registerTopLevelView(ProgramEditorView({id: 'program-editor-view'}));
     registerTopLevelView(AdminView({id: 'admin-view'}));
-    //registerTopLevelView(DataSetView({id: 'data-set-view'}));
-
-    // showTopLevelView('landing-page-view');
     showTopLevelView('login-page-view');
-    if(g_fullscreen) {
-        FullScreenWidget();
-    }
 }
 
 //
@@ -50,7 +44,7 @@ function showTopLevelView(id) {
         view = topLevelViews[key];
         if(key == id) {
             view.show();
-        } 
+        }
     }
 }
 
@@ -80,7 +74,7 @@ function showControllerViewer() {
 }
 
 //
-// Change screens within the app: 
+// Change screens within the app:
 // show the controller admin screen
 //
 function showAdminView() {

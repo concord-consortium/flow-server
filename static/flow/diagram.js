@@ -48,7 +48,7 @@ function createDiagram() {
             var block = this.blocks[i];
 
             //
-            // if block does not currently have outputs, update it; 
+            // if block does not currently have outputs, update it;
             // it will recursively call updates on inputs
             // fix(faster): keep track of dest count for each pin or each block?
             //
@@ -172,7 +172,7 @@ function createFlowBlock(blockSpec) {
 
         // if this block has inputs, we'll need to compute a new value here
         if (this.inputCount) {
-            
+
             // console.log("[DEBUG] updating block", block.name, block);
 
             // get inputs

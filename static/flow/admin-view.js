@@ -20,12 +20,12 @@ function initAdminView() {
         button.click(func);
     }
 
-    addButton("Refresh",   
+    addButton("Refresh",
         function() {
             loadAdminViewData();
         });
 
-    addButton("Exit",   
+    addButton("Exit",
         function() {
             showControllerSelector();
         });
@@ -97,12 +97,12 @@ function renderAdminViewData(controllers) {
 
     var serverInfo = $('<table>', {} );
     Util.addTableRow(serverInfo, [
-                                    $('<div>').text("Flow Server Version: "), 
+                                    $('<div>').text("Flow Server Version: "),
                                     $('<div>').text(g_flow_server_version)  ]);
     Util.addTableRow(serverInfo, [
                                     $('<div>').text("Rhizo Server Version: "),
                                     $('<div>').text(g_rhizo_server_version) ]);
-    
+
     serverInfo.appendTo(controllerAdminContent);
     $('<br>').appendTo(controllerAdminContent);
 
@@ -112,7 +112,7 @@ function renderAdminViewData(controllers) {
     //
     // Add table headers
     //
-    Util.addTableRow(table, [   createAdminHeader().html('<b>Status</b>'), 
+    Util.addTableRow(table, [   createAdminHeader().html('<b>Status</b>'),
                                 createAdminHeader().html('<b>Recording</b>'),
                                 createAdminHeader().html('<b>Last Online</b>'),
                                 createAdminHeader().html('<b>Name</b>'),
@@ -142,7 +142,7 @@ function renderAdminViewData(controllers) {
                 // Recording
                 //
                 var recordingDiv = createAdminCell('admin_recording_status_'+_i);
- 
+
                 //
                 // Last online time
                 //
@@ -157,7 +157,7 @@ function renderAdminViewData(controllers) {
                 // Version
                 //
                 var versionDiv = createAdminCell('admin_version_div_'+_i);
-            
+
                 //
                 // Available versions (Updates column)
                 //
@@ -173,10 +173,10 @@ function renderAdminViewData(controllers) {
                 //
                 // Now build a complete table row for this controller.
                 //
-                Util.addTableRow(table, [   onlineDiv, 
+                Util.addTableRow(table, [   onlineDiv,
                                             recordingDiv,
                                             lastOnlineDiv,
-                                            nameDiv, 
+                                            nameDiv,
                                             versionDiv,
                                             swUpdateDiv ]);
 
@@ -192,14 +192,14 @@ function renderAdminViewData(controllers) {
                 if(controller.status.operational_status == "UPDATING") {
                     swUpdateDiv.text("Updating...");
                 } else {
-                    setAdminAvailableVersions(   
-                                        _i, 
-                                        controller.status.available_versions, 
+                    setAdminAvailableVersions(
+                                        _i,
+                                        controller.status.available_versions,
                                         controller.path);
                 }
 
             })(i);
- 
+
         }
     }
 }
@@ -271,7 +271,7 @@ function setAdminVersionInfo(i, status) {
     Util.addTableRow(verTable, [
                     $('<div>').text("Flow:"),
                     $('<div>', { css: { whiteSpace: 'nowrap' } } ).text(status.flow_version) ] );
-                
+
     Util.addTableRow(verTable, [
                     $('<div>').text("Rhizo:"),
                     $('<div>', { css: { whiteSpace: 'nowrap' } } ).text(status.lib_version) ] );
@@ -295,7 +295,7 @@ function setAdminAvailableVersions(i, version_list, path) {
 
     if(version_list && version_list.length) {
         for(var i = 0; i < version_list.length; i++) {
-            var opt = $('<option>', {   text:   version_list[i], 
+            var opt = $('<option>', {   text:   version_list[i],
                                         value:  version_list[i]     });
             opt.appendTo(select);
         }
@@ -305,13 +305,13 @@ function setAdminAvailableVersions(i, version_list, path) {
     // Create buttons used for sw update.
     //
     var softwareButton = function(text, func) {
-    
-        var button = $('<button>', 
+
+        var button = $('<button>',
                                     {   css: {  position: 'relative',
                                                 width: '100%',
                                                 bottom: '5px' },
                                         html: text });
-    
+
         button.css('font-size','10px');
         button.click(func);
         return button;
@@ -321,7 +321,7 @@ function setAdminAvailableVersions(i, version_list, path) {
                         function() {
                             downloadSoftwareUpdates(path);
                         });
-    
+
     applyButton     = softwareButton('Apply Update',
                         function() {
                             updateSoftwareVersion(path);
@@ -329,9 +329,9 @@ function setAdminAvailableVersions(i, version_list, path) {
 
     swUpdateTable.appendTo(swUpdateDiv);
 
-    Util.addTableRow(swUpdateTable, 
+    Util.addTableRow(swUpdateTable,
                         [ availableVersionsDiv, downloadButton ] );
-    Util.addTableRow(swUpdateTable, 
+    Util.addTableRow(swUpdateTable,
                         [ createAdminCell(), applyButton ] );
 
 }
@@ -439,7 +439,7 @@ function updateSoftwareVersion(path) {
                         'update_software_version',
                         { release: value },
                         updateSoftwareVersionResponse );
-    
+
     var div = $('#software_update_'+id);
     div.text('Updating...');
 }

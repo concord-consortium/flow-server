@@ -32,13 +32,13 @@ var AdminView = function(options) {
         }
 
 
-        addButton("Refresh",   
+        addButton("Refresh",
             function() {
                 console.log("[DEBUG] refresh admin view");
                 _this.loadAdminViewData();
             });
 
-        addButton("Exit",   
+        addButton("Exit",
             function() {
                 console.log("[DEBUG] exit admin view");
                 showTopLevelView('landing-page-view');
@@ -90,7 +90,7 @@ var AdminView = function(options) {
     this.createUserAdminDiv = function() {
 
         var controllerAdminContent = $('#'+base.getDivId());
-        var userAdmin = $('<div>', {    id: 'user-admin-div', 
+        var userAdmin = $('<div>', {    id: 'user-admin-div',
                                         css: {  height: '500px',
                                                 padding: '5px' } } );
         controllerAdminContent.append(userAdmin);
@@ -112,7 +112,7 @@ var AdminView = function(options) {
 
         var username = $('<input>', { id: 'user-admin-search', type: 'text' });
         userAdmin.append(username);
-        
+
         var userSearch = $('<button>', { id: 'user-search-button'} ).text('Search');
         userAdmin.append(userSearch);
 
@@ -176,7 +176,7 @@ var AdminView = function(options) {
                                             setAdmin ],
                                             { padding: '5px' } );
 
-                        
+
                         resultDiv.append(resultTable);
 
                     } else {
@@ -232,7 +232,7 @@ var AdminView = function(options) {
                 }
             });
 
-               
+
 
     };
 
@@ -273,14 +273,14 @@ var AdminView = function(options) {
 
         var serverInfo = $('<table>', {} );
         Util.addTableRow(serverInfo, [
-                                        $('<div>').text("Flow Server Version: "), 
+                                        $('<div>').text("Flow Server Version: "),
                                         $('<div>').text(g_flow_server_version)  ],
                                         { paddingLeft: '5px' } );
         Util.addTableRow(serverInfo, [
                                         $('<div>').text("Rhizo Server Version: "),
                                         $('<div>').text(g_rhizo_server_version) ],
                                         { paddingLeft: '5px' } );
-        
+
         serverInfo.appendTo(controllerAdminContent);
         $('<br>').appendTo(controllerAdminContent);
 
@@ -293,8 +293,8 @@ var AdminView = function(options) {
         //
         // Add table headers
         //
-        Util.addTableRow(table, 
-                [   _this.createAdminTableHeader().html('<b>Status</b>'), 
+        Util.addTableRow(table,
+                [   _this.createAdminTableHeader().html('<b>Status</b>'),
                     _this.createAdminTableHeader().html('<b>Recording</b>'),
                     _this.createAdminTableHeader().html('<b>Controls</b>'),
                     _this.createAdminTableHeader().html('<b>Last Online</b>'),
@@ -333,9 +333,9 @@ var AdminView = function(options) {
                     var recordingControlDiv = _this.createAdminTableCell('admin_recording_control_'+_i);
 
                     var createRecordingControl = function(text, func) {
-                        var button = $('<button>', 
-                                        {   css: {  
-                                                    width: '100%', 
+                        var button = $('<button>',
+                                        {   css: {
+                                                    width: '100%',
                                                     bottom: '5px' },
                                             html: text });
                         button.css('font-size','10px');
@@ -347,10 +347,10 @@ var AdminView = function(options) {
                         function() {
                             var path = controller.path;
                             console.log("[DEBUG] stop program", path);
-                            _this.sendAdminMessage( path, 
+                            _this.sendAdminMessage( path,
                                                     'stop_diagram',
                                                     {} );
-                            _this.sendAdminMessage( path, 
+                            _this.sendAdminMessage( path,
                                                     'request_status',
                                                     {} );
                         }
@@ -372,7 +372,7 @@ var AdminView = function(options) {
                     // Version
                     //
                     var versionDiv = _this.createAdminTableCell('admin_version_div_'+_i);
-                
+
                     //
                     // Available versions (Updates column)
                     //
@@ -388,11 +388,11 @@ var AdminView = function(options) {
                     //
                     // Now build a complete table row for this controller.
                     //
-                    Util.addTableRow(table, [   onlineDiv, 
+                    Util.addTableRow(table, [   onlineDiv,
                                                 recordingDiv,
                                                 recordingControlDiv,
                                                 lastOnlineDiv,
-                                                nameDiv, 
+                                                nameDiv,
                                                 versionDiv,
                                                 swUpdateDiv ],
                                                 { paddingLeft: '5px' } );
@@ -400,7 +400,7 @@ var AdminView = function(options) {
                     var detailsDiv = _this.createAdminTableCell('admin_details_div_'+_i);
                     detailsDiv.css('display','inline-block');
                     detailsDiv.hide();
-                    
+
                     //
                     // Add the details row
                     //
@@ -423,16 +423,16 @@ var AdminView = function(options) {
                     if(controller.status.operational_status == "UPDATING") {
                         swUpdateDiv.text("Updating...");
                     } else {
-                        _this.setAdminAvailableVersions(   
-                                            _i, 
-                                            controller.status.available_versions, 
+                        _this.setAdminAvailableVersions(
+                                            _i,
+                                            controller.status.available_versions,
                                             controller.path);
                     }
 
                     _this.setAdminDetailInfo(_i, controller.status);
 
                 })(i);
-     
+
             }
         }
 
@@ -496,7 +496,7 @@ var AdminView = function(options) {
     this.setAdminLastOnline = function(i, last_online) {
 
         var lastOnlineDiv = $('#admin_last_online_'+i);
-        lastOnlineDiv.html( Util.getLocalDate(last_online) + 
+        lastOnlineDiv.html( Util.getLocalDate(last_online) +
                             "<br/>" +
                             Util.getLocalTime(last_online) );
     }
@@ -564,7 +564,7 @@ var AdminView = function(options) {
 
         if(version_list && version_list.length) {
             for(var i = 0; i < version_list.length; i++) {
-                var opt = $('<option>', {   text:   version_list[i], 
+                var opt = $('<option>', {   text:   version_list[i],
                                             value:  version_list[i]     });
                 opt.appendTo(select);
             }
@@ -574,13 +574,13 @@ var AdminView = function(options) {
         // Create buttons used for sw update.
         //
         var softwareButton = function(text, func) {
-        
-            var button = $('<button>', 
+
+            var button = $('<button>',
                                         {   css: {  whiteSpace: 'no-wrap',
                                                     width: '100%',
                                                     bottom: '5px' },
                                             html: text });
-        
+
             button.css('font-size','10px');
             button.click(func);
             return button;
@@ -590,7 +590,7 @@ var AdminView = function(options) {
                             function() {
                                 _this.downloadSoftwareUpdates(path);
                             });
-        
+
         applyButton     = softwareButton('Apply Update',
                             function() {
                                 _this.updateSoftwareVersion(path);
@@ -598,11 +598,11 @@ var AdminView = function(options) {
 
         swUpdateTable.appendTo(swUpdateDiv);
 
-        Util.addTableRow(swUpdateTable, 
+        Util.addTableRow(swUpdateTable,
                             [ availableVersionsDiv, downloadButton ],
                             {   verticalAlign:  'top',
                                 paddingLeft:    '3px'   } );
-        Util.addTableRow(swUpdateTable, 
+        Util.addTableRow(swUpdateTable,
                             [ _this.createAdminTableCell(), applyButton ],
                             {   verticalAlign:  'top',
                                 paddingLeft:    '3px'   } );
@@ -621,7 +621,7 @@ var AdminView = function(options) {
 
         if( status.ip_addresses != null ) {
             for (var key in status.ip_addresses) {
-                Util.addTableRow(ipTable, 
+                Util.addTableRow(ipTable,
                     [
                         _this.createAdminTableCell()
                             .css('text-align', 'left')
@@ -633,7 +633,7 @@ var AdminView = function(options) {
                     { paddingLeft: '5px' } );
             }
         }
-        
+
         detailsDiv.append(ipTable);
 
         var currentProgram = $('<span>', { css: {   float: 'left',
@@ -687,7 +687,7 @@ var AdminView = function(options) {
     // Download latest versions onto a controller.
     //
     this.downloadSoftwareUpdates = function(path) {
-        
+
         console.log("[DEBUG] downloadSoftwareUpdates", path);
 
         var id = _this.adminControllerIdMap[path];
@@ -768,7 +768,7 @@ var AdminView = function(options) {
                             'update_software_version',
                             { release: value },
                             _this.updateSoftwareVersionResponse );
-        
+
         var div = $('#software_update_'+id);
         div.text('Updating...');
     }

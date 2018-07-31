@@ -5,7 +5,7 @@ var g_recordingInterval = null;  // current recording interval
 var g_diagramIdMap = {};    // Map diagram name to an id so that we aren't
                             // using spaces in dom ids.
 
-var g_status = {};          // Keep this to check for things like 
+var g_status = {};          // Keep this to check for things like
                             // currently running diagram.
 
 /**
@@ -19,29 +19,29 @@ function diagram_list_handler(timestamp, params) {
     console.log("INFO diagram_list_handler", params);
     console.log("INFO diagram_list_handler g_controller", g_controller.name);
 
-	var diagramListDiv = $('#diagramList');
-	diagramListDiv.empty();
-	g_diagramSpecs = params.diagrams;
+    var diagramListDiv = $('#diagramList');
+    diagramListDiv.empty();
+    g_diagramSpecs = params.diagrams;
 
     //
     // Sort diagrams by name alphabetically
     //
     g_diagramSpecs.sort(Util.sortByName);
 
-	var createMenu = function(btnGroup, diagramIndex, id){
-		var diagramActions = $('<button>', {class: 'btn btn-lg dropdown-toggle', html: '<span class="caret"></span>', id: id});
-		diagramActions
-			.css({ height: '45px'})
-			.attr({ 'data-toggle': 'dropdown'})
-			.appendTo(btnGroup);
+    var createMenu = function(btnGroup, diagramIndex, id){
+        var diagramActions = $('<button>', {class: 'btn btn-lg dropdown-toggle', html: '<span class="caret"></span>', id: id});
+        diagramActions
+            .css({ height: '45px'})
+            .attr({ 'data-toggle': 'dropdown'})
+            .appendTo(btnGroup);
 
-		var diagramMenu = $('<ul>', { class: 'dropdown-menu '});
+        var diagramMenu = $('<ul>', { class: 'dropdown-menu '});
 
-		var renameAction = $('<li>', { html: '<a href="#">Rename</a>' }).appendTo(diagramMenu);
-		var deleteAction = $('<li>', { html: '<a href="#">Delete</a>' }).appendTo(diagramMenu);
+        var renameAction = $('<li>', { html: '<a href="#">Rename</a>' }).appendTo(diagramMenu);
+        var deleteAction = $('<li>', { html: '<a href="#">Delete</a>' }).appendTo(diagramMenu);
 
-		renameAction.click(diagramIndex, function(e){
-			var diagramSpec = g_diagramSpecs[e.data];
+        renameAction.click(diagramIndex, function(e){
+            var diagramSpec = g_diagramSpecs[e.data];
 
             //
             // Do not allow rename while recording.
@@ -53,11 +53,11 @@ function diagram_list_handler(timestamp, params) {
                 }
             }
 
-			modalPrompt({title: 'Rename Diagram', prompt: 'Name', default: diagramSpec.name,
-				validator: Util.diagramValidator,
-				resultFunc: function(newName) {
+            modalPrompt({title: 'Rename Diagram', prompt: 'Name', default: diagramSpec.name,
+                validator: Util.diagramValidator,
+                resultFunc: function(newName) {
 
-					sendMessage('rename_diagram', {'old_name': diagramSpec.name, 'new_name': newName});
+                    sendMessage('rename_diagram', {'old_name': diagramSpec.name, 'new_name': newName});
 
                     //
                     // If we renamed the currently running diagram, we need
@@ -82,8 +82,8 @@ function diagram_list_handler(timestamp, params) {
                     sendMessage('list_diagrams');
                     sendMessage('request_status');
 
-				}});
-		});
+                }});
+        });
 
         deleteAction.click(diagramIndex, function(e){
             var diagramSpec = g_diagramSpecs[e.data];
@@ -112,7 +112,7 @@ function diagram_list_handler(timestamp, params) {
         });
         diagramMenu.appendTo(btnGroup);
 
-	};
+    };
 
     //
     // Create new mapping of name to id.
@@ -137,7 +137,7 @@ function diagram_list_handler(timestamp, params) {
             //
             if( g_recordingInterval != null ) {
                 if(g_status.current_diagram == g_diagramSpecs[e.data].name) {
-                    setDiagramInfo( 
+                    setDiagramInfo(
                         { diagramName: g_diagramSpecs[e.data].name } );
                     showDiagramEditor();
                     loadDiagram(g_diagramSpecs[e.data]);
@@ -155,7 +155,7 @@ function diagram_list_handler(timestamp, params) {
             addMessageHandler('start_diagram_response', function(ts, result) {
                 removeMessageHandler('start_diagram_response');
                 if(result.success) {
-                    setDiagramInfo( 
+                    setDiagramInfo(
                         { diagramName: g_diagramSpecs[e.data].name } );
                     showDiagramEditor();
                     loadDiagram(g_diagramSpecs[e.data]);
@@ -198,7 +198,7 @@ function setDiagramInfo(info) {
     }
 
     //
-    // Use 'in' to check for presence of interval in param map, 
+    // Use 'in' to check for presence of interval in param map,
     // since this can be present but null.
     //
     if ('interval' in info) {
@@ -290,7 +290,7 @@ function status_handler(timestamp, params) {
         }
 
         //
-        // Add version info. (Useful when trying to track what version of 
+        // Add version info. (Useful when trying to track what version of
         // software is installed.)
         //
         addTableRow(adminTable, "Flow Client Version: ", params.flow_version);
@@ -321,7 +321,7 @@ function status_handler(timestamp, params) {
 function initControllerViewer() {
 
     var controllerName = $('#controllerName');
-    console.log("INFO initControllerViewer setting controller name", 
+    console.log("INFO initControllerViewer setting controller name",
                     g_controller.name);
     controllerName.text(g_controller.name);
 
@@ -347,7 +347,7 @@ function initControllerViewer() {
     setTargetFolder(g_controller.path);
 
     //
-    // if we've already initialized the view but are returning to it again, 
+    // if we've already initialized the view but are returning to it again,
     // we should request the list of diagrams and status again
     //
     if (g_controllerViewerInitialized) {
@@ -355,7 +355,7 @@ function initControllerViewer() {
         console.log("INFO already inited g_controllerViewerInitialized", g_controller.name);
 
         //
-        // Update new subscriptions (in case we changed controllers on this 
+        // Update new subscriptions (in case we changed controllers on this
         // websocket connection.)
         //
         sendSubscriptions();
@@ -396,26 +396,26 @@ function initControllerViewer() {
 
 // update a diagram spec in the list of diagrams after user makes edits
 function updateDiagramSpec(diagramSpec) {
-	for (var i = 0; i < g_diagramSpecs.length; i++) {
-		if (g_diagramSpecs[i].name === diagramSpec.name) {
-			g_diagramSpecs[i] = diagramSpec;
-		}
-	}
+    for (var i = 0; i < g_diagramSpecs.length; i++) {
+        if (g_diagramSpecs[i].name === diagramSpec.name) {
+            g_diagramSpecs[i] = diagramSpec;
+        }
+    }
 }
 
 
 function deleteDiagramSpec(name) {
-	for (var i = 0; i < g_diagramSpecs.length; i++) {
-		if (g_diagramSpecs[i].name === name) {
-			delete g_diagramSpecs[i];
-		}
-	}
+    for (var i = 0; i < g_diagramSpecs.length; i++) {
+        if (g_diagramSpecs[i].name === name) {
+            delete g_diagramSpecs[i];
+        }
+    }
 }
 
 
 // close the controller viewer and go back to the controller selector
 function closeControllerViewer() {
-	showControllerSelector();
+    showControllerSelector();
 }
 
 //
@@ -424,7 +424,7 @@ function closeControllerViewer() {
 function newDiagram() {
 
     if(g_recordingInterval) {
-        alert("Cannot create new diagram while recording."); 
+        alert("Cannot create new diagram while recording.");
         return;
     }
 

@@ -1,5 +1,5 @@
 //
-// A base view 
+// A base view
 //
 var BaseView = function(options) {
 
@@ -8,7 +8,7 @@ var BaseView = function(options) {
     // console.log("[DEBUG] Creating BaseView", options);
 
     var ret = {
-       
+
         _divId: divId,
 
         getDivId: function() { return this._divId; },
@@ -24,6 +24,6 @@ var BaseView = function(options) {
         }
 
     };
-    
+
     return ret;
 }

@@ -1,5 +1,5 @@
 //
-// Send a websocket message to a controller 
+// Send a websocket message to a controller
 // and handle a response.
 //
 // @param config - A json object containing configuration info.
@@ -7,26 +7,26 @@
 //                  The config can contain the folowing keys:
 //
 //                  message_type - the message type to send.
-//                  message_params - the params to send with the 
+//                  message_params - the params to send with the
 //                      outgoing message.
 //                  target_folder - the destination controller to send
 //                      the message to.
 //                  response_type - (optional) for messages which
 //                      do not respond with <message_type>_response, specify
 //                      the name of the response message type.
-//                  src_folder - (optional) only handle responses from 
+//                  src_folder - (optional) only handle responses from
 //                      the src_folder controller.
 //                  response_func - function to call when response is received.
 //                      This function will be passed a timestamp and
 //                      a params json object. This has the form
 //                      function(timestamp, params)
-//                  remove_handler - (optional) If true, remove the handler 
-//                      after handling the response. If false, do not remove 
+//                  remove_handler - (optional) If true, remove the handler
+//                      after handling the response. If false, do not remove
 //                      the handler after handling the response. The default is
 //                      true.
 //
 var MessageExecutor = function(config) {
-   
+
     this.message_type   = config.message_type;
     this.message_params = config.message_params;
     this.target_folder  = config.target_folder;
@@ -59,7 +59,7 @@ var MessageExecutor = function(config) {
 
         console.log("[DEBUG] MessageExecutor execute()");
 
-        console.log("[DEBUG] MessageExecutor call addMessageHandler", 
+        console.log("[DEBUG] MessageExecutor call addMessageHandler",
                         this.response_type );
 
         //
@@ -68,19 +68,19 @@ var MessageExecutor = function(config) {
         //
         removeMessageHandlers();
 
-        addMessageHandler(  
-            this.response_type, 
+        addMessageHandler(
+            this.response_type,
             function(timestamp, params) {
 
-                 console.log("[DEBUG] MessageExecutor handleResponse()", 
-                            _this.response_type, 
+                 console.log("[DEBUG] MessageExecutor handleResponse()",
+                            _this.response_type,
                             _this.response_func,
                             params);
 
                 if( _this.src_folder != null &&
                     _this.src_folder != params.src_folder) {
 
-                     //console.log("[DEBUG] MessageExecutor ignoring 
+                     //console.log("[DEBUG] MessageExecutor ignoring
                      //             message from " + params.src_folder);
                     return;
                 }
@@ -101,14 +101,14 @@ var MessageExecutor = function(config) {
             console.log("[INFO] MessageExecutor sending message on connected websocket. " + this.message_type + " " + this.message_params);
 
             sendSubscriptions();
-        	sendMessage(this.message_type, this.message_params);
+            sendMessage(this.message_type, this.message_params);
             return;
         }
         connectWebSocket(function() {
 
              console.log("[INFO] MessageExecutor connecting websocket.");
 
-        	sendMessage(_this.message_type, _this.message_params);
+            sendMessage(_this.message_type, _this.message_params);
         });
 
     }

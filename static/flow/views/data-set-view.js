@@ -5,7 +5,7 @@ var DataSetView = function(options) {
 
     var base = BaseView(options);
     var liveDataHolder = options.liveDataHolder;
-    
+
     var savedSequences;
     var savedStartTime;
     var sequenceCount = 0;
@@ -27,7 +27,7 @@ var DataSetView = function(options) {
     RIGHT_PANEL_WIDTH           = 200;  // px
     VERTICAL_MARGIN                = 80;   // px
     HORIZONTAL_MARGIN           = 100;  // px
-    
+
     var datasetTopbar = $('<div>', { class: 'dataset-info-topbar' });
     var datasetName = $('<div>', { class: 'dataset-info-text dataset-info-text-title' }).text('Dataset Name: ');
 
@@ -38,16 +38,16 @@ var DataSetView = function(options) {
     });
     datasetTopbar.append(datasetName);
     datasetTopbar.append(closeButton);
-    
+
     var datasetDetailsButton = $('<div>', { class: 'dataset-info-text dataset-view-details-button noSelect' });
     var datasetDetails = $('<span>', { class: 'dataset-view-details-text' }).text('Dataset Details');
     datasetDetailsButton.append(datasetDetails);
-    var img = $('<img>', { class: 'dataset-view-details-icon' }); 
+    var img = $('<img>', { class: 'dataset-view-details-icon' });
     img.attr('src', "flow-server/static/flow/images/icon-arrow-right.png");
     datasetDetailsButton.append(img);
-    
+
     var detailsDiv = $('<div>', { class: 'dataset-info-details'});
-    var programName = $('<div>', { class: 'dataset-info-text' }).text('Program Name: ');    
+    var programName = $('<div>', { class: 'dataset-info-text' }).text('Program Name: ');
     var recStatus   = $('<div>', { class: 'dataset-info-text' }).html('<i>Unknown Status</i>');
     var piName      = $('<div>', { class: 'dataset-info-text' }).text('Device: ');
     var startTime   = $('<div>', { class: 'dataset-info-text' }).text('N/A');
@@ -71,25 +71,25 @@ var DataSetView = function(options) {
     content.append(datasetTopbar);
     content.append(datasetDetailsButton);
     content.append(detailsDiv);
-    
+
     detailsDiv.append(programName);
     detailsDiv.append(recStatus);
     detailsDiv.append(piName);
     detailsDiv.append(startTime);
     detailsDiv.append(endTime);
 
-    
+
     var canvas = $('<canvas>', { id: 'data-set-canvas' } );
     content.append(canvas);
 
     //
     // View Program and Export buttons
     //
-    var selectIntervalBtn = $('<button>', {id: 'data-set-select-interval', class: 'dataflow-button dataset-codap-button'}).text('Select Interval');    
+    var selectIntervalBtn = $('<button>', {id: 'data-set-select-interval', class: 'dataflow-button dataset-codap-button'}).text('Select Interval');
     var exportBtn   = $('<button>', {class: 'dataflow-button dataset-codap-button'}).text('Export to CODAP');
-    if(g_useCodap)content.append(selectIntervalBtn); 
+    if(g_useCodap)content.append(selectIntervalBtn);
     if(g_useCodap)content.append(exportBtn);
-    
+
     selectIntervalBtn.click( function(e) {
         selectInterval();
     });
@@ -102,34 +102,34 @@ var DataSetView = function(options) {
     // Load a dataset and initialize view.
     //
     base.loadDataSet = function(dataSet) {
-       
+
         //console.log("[DEBUG] loadDataSet", dataSet);
         if(dataSet === null) {
             modalAlert({
-                title: 'Dataset Load Error', 
+                title: 'Dataset Load Error',
                 message: "Error opening dataset. Dataset is null.",
                 nextFunc: function() {
-             }});            
+             }});
             return false;
-        }   
+        }
         if(dataSet.metadata === null) {
             modalAlert({
-                title: 'Dataset Load Error', 
+                title: 'Dataset Load Error',
                 message: "Error opening dataset. Dataset metadata is null.",
                 nextFunc: function() {
-             }});            
+             }});
             return false;
-        }   
+        }
         base.m_dataSet              = dataSet;
         base.m_program              = specToDiagram(dataSet.metadata.program);
         base.m_recordingLocation    = "/" + dataSet.metadata.recording_location;
-       
-        console.log("[DEBUG] loadDataSet", 
-                        base.m_program, 
+
+        console.log("[DEBUG] loadDataSet",
+                        base.m_program,
                         base.m_recordingLocation);
-                        
-        $('#data-set-select-interval').html('Select Interval');                        
-                        
+
+        $('#data-set-select-interval').html('Select Interval');
+
         showDetails = false;
         showHideDatasetDeails(showDetails);
 
@@ -148,12 +148,12 @@ var DataSetView = function(options) {
             //modern style dataset where name/displayed name are unique
             programDisplayedName = base.m_dataSet.metadata.program.displayedName;
         }
-        programName.text("Program Name: " + programDisplayedName);        
-        
+        programName.text("Program Name: " + programDisplayedName);
+
         var recording   = base.m_dataSet.metadata.recording;
         var start       = base.m_dataSet.metadata.start_time;
         var end         = base.m_dataSet.metadata.end_time;
-        
+
         //
         // Set currently recording status
         //
@@ -172,7 +172,7 @@ var DataSetView = function(options) {
                         Util.getLocalTime(start);
         }
         startTime.html(startStr);
-            
+
 
         //
         // Show end time
@@ -181,10 +181,10 @@ var DataSetView = function(options) {
         if(end) {
             endStr = "Ended: " + Util.getLocalDate(end) + ", " +
                      Util.getLocalTime(end);
-            
+
         }
-        endTime.html(endStr);    
-        
+        endTime.html(endStr);
+
 
         base.m_canvas = document.getElementById('data-set-canvas');
         base.m_plotHandler = createPlotHandler(base.m_canvas);
@@ -194,10 +194,10 @@ var DataSetView = function(options) {
         base.resizeCanvas();
 
         base.m_plotHandler.plotter.resetReceived();
-        
+
         isLive = dataSet.metadata.recording;
         updateSequenceTime = dataSet.metadata.recording_interval * 1000;
-        
+
         var url = '/ext/flow/list_datasetsequences';
         var data = { filename:      dataSet.name,
                      csrf_token:    g_csrfToken     };
@@ -212,7 +212,7 @@ var DataSetView = function(options) {
                 // console.log("[DEBUG] List sequences", response);
 
                 if(response.success) {
-                   
+
                     var items = response.items;
                     for(var i = 0; i < items.length; i++) {
                         if(items[i].name == "metadata" && base.m_dataSet.metadata.start_time==null){
@@ -229,7 +229,7 @@ var DataSetView = function(options) {
                     //
                     // Set time frame on graph to start and end time of recording.
                     //
-                    setTimeFrame(   items, base.m_dataSet.metadata.start_time, 
+                    setTimeFrame(   items, base.m_dataSet.metadata.start_time,
                                     base.m_dataSet.metadata.end_time );
 
                 } else {
@@ -240,7 +240,7 @@ var DataSetView = function(options) {
                 console.log("[ERROR] List sequences error", data);
             },
         });
-        
+
         return true;
     }
 
@@ -253,8 +253,8 @@ var DataSetView = function(options) {
     // Resize canvas
     //
     base.resizeCanvas = function() {
-        //console.log("[DEBUG] resizeCanvas", 
-        //                window.innerWidth, 
+        //console.log("[DEBUG] resizeCanvas",
+        //                window.innerWidth,
         //                window.innerHeight);
         base.m_canvas.width = window.innerWidth - RIGHT_PANEL_WIDTH - HORIZONTAL_MARGIN;
         base.m_canvas.height = window.innerHeight - PLOTTER_MARGIN_BOTTOM - VERTICAL_MARGIN;
@@ -270,7 +270,7 @@ var DataSetView = function(options) {
         clearTimeout(updateSequenceTimer);
         showDiagramEditor();
     }
-    
+
     //
     //stop live updates
     //
@@ -285,7 +285,7 @@ var DataSetView = function(options) {
         var timestamps = data.timestamps;
         var validvalues = [];
         var validtimestamps = [];
-        
+
         if(timestamps == null || values == null) {
             // if we couldn't get a valid timestamp or value object,
             // something went terribly wrong and sequence is invalid
@@ -293,7 +293,7 @@ var DataSetView = function(options) {
             // contents of the dataset folder as if it were a sequence folder
             return;
         }
-        
+
         console.log('received', values.length, 'values');
         console.log('received', timestamps.length, 'timestamps');
         //console.log('timestamps: ', timestamps);
@@ -318,12 +318,12 @@ var DataSetView = function(options) {
         //
         var dataPair = base.findDataPair(sequenceName);
         if (!dataPair) {
-            
+
             dataPair = base.createDataPair(sequenceName);
-            
+
             // add data pair to plotter
             base.m_plotHandler.plotter.dataPairs.push(dataPair);
-            base.m_plotHandler.plotter.setData(base.m_plotHandler.plotter.dataPairs);            
+            base.m_plotHandler.plotter.setData(base.m_plotHandler.plotter.dataPairs);
         }
 
         if (dataPair) {
@@ -334,7 +334,7 @@ var DataSetView = function(options) {
             base.m_plotHandler.plotter.autoBounds(true);
             base.m_plotHandler.drawPlot(null, null);
         }
-        
+
         //if we found the final sequence and we are live, set the timer to load again
         sequenceCount--;
         if(isLive && sequenceCount == 0){
@@ -411,13 +411,13 @@ var DataSetView = function(options) {
 
             // Safari workaround
             var dateStr = dateStr.replace(/-/g, '/');
-        
+
             return new Date(dateStr);
         }
 
         var startDate   = parseDate(startStr);
         var endDate     = parseDate(endStr);
-        console.log("[DEBUG] setTimeFrame startDate endDate", 
+        console.log("[DEBUG] setTimeFrame startDate endDate",
                                 startDate, endDate);
 
         base.m_plotHandler.plotter.resetReceived();
@@ -426,10 +426,10 @@ var DataSetView = function(options) {
         var end     = moment(endDate.getTime() - 1000).toISOString();
 
         //save the start time in case we are live and need to request sequence data again
-        savedStartTime = start;    
+        savedStartTime = start;
         savedSequences = sequences;
         sequenceCount = 0;
-        
+
         for (var i = 0; i < sequences.length; i++) {
             if(sequences[i].name!="metadata"){
                 sequenceCount++;
@@ -437,7 +437,7 @@ var DataSetView = function(options) {
                     count: 100000,
                     start_timestamp: start,
                     end_timestamp: end
-                });   
+                });
             }
         }
     }
@@ -447,15 +447,15 @@ var DataSetView = function(options) {
     function updateSequence() {
         //turn off timer, turn it on after we get the dataset
         clearTimeout(updateSequenceTimer);
-        
+
         //store the number of sequences that we will request
         sequenceCount = 0;
 
-        //request dataset     
+        //request dataset
         var start   = savedStartTime;
         var d = new Date();
         var end = d.toISOString();
-        
+
         for (var i = 0; i < savedSequences.length; i++) {
             if(savedSequences[i].name!="metadata"){
                 sequenceCount++;
@@ -463,11 +463,11 @@ var DataSetView = function(options) {
                     count: 100000,
                     start_timestamp: start,
                     end_timestamp: end
-                });   
+                });
             }
         }
-    }    
-    
+    }
+
     function selectInterval() {
         if (base.m_plotHandler.intervalSelect) {
             base.m_plotHandler.setIntervalSelect(false);
@@ -495,7 +495,7 @@ var DataSetView = function(options) {
             }
 
             CodapTest.prepCollection(
-                attrs, 
+                attrs,
                 function() {
                     // get data for quick reference
                     var xs = [];
@@ -588,21 +588,21 @@ var DataSetView = function(options) {
                     debug("Attempting to open case table.");
 
                     //
-                    // Open case table for the user so they don't 
+                    // Open case table for the user so they don't
                     // have to select it from the menu after clicking the
                     // export button.
                     //
                     codapInterface.sendRequest(
-                        {   
-                            action:     "create", 
-                            resource:   "component", 
-                            values:     {   type:           "caseTable", 
+                        {
+                            action:     "create",
+                            resource:   "component",
+                            values:     {   type:           "caseTable",
                                             name:           "explore_flow_data",
                                             title:          "Explore Data in CODAP",
                                             dimensions:     {   width:  700,
                                                                 height: 500 },
-                                            dataContext:    "Flow_Data" 
-                                        } 
+                                            dataContext:    "Flow_Data"
+                                        }
                         },
                         function(iResult, iRequest) {
                             debug("Opened case table", iResult);

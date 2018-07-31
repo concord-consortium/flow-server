@@ -7,12 +7,12 @@ function initCodapBridge() {
 
     CodapTest.debug("initCodapBridge()");
 
-	codapInterface.init({
-		name: 'DataFlow',
-		title: 'Data Flow',
-		dimensions: {width: 900, height: 600},
-		version: '0.1'
-	});
+    codapInterface.init({
+        name: 'DataFlow',
+        title: 'Data Flow',
+        dimensions: {width: 900, height: 600},
+        version: '0.1'
+    });
 
     CodapTest.debug("initCodapBridge() completed.");
 };
@@ -22,13 +22,13 @@ function initCodapBridge() {
 //
 var CodapTest = {
 
-	state: codapInterface.getInteractiveState(),
+    state: codapInterface.getInteractiveState(),
 
     //
     // Create the CODAP dataContext
     //
     createContext: function(callback) {
-    
+
         this.debug("Checking for CODAP dataContext...");
 
         //
@@ -44,7 +44,7 @@ var CodapTest = {
             }, function (iResult, iRequest) {
 
                 if (iResult && !iResult.success) {
-                
+
                     this.debug("Creating CODAP dataContext...");
 
                     codapInterface.sendRequest(
@@ -54,8 +54,8 @@ var CodapTest = {
                             values: {
                                 name:   "Flow_Data",
                             }
-                        }, 
-    
+                        },
+
                         function (iResult, iRequest) {
                             if (iResult && iResult.success) {
                                 this.debug(
@@ -102,7 +102,7 @@ var CodapTest = {
     },
 
     //
-    // Set the format of the collection; attributes should be a list 
+    // Set the format of the collection; attributes should be a list
     // of fields: [{name: 'field_a', ...}, {name: 'field_b', ...}];
     //
     // See CODAP docs for more info about attributes.
@@ -135,7 +135,7 @@ var CodapTest = {
                     attrs: attrs,
                 }
             ]
-        }, 
+        },
         function (iResult, iRequest) {
             this.debug("Create collection result", iResult, iRequest);
             if (iResult && iResult.success) {
@@ -146,11 +146,11 @@ var CodapTest = {
     },
 
     //
-    // Send a log message to CODAP, values should be a dictionary: 
+    // Send a log message to CODAP, values should be a dictionary:
     // {topic: <string>, formatStr: <string>, replaceArgs: <array>}
-    // where topic is optional and formatStr can contain %@ placeholders 
+    // where topic is optional and formatStr can contain %@ placeholders
     // that are replaced with the values in replaceArgs.
-    // example: {   formatStr: "Launched rocket with %@ engine toward %@", 
+    // example: {   formatStr: "Launched rocket with %@ engine toward %@",
     //              replaceArgs: ["red", "satellite"]}
     //
     log: function (values) {
