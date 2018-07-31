@@ -13,7 +13,7 @@ function initFlowApp() {
     // showTopLevelView('landing-page-view');
     showTopLevelView('login-page-view');
     if(g_fullscreen) {
-        var fullscreenWidget = FullScreenWidget();
+        FullScreenWidget();
     }
 }
 
