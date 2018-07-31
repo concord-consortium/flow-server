@@ -849,11 +849,11 @@ button.filter {
   cursor: pointer;
   border-radius: 5px;
 }
- #fullscreen-button:hover {
+#fullscreen-button:hover {
   background-size: 105%;
   box-shadow: 0 0 2px #D09845;
 }
- #fullscreen-button.exit {
+#fullscreen-button.exit {
   background: no-repeat url(./images/fullscreen-exit.svg) center/100%;
 }
 
