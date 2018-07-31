@@ -25,9 +25,10 @@ var DataSetView = function(options) {
 
     PLOTTER_PADDING_VERTICAL    = 80;   // px
     RIGHT_PANEL_WIDTH           = 200;  // px
-    VERTICAL_MARGIN                = 80;   // px
+    VERTICAL_MARGIN             = 80;   // px
     HORIZONTAL_MARGIN           = 100;  // px
-
+	PLOTTER_MARGIN_BOTTOM		= 94; // px
+	
     var datasetTopbar = $('<div>', { class: 'dataset-info-topbar' });
     var datasetName = $('<div>', { class: 'dataset-info-text dataset-info-text-title' }).text('Dataset Name: ');
 
