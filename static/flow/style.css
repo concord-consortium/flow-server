@@ -667,13 +667,15 @@
 .flowBlockNameLong {
     width: 130px;
 }
-.flowBlockParamLabel {
+.flow-block-param-label {
     display: inline-block;
     font-size: 13px;
     line-height: 36px;
     height:36px;
     margin-left: 2px;
-
+}
+.flow-block-param-label-units {
+    float: right;
 }
 .flowBlockValueAndUnits {
     display: inline-block;
@@ -700,10 +702,10 @@
 .flowBlockImage {
     margin-bottom: 2px;
 }
-.flowBlockInputHolderMargin{
+.flow-block-input-holder-margin{
     margin-right: 24px;
 }
-.flowBlockInput {
+.flow-block-input {
     display: inline-block;
     float: right;
     text-align: center;
@@ -717,7 +719,7 @@
     padding-top:1px;
     padding-bottom:1px;
 }
-.flowBlockInputLong {
+.flow-block-input-long {
     width: 140px;
 }
 .flowBlockMenu {
