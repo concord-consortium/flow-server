@@ -490,6 +490,26 @@ var ProgramEditorPanel = function(options) {
 
     };
 
+    // display data in a plot block
+    var displayPlot = function(block) {
+        var canvas = document.getElementById('bc_' + block.id);
+        block.view.plotHandler = createPlotHandler(canvas);
+        block.view.plotHandler.plotter.addYaxisBuffer(10);
+        block.view.plotHandler.plotter.showTimeHighlight = false;
+        block.view.xData = createDataColumn('last 30 seconds', []);
+        block.view.xData.hideAxisLabel = true;
+        block.view.xData.type = 'timestamp';
+        block.view.yData = createDataColumn('value', []);
+        var dataPairs = [
+            {
+                'xData': block.view.xData,
+                'yData': block.view.yData,
+            }
+        ];
+        block.view.plotHandler.plotter.setData(dataPairs);
+        block.view.plotHandler.drawPlot(null, null);
+    }
+
     //
     // add block param values to the block div for later retrieval
     //
