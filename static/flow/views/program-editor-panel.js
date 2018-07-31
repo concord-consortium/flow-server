@@ -3,11 +3,12 @@
 // The main UI panel for dataflow program editing.
 //
 var ProgramEditorPanel = function(options) {
+
+    this.m_startTimestamp = moment().valueOf() * 0.001;  // a unix timestamp used as the starting point for time series plots
     this.m_scale        = null;
     this.m_diagram      = null;
     this.m_diagramName  = null;
     this.m_diagramDisplayedName  = null;
-    this.m_modified     = null;
     this.m_svgDrawer    = null;
 
     this.container      = options.container;
@@ -124,8 +125,6 @@ var ProgramEditorPanel = function(options) {
                 }
             }
         }
-
-        m_modified = false;
     };
 
     this.createDateTimeName = function(prefixStr){
@@ -491,6 +490,26 @@ var ProgramEditorPanel = function(options) {
 
     };
 
+    // display data in a plot block
+    var displayPlot = function(block) {
+        var canvas = document.getElementById('bc_' + block.id);
+        block.view.plotHandler = createPlotHandler(canvas);
+        block.view.plotHandler.plotter.addYaxisBuffer(10);
+        block.view.plotHandler.plotter.showTimeHighlight = false;
+        block.view.xData = createDataColumn('last 30 seconds', []);
+        block.view.xData.hideAxisLabel = true;
+        block.view.xData.type = 'timestamp';
+        block.view.yData = createDataColumn('value', []);
+        var dataPairs = [
+            {
+                'xData': block.view.xData,
+                'yData': block.view.yData,
+            }
+        ];
+        block.view.plotHandler.plotter.setData(dataPairs);
+        block.view.plotHandler.drawPlot(null, null);
+    }
+
     //
     // add block param values to the block div for later retrieval
     //
@@ -528,47 +547,6 @@ var ProgramEditorPanel = function(options) {
             var eventdata = {blockid:block.id, paramname: param.name};
             input.keyup(eventdata, _this.paramEntryChanged);
             input.focusout(eventdata, _this.paramEntryFocusOut);
-        }
-    };
-
-    //
-    // Scale css classes based on current scale value.
-    // Will scale the following css classes:
-    // - flowBlockValueAndUnits
-    // - flowBlockValue
-    // etc. as specified in CLASS_SCALING_TABLE
-    //
-    this.scaleClasses = function() {
-        //
-        // adjust css sizing properties based on scale
-        //
-
-        // allow reset to exactly 1.0 scale if it's slightly off
-        if (this.m_scale > 0.95 && this.m_scale < 1.05) {
-            do_reset = true;
-            this.m_scale = 1.0;
-        } else {
-            do_reset = false;
-        }
-        for (var key in CLASS_SCALING_TABLE) {
-          var node = $("." + key)
-          if (node) {
-            for (var cssProp in CLASS_SCALING_TABLE[key]) {
-                var value = node.css(cssProp);
-                if (value) {
-                    var defaultValue = CLASS_SCALING_TABLE[key][cssProp];
-                    var newValue = Math.round(defaultValue * this.m_scale);
-                    // append "px" if needed
-                    if (value && value.endsWith("px")) {
-                        newValue = "" + newValue + "px";
-                    }
-                    //console.log("scaleClasses: " + key + " - " + cssProp + ": " + value + " -> " + newValue);
-                    node.css(cssProp, newValue);
-                } else {
-                    //console.log("scaleClasses: skipping " + key + " - " + cssProp);
-                }
-            }
-          }
         }
     };
 
@@ -693,17 +671,8 @@ var ProgramEditorPanel = function(options) {
             _this.moveBlock(_this.m_dragBlock,
                             x + _this.m_dragBlockOffsetX,
                             y + _this.m_dragBlockOffsetY );
-            _this.layoutModified();
         }
     };
-
-    //
-    // Call this when the visual appearance of the diagram is changed.
-    //
-    this.layoutModified = function() {
-        _this.m_modified = true;
-    };
-
 
     //
     // Handle mouse button up in SVG area
@@ -1597,7 +1566,7 @@ var ProgramEditorPanel = function(options) {
             // do nothing
         } else if (block.type === 'plot') {
             if (block.value !== null && !isNaN(block.value)) {
-                var timestamp = moment().valueOf() * 0.001 - g_startTimestamp;
+                var timestamp = moment().valueOf() * 0.001 - this.m_startTimestamp;
                 block.view.xData.data.push(timestamp);
                 block.view.yData.data.push(block.value);
                 if (block.view.xData.data.length > 30) {
@@ -1648,14 +1617,6 @@ var ProgramEditorPanel = function(options) {
     }
 
     //
-    // zoom blocks based on UI controls
-    //
-    this.zoomBlocks = function(increment) {
-        this.m_scale += increment;
-        this.redrawBlocks();
-    }
-
-    //
     // Redraw blocks. Usually called as part of scaling.
     //
     this.redrawBlocks = function() {
@@ -1673,7 +1634,7 @@ var ProgramEditorPanel = function(options) {
             for (var j = 0; j < block.pins.length; j++) {
                 var pin = block.pins[j];
                 if (pin.sourcePin) {
-                    this.displayConnection(pin, g_scale);
+                    this.displayConnection(pin, this.m_scale);
                 }
             }
         }
