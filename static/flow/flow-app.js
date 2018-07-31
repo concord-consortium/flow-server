@@ -12,6 +12,9 @@ function initFlowApp() {
 
     // showTopLevelView('landing-page-view');
     showTopLevelView('login-page-view');
+    if(g_fullscreen) {
+        FullScreenWidget();
+    }
 }
 
 //
@@ -92,19 +95,19 @@ function showAdminView() {
 
 // change screens within the app: show the flow diagram editor screen
 function showDiagramEditor() {
-	initDiagramEditor();
-	$('#controllerSelectorPanel').hide();
-	$('#controllerViewerPanel').hide();
-	$('#diagramEditorPanel').show();
-	$('#plotterPanel').hide();
+    initDiagramEditor();
+    $('#controllerSelectorPanel').hide();
+    $('#controllerViewerPanel').hide();
+    $('#diagramEditorPanel').show();
+    $('#plotterPanel').hide();
 }
 
 
 // change screens within the app: show the plotter screen
 function showPlotter() {
-	initPlotter();
-	$('#controllerSelectorPanel').hide();
-	$('#controllerViewerPanel').hide();
-	$('#diagramEditorPanel').hide();
-	$('#plotterPanel').show();
+    initPlotter();
+    $('#controllerSelectorPanel').hide();
+    $('#controllerViewerPanel').hide();
+    $('#diagramEditorPanel').hide();
+    $('#plotterPanel').show();
 }
