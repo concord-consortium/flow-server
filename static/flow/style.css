@@ -32,7 +32,7 @@
     display: flex;
     align-items: stretch;
     width:100%;
-    height: 60px;
+    height: 70px;
     padding-left: 15px;
     padding-right: 10px;
     padding-top: 5px;
@@ -105,6 +105,14 @@
 }
 .topbar-save-program-name:focus {
     border: 1px solid #6FC6DA;
+}
+.topbar-save-program-status{
+    line-height: 12px;
+	font-size: 12px;
+	float: right;
+	text-decoration: underline;
+	padding: 5px;
+	color: #777777
 }
 .menu-icon{
     margin-right:10px;
@@ -198,7 +206,7 @@
 */
 .menu-and-content-holder{
     position: relative;
-    height: calc(100vh - 60px);
+    height: calc(100vh - 70px);
     width: 100%;
     background-color: #ffffff;
 }
@@ -823,32 +831,6 @@ button.filter {
     padding:            10px 11px;
     margin:                0 auto;
     border-radius:        25px;
-}
-
-/*
-* — fullscreen —
-*/
-.fullscreen-container {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-}
-#fullscreen-button {
-  margin: 5px;
-  width: 42px;
-  height: 42px;
-  background: no-repeat url(./images/fullscreen.svg) center/100%;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-#fullscreen-button:hover {
-  background-size: 105%;
-  box-shadow: 0 0 2px #D09845;
-}
-
-#fullscreen-button.exit {
-  background: no-repeat url(./images/fullscreen-exit.svg) center/100%;
 }
 
 /*
