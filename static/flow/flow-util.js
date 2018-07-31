@@ -42,7 +42,7 @@ Util.sortByName = function(a, b) {
     var bName = b.name.toUpperCase();
     return ((aName > bName) - (bName > aName));
 };
- 
+
 //
 // Add td elements to a table row
 // @param table     The table to add to.
@@ -109,7 +109,7 @@ Util.convertDateTimeStringToHumanReadable = function(dateTimeStr) {
     var day = dateTimeStr.substring(6, 8);
     var hour = dateTimeStr.substring(9, 11);
     var min = dateTimeStr.substring(11, 13);
-    
+
     if(month=="01")
         month="January";
     else if(month=="02")
@@ -149,7 +149,7 @@ Util.convertDateTimeStringToHumanReadable = function(dateTimeStr) {
     var minNum = parseInt(min, 10);
     if(min<10)
         minNum="0" + minNum;
-    
+
     var finalStr = month + " " + dayNum + ", " + year + " " + hourNum + ":" + minNum + " " + ampm;
     return finalStr;
 

@@ -57,19 +57,19 @@ function handleHttpStatus(httpStatus) {
       console.log("handleHttpStatus.event: Retrieving body...");
       manylabsBle.getHttpBody().then(body => {
         console.log("getHttpBody.body: " + body);
-		var message = JSON.parse(body);
-		var type = message['type'];
+        var message = JSON.parse(body);
+        var type = message['type'];
 
-		//var type = "update_diagram"
-		var func = g_blewsh.handlers[type];
-		if (func) {
-			console.log("message['parameters']:" + JSON.stringify(message['parameters']))
-			func(moment(message['timestamp']), message['parameters']);
-		}
-		for (var i = 0; i < g_blewsh.genericHandlers.length; i++) {
-			var func = g_blewsh.genericHandlers[i];
-			func(moment(message['timestamp']), type, message['parameters']);
-		}
+        //var type = "update_diagram"
+        var func = g_blewsh.handlers[type];
+        if (func) {
+            console.log("message['parameters']:" + JSON.stringify(message['parameters']))
+            func(moment(message['timestamp']), message['parameters']);
+        }
+        for (var i = 0; i < g_blewsh.genericHandlers.length; i++) {
+            var func = g_blewsh.genericHandlers[i];
+            func(moment(message['timestamp']), type, message['parameters']);
+        }
 
         //responseText.innerHTML += "<br/>";
         //responseText.innerHTML += ts.toLocaleTimeString('en-US', options) + "." + (ts.getTime() % 999) + ": " + body;

@@ -9,17 +9,17 @@ var ProgramEditorBlockPalette = function(options) {
 
     //
     // create a menu section
-    //    
+    //
     var createSection = function(name, content, collapsedbydefault) {
-        
+
         var div = $('<div>', {class: 'menu-section'});
         var header = $('<div>', {class: 'menu-header-editor'} );
         var title = $('<div>', {class: 'menu-title menu-title-editor noSelect'} ).text(name);
         var chevron = $('<div>', {class: 'diagram-menu-chevron noSelect'} );
         var img = $('<img>');
         img.attr('src', "flow-server/static/flow/images/icon-arrow-white.png");
-        img.appendTo(chevron);            
-        
+        img.appendTo(chevron);
+
         if(name == 'Input'){
             header.addClass('concordblue');
         }
@@ -42,30 +42,30 @@ var ProgramEditorBlockPalette = function(options) {
                 content.show();
             }
         });
-        div.append(header); 
-        header.append(title); 
-        header.append(chevron); 
+        div.append(header);
+        header.append(title);
+        header.append(chevron);
         div.append(content);
 
         if(collapsedbydefault){
             img.attr("src","flow-server/static/flow/images/icon-arrow-right-white.png");
             content.hide();
         }
-        
+
         return div;
     }
-    
+
     //
     // create the sensor menu section main button
     //
     var createBtn = function(name, type) {
-        
+
         var div = $('<div>', { class: 'diagram-menu-entry container-light-gray' } );
         var btn;
         btn = $('<span>', { class: '' } );
 
         //icon
-        var menuIcon = $('<img class="menu-icon">'); 
+        var menuIcon = $('<img class="menu-icon">');
         if(type=="temperature")
             menuIcon.attr('src', "flow-server/static/flow/images/icon-temperature.png");
         else if(type=="humidity")
@@ -95,7 +95,7 @@ var ProgramEditorBlockPalette = function(options) {
         else if(type=="equals")
             menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-equals.png");
         else if(type=="not equals")
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-notequals.png");        
+            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-notequals.png");
         else if(type=="and")
             menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-and.png");
         else if(type=="or")
@@ -111,7 +111,7 @@ var ProgramEditorBlockPalette = function(options) {
         else if(type=="moving average")
             menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-movingavg.png");
         else if(type=="exp moving average")
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-expmovingavg.png");        
+            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-expmovingavg.png");
         else if(type=="timer")
             menuIcon.attr('src', "flow-server/static/flow/images/icon-timer.png");
         else if(type=="relay")
@@ -122,8 +122,8 @@ var ProgramEditorBlockPalette = function(options) {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-output-data.png");
 
         menuIcon.attr("height","20");
-        menuIcon.appendTo(div);            
-        
+        menuIcon.appendTo(div);
+
         btn.text(name);
         div.click( function() {
             if(type=='temperature' || type=='humidity' || type=='CO2' || type=='O2' || type=='light' || type=='soilmoisture')
@@ -138,22 +138,22 @@ var ProgramEditorBlockPalette = function(options) {
                 programEditorPanel.addNumericBlock();
             }
             else if(type == "timer")
-                programEditorPanel.addTimerBlock("timer");            
+                programEditorPanel.addTimerBlock("timer");
             else{
                 programEditorPanel.addFilterBlock(type);
             }
         });
-        btn.appendTo(div);        
+        btn.appendTo(div);
         return div;
-    };        
-    
+    };
+
     //
     // Sensors
     //
     var temp        = createBtn("temperature", "temperature");
     var humidity    = createBtn("humidity", "humidity");
     var co2         = createBtn("CO2", "CO2");
-    var o2          = createBtn("O2", "O2");  
+    var o2          = createBtn("O2", "O2");
     var light       = createBtn("light", "light");
     var soil        = createBtn("soil moisture", "soilmoisture");
 
@@ -171,7 +171,7 @@ var ProgramEditorBlockPalette = function(options) {
     // Filters
     //
     var numericButton   = createBtn("number","number");
-    var timerButton        = createBtn("timer","timer");    
+    var timerButton        = createBtn("timer","timer");
     var plusButton   = createBtn("plus","plus");
     var minusButton   = createBtn("minus","minus");
     var timesButton   = createBtn("times","times");
@@ -212,7 +212,7 @@ var ProgramEditorBlockPalette = function(options) {
     container.append(menuSeparator);
     var filters = createSection("Logic", filterContent, true);
     container.append(filters);
-    
+
     //
     // Outputs: relays and plots and data bucket
     //
@@ -225,7 +225,7 @@ var ProgramEditorBlockPalette = function(options) {
     outputContent.append(plot);
     outputContent.append(databucket);
     var menuSeparator = jQuery('<div>', {class:'menu-separator'} );
-    container.append(menuSeparator);    
+    container.append(menuSeparator);
     var outputs = createSection("Outputs", outputContent, true);
     container.append(outputs);
 }

@@ -8,14 +8,14 @@ function addFilterMethods(block, type) {
         console.log("Invalid filter block type: " + type);
         return;
     }
-    
+
     block.inputCount = type === "not" || type === "exponential moving average" || type === "simple moving average" || type === "absolute value" ? 1 : 2;
     block.outputCount = 1;
-    
+
     // filter-specific block attributes
     block.lastAverage = null;
     block.averageStorage = [];
-    
+
     // This will execute the switch once when the block is created. After that,
     // computeFilterValue will just be one of these functions.
     block.computeFilterValue = (function() {
@@ -104,7 +104,7 @@ function addFilterMethods(block, type) {
         if(len > 0){
             for (var i = 0; i < len; i++) {
                 avg += block.averageStorage[i] / len;
-            }                    
+            }
         }
         //incorrect calculation, leave in in case we need to compare methods
         /*
@@ -126,7 +126,7 @@ function addFilterMethods(block, type) {
             //incorrect calculation, leave in in case we need to compare methods
             //var alpha = boxSize / (boxSize + 1);
             //avg = block.lastAverage * alpha + newValue * (1 - alpha);
-                        
+
             if(isNaN(newValue) || newValue==null || newValue==undefined) {
                 //something went wrong and we were passed a bad value
                 //reuse the previous value
@@ -137,7 +137,7 @@ function addFilterMethods(block, type) {
                 //k = 2/(n+1) or alpha = 2/(boxsize + 1)
                 //ema = current*k + emaPrev * (1-k) or avg = newValue*k + block.lastAverage * (1-alpha)
                 var alpha = 2 / (boxSize + 1);
-                avg = newValue * alpha + block.lastAverage * (1 - alpha);                
+                avg = newValue * alpha + block.lastAverage * (1 - alpha);
             }
         }
         else{

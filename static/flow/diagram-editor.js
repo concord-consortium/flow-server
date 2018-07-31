@@ -273,18 +273,12 @@ function exploreData(e) {
 function displayBlock(block) {
     var blockDiv = $('<div>', {class: 'flowBlock', id: 'b_' + block.id});
     block.view.div = blockDiv;
-    //var scale = block.ctx.scale;
-    //var scale = 0.6;
+
     // add menu
     var menuData = createMenuData();
     menuData.add('Rename', renameBlock, {id: block.id});
     menuData.add('Delete', deleteBlock, {id: block.id});
-    //menuData.add('Zoom In (Ctrl+i)', zoominBlock, {id: block.id});
-    //menuData.add('Zoom Out (Ctrl+o)', zoomoutBlock, {id: block.id});
 
-    //if (block.hasSeq) {
-    //  menuData.add('View Recorded Data', viewRecordedData, {id: block.id});
-    //}
     var menuHolderDiv = $('<div>', {class: 'flowBlockMenuHolder'});
     var menuDiv = $('<div>', {class: 'dropdown flowBlockMenu'}).appendTo(menuHolderDiv);
     var menuInnerDiv = $('<div>', {
@@ -763,7 +757,6 @@ function scaleClasses() {
                 }
                 //console.log("scaleClasses: " + key + " - " + cssProp + ": " + value + " -> " + newValue);
                 node.css(cssProp, newValue);
-                //$("." + key).css(cssProp, newValue);
             } else {
                 //console.log("scaleClasses: skipping " + key + " - " + cssProp);
             }
@@ -839,7 +832,6 @@ function addFilterBlock(e) {
             blockSpec.type = "box"
         else if(type === 'exponential moving average')
             blockSpec.type = "ema"
-        //blockSpec.type = "number_display_and_input"
         blockSpec.params = [{
             'name': 'period',
             'type': 'n',
@@ -952,7 +944,7 @@ function saveDiagram(promptForName, closeWhenDone, chainDialog) {
         // or save using existing name
         } else {
 
-            console.log("[DEBUG] Save diagram name '"+ name + 
+            console.log("[DEBUG] Save diagram name '"+ name +
                         "' g_diagramName '" + g_diagramName + "'");
 
             // send diagram to controller
@@ -1027,9 +1019,9 @@ function saveDiagramAndStart(promptForName, closeWhenDone, chainDialog) {
 // and go back to the controller viewer
 //
 function closeDiagramEditor() {
-    
+
     if(g_recordingInterval) {
-        // If we are recording, ignore any changes and exit. 
+        // If we are recording, ignore any changes and exit.
         // Do not prompt to save.
         showControllerViewer();
         return;
