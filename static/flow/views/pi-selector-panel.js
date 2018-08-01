@@ -25,6 +25,10 @@ var PiSelectorPanel = function(options) {
     var currentControllerName;
     var currentRecordingDataset;
 
+    //check if sensor data is delayed or has stopped updating
+    var loadPiListTimer;
+    var loadPiListTimerInterval = 10000; //30 seconds
+
     //
     // Devices: list of available pis and refresh button
     //
@@ -59,7 +63,7 @@ var PiSelectorPanel = function(options) {
     //
     // update any running program blocks on landing page based on online/offline pis
     //
-    var updateRunningProgramBlocks = function (){
+    var updateActivityFeed = function (){
         if(this.availableControllers.length == 0){
             return;
         }
@@ -81,6 +85,7 @@ var PiSelectorPanel = function(options) {
                 }
             }
         }
+        restartLoadPiListTimer(loadPiListTimerInterval);
     }
 
 
@@ -144,7 +149,7 @@ var PiSelectorPanel = function(options) {
                     else
                         rebuildPiMenuIfNeeded();
 
-                    updateRunningProgramBlocks();
+                    updateActivityFeed();
 
                 } else {
                     if(rebuildMenu)
@@ -706,6 +711,48 @@ var PiSelectorPanel = function(options) {
 
         var stopDiagram = MessageExecutor(execParams);
         stopDiagram.execute();
+    }
+
+    //
+    // is the activity feed in a state where it contains a program?
+    //
+    function activityFeedContainsProgram() {
+        if ($("live-data-item-holder").length) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    //
+    // timer fired, do we need a new list of pis?
+    //
+    function checkUpdatePiList() {
+        clearTimeout(loadPiListTimer);
+
+        // refresh list if we have an active program in the activity feed
+        // in the future, other actions might trigger refresh of list
+        var updateActivityFeedPrograms = activityFeedContainsProgram();
+        if (updateActivityFeedPrograms){
+            _this.loadPiList(false);
+        }
+        else {
+            restartLoadPiListTimer(loadPiListTimerInterval);
+        }
+    }
+    //
+    // restart timer to determine if we need to get an updated list of pis
+    //
+    function restartLoadPiListTimer(timeInterval){
+        clearTimeout(loadPiListTimer);
+        loadPiListTimer = setTimeout(checkUpdatePiList, timeInterval);
+    }
+    //
+    // stop timer that determines if we need to get an updated list of pis
+    //
+    function disableLoadPiListTimer(){
+        clearTimeout(loadPiListTimer);
     }
 
     //
