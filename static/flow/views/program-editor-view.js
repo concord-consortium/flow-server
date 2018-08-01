@@ -14,7 +14,7 @@ var ProgramEditorView = function(options) {
 
     mainContentBox.appendTo(content);
 
-    var topBar  = jQuery('<div>', {class:'topbar'} );
+    var topBar  = jQuery('<div>', {id: "editor-topbar", class:'topbar'} );
 
     topBar.appendTo(mainContentBox);
 
@@ -38,9 +38,11 @@ var ProgramEditorView = function(options) {
     //
     // program save
     //
-    var saveBar  = jQuery('<div>', {class:'topbar-save noSelect'} );
-    var saveBarBox  = jQuery('<div>', {class:'topbar-underline-box noSelect'} );
+    var saveBar  = jQuery('<div>', {class: 'topbar-save noSelect'} );
+    var saveBarBox  = jQuery('<div>', {class: 'topbar-underline-box noSelect'} );
     saveBarBox.appendTo(saveBar);
+    var saveBarStatus  = jQuery('<div>', {id: 'save-program-status', class: 'topbar-save-program-status noSelect'} );
+    saveBarStatus.appendTo(saveBar);
 
     //input field to enter program name
     var programNameField = jQuery('<input>', {
@@ -57,27 +59,15 @@ var ProgramEditorView = function(options) {
         var filename = jQuery('#program-editor-filename').val();
         filename = Util.filterWhiteSpaceCharacters(filename);
         jQuery('#program-editor-filename').val(filename);
+        programEditorPanel.autoSaveProgram();
+
     });
     programNameField.appendTo(saveBarBox);
 
-    //program save button
-    var saveBarButton = $('<img class="topbar-icon-save">');
-    saveBarButton.attr('src', "flow-server/static/flow/images/icon-save.png");
-    saveBarButton.appendTo(saveBarBox);
-    saveBarButton.mouseover( function() {
-        saveBarButton.attr('src', "flow-server/static/flow/images/icon-save-hover.png");
-    });
-    saveBarButton.mouseout( function() {
-        saveBarButton.attr('src', "flow-server/static/flow/images/icon-save.png");
-    });
-    saveBarButton.mousedown( function() {
-        saveBarButton.attr('src', "flow-server/static/flow/images/icon-save-down.png");
-    });
     //
-    // handle save button click event
+    // save program to server
     //
-    saveBarButton.click( function() {
-
+    this.saveProgram = function(completionCallback) {
         var displayedFilename = jQuery('#program-editor-filename').val();
         if(displayedFilename == null || displayedFilename == "") {
             modalAlert({
@@ -120,34 +110,24 @@ var ProgramEditorView = function(options) {
                     response);
 
                 if(response.success) {
-                    modalAlert({
-                        title: "Program Saved",
-                        message: "Program successfully saved.",
-                        nextFunc: function() {
-                        }
-                    });
-
+                    if(typeof completionCallback === "function") {
+                        completionCallback(true);
+					}
                 } else {
-                    modalAlert({
-                        title: "Program Save Error",
-                        message: "Error: " + response.message,
-                        nextFunc: function() {
-                        }
-                    });
+                    if(typeof completionCallback === "function") {
+                        completionCallback(false);
+					}
                 }
             },
             error: function(data) {
                 console.log("[ERROR] Save error", data);
-                modalAlert({
-                    title: "Program Save Error",
-                    message: "Error saving program.",
-                    nextFunc: function() {
-                    }
-                });
+                if(typeof completionCallback === "function") {
+                    completionCallback(false);
+				}
             },
         });
 
-    });
+    }
     saveBar.appendTo(topBar);
 
     //
@@ -243,7 +223,7 @@ var ProgramEditorView = function(options) {
 
     menuAndContentHolderOverlay.appendTo(menuAndContentHolder);
 
-    var menuHolder  = jQuery('<div>', {class:'menu-holder menu-holder-program container-light-gray'} );
+    var menuHolder  = jQuery('<div>', {id: "editor-menu", class:'menu-holder menu-holder-program container-light-gray'} );
 
     menuHolder.appendTo(menuAndContentHolder);
 

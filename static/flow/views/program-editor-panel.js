@@ -22,9 +22,18 @@ var ProgramEditorPanel = function(options) {
     this.m_dragBlock        = null;
     this.m_dragBlockOffsetX = null;
     this.m_dragBlockOffsetY = null;
+    this.dragBlockMoved = false;
 
     this.m_activeStartPin   = null;
     this.m_activeLineSvg    = null;
+
+    // auto save and undo variables
+    this.maxSpecHistory = 11; //first item in array is current state so n-1 undos allowed
+    this.programSpecStored = [];
+    this.saveAgain = false;
+    this.saving = false;
+    this.lastChangeMoveBlock = false;
+
 
     //
     // Create block palette
@@ -42,8 +51,8 @@ var ProgramEditorPanel = function(options) {
     var svgDiv = $('<div>', { class: 'diagramSvgHolder',  id: 'program-holder'} );
     svgWrapper.append(svgDiv);
     this.container.append(svgWrapper);
-    var holderoffsetx = 180;
-    var holderoffsety = 60;
+    var holderoffsetx = $("#editor-menu").outerWidth();
+    var holderoffsety = $("#editor-topbar").outerHeight();
 
     //recording/running program
     var m_runningProgram = false;
@@ -57,6 +66,8 @@ var ProgramEditorPanel = function(options) {
     // Load a diagram from a spec dictionary into the UI editor
     //
     this.loadProgram = function(programSpec, displayedName) {
+
+        updateSaveStatus("");
 
         if(this.m_svgDrawer == null) {
             this.m_svgDrawer = SVG('program-holder');
@@ -73,6 +84,8 @@ var ProgramEditorPanel = function(options) {
         // Maintain set of block names
         //
         this.nameHash = {};
+
+        this.programSpecStored = []
 
         //
         // Default empty program
@@ -91,40 +104,108 @@ var ProgramEditorPanel = function(options) {
             programSpec.name = this.createDateTimeName("program_");
         }
 
-        if (this.m_diagram) {  // remove any existing diagram elements
-            for (var i = 0; i < this.m_diagram.blocks.length; i++) {
-                // console.log("[DEBUG] undisplay block", this.m_diagram.blocks[i]);
-                this.undisplayBlock(this.m_diagram.blocks[i]);
-            }
-        }
+        this.undisplayAllBlocks();
 
         this.m_scale = 1.0;
         this.m_diagram = specToDiagram(programSpec);
         this.m_diagramName = programSpec.name;
 
-        //
-        // Display blocks
-        //
-        for (var i = 0; i < this.m_diagram.blocks.length; i++) {
-            // console.log("[DEBUG] display block", this.m_diagram.blocks[i]);
-            var block = this.m_diagram.blocks[i];
-            this.displayBlock(block);
-            this.nameHash[block.name] = block;
+        this.m_diagramDisplayedName = programSpec.displayedName;
+
+        this.displayAllBlocks();
+
+        this.displayAllConnections();
+
+        this.lastChangeMoveBlock = false;
+        storeProgramState(false);
+    };
+
+    //
+    // store program state so we have record of user actions
+	// overwrite: if true, then replace the last program state in the storage array
+	// for example, 2 consecutive move block actions occur, but we only want to save the last one
+    //
+    var storeProgramState = function(overwrite) {
+        if (overwrite) {
+            _this.programSpecStored[_this.programSpecStored.length - 1] = diagramToSpec(_this.m_diagram);
+        } else {
+            _this.programSpecStored.push(diagramToSpec(_this.m_diagram));
+        }
+        if (_this.programSpecStored.length > _this.maxSpecHistory) {
+            _this.programSpecStored.shift();
+        }
+    };
+
+    //
+    // use ctrl+ z to undo action in editor
+    //
+    var undoChange = function() {
+
+        // see if we have a valid spec in the storage array that we can undo to
+		// nth block is current state, n-1 entry is first valid undo state
+        if (_this.programSpecStored.length < 2) {
+            return;
         }
 
-        //
-        // Display connections
-        //
-        for (var i = 0; i < this.m_diagram.blocks.length; i++) {
-            var block = this.m_diagram.blocks[i];
-            for (var j = 0; j < block.pins.length; j++) {
-                var pin = block.pins[j];
-                if (pin.sourcePin) {
-                    // console.log("[DEBUG] displayConnection", pin);
-                    this.displayConnection(pin, this.m_scale);
-                }
-            }
+        // clear existing program
+        _this.undisplayAllBlocks();
+        _this.nameHash = {};
+		
+        // the final spec in the array is the current state, get the (n-1)th entry
+        _this.m_diagram = specToDiagram(_this.programSpecStored[_this.programSpecStored.length - 2]);
+
+        // remove last stored state from array
+        _this.programSpecStored.pop();
+
+        _this.displayAllBlocks();
+
+        _this.displayAllConnections();
+
+		// resave program, but do not resave the state
+        _this.autoSaveProgram(false, false);
+    };
+
+    // bind the undo key when we init, be sure only to call once
+    $(document).bind('keydown', 'ctrl+z', undoChange);
+
+    //
+    // use ctrl+ z to undo action in editor
+    //
+    this.autoSaveProgram = function(moveBlock = false, saveState = true) {
+        updateSaveStatus("Saving...");
+        // lump block moves together
+        // if the last change was a move and this is a move
+        // then only save the most recent move
+        if (saveState) {
+            var overwrite = moveBlock && _this.lastChangeMoveBlock;
+            storeProgramState(overwrite);
+            _this.lastChangeMoveBlock = moveBlock;
         }
+        if (_this.saving) {
+            _this.saveAgain = true;
+            return;
+        }
+        _this.saving = true;
+        saveProgram(saveComplete);
+    };
+
+    //
+    // called when save is complete
+    //
+    var saveComplete = function(success) {
+        _this.saving = false;
+        updateSaveStatus("All changes saved");
+        if (_this.saveAgain) {
+            _this.saveAgain = false;
+            _this.autoSaveProgram(false, false);
+        }
+    };
+
+    //
+    // update the save status bar
+    //
+    var updateSaveStatus = function(newStatus) {
+        $("#save-program-status").text(newStatus);
     };
 
     this.createDateTimeName = function(prefixStr){
@@ -159,11 +240,11 @@ var ProgramEditorPanel = function(options) {
             potentialName = potentialName + sec;
 
         return potentialName;
-    }
+    };
 
     this.getProgramName = function(){
         return this.m_diagramName;
-    }
+    };
 
     //
     // Create HTML/DOM elements for a block along with SVG pins.
@@ -487,7 +568,6 @@ var ProgramEditorPanel = function(options) {
             pinSvg.mouseout(this.pinMouseOut);
             pin.view.svg = pinSvg;
         }
-
     };
 
     // display data in a plot block
@@ -508,7 +588,19 @@ var ProgramEditorPanel = function(options) {
         ];
         block.view.plotHandler.plotter.setData(dataPairs);
         block.view.plotHandler.drawPlot(null, null);
-    }
+    };
+
+    //
+    // display all blocks in program
+    //
+    this.displayAllBlocks = function() {
+        for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
+            // console.log("[DEBUG] display block", _this.m_diagram.blocks[i]);
+            var block = _this.m_diagram.blocks[i];
+            _this.displayBlock(block);
+            _this.nameHash[block.name] = block;
+        }
+    };
 
     //
     // add block param values to the block div for later retrieval
@@ -572,6 +664,17 @@ var ProgramEditorPanel = function(options) {
         }
     };
 
+    // Remove all blocks
+    //
+    this.undisplayAllBlocks = function() {
+        if (_this.m_diagram) {  // remove any existing diagram elements
+            for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
+                // console.log("[DEBUG] undisplay block", _this.m_diagram.blocks[i]);
+                _this.undisplayBlock(_this.m_diagram.blocks[i]);
+            }
+        }
+    };
+
     //
     // Draw a connection between two blocks (as an SVG line)
     //
@@ -585,6 +688,23 @@ var ProgramEditorPanel = function(options) {
         line.click(connectionClick);
         destPin.view.svgConn = line;
     };
+
+    //
+    // display all connections between blocks
+    //
+    this.displayAllConnections = function() {
+        for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
+            var block = _this.m_diagram.blocks[i];
+            for (var j = 0; j < block.pins.length; j++) {
+                var pin = block.pins[j];
+                if (pin.sourcePin) {
+                    // console.log("[DEBUG] displayConnection", pin);
+                    _this.displayConnection(pin, _this.m_scale);
+                }
+            }
+        }
+    };
+
 
     //
     // Move a block along with its pins and connections
@@ -671,6 +791,9 @@ var ProgramEditorPanel = function(options) {
             _this.moveBlock(_this.m_dragBlock,
                             x + _this.m_dragBlockOffsetX,
                             y + _this.m_dragBlockOffsetY );
+
+            dragBlockMoved = true;
+
         }
     };
 
@@ -680,6 +803,12 @@ var ProgramEditorPanel = function(options) {
     this.mouseUp = function(e) {
          //console.log("[DEBUG] mouseUp");
         _this.m_activeStartPin = null;
+        if (_this.m_dragBlock) {
+            if(dragBlockMoved) {
+                _this.autoSaveProgram(true);
+            }
+            dragBlockMoved = false;
+        }
         _this.m_dragBlock = null;
         if (_this.m_activeLineSvg) {
             _this.m_activeLineSvg.remove();
@@ -730,6 +859,7 @@ var ProgramEditorPanel = function(options) {
                 resultFunc: function(newName) {
                     block.name = newName;
                     $('#bn_' + block.id).html(newName);
+                    _this.autoSaveProgram();
                 }
             });
         }
@@ -747,6 +877,7 @@ var ProgramEditorPanel = function(options) {
         }
         //update any blocks that this action may affect
         _this.updateAllBlocks();
+        _this.autoSaveProgram();
     };
 
     //
@@ -787,7 +918,7 @@ var ProgramEditorPanel = function(options) {
 
             //update any blocks that this action may affect
             _this.updateAllBlocks();
-
+            _this.autoSaveProgram();
             // CodapTest.logTopic('Dataflow/ConnectBlock');
         }
     };
@@ -819,6 +950,7 @@ var ProgramEditorPanel = function(options) {
 
         //update any blocks that this action may affect
         _this.updateAllBlocks();
+        _this.autoSaveProgram();
     };
 
     //
@@ -940,6 +1072,7 @@ var ProgramEditorPanel = function(options) {
         _this.nameHash[name] = block;
         _this.displayBlock(block);
         CodapTest.logTopic('Dataflow/ConnectSensor');
+        _this.autoSaveProgram();
     };
 
     //
@@ -971,6 +1104,7 @@ var ProgramEditorPanel = function(options) {
         _this.nameHash[name] = block;
         _this.displayBlock(block);
         //CodapTest.logTopic('Dataflow/ConnectSensor');
+        _this.autoSaveProgram();
     };
 
 
@@ -1038,6 +1172,7 @@ var ProgramEditorPanel = function(options) {
         _this.nameHash[name] = block;
         _this.displayBlock(block);
         //CodapTest.logTopic('Dataflow/ConnectSensor');
+        _this.autoSaveProgram();
     };
 
     //
@@ -1079,6 +1214,7 @@ var ProgramEditorPanel = function(options) {
         _this.nameHash[name] = block;
         _this.displayBlock(block);
         //CodapTest.logTopic('Dataflow/ConnectSensor');
+        _this.autoSaveProgram();
     };
 
 
@@ -1148,6 +1284,7 @@ var ProgramEditorPanel = function(options) {
         block.view.x = 35 + offsetx;
         block.view.y = 35 + offsety;
         _this.displayBlock(block);
+        _this.autoSaveProgram();
     };
 
 
@@ -1168,6 +1305,7 @@ var ProgramEditorPanel = function(options) {
         block.view.x = 35 + offsetx;
         block.view.y = 35 + offsety;
         _this.displayBlock(block);
+        _this.autoSaveProgram();
     };
 
     //
@@ -1188,6 +1326,7 @@ var ProgramEditorPanel = function(options) {
         block.view.y = 35 + offsety;
         _this.displayBlock(block);
         CodapTest.logTopic('Dataflow/AddPlot');
+        _this.autoSaveProgram();
     };
 
     //
@@ -1205,6 +1344,7 @@ var ProgramEditorPanel = function(options) {
 
         //update any blocks that this action may affect
         _this.updateAllBlocks();
+        _this.autoSaveProgram();
     }
 
     //
@@ -1228,10 +1368,10 @@ var ProgramEditorPanel = function(options) {
         var divindex = e.data.divindex;
         for (var i = 0; i < block.params.length; i++) {
             var param = block.params[i];
-            if(paramname == param.name){
+            if (paramname == param.name) {
                 var defval = param['default'];
-                if(isNaN(defval)){ //handle strings first
-                    if(paramname == "sequence_names"){
+                if (isNaN(defval)) { //handle strings first
+                    if (paramname == "sequence_names") {
                         var val = $('#b' + block.id + '_bp_' + param.name + divindex).val();
                         val = Util.filterInvalidCharacters(val);
                         if(stripwhitespace)
@@ -1240,8 +1380,7 @@ var ProgramEditorPanel = function(options) {
                         paramKeyArray = Object.keys(param.value);
                         paramValueArray = Object.values(param.value);
                         param.value[connectedblockid] = val;
-                    }
-                    else{
+                    } else {
                         var val = $('#b' + block.id + '_bp_' + param.name).val();
                         val = Util.filterInvalidCharacters(val);
                         if(stripwhitespace)
@@ -1249,8 +1388,7 @@ var ProgramEditorPanel = function(options) {
                         $('#b' + block.id + '_bp_' + param.name).val(val);
                         param.value = val;
                     }
-                }
-                else{
+                } else {
                     var str = $('#b' + block.id + '_bp_' + param.name).val();
                     str = str.replace ( /[^0-9.]/g, '' ); //strip out non-numeric values
                     $('#b' + block.id + '_bp_' + param.name).val(str); //put stripped back in the input field
@@ -1267,6 +1405,7 @@ var ProgramEditorPanel = function(options) {
 
         //update any blocks that this action may affect
         _this.updateAllBlocks();
+        _this.autoSaveProgram();
     }
 
 
