@@ -75,7 +75,7 @@ var PiSelectorPanel = function(options) {
             var potentialButton = $(potentialButtonId);
             var potentialStatusDiv = $(potentialStatusId);
             if(potentialButton.length && potentialStatusDiv.length){
-                if(!controller.online) {
+                if(controller.online) {
                     potentialButton.show();
                     potentialStatusDiv.hide();
                 }
