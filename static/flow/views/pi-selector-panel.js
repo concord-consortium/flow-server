@@ -562,27 +562,6 @@ var PiSelectorPanel = function(options) {
         }
 
         //
-        // Check that all sensor blocks can be mapped to physical sensors.
-        //
-        var unmapped = editor.getProgramEditorPanel().getUnmappedSensors();
-        if(unmapped.length > 0) {
-            var names = "";
-            for(var i = 0; i < unmapped.length; i++) {
-                if(i != 0) {
-                    names += ",";
-                }
-                names += " " + unmapped[i];
-            }
-            modalAlert({
-                title: 'Cannot Run Program',
-                message: "Error: The following blocks do not have available sensors on " + controller.name + ":" + names,
-                nextFunc: function() {
-                    updateProgramButtons(false, false, false);
-                }});
-            return;
-       }
-
-        //
         // Set name on program
         //
         var displayedName = jQuery('#program-editor-filename').val();
