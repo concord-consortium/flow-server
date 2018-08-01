@@ -717,7 +717,7 @@ var PiSelectorPanel = function(options) {
     // is the activity feed in a state where it contains a program?
     //
     function activityFeedContainsProgram() {
-        if ($("live-data-item-holder").length) {
+        if ($(".live-data-item-holder").length) {
             return true;
         }
         else {
