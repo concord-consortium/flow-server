@@ -58,9 +58,9 @@ var ProgramEditorBlockPalette = function(options) {
     //
     // create the sensor menu section main button
     //
-    var createBtn = function(name, type) {
+    var createBtn = function(name, type, tooltip) {
 
-        var div = $('<div>', { class: 'diagram-menu-entry container-light-gray' } );
+        var menuentry = $('<div>', { class: 'diagram-menu-entry container-light-gray', title: tooltip } );
         var btn;
         btn = $('<span>', { class: '' } );
 
@@ -122,10 +122,10 @@ var ProgramEditorBlockPalette = function(options) {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-output-data.png");
 
         menuIcon.attr("height","20");
-        menuIcon.appendTo(div);
+        menuIcon.appendTo(menuentry);
 
         btn.text(name);
-        div.click( function() {
+        menuentry.click( function() {
             if(type=='temperature' || type=='humidity' || type=='CO2' || type=='O2' || type=='light' || type=='soilmoisture')
                 programEditorPanel.addDeviceBlock(type);
             else if(type=='relay')
@@ -143,19 +143,20 @@ var ProgramEditorBlockPalette = function(options) {
                 programEditorPanel.addFilterBlock(type);
             }
         });
-        btn.appendTo(div);
-        return div;
+        btn.appendTo(menuentry);
+        return menuentry;
     };
 
     //
     // Sensors
     //
-    var temp        = createBtn("temperature", "temperature");
-    var humidity    = createBtn("humidity", "humidity");
-    var co2         = createBtn("CO2", "CO2");
-    var o2          = createBtn("O2", "O2");
-    var light       = createBtn("light", "light");
-    var soil        = createBtn("soil moisture", "soilmoisture");
+    var temp        = createBtn("temperature", "temperature", "contains temperature sensor values");
+    var humidity    = createBtn("humidity", "humidity", "contains humidity sensor values");
+    var co2         = createBtn("CO2", "CO2", "contains carbon dioxide sensor values");
+    var o2          = createBtn("O2", "O2", "contains oxygen sensor values");
+    var light       = createBtn("light", "light", "contains light sensor values");
+    var soil        = createBtn("soil moisture", "soilmoisture", "contains soil moisture sensor values");
+
 
     var sensorContent = $('<div>');
     sensorContent.append(temp);
@@ -170,24 +171,24 @@ var ProgramEditorBlockPalette = function(options) {
     //
     // Filters
     //
-    var numericButton   = createBtn("number","number");
-    var timerButton        = createBtn("timer","timer");
-    var plusButton   = createBtn("plus","plus");
-    var minusButton   = createBtn("minus","minus");
-    var timesButton   = createBtn("times","times");
-    var dividedbyButton   = createBtn("divided by","divided by");
-    var greaterthanButton   = createBtn("greater than","greater than");
-    var lessthanButton   = createBtn("less than","less than");
-    var equalsButton   = createBtn("equals","equals");
-    var notequalsButton   = createBtn("not equals","not equals");
-    var andButton   = createBtn("and","and");
-    var orButton    = createBtn("or","or");
-    var notButton   = createBtn("not","not");
-    var nandButton   = createBtn("nand","nand");
-    var xorButton   = createBtn("xor","xor");
-    var absButton   = createBtn("absolute value","absolute value");
-    var simpleavgButton   = createBtn("moving average","moving average");
-    var expavgButton   = createBtn("exp moving average","exp moving average");
+    var numericButton   = createBtn("number", "number", "contains a user-defined number");
+    var timerButton        = createBtn("timer", "timer", "changes between 0 and 1 over user-defined time periods");
+    var plusButton   = createBtn("plus", "plus", "adds two block values");
+    var minusButton   = createBtn("minus", "minus", "subtracts one block value from another block value");
+    var timesButton   = createBtn("times", "times", "multiplies two block values");
+    var dividedbyButton   = createBtn("divided by", "divided by", "divides one block value by another block value");
+    var greaterthanButton   = createBtn("greater than", "greater than", "compares two blocks using greater than");
+    var lessthanButton   = createBtn("less than", "less than", "compares two blocks using less than");
+    var equalsButton   = createBtn("equals", "equals", "calculates if blocks are equal, 1 if equal, 0 if not equal");
+    var notequalsButton   = createBtn("not equals", "not equals", "calculates if blocks are NOT equal, 1 if not equal, 0 if equal");
+    var andButton   = createBtn("and", "and", "calculates logical AND, 1 if two block values are both not 0");
+    var orButton    = createBtn("or", "or", "calculates logical OR, 1 if at least one block values is not 0");
+    var notButton   = createBtn("not", "not", "calculates logical NOT of block value");
+    var nandButton   = createBtn("nand", "nand", "calculates logical NAND of two block values");
+    var xorButton   = createBtn("xor", "xor", "calculates logical XOR of two block values");
+    var absButton   = createBtn("absolute value", "absolute value", "calculates absolute value of block value");
+    var simpleavgButton   = createBtn("moving average", "moving average", "calculates simple moving average of block values over time");
+    var expavgButton   = createBtn("exp moving average", "exp moving average", "calculates exponential moving average of block values over time");
 
     var filterContent = $('<div>');
     filterContent.append(numericButton);
@@ -216,9 +217,9 @@ var ProgramEditorBlockPalette = function(options) {
     //
     // Outputs: relays and plots and data bucket
     //
-    var relay   = createBtn("relay","relay");
-    var plot        = createBtn("plot","plot");
-    var databucket   = createBtn("data storage","data storage");
+    var relay   = createBtn("relay","relay", "turns relay on if value is not 0, off if value is 0");
+    var plot        = createBtn("plot","plot", "plots the last 30 seconds of block values");
+    var databucket   = createBtn("data storage", "data storage", "stores dataset containing any connected blocks");
 
     var outputContent = $('<div>');
     outputContent.append(relay);
@@ -229,3 +230,4 @@ var ProgramEditorBlockPalette = function(options) {
     var outputs = createSection("Outputs", outputContent, true);
     container.append(outputs);
 }
+
