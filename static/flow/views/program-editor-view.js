@@ -112,18 +112,18 @@ var ProgramEditorView = function(options) {
                 if(response.success) {
                     if(typeof completionCallback === "function") {
                         completionCallback(true);
-					}
+                    }
                 } else {
                     if(typeof completionCallback === "function") {
                         completionCallback(false);
-					}
+                    }
                 }
             },
             error: function(data) {
                 console.log("[ERROR] Save error", data);
                 if(typeof completionCallback === "function") {
                     completionCallback(false);
-				}
+                }
             },
         });
 
@@ -291,6 +291,7 @@ var ProgramEditorView = function(options) {
     // Load program from spec stored in dataset metadata
     //
     base.loadProgramFromSpec = function(params) {
+
         // console.log("[DEBUG] ProgramEditorView loadProgramFromSpec()", params);
         programloaded = true;
 
@@ -301,6 +302,8 @@ var ProgramEditorView = function(options) {
         var nameWidget      = jQuery('#program-editor-filename');
 
         nameWidget.val(displayedName);
+
+        piSelectorPanel.disableLoadPiListTimer();
 
         piSelectorPanel.resetStateOnProgramLoad();
         piSelectorPanel.resetPiSelectionState();
@@ -323,6 +326,8 @@ var ProgramEditorView = function(options) {
         var nameWidget      = jQuery('#program-editor-filename');
 
         nameWidget.val('');
+
+        piSelectorPanel.disableLoadPiListTimer();
 
         piSelectorPanel.setProgramControlsToNeutral();
         piSelectorPanel.loadPiList(true);
