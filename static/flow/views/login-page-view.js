@@ -5,21 +5,21 @@ var LoginPageView = function(options) {
 
     var base = BaseView(options);
 
-    var content = jQuery('#'+base.getDivId());
+    var content = $('#'+base.getDivId());
 
-    var title = jQuery('<h1>');
+    var title = $('<h1>');
     title.text('Dataflow');
 
-    var ssoLink = jQuery('<a>', { href: '/ext/flow/login' } );
+    var ssoLink = $('<a>', { href: '/ext/flow/login' } );
     ssoLink.text('Login');
 
-    var welcomeText = jQuery('<div>', { css: {  width: '800px',
+    var welcomeText = $('<div>', { css: {  width: '800px',
                                                 margin: '0 auto',
                                                 textAlign: 'center' } } );
 
     welcomeText.append(title);
     welcomeText.append(ssoLink);
-    welcomeText.append(jQuery('<br>'));
+    welcomeText.append($('<br>'));
     content.append(welcomeText);
 
     base.show = function() {
@@ -31,7 +31,7 @@ var LoginPageView = function(options) {
             return;
         }
 
-        jQuery('#'+base.getDivId()).show();
+        $('#'+base.getDivId()).show();
     }
 
     return base;

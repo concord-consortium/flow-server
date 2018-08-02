@@ -204,7 +204,7 @@ var LandingPageMyProgramsView = function(options) {
     };
 
     base.show = function() {
-        var content = jQuery("#" + base.getDivId());
+        var content = $("#" + base.getDivId());
         loadPrograms(content);
     }
 
