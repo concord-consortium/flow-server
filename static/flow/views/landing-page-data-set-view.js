@@ -84,7 +84,6 @@ var LandingPageDataSetView = function(options) {
                                 livedatablock.appendTo(liveDataHolder);
                                 // console.log("[DEBUG] Creating dataset item", items[i]);
                             }
-
                         }
                         else{
                             for(var i = 0; i < list.length; i++) {
@@ -113,6 +112,15 @@ var LandingPageDataSetView = function(options) {
 
                     if (recording.length == 0 && recorded.length == 0) {
                         addDatasetMessageToMenu(recordedDataHolder, "No available datasets");
+                    }
+
+                    if (recording.length) {
+                        // we found a currently recording dataset...
+                        // poll the server for pi status updates to allow analogous update of activity feed state
+                        // e.g., if pi is marked as "unavailable" in activity feed, update feed if pi comes back online
+                        var editor = getTopLevelView("program-editor-view");
+                        var piSelectorPanel = editor.getPiSelectorPanel();
+                        piSelectorPanel.restartLoadPiListTimer();
                     }
 
                     //resize the landing page view

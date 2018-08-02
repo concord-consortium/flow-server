@@ -25,6 +25,10 @@ var PiSelectorPanel = function(options) {
     var currentControllerName;
     var currentRecordingDataset;
 
+    //check if sensor data is delayed or has stopped updating
+    var loadPiListTimer;
+    var loadPiListTimerInterval = 30000; //30 seconds
+
     //
     // Devices: list of available pis and refresh button
     //
@@ -34,10 +38,10 @@ var PiSelectorPanel = function(options) {
     //
     //function to determine if a pi is online or offline
     //
-    this.isPiOffline = function(piName){
+    this.isPiOffline = function(piName) {
         var retval = false;
         //if we have no list of pis chances are we haven't received a response from the server
-        if(this.availableControllers.length == 0){
+        if (this.availableControllers.length == 0) {
             return retval;
         }
         //what is the status of pi?
@@ -59,8 +63,8 @@ var PiSelectorPanel = function(options) {
     //
     // update any running program blocks on landing page based on online/offline pis
     //
-    var updateRunningProgramBlocks = function (){
-        if(this.availableControllers.length == 0){
+    var updateActivityFeed = function (){
+        if (this.availableControllers.length == 0) {
             return;
         }
         //find any running program blocks
@@ -70,19 +74,18 @@ var PiSelectorPanel = function(options) {
             var potentialStatusId = "#liveDataStatusDiv" + controller.name;
             var potentialButton = $(potentialButtonId);
             var potentialStatusDiv = $(potentialStatusId);
-            if(potentialButton.length && potentialStatusDiv.length){
-                if(!controller.online) {
+            if (potentialButton.length && potentialStatusDiv.length) {
+                if (controller.online) {
                     potentialButton.show();
                     potentialStatusDiv.hide();
                 }
-                else{
+                else {
                     potentialButton.hide();
                     potentialStatusDiv.show();
                 }
             }
         }
     }
-
 
     //
     // set default state of topbar program controls UI
@@ -94,7 +97,6 @@ var PiSelectorPanel = function(options) {
         _this.currentlyRecording = false;
         _this.selectedController = null;
     }
-
 
     //
     // AJAX call and handler for listing Pis.
@@ -144,7 +146,7 @@ var PiSelectorPanel = function(options) {
                     else
                         rebuildPiMenuIfNeeded();
 
-                    updateRunningProgramBlocks();
+                    updateActivityFeed();
 
                 } else {
                     if(rebuildMenu)
@@ -706,6 +708,30 @@ var PiSelectorPanel = function(options) {
 
         var stopDiagram = MessageExecutor(execParams);
         stopDiagram.execute();
+    }
+
+    //
+    // timer fired, update pi list
+    //
+    function updatePiList() {
+        clearTimeout(loadPiListTimer);
+        _this.loadPiList(false);
+        restartLoadPiListTimer(loadPiListTimerInterval);
+    }
+
+    //
+    // restart timer to determine if we need to get an updated list of pis
+    //
+    this.restartLoadPiListTimer = function() {
+        clearTimeout(loadPiListTimer);
+        loadPiListTimer = setTimeout(updatePiList, loadPiListTimerInterval);
+    }
+
+    //
+    // stop timer that determines if we need to get an updated list of pis
+    //
+    this.disableLoadPiListTimer = function() {
+        clearTimeout(loadPiListTimer);
     }
 
     //
