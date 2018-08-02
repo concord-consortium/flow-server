@@ -27,13 +27,14 @@ var DataSetView = function(options) {
     RIGHT_PANEL_WIDTH           = 200;  // px
     VERTICAL_MARGIN             = 80;   // px
     HORIZONTAL_MARGIN           = 100;  // px
-	PLOTTER_MARGIN_BOTTOM		= 94; // px
-	
+    PLOTTER_MARGIN_BOTTOM       = 94; // px
+
     var datasetTopbar = $('<div>', { class: 'dataset-info-topbar' });
     var datasetName = $('<div>', { class: 'dataset-info-text dataset-info-text-title' }).text('Dataset Name: ');
 
     var closeButton = $('<button>', {   html: 'Close' , class: 'dataflow-button dataset-view-close-button'} );
     closeButton.click(function(e) {
+        clearTimeout(updateSequenceTimer);
         base.hide();
         liveDataHolder.show();
     });
@@ -103,6 +104,7 @@ var DataSetView = function(options) {
     // Load a dataset and initialize view.
     //
     base.loadDataSet = function(dataSet) {
+        clearTimeout(updateSequenceTimer);
 
         //console.log("[DEBUG] loadDataSet", dataSet);
         if(dataSet === null) {
