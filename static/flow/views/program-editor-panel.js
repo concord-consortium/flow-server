@@ -122,8 +122,8 @@ var ProgramEditorPanel = function(options) {
 
     //
     // store program state so we have record of user actions
-	// overwrite: if true, then replace the last program state in the storage array
-	// for example, 2 consecutive move block actions occur, but we only want to save the last one
+    // overwrite: if true, then replace the last program state in the storage array
+    // for example, 2 consecutive move block actions occur, but we only want to save the last one
     //
     var storeProgramState = function(overwrite) {
         if (overwrite) {
@@ -142,7 +142,7 @@ var ProgramEditorPanel = function(options) {
     var undoChange = function() {
 
         // see if we have a valid spec in the storage array that we can undo to
-		// nth block is current state, n-1 entry is first valid undo state
+        // nth block is current state, n-1 entry is first valid undo state
         if (_this.programSpecStored.length < 2) {
             return;
         }
@@ -150,7 +150,7 @@ var ProgramEditorPanel = function(options) {
         // clear existing program
         _this.undisplayAllBlocks();
         _this.nameHash = {};
-		
+
         // the final spec in the array is the current state, get the (n-1)th entry
         _this.m_diagram = specToDiagram(_this.programSpecStored[_this.programSpecStored.length - 2]);
 
@@ -161,8 +161,10 @@ var ProgramEditorPanel = function(options) {
 
         _this.displayAllConnections();
 
-		// resave program, but do not resave the state
+        // resave program, but do not resave the state
         _this.autoSaveProgram(false, false);
+
+        _this.lastChangeMoveBlock = false;
     };
 
     // bind the undo key when we init, be sure only to call once
