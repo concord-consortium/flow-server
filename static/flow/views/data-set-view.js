@@ -15,7 +15,7 @@ var DataSetView = function(options) {
 
     // console.log("[DEBUG] DataSetView base", base);
 
-    var content = jQuery('#'+base.getDivId());
+    var content = $('#'+base.getDivId());
 
     base.m_dataset              = null;
     base.m_program              = null;

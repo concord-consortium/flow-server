@@ -209,7 +209,7 @@ var ProgramEditorBlockPalette = function(options) {
     filterContent.append(absButton);
     filterContent.append(simpleavgButton);
     filterContent.append(expavgButton);
-    var menuSeparator = jQuery('<div>', {class:'menu-separator'} );
+    var menuSeparator = $('<div>', {class:'menu-separator'} );
     container.append(menuSeparator);
     var filters = createSection("Logic", filterContent, true);
     container.append(filters);
@@ -225,7 +225,7 @@ var ProgramEditorBlockPalette = function(options) {
     outputContent.append(relay);
     outputContent.append(plot);
     outputContent.append(databucket);
-    var menuSeparator = jQuery('<div>', {class:'menu-separator'} );
+    var menuSeparator = $('<div>', {class:'menu-separator'} );
     container.append(menuSeparator);
     var outputs = createSection("Outputs", outputContent, true);
     container.append(outputs);

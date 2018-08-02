@@ -6,7 +6,7 @@ var AdminView = function(options) {
     var base = BaseView(options);
     var _this = this;
 
-    var content = jQuery('#'+base.getDivId());
+    var content = $('#'+base.getDivId());
 
     this.adminControllerIdMap = {};
 

@@ -566,7 +566,7 @@ var PiSelectorPanel = function(options) {
         //
         // Set name on program
         //
-        var displayedName = jQuery('#program-editor-filename').val();
+        var displayedName = $('#program-editor-filename').val();
         programSpec.name = ""; //don't have an actual folder location for this "virtual" program
         programSpec.archived = false;
         programSpec.displayedName = displayedName;

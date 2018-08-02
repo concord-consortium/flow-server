@@ -8,26 +8,26 @@ var ProgramEditorView = function(options) {
     //
     var base = BaseView(options);
 
-    var content = jQuery('#'+base.getDivId());
+    var content = $('#'+base.getDivId());
 
-    var mainContentBox  = jQuery('<div>', {class:'main-content-box'} );
+    var mainContentBox  = $('<div>', {class:'main-content-box'} );
 
     mainContentBox.appendTo(content);
 
-    var topBar  = jQuery('<div>', {id: "editor-topbar", class:'topbar'} );
+    var topBar  = $('<div>', {id: "editor-topbar", class:'topbar'} );
 
     topBar.appendTo(mainContentBox);
 
     //
     // title and icon
     //
-    var titleBar  = jQuery('<div>', {class:'topbar-title topbar-title-link noSelect'} );
+    var titleBar  = $('<div>', {class:'topbar-title topbar-title-link noSelect'} );
 
     var titleBarIcon = $('<img class="topbar-icon">');
     titleBarIcon.attr('src', "flow-server/static/flow/images/icon-arrow-left.png");
     titleBarIcon.appendTo(titleBar);
 
-    var titleBarText  = jQuery('<span>', {class:'topbar-text noSelect', text:"Editor"} );
+    var titleBarText  = $('<span>', {class:'topbar-text noSelect', text:"Editor"} );
     titleBarText.appendTo(titleBar);
     titleBar.click( function(e) {
         showTopLevelView('landing-page-view');
@@ -38,27 +38,27 @@ var ProgramEditorView = function(options) {
     //
     // program save
     //
-    var saveBar  = jQuery('<div>', {class: 'topbar-save noSelect'} );
-    var saveBarBox  = jQuery('<div>', {class: 'topbar-underline-box noSelect'} );
+    var saveBar  = $('<div>', {class: 'topbar-save noSelect'} );
+    var saveBarBox  = $('<div>', {class: 'topbar-underline-box noSelect'} );
     saveBarBox.appendTo(saveBar);
-    var saveBarStatus  = jQuery('<div>', {id: 'save-program-status', class: 'topbar-save-program-status noSelect'} );
+    var saveBarStatus  = $('<div>', {id: 'save-program-status', class: 'topbar-save-program-status noSelect'} );
     saveBarStatus.appendTo(saveBar);
 
     //input field to enter program name
-    var programNameField = jQuery('<input>', {
+    var programNameField = $('<input>', {
                                             id: 'program-editor-filename',
                                             type: 'text',
                                             class: 'topbar-save-program-name'
     });
     programNameField.keyup( function() {
-        var filename = jQuery('#program-editor-filename').val();
+        var filename = $('#program-editor-filename').val();
         filename = Util.filterInvalidCharacters(filename);
-        jQuery('#program-editor-filename').val(filename);
+        $('#program-editor-filename').val(filename);
     });
     programNameField.focusout( function() {
-        var filename = jQuery('#program-editor-filename').val();
+        var filename = $('#program-editor-filename').val();
         filename = Util.filterWhiteSpaceCharacters(filename);
-        jQuery('#program-editor-filename').val(filename);
+        $('#program-editor-filename').val(filename);
         programEditorPanel.autoSaveProgram();
 
     });
@@ -68,7 +68,7 @@ var ProgramEditorView = function(options) {
     // save program to server
     //
     this.saveProgram = function(completionCallback) {
-        var displayedFilename = jQuery('#program-editor-filename').val();
+        var displayedFilename = $('#program-editor-filename').val();
         if(displayedFilename == null || displayedFilename == "") {
             modalAlert({
                 title: 'Invalid Name',
@@ -133,7 +133,7 @@ var ProgramEditorView = function(options) {
     //
     // device select
     //
-    var deviceBar  = jQuery('<div>', {class:'topbar-device-select noSelect'} );
+    var deviceBar  = $('<div>', {class:'topbar-device-select noSelect'} );
 
     var menuDiv = $('<div>', {class: 'dropdown topbar-dropdown'}).appendTo(deviceBar);
     var menuInnerDiv = $('<div>', {
@@ -143,12 +143,12 @@ var ProgramEditorView = function(options) {
         'aria-expanded': 'true',
     }).appendTo(menuDiv);
 
-    var deviceBarBox  = jQuery('<div>', {class:'topbar-underline-box noSelect'} );
-    var deviceBarButton  = jQuery('<div>', {class:'topbar-device-select-button noSelect'} );
+    var deviceBarBox  = $('<div>', {class:'topbar-underline-box noSelect'} );
+    var deviceBarButton  = $('<div>', {class:'topbar-device-select-button noSelect'} );
     deviceBarBox.appendTo(menuInnerDiv);
     deviceBarButton.appendTo(deviceBarBox);
 
-    var deviceBarText  = jQuery('<span>', {class:'topbar-device-select-text noSelect', text:"select a device"} );
+    var deviceBarText  = $('<span>', {class:'topbar-device-select-text noSelect', text:"select a device"} );
     deviceBarText.appendTo(deviceBarButton);
     var deviceBarIcon = $('<img class="topbar-device-select-arrow">');
     deviceBarIcon.attr('src', "flow-server/static/flow/images/icon-arrow-right.png");
@@ -162,7 +162,7 @@ var ProgramEditorView = function(options) {
     var dropDownList = createDropDownList({menuData: menuData}).appendTo(menuDiv);
 
     // program start, stop, view
-    var deviceRunHolder  = jQuery('<div>', {class:'topbar-device-control'} );
+    var deviceRunHolder  = $('<div>', {class:'topbar-device-control'} );
     var runProgramButton = $('<button>', {   html: 'run' , class: 'topbar-run-button noSelect'} );
     runProgramButton.appendTo(deviceRunHolder);
     var viewDataButton = $('<button>', {   html: 'view data' , class: 'topbar-run-button topbar-view-button noSelect'} );
@@ -181,16 +181,16 @@ var ProgramEditorView = function(options) {
     //
     // Show welcome message
     //
-    var welcomeMessage  = jQuery('<div>', {class:'topbar-login noSelect'} );
-    var welcomeText = jQuery('<span>', {class:'topbar-text topbar-login-text noSelect'});
-    var signOut = jQuery('<a>', { href: '/ext/flow/logout', class: 'topbar-text topbar-login-text noSelect' } );
+    var welcomeMessage  = $('<div>', {class:'topbar-login noSelect'} );
+    var welcomeText = $('<span>', {class:'topbar-text topbar-login-text noSelect'});
+    var signOut = $('<a>', { href: '/ext/flow/logout', class: 'topbar-text topbar-login-text noSelect' } );
     signOut.text('logout');
     if(g_user != null) {
         welcomeText.text('Welcome, ' + g_user.full_name + '!');
         welcomeMessage.append(welcomeText);
-        welcomeMessage.append(jQuery('<span>').text(' '));
+        welcomeMessage.append($('<span>').text(' '));
         welcomeMessage.append(signOut);
-        var spacing = jQuery('<span>', { css: {
+        var spacing = $('<span>', { css: {
                                     paddingRight: '5px'} } );
         spacing.text(' ');
         welcomeMessage.append(spacing);
@@ -212,30 +212,30 @@ var ProgramEditorView = function(options) {
     //
     // Build the left menu holder
     //
-    var menuAndContentHolder  = jQuery('<div>', {class:'menu-and-content-holder menu-and-content-holder-program'} );
+    var menuAndContentHolder  = $('<div>', {class:'menu-and-content-holder menu-and-content-holder-program'} );
 
     menuAndContentHolder.appendTo(mainContentBox);
 
-    var menuAndContentHolderOverlay  = jQuery('<div>', {class:'menu-and-content-holder-overlay', id: 'program-holder-overlay'} );
+    var menuAndContentHolderOverlay  = $('<div>', {class:'menu-and-content-holder-overlay', id: 'program-holder-overlay'} );
 
-    var menuAndContentHolderOverlayText  = jQuery('<div>', {class: 'overlay-lock', text:"program locked while running!"} );
+    var menuAndContentHolderOverlayText  = $('<div>', {class: 'overlay-lock', text:"program locked while running!"} );
     menuAndContentHolderOverlayText.appendTo(menuAndContentHolderOverlay);
 
     menuAndContentHolderOverlay.appendTo(menuAndContentHolder);
 
-    var menuHolder  = jQuery('<div>', {id: "editor-menu", class:'menu-holder menu-holder-program container-light-gray'} );
+    var menuHolder  = $('<div>', {id: "editor-menu", class:'menu-holder menu-holder-program container-light-gray'} );
 
     menuHolder.appendTo(menuAndContentHolder);
 
-    var menuTopButtonHolder  = jQuery('<div>', {class:'menu-top-button-holder'} );
+    var menuTopButtonHolder  = $('<div>', {class:'menu-top-button-holder'} );
     menuTopButtonHolder.appendTo(menuHolder);
 
-    var menuSeparator = jQuery('<div>', {class:'menu-separator'} );
+    var menuSeparator = $('<div>', {class:'menu-separator'} );
     menuSeparator.appendTo(menuHolder);
 
-    var menuFilesButton  = jQuery('<button>', {class:'menu-top-button container-dark-gray  noSelect', text:"My Stuff"} );
+    var menuFilesButton  = $('<button>', {class:'menu-top-button container-dark-gray  noSelect', text:"My Stuff"} );
     menuFilesButton.appendTo(menuTopButtonHolder);
-    var menuBlocksButton  = jQuery('<div>', {class:'menu-top-button-inactive container-blue-select noSelect', text:"Editor"} );
+    var menuBlocksButton  = $('<div>', {class:'menu-top-button-inactive container-blue-select noSelect', text:"Editor"} );
     menuBlocksButton.appendTo(menuTopButtonHolder);
     menuFilesButton.click( function(e) {
         showTopLevelView('landing-page-view');
@@ -273,7 +273,7 @@ var ProgramEditorView = function(options) {
 
         // console.log("[DEBUG] Reset editor.");
 
-        var nameWidget      = jQuery('#program-editor-filename');
+        var nameWidget      = $('#program-editor-filename');
 
         nameWidget.val('');
 
@@ -299,7 +299,7 @@ var ProgramEditorView = function(options) {
         var filename    = programSpec.name;
         var displayedName    = programSpec.displayedName;
 
-        var nameWidget      = jQuery('#program-editor-filename');
+        var nameWidget      = $('#program-editor-filename');
 
         nameWidget.val(displayedName);
 
@@ -323,7 +323,7 @@ var ProgramEditorView = function(options) {
         programloaded = true;
         // console.log("[DEBUG] ProgramEditorView loadProgram()", params);
 
-        var nameWidget      = jQuery('#program-editor-filename');
+        var nameWidget      = $('#program-editor-filename');
 
         nameWidget.val('');
 

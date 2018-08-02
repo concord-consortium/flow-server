@@ -1150,7 +1150,7 @@ var ProgramEditorPanel = function(options) {
                 y: 35 + offsety,
             }
         };
-        var displayedFilename = jQuery('#program-editor-filename').val();
+        var displayedFilename = $('#program-editor-filename').val();
         var potentialName = displayedFilename + " dataset";
 
         blockSpec.params = [{

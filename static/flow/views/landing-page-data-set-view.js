@@ -29,7 +29,7 @@ var LandingPageDataSetView = function(options) {
 
         // console.log("[DEBUG] loading recorded data...");
         liveDataHolder.empty();
-        var livedatatitlebar  = jQuery("<div>", {class:"live-data-title-bar", text:"You don't have any running programs. Click \"New Program\" to get started."} );
+        var livedatatitlebar  = $("<div>", {class:"live-data-title-bar", text:"You don't have any running programs. Click \"New Program\" to get started."} );
         livedatatitlebar.appendTo(liveDataHolder);
 
         recordedDataHolder.empty();
@@ -185,33 +185,33 @@ var LandingPageDataSetView = function(options) {
         }
 
         //main holder for activity feed item
-        var liveDataItemHolder = jQuery("<div>", {class:"live-data-item-holder"} );
+        var liveDataItemHolder = $("<div>", {class:"live-data-item-holder"} );
 
-        var liveDataItemBoxProgramTitle = jQuery("<div>", {class:"live-data-item-title", text:programName} );
+        var liveDataItemBoxProgramTitle = $("<div>", {class:"live-data-item-title", text:programName} );
         liveDataItemBoxProgramTitle.appendTo(liveDataItemHolder);
 
         //device section
-        var liveDataItemBoxPi = jQuery("<div>", {class:"live-data-item-box"} );
+        var liveDataItemBoxPi = $("<div>", {class:"live-data-item-box"} );
         //image icon
         var liveDataItemBoxPiIcon = $("<img class='center'>");
         liveDataItemBoxPiIcon.attr("src", "flow-server/static/flow/images/icon-device.png");
         liveDataItemBoxPiIcon.attr("width","145");
         liveDataItemBoxPiIcon.appendTo(liveDataItemBoxPi);
         //name of the Pi
-        var liveDataItemBoxPiName  = jQuery("<div>", {class:"live-data-item-box-name", text:controllerName} );
+        var liveDataItemBoxPiName  = $("<div>", {class:"live-data-item-box-name", text:controllerName} );
         //stop button
         var buttonid = "liveDataStopButton" + controllerName;
         var stopButton = $("<button>", { id: buttonid, class:"live-data-item-box-button center",   html: "stop program" } );
 
         //add hidden status indication in case pi is offline
         var statusid = "liveDataStatusDiv" + controllerName;
-        var statusDiv = jQuery("<div>", {id: statusid, class:"live-data-item-box-warning"} );
+        var statusDiv = $("<div>", {id: statusid, class:"live-data-item-box-warning"} );
         //warning icon
         var warningIcon = $("<img class='warning-icon'>");
         warningIcon.attr("src", "flow-server/static/flow/images/icon-warning.png");
         warningIcon.appendTo(statusDiv);
         var statusText = "Offline";
-        var statusMessage = jQuery("<span>", {class:"noSelect", text:statusText} );
+        var statusMessage = $("<span>", {class:"noSelect", text:statusText} );
         statusMessage.appendTo(statusDiv);
 
         liveDataItemBoxPiName.appendTo(liveDataItemBoxPi);
@@ -230,14 +230,14 @@ var LandingPageDataSetView = function(options) {
 
 
         //program section
-        var liveDataItemBoxProgram = jQuery("<div>", {class:"live-data-item-box"} );
+        var liveDataItemBoxProgram = $("<div>", {class:"live-data-item-box"} );
         //image icon
         var liveDataItemBoxProgramIcon = $("<img class='center'>");
         liveDataItemBoxProgramIcon.attr("src", "flow-server/static/flow/images/icon-program.png");
         liveDataItemBoxProgramIcon.attr("width","145");
         liveDataItemBoxProgramIcon.appendTo(liveDataItemBoxProgram);
         //name of the program
-        var liveDataItemBoxProgramName = jQuery("<div>", {class:"live-data-item-box-name", text:programName} );
+        var liveDataItemBoxProgramName = $("<div>", {class:"live-data-item-box-name", text:programName} );
         var viewProgramButton = $("<button>", { class:"live-data-item-box-button center",   html: "view program" } );
         liveDataItemBoxProgramName.appendTo(liveDataItemBoxProgram);
         viewProgramButton.appendTo(liveDataItemBoxProgram);
@@ -273,7 +273,7 @@ var LandingPageDataSetView = function(options) {
         });
 
         //dataset section
-        var liveDataItemBoxData = jQuery("<div>", {class:"live-data-item-box"} );
+        var liveDataItemBoxData = $("<div>", {class:"live-data-item-box"} );
         //image icon
         var liveDataItemBoxProgramIcon = $("<img class='center'>");
         liveDataItemBoxProgramIcon.attr("src", "flow-server/static/flow/images/icon-graph.png");
@@ -283,7 +283,7 @@ var LandingPageDataSetView = function(options) {
         if (displayedFilename == null || displayedFilename == "") {
             displayedFilename = "Untitled Dataset";
         }
-        var liveDataItemBoxDataName = jQuery("<div>", {class:"live-data-item-box-name", text:displayedFilename} );
+        var liveDataItemBoxDataName = $("<div>", {class:"live-data-item-box-name", text:displayedFilename} );
         var viewButton = $("<button>", { class:"live-data-item-box-button center",   html: "view dataset" } );
         liveDataItemBoxDataName.appendTo(liveDataItemBoxData);
 
@@ -294,8 +294,8 @@ var LandingPageDataSetView = function(options) {
             loadDataSet(e.data);
         });
 
-        var liveDataItemConnector1 = jQuery("<div>", {class:"live-data-item-connector"} );
-        var liveDataItemConnector2 = jQuery("<div>", {class:"live-data-item-connector"} );
+        var liveDataItemConnector1 = $("<div>", {class:"live-data-item-connector"} );
+        var liveDataItemConnector2 = $("<div>", {class:"live-data-item-connector"} );
 
         var arrow1 = $("<img class='center'>");
         arrow1.attr("src", "flow-server/static/flow/images/icon-arrow-connector.png");
@@ -436,7 +436,7 @@ var LandingPageDataSetView = function(options) {
     };
 
     base.show = function() {
-        var menucontentholder = jQuery("#" + base.getDivId());
+        var menucontentholder = $("#" + base.getDivId());
         loadDataSets(menucontentholder, liveDataHolder);
     }
 
