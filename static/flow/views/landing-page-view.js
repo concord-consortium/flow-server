@@ -247,10 +247,6 @@ var LandingPageView = function(options) {
         myPrograms.show();
         myDatasets.show();
     }
-    base.hide = function() {
-        jQuery("#" + base.getDivId()).hide();
-        dataSetView.stopLiveUpdates();
-    }
 
     return base;
 }
