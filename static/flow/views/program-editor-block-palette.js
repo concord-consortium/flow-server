@@ -20,21 +20,18 @@ var ProgramEditorBlockPalette = function(options) {
         img.attr('src', "flow-server/static/flow/images/icon-arrow-white.png");
         img.appendTo(chevron);
 
-        if(name == 'Input'){
+        if (name == 'Input') {
             header.addClass('concordblue');
-        }
-        else if(name == 'Logic'){
+        } else if (name == 'Logic') {
             header.addClass('concordgreen');
-        }
-        else if(name == 'Outputs'){
+        } else if (name == 'Outputs') {
             header.addClass('concordorange');
-        }
-        else{
+        } else {
             header.addClass('concordlightblue');
         }
 
         header.click( function(e) {
-            if(content.is(":visible")) {
+            if (content.is(":visible")) {
                 img.attr("src","flow-server/static/flow/images/icon-arrow-right-white.png");
                 content.hide();
             } else {
@@ -47,7 +44,7 @@ var ProgramEditorBlockPalette = function(options) {
         header.append(chevron);
         div.append(content);
 
-        if(collapsedbydefault){
+        if (collapsedbydefault) {
             img.attr("src","flow-server/static/flow/images/icon-arrow-right-white.png");
             content.hide();
         }
@@ -64,82 +61,82 @@ var ProgramEditorBlockPalette = function(options) {
         var btn;
         btn = $('<span>', { class: '' } );
 
-        //icon
+        // Icon
         var menuIcon = $('<img class="menu-icon">');
-        if(type=="temperature")
+        if (type=="temperature") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-temperature.png");
-        else if(type=="humidity")
+        } else if (type=="humidity") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-humidity.png");
-        else if(type=="CO2")
+        } else if (type=="CO2") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-co2.png");
-        else if(type=="O2")
+        } else if (type=="O2") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-o2.png");
-        else if(type=="light")
+        } else if (type=="light") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-light.png");
-        else if(type=="soilmoisture")
+        } else if (type=="soilmoisture") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-soilmoisture.png");
-        else if(type=="number")
+        } else if (type=="number") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-numeric.png");
-        else if(type=="plus")
+        } else if (type=="plus") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-plus.png");
-        else if(type=="minus")
+        } else if (type=="minus") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-minus.png");
-        else if(type=="times")
+        } else if (type=="times") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-times.png");
-        else if(type=="divided by")
+        } else if (type=="divided by") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-divide.png");
-        else if(type=="greater than")
+        } else if (type=="greater than") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-greaterthan.png");
-        else if(type=="less than")
+        } else if (type=="less than") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-lessthan.png");
-        else if(type=="equals")
+        } else if (type=="equals") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-equals.png");
-        else if(type=="not equals")
+        } else if (type=="not equals") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-notequals.png");
-        else if(type=="and")
+        } else if (type=="and") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-and.png");
-        else if(type=="or")
+        } else if (type=="or") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-or.png");
-        else if(type=="not")
+        } else if (type=="not") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-not.png");
-        else if(type=="nand")
+        } else if (type=="nand") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-nand.png");
-        else if(type=="xor")
+        } else if (type=="xor") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-xor.png");
-        else if(type=="absolute value")
+        } else if (type=="absolute value") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-abs.png");
-        else if(type=="moving average")
+        } else if (type=="moving average") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-movingavg.png");
-        else if(type=="exp moving average")
+        } else if (type=="exp moving average") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-expmovingavg.png");
-        else if(type=="timer")
+        } else if (type=="timer") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-timer.png");
-        else if(type=="relay")
+        } else if (type=="relay") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-output-relay.png");
-        else if(type=="plot")
+        } else if (type=="plot") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-output-plot.png");
-        else if(type=="data storage")
+        } else if (type=="data storage") {
             menuIcon.attr('src', "flow-server/static/flow/images/icon-output-data.png");
+        }
 
         menuIcon.attr("height","20");
         menuIcon.appendTo(menuentry);
 
         btn.text(name);
         menuentry.click( function() {
-            if(type=='temperature' || type=='humidity' || type=='CO2' || type=='O2' || type=='light' || type=='soilmoisture')
+            if (type=='temperature' || type=='humidity' || type=='CO2' || type=='O2' || type=='light' || type=='soilmoisture') {
                 programEditorPanel.addDeviceBlock(type);
-            else if(type=='relay')
+            } else if (type=='relay') {
                 programEditorPanel.addRelayBlock("relay");
-            else if(type == "plot")
+            } else if (type == "plot") {
                 programEditorPanel.addPlotBlock("plot");
-            else if(type == "data storage")
+            } else if (type == "data storage") {
                 programEditorPanel.addDataStorageBlock("data storage");
-            else if(type=='number'){
+            } else if (type=='number') {
                 programEditorPanel.addNumericBlock();
-            }
-            else if(type == "timer")
+            } else if (type == "timer") {
                 programEditorPanel.addTimerBlock("timer");
-            else{
+            } else {
                 programEditorPanel.addFilterBlock(type);
             }
         });

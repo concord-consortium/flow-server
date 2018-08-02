@@ -4,7 +4,7 @@
 //
 var ProgramEditorView = function(options) {
     //
-    // create the main content boxes and top bar
+    // Create the main content boxes and top bar
     //
     var base = BaseView(options);
 
@@ -19,7 +19,7 @@ var ProgramEditorView = function(options) {
     topBar.appendTo(mainContentBox);
 
     //
-    // title and icon
+    // Title and icon
     //
     var titleBar  = $('<div>', {class:'topbar-title topbar-title-link noSelect'} );
 
@@ -36,7 +36,7 @@ var ProgramEditorView = function(options) {
     titleBar.appendTo(topBar);
 
     //
-    // program save
+    // Program save
     //
     var saveBar  = $('<div>', {class: 'topbar-save noSelect'} );
     var saveBarBox  = $('<div>', {class: 'topbar-underline-box noSelect'} );
@@ -44,7 +44,7 @@ var ProgramEditorView = function(options) {
     var saveBarStatus  = $('<div>', {id: 'save-program-status', class: 'topbar-save-program-status noSelect'} );
     saveBarStatus.appendTo(saveBar);
 
-    //input field to enter program name
+    // Input field to enter program name
     var programNameField = $('<input>', {
                                             id: 'program-editor-filename',
                                             type: 'text',
@@ -65,11 +65,11 @@ var ProgramEditorView = function(options) {
     programNameField.appendTo(saveBarBox);
 
     //
-    // save program to server
+    // Save program to server
     //
     this.saveProgram = function(completionCallback) {
         var displayedFilename = $('#program-editor-filename').val();
-        if(displayedFilename == null || displayedFilename == "") {
+        if (displayedFilename == null || displayedFilename == "") {
             modalAlert({
                 title: 'Invalid Name',
                 message: "Please enter a valid program name.",
@@ -109,19 +109,19 @@ var ProgramEditorView = function(options) {
                     "[DEBUG] Save program response",
                     response);
 
-                if(response.success) {
-                    if(typeof completionCallback === "function") {
+                if (response.success) {
+                    if (typeof completionCallback === "function") {
                         completionCallback(true);
                     }
                 } else {
-                    if(typeof completionCallback === "function") {
+                    if (typeof completionCallback === "function") {
                         completionCallback(false);
                     }
                 }
             },
             error: function(data) {
                 console.log("[ERROR] Save error", data);
-                if(typeof completionCallback === "function") {
+                if (typeof completionCallback === "function") {
                     completionCallback(false);
                 }
             },
@@ -131,7 +131,7 @@ var ProgramEditorView = function(options) {
     saveBar.appendTo(topBar);
 
     //
-    // device select
+    // Device select
     //
     var deviceBar  = $('<div>', {class:'topbar-device-select noSelect'} );
 
@@ -161,7 +161,7 @@ var ProgramEditorView = function(options) {
     menuData.add('none', this.renameBlock, {name: "none"});
     var dropDownList = createDropDownList({menuData: menuData}).appendTo(menuDiv);
 
-    // program start, stop, view
+    // Program start, stop, view
     var deviceRunHolder  = $('<div>', {class:'topbar-device-control'} );
     var runProgramButton = $('<button>', {   html: 'run' , class: 'topbar-run-button noSelect'} );
     runProgramButton.appendTo(deviceRunHolder);
@@ -185,7 +185,7 @@ var ProgramEditorView = function(options) {
     var welcomeText = $('<span>', {class:'topbar-text topbar-login-text noSelect'});
     var signOut = $('<a>', { href: '/ext/flow/logout', class: 'topbar-text topbar-login-text noSelect' } );
     signOut.text('logout');
-    if(g_user != null) {
+    if (g_user != null) {
         welcomeText.text('Welcome, ' + g_user.full_name + '!');
         welcomeMessage.append(welcomeText);
         welcomeMessage.append($('<span>').text(' '));
@@ -199,7 +199,7 @@ var ProgramEditorView = function(options) {
         welcomeText.text('You are not logged in.');
         welcomeMessage.append(welcomeText);
     }
-    if(g_user != null && g_user.isAdmin) {
+    if (g_user != null && g_user.isAdmin) {
         var adminButton = $('<button>', {   html: 'Admin' , class: 'dataflow-button'} );
         adminButton.click(function(e) {
             showTopLevelView('admin-view');
@@ -337,20 +337,21 @@ var ProgramEditorView = function(options) {
         //
         // If no program to load, create a new program
         //
-        if(!params.filename) {
+        if (!params.filename) {
             programEditorPanel.loadProgram(null, params.displayedName);
             showTopLevelView('program-editor-view');
             return;
         }
 
-        if(params && params.filename) {
+        if (params && params.filename) {
             var hasFolderStructure = params.folderstructure;
             var filename    = params.filename;
             var displayedName    = params.displayedName;
             var url = '/ext/flow/load_program'
             var serverfilename = filename;
-            if(hasFolderStructure)
+            if (hasFolderStructure) {
                 serverfilename = serverfilename + "/program";
+            }
             var data = {    filename:   serverfilename,
                             csrf_token: g_csrfToken      };
 
@@ -368,8 +369,7 @@ var ProgramEditorView = function(options) {
 
                     console.log("[DEBUG] Load program response", response);
 
-                    if(response.success) {
-
+                    if (response.success) {
                         var content = response.content;
                         var programSpec = JSON.parse(content);
                         nameWidget.val(displayedName);

@@ -1,4 +1,4 @@
-var g_nextBlockId = 1;  // used to assign unique numeric IDs to each block
+var g_nextBlockId = 1; // used to assign unique numeric IDs to each block
 
 var BLOCK_HISTORY_LIMIT = 1000;
 
@@ -109,18 +109,18 @@ function createDiagram() {
 // this function is called createFlowBlock rather than createBlock to avoid conflicts with blocks.js library provided by server platform
 function createFlowBlock(blockSpec) {
     var block = {};
-    block.name = blockSpec.name;  // name should be unique
+    block.name = blockSpec.name; // name should be unique
     block.type = blockSpec.type;
     block.units = blockSpec.units;
     block.pins = [];
-    block.inputCount = blockSpec.input_count || 0;  // fix(soon): remove this and use inputPins and outputPins?
+    block.inputCount = blockSpec.input_count || 0; // fix(soon): remove this and use inputPins and outputPins?
     block.outputCount = blockSpec.output_count || 0;
-    block.value = blockSpec.value || null;  // null means no defined value
-    block.stale = true;  // value needs to be updated
-    block.params = blockSpec.params || [];  // for user-set block parameters (e.g. filter parameters)
-    block.inputType = ('input_type' in blockSpec) ? blockSpec.input_type : 'n';  // default to numeric for now
-    block.outputType = ('output_type' in blockSpec) ? blockSpec.output_type : 'n';  // default to numeric for now
-    block.hasSeq = blockSpec.has_seq || false;  // false if corresponds to physical hardware
+    block.value = blockSpec.value || null; // null means no defined value
+    block.stale = true; // value needs to be updated
+    block.params = blockSpec.params || []; // for user-set block parameters (e.g. filter parameters)
+    block.inputType = ('input_type' in blockSpec) ? blockSpec.input_type : 'n'; // default to numeric for now
+    block.outputType = ('output_type' in blockSpec) ? blockSpec.output_type : 'n'; // default to numeric for now
+    block.hasSeq = blockSpec.has_seq || false; // false if corresponds to physical hardware
     block.boxSize = blockSpec.boxSize; //does this need to live on the pi too?
     if (blockSpec.id) {
         block.id = blockSpec.id;
@@ -150,7 +150,7 @@ function createFlowBlock(blockSpec) {
     }
 
     var _allowedFilterTypes = allowedFilterTypes();
-    if(_allowedFilterTypes.indexOf(blockSpec.type) >= 0) {
+    if (_allowedFilterTypes.indexOf(blockSpec.type) >= 0) {
         console.log("[DEBUG] Adding filter methods...");
         addFilterMethods(block, blockSpec.type);
     }
@@ -196,7 +196,7 @@ function createFlowBlock(blockSpec) {
             block.decimalPlaces = decimalPlaces;
 
             // compute new value
-            if (this.outputCount) {  // fix(soon): figure out how to determine whether this is a filter
+            if (this.outputCount) { // fix(soon): figure out how to determine whether this is a filter
                 if (inputs.length == this.inputCount) {
                     // console.log("[DEBUG] Setting computed value", this);
                     this.value = this.computeFilterValue(inputs);
@@ -204,11 +204,14 @@ function createFlowBlock(blockSpec) {
                 } else {
                     this.value = null;
                 }
-            } else {  // no outputs: actuator or display
+            } else { // no outputs: actuator or display
                 if (inputs.length) {
                     this.value = inputs[0];
-                    if (this.virtual === false) {  // send data to actuator
-                        sendMessage('update_actuator', {'name': this.name, 'value': this.value});
+                    if (this.virtual === false) { // send data to actuator
+                        sendMessage('update_actuator', {
+                            'name': this.name,
+                            'value': this.value
+                        });
                     }
                 } else {
                     this.value = null;
@@ -229,26 +232,26 @@ function createFlowBlock(blockSpec) {
         }
         var value = this.value;
         //strip out values from sensors, these should NOT be saved
-        if(this.type == "temperature" ||
-                this.type == "humidity" ||
-                this.type == "light" ||
-                this.type == "soilmoisture" ||
-                this.type == "CO2" ||
-                this.type == "O2")
-                value = null;
+        if (this.type == "temperature" ||
+            this.type == "humidity" ||
+            this.type == "light" ||
+            this.type == "soilmoisture" ||
+            this.type == "CO2" ||
+            this.type == "O2")
+            value = null;
         return {
             id: this.id,
             name: this.name,
             type: this.type,
             units: this.units,
-            sources: sources,  // list of source block IDs
+            sources: sources, // list of source block IDs
             input_count: this.inputCount,
             output_count: this.outputCount,
             input_type: this.inputType,
             output_type: this.outputType,
             has_seq: this.hasSeq,
             params: this.params,
-            value: this.output_type === 'i' ? '' : value,  // only really needed for user input blocks; make sure not saving misc images or sensor values in spec
+            value: this.output_type === 'i' ? '' : value, // only really needed for user input blocks; make sure not saving misc images or sensor values in spec
             view: {
                 x: this.view.x,
                 y: this.view.y,
@@ -256,7 +259,7 @@ function createFlowBlock(blockSpec) {
         }
     };
 
-    block.updateValue = function(value, timestamp){
+    block.updateValue = function(value, timestamp) {
         this.value = value;
 
         // don't store images in history
@@ -283,9 +286,9 @@ function createFlowBlock(blockSpec) {
 function createPin(block, index, isInput) {
     var pin = {};
     pin.block = block;
-    pin.index = index;  // fix(soon): rethink this
+    pin.index = index; // fix(soon): rethink this
     pin.isInput = isInput;
-    pin.sourcePin = null;  // the source pin object (if connected)
+    pin.sourcePin = null; // the source pin object (if connected)
     pin.view = {};
     pin.view.x = 0;
     pin.view.y = 0;
@@ -348,5 +351,8 @@ function diagramToSpec(diagram) {
     for (var i = 0; i < diagram.blocks.length; i++) {
         blocks.push(diagram.blocks[i].asSpec());
     }
-    return {'file_version': '0.1', 'blocks': blocks};
+    return {
+        'file_version': '0.1',
+        'blocks': blocks
+    };
 }
