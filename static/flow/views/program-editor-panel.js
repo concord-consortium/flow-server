@@ -27,8 +27,8 @@ var ProgramEditorPanel = function(options) {
     this.m_activeStartPin   = null;
     this.m_activeLineSvg    = null;
 
-    // auto save and undo variables
-    this.maxSpecHistory = 11; //first item in array is current state so n-1 undos allowed
+    // Auto save and undo variables
+    this.maxSpecHistory = 11; // First item in array is current state so n-1 undos allowed
     this.programSpecStored = [];
     this.saveAgain = false;
     this.saving = false;
@@ -54,7 +54,7 @@ var ProgramEditorPanel = function(options) {
     var holderoffsetx = $("#editor-menu").outerWidth();
     var holderoffsety = $("#editor-topbar").outerHeight();
 
-    //recording/running program
+    // Recording/running program
     var m_runningProgram = false;
 
     //
@@ -69,7 +69,7 @@ var ProgramEditorPanel = function(options) {
 
         updateSaveStatus("");
 
-        if(this.m_svgDrawer == null) {
+        if (this.m_svgDrawer == null) {
             this.m_svgDrawer = SVG('program-holder');
             $('#program-holder').mousemove(this.mouseMove);
             $('#program-holder').mouseup(this.mouseUp);
@@ -77,7 +77,7 @@ var ProgramEditorPanel = function(options) {
 
         // console.log("[DEBUG] loadProgram", programSpec);
 
-        //handle mouseup to stop moving blocks when outside of the program canvas area
+        // Handle mouseup to stop moving blocks when outside of the program canvas area
         $('#program-editor-view').mouseup(this.mouseUp);
 
         //
@@ -90,14 +90,13 @@ var ProgramEditorPanel = function(options) {
         //
         // Default empty program
         //
-        if(!programSpec) {
+        if (!programSpec) {
             $('#program-editor-filename').val(displayedName);
             programSpec = { blocks: [] };
             programSpec.name = this.createDateTimeName("program_");
             programSpec.displayedName = displayedName;
             programSpec.archived = false;
-        }
-        else if(programSpec.name == null || programSpec.name == ""){
+        } else if (programSpec.name == null || programSpec.name == "") {
             // if we loaded a program copy stored in dataset metadata,
             // or if the name value is null or undefined
             // then it might not have a valid file name
@@ -210,7 +209,7 @@ var ProgramEditorPanel = function(options) {
         $("#save-program-status").text(newStatus);
     };
 
-    this.createDateTimeName = function(prefixStr){
+    this.createDateTimeName = function(prefixStr) {
         var d = new Date();
         var year = d.getFullYear();
         var month = d.getMonth() + 1;
@@ -220,31 +219,36 @@ var ProgramEditorPanel = function(options) {
         var sec = d.getSeconds();
 
         var potentialName = prefixStr + year;
-        if(month < 10)
+        if (month < 10) {
             potentialName = potentialName + "0" + month;
-        else
+        } else {
             potentialName = potentialName + month;
-        if(day < 10)
+        }
+        if (day < 10) {
             potentialName = potentialName + "0" + day + "_";
-        else
+        } else {
             potentialName = potentialName + day + "_";
-        if(hour < 10)
+        }
+        if (hour < 10) {
             potentialName = potentialName + "0" + hour;
-        else
+        } else {
             potentialName = potentialName + hour;
-        if(min < 10)
+        }
+        if (min < 10) {
             potentialName = potentialName + "0" + min;
-        else
+        } else {
             potentialName = potentialName + min;
-        if(sec < 10)
+        }
+        if (sec < 10) {
             potentialName = potentialName + "0" + sec;
-        else
+        } else {
             potentialName = potentialName + sec;
+        }
 
         return potentialName;
     };
 
-    this.getProgramName = function(){
+    this.getProgramName = function() {
         return this.m_diagramName;
     };
 
@@ -255,60 +259,49 @@ var ProgramEditorPanel = function(options) {
 
         var blockDiv = $('<div>', {class: 'flowBlock', id: 'b_' + block.id});
         block.view.div = blockDiv;
-        if (block.type === 'exponential moving average' || block.type === 'simple moving average') {// if (block.type === 'number_display_and_input') {
+        if (block.type === 'exponential moving average' || block.type === 'simple moving average') {
              blockDiv.addClass('flowBlockTallWide');
-        }
-        else if (block.type === 'timer') {
+        } else if (block.type === 'timer') {
              blockDiv.addClass('flowBlockTimer');
-        }
-        else if (block.type === 'data storage') {
+        } else if (block.type === 'data storage') {
              blockDiv.addClass('flowBlockData');
-        }
-        else if (block.type === 'plot') {
+        } else if (block.type === 'plot') {
              blockDiv.addClass('flowBlockPlot');
         }
 
         var blockContentDiv;
 
-        if(_this.isDeviceBlock(block.type)) {
+        if (_this.isDeviceBlock(block.type)) {
             blockDiv.addClass('concordblue');
             blockContentDiv = $('<div>', {class: 'flowBlockContent', id: 'bcon_' + block.id});
-        }
-        else if(_this.isFilterBlock(block.type)) {
+        } else if (_this.isFilterBlock(block.type)) {
             blockDiv.addClass('concordgreen');
             blockContentDiv = $('<div>', {class: 'flowBlockContent', id: 'bcon_' + block.id});
-        }
-        else if (block.type === 'number_entry') {
+        } else if (block.type === 'number_entry') {
             blockDiv.addClass('concordgreen');
             blockContentDiv = $('<div>', {class: 'flowBlockContent', id: 'bcon_' + block.id});
-        }
-        else if (block.type === 'relay') {
+        } else if (block.type === 'relay') {
             blockDiv.addClass('concordorange');
             blockContentDiv = $('<div>', {class: 'flowBlockContent', id: 'bcon_' + block.id});
-        }
-        else if (block.type === 'timer') {
+        } else if (block.type === 'timer') {
             blockDiv.addClass('concordgreen');
             blockContentDiv = $('<div>', {class: 'flowBlockContent flowBlockContentTimer', id: 'bcon_' + block.id});
-        }
-        else if (block.type === 'data storage') {
+        } else if (block.type === 'data storage') {
             blockDiv.addClass('concordorange');
             blockContentDiv = $('<div>', {class: 'flowBlockContent flowBlockContentData', id: 'bcon_' + block.id});
 
-            //adjust the size based on the number of connected pins
+            // Adjust the size based on the number of connected pins
             var newDivHeight = 142 + (block.inputCount-1) * 36;
             blockDiv.css('height', newDivHeight + 'px');
             blockContentDiv.css('height', newDivHeight + 'px');
 
-        }
-        else if (block.type === 'exponential moving average' || block.type === 'simple moving average') {//else if (block.type === 'number_display_and_input') {
+        } else if (block.type === 'exponential moving average' || block.type === 'simple moving average') {//else if (block.type === 'number_display_and_input') {
             blockDiv.addClass('concordgreen');
             blockContentDiv = $('<div>', {class: 'flowBlockContent flowBlockContentTallWide', id: 'bcon_' + block.id});
-        }
-        else if (block.type === 'plot') {
+        } else if (block.type === 'plot') {
             blockDiv.addClass('concordorange');
             blockContentDiv = $('<div>', {class: 'flowBlockContent flowBlockContentPlot', id: 'bcon_' + block.id});
-        }
-        else {
+        } else {
             blockDiv.addClass('concordlightblue');
             blockContentDiv = $('<div>', {class: 'flowBlockContent', id: 'bcon_' + block.id});
         }
@@ -318,7 +311,7 @@ var ProgramEditorPanel = function(options) {
         // Add menu
         //
         var menuData = createMenuData();
-        if(!_this.isFilterBlock(block.type) && block.type!="plot") {
+        if (!_this.isFilterBlock(block.type) && block.type!="plot") {
             menuData.add('Rename', this.renameBlock, {id: block.id});
         }
         menuData.add('Delete', this.deleteBlock, {id: block.id});
@@ -338,7 +331,7 @@ var ProgramEditorPanel = function(options) {
         menuHolderDiv.appendTo(blockContentDiv);
 
         //
-        // add name, value, and units
+        // Add name, value, and units
         //
         if (block.type !== 'plot') {
             var namediv = $('<div>', {class: 'flowBlockName flowBlockNameNormal noSelect', id: 'bn_' + block.id, html: block.name});
@@ -364,7 +357,7 @@ var ProgramEditorPanel = function(options) {
         } else {
             var div = $('<div>', {class: 'flowBlockValueAndUnits noSelect'});
             var initval = "...";
-            if (block.type === "data storage"){
+            if (block.type === "data storage") {
                 initval = "";
             }
             var span = $('<span>', {class: 'flowBlockValue', html: initval, id: 'bv_' + block.id});
@@ -391,7 +384,7 @@ var ProgramEditorPanel = function(options) {
 
                 var divflowBlockInputHolder2 = $('<div>', {class: 'flow-block-input-holder flow-block-input-holder-margin'});
                 var divflowBlockInputHolder3 = $('<div>', {class: 'flow-block-input-holder flow-block-input-holder-margin ephemeral-div'});
-            if(block.type === 'data storage' || block.type === 'timer'){
+            if (block.type === 'data storage' || block.type === 'timer') {
                     divflowBlockInputHolder2.appendTo(blockContentDiv);
                 }
 
@@ -401,39 +394,36 @@ var ProgramEditorPanel = function(options) {
                     var displayedParamName = param.name;
                     var input;
                     var divindex = 1;
-                    if(param.name=="period"){
+                    if (param.name=="period") {
                         displayedParamName = "last";
                         $('<div>', {class: 'flow-block-param-label noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder);
                         input = $('<input>', {class: 'form-control flow-block-input', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).appendTo(divflowBlockInputHolder);
-                    }
-                    else if(param.name=="recording_interval"){
+                    }  else if (param.name=="recording_interval") {
                         displayedParamName = "interval";
                         $('<div>', {class: 'flow-block-param-label noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder);
                         $('<div>', {class: 'flow-block-param-label flow-block-param-label-units noSelect', html: "sec"}).appendTo(divflowBlockInputHolder);
                         input = $('<input>', {class: 'form-control flow-block-input', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).appendTo(divflowBlockInputHolder);
-                    }
-                    else if(param.name=="dataset_location"){
+                    } else if (param.name=="dataset_location") {
                         displayedParamName = "name";
                         $('<div>', {class: 'flow-block-param-label noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder2);
                         input = $('<input>', {class: 'form-control flow-block-input flow-block-input-long', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).appendTo(divflowBlockInputHolder2);
-                    }
-                    else if(param.name=="sequence_names"){
+                    } else if (param.name=="sequence_names") {
                         //if loading from file, this might be populated
                         paramKeyArray = Object.keys(param.value);
                         paramValueArray = Object.values(param.value);
                         displayedParamName = "type";
 
-                        for(var p = 0; p < block.pins.length; p++){
-                            if(block.pins[p].sourcePin!=null){
+                        for (var p = 0; p < block.pins.length; p++) {
+                            if (block.pins[p].sourcePin!=null) {
                                 var connectedblockid = block.pins[p].sourcePin.block.id;
 
-                                for(var x = 0; x < (paramKeyArray.length); x++){
-                                    if(connectedblockid == paramKeyArray[x]){
+                                for (var x = 0; x < (paramKeyArray.length); x++) {
+                                    if (connectedblockid == paramKeyArray[x]) {
                                         initval = paramValueArray[x];
                                         break;
                                     }
                                 }
-                                //make a new div to show sequence info
+                                // make a new div to show sequence info
                                 var divflowBlockInputHolderEphemeral = $('<div>', {class: 'flowBlockInputHolder flow-block-input-holder-margin ephemeral-div'});
                                 divflowBlockInputHolderEphemeral.appendTo(blockContentDiv);
 
@@ -455,19 +445,16 @@ var ProgramEditorPanel = function(options) {
                         input = $('<input>', {class: 'form-control flow-block-input flow-block-input-long', type: 'text', id: 'b' + block.id + '_bp_' + param.name + (paramValueArray.length + 1), value: initval}).appendTo(divflowBlockInputHolder3);
 
 
-                    }
-                    else if(param.name=="seconds_off"){
+                    }  else if (param.name=="seconds_off") {
                         displayedParamName = "seconds off";
                         $('<div>', {class: 'flow-block-param-label noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder2);
                         input = $('<input>', {class: 'form-control flow-block-input', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).appendTo(divflowBlockInputHolder2);
-                    }
-                    else if(param.name=="seconds_on"){
+                    } else if (param.name=="seconds_on") {
                         displayedParamName = "seconds on";
                         $('<div>', {class: 'flow-block-param-label noSelect', html: displayedParamName}).appendTo(divflowBlockInputHolder);
                         input = $('<input>', {class: 'form-control flow-block-input', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).appendTo(divflowBlockInputHolder);
 
-                    }
-                    else{
+                    } else {
                         continue;
                     }
 
@@ -518,7 +505,7 @@ var ProgramEditorPanel = function(options) {
         var blockpos = blockDiv.position();
         var blockposleft = blockpos.left;
         var blockpostop = blockpos.top;
-        //console.log("[DEBUG] block t,l=" + blockpostop + ", " + blockposleft);
+        // console.log("[DEBUG] block t,l=" + blockpostop + ", " + blockposleft);
         // console.log("[DEBUG] block w,h=" + w + ", " + h);
 
         block.view.w = w;
@@ -537,20 +524,17 @@ var ProgramEditorPanel = function(options) {
         for (var i = 0; i < block.pins.length; i++) {
             var pin = block.pins[i];
             if (pin.isInput) {
-                if(block.type==="data storage"){
+                if (block.type==="data storage") {
                     pin.view.offsetX = -4;
                     pin.view.offsetY = 124 + (36*i);
-                }
-                else{
+                } else {
                     if (block.inputCount == 1) {
                         pin.view.offsetX = -4;
                         pin.view.offsetY = h / 2;
-                    }
-                    else if (block.inputCount == 2) {
+                    }  else if (block.inputCount == 2) {
                         pin.view.offsetX = 0;
                         pin.view.offsetY = h / 10 + (4 * h) / 5 * pin.index;
-                    }
-                    else if (block.inputCount == 3) {
+                    } else if (block.inputCount == 3) {
                         pin.view.offsetX = 0;
                         pin.view.offsetY = h / 10 + (2 * h) / 5 * pin.index;
                     }
@@ -572,7 +556,7 @@ var ProgramEditorPanel = function(options) {
         }
     };
 
-    // display data in a plot block
+    // Display data in a plot block
     var displayPlot = function(block) {
         var canvas = document.getElementById('bc_' + block.id);
         block.view.plotHandler = createPlotHandler(canvas);
@@ -593,7 +577,7 @@ var ProgramEditorPanel = function(options) {
     };
 
     //
-    // display all blocks in program
+    // Display all blocks in program
     //
     this.displayAllBlocks = function() {
         for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
@@ -605,7 +589,7 @@ var ProgramEditorPanel = function(options) {
     };
 
     //
-    // add block param values to the block div for later retrieval
+    // Add block param values to the block div for later retrieval
     //
     var appendBlockParametersToBlockDiv = function(block, blockDiv) {
         for (var i = 0; i < block.params.length; i++) {
@@ -613,29 +597,25 @@ var ProgramEditorPanel = function(options) {
 
             var initval = param.value;
             var displayedParamName = param.name;
-            if(param.name=="period"){
+            if (param.name=="period") {
                 displayedParamName = "last";
-            }
-            else if(param.name=="recording_interval"){
+            } else if (param.name=="recording_interval") {
                 displayedParamName = "interval";
-            }
-            else if(param.name=="dataset_location"){
+            } else if (param.name=="dataset_location") {
                 displayedParamName = "name";
-            }
-            else if(param.name=="seconds_off"){
+            } else if (param.name=="seconds_off") {
                 displayedParamName = "off";
-            }
-            else if(param.name=="seconds_on"){
+            } else if (param.name=="seconds_on") {
                 displayedParamName = "on";
-            }
-            else{ //if we don't recognize it, skip it for now
+            } else { //if we don't recognize it, skip it for now
                 continue;
             }
             $('<div>', {class: 'flow-block-param-label noSelect', html: displayedParamName}).appendTo(blockDiv);
-            if(i==0)
+            if (i == 0) {
                 var input = $('<input>', {class: 'form-control flow-block-input', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).appendTo(blockDiv);
-            else
+            } else {
                 var input = $('<input>', {class: 'form-control flow-block-input', type: 'text', id: 'b' + block.id + '_bp_' + param.name, value: initval}).prependTo(blockDiv);
+            }
 
             input.mousedown(function(e) {e.stopPropagation()});
             var eventdata = {blockid:block.id, paramname: param.name};
@@ -692,7 +672,7 @@ var ProgramEditorPanel = function(options) {
     };
 
     //
-    // display all connections between blocks
+    // Display all connections between blocks
     //
     this.displayAllConnections = function() {
         for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
@@ -712,8 +692,10 @@ var ProgramEditorPanel = function(options) {
     // Move a block along with its pins and connections
     //
     this.moveBlock = function(block, x, y) {
-        if(m_runningProgram)
+        if (m_runningProgram) {
             return;
+        }
+
         //
         // Move block div
         //
@@ -737,7 +719,7 @@ var ProgramEditorPanel = function(options) {
         }
 
         //
-        // move connections
+        // Move connections
         //
         var destPins = _this.m_diagram.findDestPins(block);
         for (var i = 0; i < destPins.length; i++) {
@@ -779,11 +761,11 @@ var ProgramEditorPanel = function(options) {
             var x = e.pageX;
             var y = e.pageY;
 
-            //bounds check to prevent dragging over UI/UX
-            if((x + _this.m_dragBlockOffsetX)<holderoffsetx){
+            // bounds check to prevent dragging over UI/UX
+            if ((x + _this.m_dragBlockOffsetX)<holderoffsetx) {
                 x = holderoffsetx - _this.m_dragBlockOffsetX;
             }
-            if((y + _this.m_dragBlockOffsetY)<holderoffsety){
+            if ((y + _this.m_dragBlockOffsetY)<holderoffsety) {
                 y = holderoffsety - _this.m_dragBlockOffsetY;
             }
 
@@ -806,7 +788,7 @@ var ProgramEditorPanel = function(options) {
          //console.log("[DEBUG] mouseUp");
         _this.m_activeStartPin = null;
         if (_this.m_dragBlock) {
-            if(dragBlockMoved) {
+            if (dragBlockMoved) {
                 _this.autoSaveProgram(true);
             }
             dragBlockMoved = false;
@@ -877,7 +859,7 @@ var ProgramEditorPanel = function(options) {
             _this.m_diagram.removeBlock(block);
             delete _this.nameHash[block.name];
         }
-        //update any blocks that this action may affect
+        // update any blocks that this action may affect
         _this.updateAllBlocks();
         _this.autoSaveProgram();
     };
@@ -899,10 +881,10 @@ var ProgramEditorPanel = function(options) {
         var startPin = _this.m_activeStartPin;
         if (startPin.isInput != endPin.isInput) {
 
-            //no duplicate connections on data storage block
-            if(endPin.block.type === "data storage"){
-                for(var i = 0; i < endPin.block.pins.length; i++){
-                    if(endPin.block.pins[i].sourcePin == startPin){
+            // no duplicate connections on data storage block
+            if (endPin.block.type === "data storage") {
+                for (var i = 0; i < endPin.block.pins.length; i++) {
+                    if (endPin.block.pins[i].sourcePin == startPin) {
                         return;
                     }
                 }
@@ -918,7 +900,7 @@ var ProgramEditorPanel = function(options) {
             _this.m_activeLineSvg.remove();
             _this.m_activeLineSvg = null;
 
-            //update any blocks that this action may affect
+            // update any blocks that this action may affect
             _this.updateAllBlocks();
             _this.autoSaveProgram();
             // CodapTest.logTopic('Dataflow/ConnectBlock');
@@ -950,7 +932,7 @@ var ProgramEditorPanel = function(options) {
         destPin.sourcePin = null;
         destPin.view.svgConn.remove();
 
-        //update any blocks that this action may affect
+        // update any blocks that this action may affect
         _this.updateAllBlocks();
         _this.autoSaveProgram();
     };
@@ -1011,7 +993,7 @@ var ProgramEditorPanel = function(options) {
     this.getUniqueName = function(name) {
 
         var block = this.nameHash[name];
-        if(!block) {
+        if (!block) {
             return name;
         }
         var count = 2;
@@ -1025,11 +1007,11 @@ var ProgramEditorPanel = function(options) {
     //
     this.newBlockXOffset = function() {
         numb = (_this.m_diagram.blocks.length);
-        if(numb >= 72){
-            numb = numb%72;
+        if (numb >= 72) {
+            numb = numb % 72;
         }
         var r =  Math.floor((numb)/18);
-        var c =  (numb)%18;
+        var c =  (numb) % 18;
         var offset = r * 250 + c * 5;
         return offset;
     }
@@ -1038,10 +1020,10 @@ var ProgramEditorPanel = function(options) {
     //
     this.newBlockYOffset = function() {
         numb = (_this.m_diagram.blocks.length);
-        if(numb >= 72){
-            numb = numb%72;
+        if (numb >= 72) {
+            numb = numb % 72;
         }
-        var c =  (numb)%18;
+        var c =  (numb) % 18;
         var offset = c * 35;
         return offset;
     }
@@ -1116,14 +1098,14 @@ var ProgramEditorPanel = function(options) {
     this.addDataStorageBlock = function(type) {
         type = "data storage";
         var dataStorageBlockAllowed = true;
-        //check if there is an exising data storage block
+        // check if there is an exising data storage block
         for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
             var block = _this.m_diagram.blocks[i];
-            if(block.type=="data storage") {
+            if (block.type=="data storage") {
                 dataStorageBlockAllowed = false;
             }
         }
-        if(!dataStorageBlockAllowed) {
+        if (!dataStorageBlockAllowed) {
             modalAlert({
                 title: 'Program Warning',
                 message: "Only one data storage block allowed per program.",
@@ -1240,11 +1222,10 @@ var ProgramEditorPanel = function(options) {
             blockSpec.input_count = 1;
         }
         if (type === 'moving average'|| type === 'exp moving average') {
-            if (type === 'exp moving average'){
+            if (type === 'exp moving average') {
                 blockSpec.name = "exp moving average";
                 blockSpec.type = "exponential moving average";
-            }
-            else if(type === 'moving average'){
+            } else if (type === 'moving average') {
                  blockSpec.type = "simple moving average";
             }
             blockSpec.input_count = 1;
@@ -1344,7 +1325,7 @@ var ProgramEditorPanel = function(options) {
         }
         // fix(faster): only trigger if value has changed
 
-        //update any blocks that this action may affect
+        // update any blocks that this action may affect
         _this.updateAllBlocks();
         _this.autoSaveProgram();
     }
@@ -1372,12 +1353,13 @@ var ProgramEditorPanel = function(options) {
             var param = block.params[i];
             if (paramname == param.name) {
                 var defval = param['default'];
-                if (isNaN(defval)) { //handle strings first
+                if (isNaN(defval)) { // handle strings first
                     if (paramname == "sequence_names") {
                         var val = $('#b' + block.id + '_bp_' + param.name + divindex).val();
                         val = Util.filterInvalidCharacters(val);
-                        if(stripwhitespace)
+                        if (stripwhitespace) {
                             val = Util.filterWhiteSpaceCharacters(val);
+                        }
                         $('#b' + block.id + '_bp_' + param.name + divindex).val(val);
                         paramKeyArray = Object.keys(param.value);
                         paramValueArray = Object.values(param.value);
@@ -1385,15 +1367,16 @@ var ProgramEditorPanel = function(options) {
                     } else {
                         var val = $('#b' + block.id + '_bp_' + param.name).val();
                         val = Util.filterInvalidCharacters(val);
-                        if(stripwhitespace)
+                        if (stripwhitespace) {
                             val = Util.filterWhiteSpaceCharacters(val);
+                        }
                         $('#b' + block.id + '_bp_' + param.name).val(val);
                         param.value = val;
                     }
                 } else {
                     var str = $('#b' + block.id + '_bp_' + param.name).val();
-                    str = str.replace ( /[^0-9.]/g, '' ); //strip out non-numeric values
-                    $('#b' + block.id + '_bp_' + param.name).val(str); //put stripped back in the input field
+                    str = str.replace ( /[^0-9.]/g, '' ); // strip out non-numeric values
+                    $('#b' + block.id + '_bp_' + param.name).val(str); // put stripped back in the input field
                     var val = parseFloat(str);
                     if (isNaN(val)) {
                         param.value = param['default'];
@@ -1405,7 +1388,7 @@ var ProgramEditorPanel = function(options) {
             }
         }
 
-        //update any blocks that this action may affect
+        // update any blocks that this action may affect
         _this.updateAllBlocks();
         _this.autoSaveProgram();
     }
@@ -1425,8 +1408,8 @@ var ProgramEditorPanel = function(options) {
         var ret = [];
         for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
             var block = _this.m_diagram.blocks[i];
-            if(_this.isDeviceBlock(block.type)) {
-                if(!_this.receivedSensorData[block.name]) {
+            if (_this.isDeviceBlock(block.type)) {
+                if (!_this.receivedSensorData[block.name]) {
                     ret.push(block.name);
                 }
             }
@@ -1439,10 +1422,10 @@ var ProgramEditorPanel = function(options) {
     //
     this.handleSensorData = function(timestamp, params) {
         // console.log("[DEBUG] handleSensorData", params);
-        if(params.data) {
+        if (params.data) {
             // console.log("[DEBUG] handleSensorData updating blocks.");
             _this.receivedSensorData = {};
-            for(var i = 0; i < params.data.length; i++) {
+            for (var i = 0; i < params.data.length; i++) {
                 var sensor  = params.data[i];
                 var name    = sensor.name;
                 var value   = sensor.value;
@@ -1458,13 +1441,13 @@ var ProgramEditorPanel = function(options) {
             // Check for device blocks for which we did not receive any data
             // and set their values to null.
             //
-            if(_this.m_diagram == null){
+            if (_this.m_diagram == null) {
                 return;
             }
             for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
                 var block = _this.m_diagram.blocks[i];
-                if(_this.isDeviceBlock(block.type)) {
-                    if(!_this.receivedSensorData[block.name]) {
+                if (_this.isDeviceBlock(block.type)) {
+                    if (!_this.receivedSensorData[block.name]) {
                         block.updateValue(null);
                         _this.displayBlockValue(block);
                     }
@@ -1474,7 +1457,7 @@ var ProgramEditorPanel = function(options) {
             //
             // Now compute values for non-sensor blocks
             //
-            //console.log("[DEBUG] diagram.update()");
+            // console.log("[DEBUG] diagram.update()");
             _this.m_diagram.update();
 
             //
@@ -1491,10 +1474,10 @@ var ProgramEditorPanel = function(options) {
         //
         // Now compute values for non-sensor blocks
         //
-        //console.log("[DEBUG] diagram.update()");
+        // console.log("[DEBUG] diagram.update()");
         _this.m_diagram.update();
 
-        //update pins
+        // update pins
         _this.updateDataStoragePins();
 
         //
@@ -1511,32 +1494,33 @@ var ProgramEditorPanel = function(options) {
     //
     this.updateDataStoragePins = function () {
         for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
-            if(_this.m_diagram.blocks[i].type === "data storage"){
+            if (_this.m_diagram.blocks[i].type === "data storage") {
                 var numConnectedPins = 0;
                 var deletionIndex = 0;
                 var deletionBlockId = 0;
-                //how many pins are connected to this block?
+                // how many pins are connected to this block?
                 var numPins = _this.m_diagram.blocks[i].inputCount;
-                for(var x = 0; x < _this.m_diagram.blocks[i].pins.length; x++){
-                    if(_this.m_diagram.blocks[i].pins[x].sourcePin!=null){
+                for (var x = 0; x < _this.m_diagram.blocks[i].pins.length; x++) {
+                    if (_this.m_diagram.blocks[i].pins[x].sourcePin!=null) {
                         numConnectedPins++;
                     }
                 }
-                if(numPins == (numConnectedPins + 1)){
+                if (numPins == (numConnectedPins + 1)) {
                     return;
                 }
                 else{
-                    //we have an incorrect number of pins, need to add or subtract something
+                    // we have an incorrect number of pins, need to add or subtract something
 
                     var addingPin = true;
-                    if(numPins > (numConnectedPins + 1))
+                    if (numPins > (numConnectedPins + 1)) {
                         addingPin = false;
+                    }
                     var connectedId;
 
                     var newPinCount = numConnectedPins + 1;
                     _this.m_diagram.blocks[i].inputCount = numConnectedPins + 1;
 
-                    if(addingPin){
+                    if (addingPin) {
                         var pin = createPin(_this.m_diagram.blocks[i], 1, true);
                         _this.m_diagram.blocks[i].pins.push(pin);
 
@@ -1567,24 +1551,23 @@ var ProgramEditorPanel = function(options) {
                         pin.view.svg = pinSvg;
                     }
                     else{
-                        //determine the pin that needs to be removed
-                        for(var x = 0; x < _this.m_diagram.blocks[i].pins.length; x++){
-                            if(_this.m_diagram.blocks[i].pins[x].sourcePin==null){
+                        // determine the pin that needs to be removed
+                        for (var x = 0; x < _this.m_diagram.blocks[i].pins.length; x++) {
+                            if (_this.m_diagram.blocks[i].pins[x].sourcePin==null) {
                                 _this.m_diagram.blocks[i].pins[x].view.svg.remove();
                                 _this.m_diagram.blocks[i].pins.splice(x, 1);
-                               // deletionIndex = x;
                                 break;
                             }
                         }
-                        //reposition the remaining pins
+                        // reposition the remaining pins
                         var y = _this.m_diagram.blocks[i].view.y;
-                        for(var x = 0; x < _this.m_diagram.blocks[i].pins.length; x++){
+                        for (var x = 0; x < _this.m_diagram.blocks[i].pins.length; x++) {
                             _this.m_diagram.blocks[i].pins[x].view.offsetY = 124 + (x*36);
                             _this.m_diagram.blocks[i].pins[x].view.y = y + _this.m_diagram.blocks[i].pins[x].view.offsetY;
                         }
                     }
 
-                    //update the block params
+                    // update the block params
                     var paramSequenceObject;
                     var paramKeyArray;
                     var paramValueArray;
@@ -1592,13 +1575,13 @@ var ProgramEditorPanel = function(options) {
                     var newlyConnectedBlockName;
                     for (var pa = 0; pa < _this.m_diagram.blocks[i].params.length; pa++) {
                         paramSequenceObject = _this.m_diagram.blocks[i].params[pa];
-                        if(paramSequenceObject.name=="sequence_names"){
+                        if (paramSequenceObject.name=="sequence_names") {
 
-                            //found the sequence names params
-                            if(addingPin){
-                                //the newly connected pin
+                            // found the sequence names params
+                            if (addingPin) {
+                                // the newly connected pin
                                 newlyConnectedBlockId = _this.m_diagram.blocks[i].pins[numConnectedPins-1].sourcePin.block.id;
-                                //get sequence name from block name
+                                // get sequence name from block name
                                 newlyConnectedBlockName = _this.m_diagram.blocks[i].pins[numConnectedPins-1].sourcePin.block.name;
                                 var potentialSequenceName = newlyConnectedBlockName;
                                 var count = 0;
@@ -1606,8 +1589,8 @@ var ProgramEditorPanel = function(options) {
                                 paramValueArray = Object.values(_this.m_diagram.blocks[i].params[pa].value);
                                 do {
                                     unique = true;
-                                    for(var pv = 0; pv < paramValueArray.length; pv++){
-                                        if(potentialSequenceName == paramValueArray[pv]){
+                                    for (var pv = 0; pv < paramValueArray.length; pv++) {
+                                        if (potentialSequenceName == paramValueArray[pv]) {
                                             count++;
                                             potentialSequenceName = newlyConnectedBlockName + count;
                                             unique = false;
@@ -1615,61 +1598,61 @@ var ProgramEditorPanel = function(options) {
                                         }
                                     }
                                 } while(unique==false);
-                                //get the sequence name from the div
+                                // get the sequence name from the div
                                 _this.m_diagram.blocks[i].params[pa].value[newlyConnectedBlockId] = potentialSequenceName;
                             }
                             else{
                                 paramKeyArray = Object.keys(paramSequenceObject.value);
                                 var deletionId;
-                                //determine the param that needs to be removed
-                                for(var pk = 0; pk < paramKeyArray.length; pk++){
+                                // determine the param that needs to be removed
+                                for (var pk = 0; pk < paramKeyArray.length; pk++) {
                                     var foundit = false;
-                                    for(var pi = 0; pi < _this.m_diagram.blocks[i].pins.length; pi++){
-                                        if(_this.m_diagram.blocks[i].pins[pi].sourcePin!=null){
-                                            if(_this.m_diagram.blocks[i].pins[pi].sourcePin.block.id == paramKeyArray[pk]){
+                                    for (var pi = 0; pi < _this.m_diagram.blocks[i].pins.length; pi++) {
+                                        if (_this.m_diagram.blocks[i].pins[pi].sourcePin!=null) {
+                                            if (_this.m_diagram.blocks[i].pins[pi].sourcePin.block.id == paramKeyArray[pk]) {
                                                 foundit = true;
                                                 break;
                                             }
                                         }
                                     }
-                                    if(!foundit){
+                                    if (!foundit) {
                                         deletionId = paramKeyArray[pk];
                                         break;
                                     }
                                 }
                                 delete _this.m_diagram.blocks[i].params[pa].value[deletionId];
                             }
-                            //generate arrays of the keys and values, we need these to create the HTML divs
+                            // generate arrays of the keys and values, we need these to create the HTML divs
                             paramKeyArray = Object.keys(_this.m_diagram.blocks[i].params[pa].value);
                             paramValueArray = Object.values(_this.m_diagram.blocks[i].params[pa].value);
                         }
                     }
 
 
-                    //adjust the size based on the number of connected pins
+                    // adjust the size based on the number of connected pins
                     var newDivHeight = 142 + (newPinCount-1) * 36;
                     $("#b_" + _this.m_diagram.blocks[i].id ).css('height', newDivHeight + 'px');
                     $("#bcon_" + _this.m_diagram.blocks[i].id ).css('height', newDivHeight + 'px');
                     _this.m_diagram.blocks[i].view.h = newDivHeight;
 
-                    //remove all existing ephemeral divs
+                    // remove all existing ephemeral divs
                     $('.ephemeral-div').remove()
-                    //create divs
-                    for(var x = 0; x < (newPinCount); x++){
-                        //make a new div to show sequence info
+                    // create divs
+                    for (var x = 0; x < (newPinCount); x++) {
+                        // make a new div to show sequence info
                         var divflowBlockInputHolder = $('<div>', {class: 'flow-block-input-holder flow-block-input-holder-margin ephemeral-div'});
                         $("#bcon_" + _this.m_diagram.blocks[i].id ).append(divflowBlockInputHolder);
                         var displayedParamName = "type";
                         var initval = "";//"data type" + (x+1);
 
-                        //get the block id from each connected pin, use that block id to get sequence name to put here
+                        // get the block id from each connected pin, use that block id to get sequence name to put here
                         var connectedBlockId = -1;
-                        //find the id on the xth pin
-                        if(_this.m_diagram.blocks[i].pins[x].sourcePin!=null){
+                        // find the id on the xth pin
+                        if (_this.m_diagram.blocks[i].pins[x].sourcePin!=null) {
                             connectedBlockId = _this.m_diagram.blocks[i].pins[x].sourcePin.block.id;
                             var pindex = 0;
-                            for(var pk = 0; pk < paramKeyArray.length; pk++){
-                                if(connectedBlockId == paramKeyArray[pk]){
+                            for (var pk = 0; pk < paramKeyArray.length; pk++) {
+                                if (connectedBlockId == paramKeyArray[pk]) {
                                     pindex = pk;
                                     break;
                                 }
@@ -1687,7 +1670,7 @@ var ProgramEditorPanel = function(options) {
                         input.focusout(eventdata, _this.paramEntryFocusOut);
                     }
 
-                    //force refresh of block so we display pins and connections correctly
+                    // force refresh of block so we display pins and connections correctly
                     _this.moveBlock(_this.m_diagram.blocks[i],
                             _this.m_diagram.blocks[i].view.x,
                             _this.m_diagram.blocks[i].view.y );
@@ -1727,26 +1710,28 @@ var ProgramEditorPanel = function(options) {
                 console.log('set image ' + block.value.length);
                 $('#bi_' + block.id).attr('src', 'data:image/jpeg;base64,' + block.value);
             }
-        } else if (block.type === "data storage"){
+        } else if (block.type === "data storage") {
             $('#bv_' + block.id).html('');
-        } else if (block.type === "relay"){
+        } else if (block.type === "relay") {
             var mag = Math.abs(block.value);
-            if(mag >= 1)
+            if (mag >= 1) {
                 $('#bv_' + block.id).html('on');
-            else
+            }
+            else {
                 $('#bv_' + block.id).html('off');
+            }
         }
         else {
             if (block.value === null) {
                 $('#bv_' + block.id).html('...');
             } else {
-                if(block.value > 10000){
+                if (block.value > 10000) {
                     var roundednum = Math.round(block.value * 1) / 1;
                 }
-                else if(block.value > 1000){
+                else if (block.value > 1000) {
                     var roundednum = Math.round(block.value * 10) / 10;
                 }
-                else if(block.value > 100){
+                else if (block.value > 100) {
                     var roundednum = Math.round(block.value * 100) / 100;
                 }
                 else{
@@ -1788,11 +1773,11 @@ var ProgramEditorPanel = function(options) {
         var ret = "";
         for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
             var block = _this.m_diagram.blocks[i];
-            if(block.type === "data storage") {
+            if (block.type === "data storage") {
                 for (var x = 0; x < block.params.length; x++) {
                     var param = block.params[x];
                     var val = param.value
-                    if(param.name=="dataset_location"){
+                    if (param.name=="dataset_location") {
                         ret = val;
                         break;
                     }
@@ -1809,7 +1794,7 @@ var ProgramEditorPanel = function(options) {
         var ret = false;
         for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
             var block = _this.m_diagram.blocks[i];
-            if(block.type === "data storage") {
+            if (block.type === "data storage") {
                 ret = true;
                 break;
             }
@@ -1824,15 +1809,15 @@ var ProgramEditorPanel = function(options) {
         var ret = true;
         for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
             var block = _this.m_diagram.blocks[i];
-            if(block.type === "data storage") {
+            if (block.type === "data storage") {
                 for (var x = 0; x < block.params.length; x++) {
                     var param = block.params[x];
                     var val = param.value
-                    if(param.name=="sequence_names"){
+                    if (param.name=="sequence_names") {
                         var paramKeyArray = Object.keys(param.value);
                         var paramValueArray = Object.values(param.value);
-                        for(var x = 0; x < (paramValueArray.length); x++){
-                            if(paramValueArray == ""){
+                        for (var x = 0; x < (paramValueArray.length); x++) {
+                            if (paramValueArray == "") {
                                 ret = false;
                                 break;
                             }
@@ -1848,7 +1833,7 @@ var ProgramEditorPanel = function(options) {
     //
     // update blocks when pi is unselected
     //
-    this.piUnselected = function (){
+    this.piUnselected = function () {
         //
         // Clear any old sensor data being displayed.
         // Do this by calling the handler with an empty array of
@@ -1861,7 +1846,7 @@ var ProgramEditorPanel = function(options) {
     // Notify program editor we are in record mode
     //
     this.toggleRunProgramMode = function(running) {
-        if(running){
+        if (running) {
             this.m_runningProgram = true;
             $("#program-holder-overlay").css("display", "block");
         }

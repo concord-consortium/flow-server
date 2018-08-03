@@ -4,7 +4,7 @@ function addFilterMethods(block, type) {
 
     // make sure this is an allowed type
     var _allowedFilterTypes = allowedFilterTypes();
-    if(_allowedFilterTypes.indexOf(type) == -1) {
+    if (_allowedFilterTypes.indexOf(type) == -1) {
         console.log("Invalid filter block type: " + type);
         return;
     }
@@ -57,11 +57,11 @@ function addFilterMethods(block, type) {
                 };
             case 'divided by':
                 return function(inputs) {
-                    return (Math.abs( inputs[1] ) > 1e-8) ? inputs[0] / inputs[1] : 0;
+                    return (Math.abs(inputs[1]) > 1e-8) ? inputs[0] / inputs[1] : 0;
                 };
             case 'absolute value':
                 return function(inputs) {
-                    return Math.abs( inputs[0] );
+                    return Math.abs(inputs[0]);
                 };
             case 'equals':
                 return function(inputs) {
@@ -81,11 +81,11 @@ function addFilterMethods(block, type) {
                 };
             case 'simple moving average':
                 return function(inputs) {
-                    return block.computeMovingAverage(inputs[0], block.params[0].value);//return block.computeMovingAverage(inputs[0], block.boxSize);
+                    return block.computeMovingAverage(inputs[0], block.params[0].value); //return block.computeMovingAverage(inputs[0], block.boxSize);
                 };
             case 'exponential moving average':
                 return function(inputs) {
-                    return block.computeEMA(inputs[0], block.params[0].value);//return block.computeEMA(inputs[0], block.boxSize);
+                    return block.computeEMA(inputs[0], block.params[0].value); //return block.computeEMA(inputs[0], block.boxSize);
                 };
         }
     })();
@@ -96,12 +96,12 @@ function addFilterMethods(block, type) {
         var avg = 0;
 
         block.averageStorage.push(newValue);
-        if(block.averageStorage.length > boxSize) {
+        if (block.averageStorage.length > boxSize) {
             block.averageStorage.shift();
         }
 
         var len = block.averageStorage.length;
-        if(len > 0){
+        if (len > 0) {
             for (var i = 0; i < len; i++) {
                 avg += block.averageStorage[i] / len;
             }
@@ -127,12 +127,12 @@ function addFilterMethods(block, type) {
             //var alpha = boxSize / (boxSize + 1);
             //avg = block.lastAverage * alpha + newValue * (1 - alpha);
 
-            if(isNaN(newValue) || newValue==null || newValue==undefined) {
+            if (isNaN(newValue) || newValue == null || newValue == undefined) {
                 //something went wrong and we were passed a bad value
                 //reuse the previous value
                 avg = block.lastAverage;
             }
-            else{
+            else {
                 //correct computation of EMA
                 //k = 2/(n+1) or alpha = 2/(boxsize + 1)
                 //ema = current*k + emaPrev * (1-k) or avg = newValue*k + block.lastAverage * (1-alpha)
@@ -140,10 +140,10 @@ function addFilterMethods(block, type) {
                 avg = newValue * alpha + block.lastAverage * (1 - alpha);
             }
         }
-        else{
+        else {
             //we have no previous EMA, start with an average of existing values
             //in this case this is just the currentVal (since we only have 1 value)
-            if(newValue!=undefined && newValue!=null && !isNaN(newValue))
+            if (newValue != undefined && newValue != null && !isNaN(newValue))
                 avg = newValue;
         }
         block.lastAverage = avg;
@@ -159,4 +159,3 @@ function allowedFilterTypes() {
         "equals", "not equals", "less than", "greater than",
     ];
 }
-

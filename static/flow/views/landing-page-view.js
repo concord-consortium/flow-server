@@ -8,7 +8,7 @@
 var LandingPageView = function(options) {
 
     //
-    // create the main content boxes and top bar
+    // Create the main content boxes and top bar
     //
     var base = BaseView(options);
 
@@ -22,11 +22,11 @@ var LandingPageView = function(options) {
 
     topBar.appendTo(mainContentBox);
 
-    //icon and title in upper left
+    // Icon and title in upper left
     var titleBar  = $("<div>", {class: "topbar-title noSelect"} );
 
     //
-    // title and icon
+    // Title and icon
     //
     var titleBarIcon = $("<img class='topbar-icon'>");
     titleBarIcon.attr("src", "flow-server/static/flow/images/icon-home.png");
@@ -75,7 +75,7 @@ var LandingPageView = function(options) {
 
     menuAndContentHolder.appendTo(mainContentBox);
 
-    //load dataset-view
+    // Load dataset-view
     base.loadDataSet = function(dataSet) {
          var success = dataSetView.loadDataSet(dataSet);
          if (success) {
@@ -85,7 +85,7 @@ var LandingPageView = function(options) {
          }
     }
 
-    //resize div
+    // Resize div
     base.resizeMenuAndContentHolder = function() {
         const paddingHeight = 70; //20 for dividers, 50 for usability
         var contentHeight = menuTopButtonHolder.height();
@@ -132,14 +132,13 @@ var LandingPageView = function(options) {
         var editor = getTopLevelView("program-editor-view");
         if (editor.programLoaded() ) {
             showTopLevelView("program-editor-view");
-        }
-        else{
+        } else {
             getNewProgramName();
         }
     });
 
     //
-    // live data
+    // Live data
     //
     var liveDataHolder = $("<div>", {class: "live-data-holder"} );
     liveDataHolder.appendTo(menuAndContentHolder);
@@ -147,7 +146,7 @@ var LandingPageView = function(options) {
     liveDataTitleBar.appendTo(liveDataHolder);
 
     //
-    // dataview
+    // Dataview
     //
     var dataSetViewDiv = $("<div>", {id: "data-set-view", class: "dataset-view"} );
     dataSetViewDiv.appendTo(menuAndContentHolder);
@@ -155,7 +154,7 @@ var LandingPageView = function(options) {
     var dataSetView = DataSetView({id: "data-set-view", liveDataHolder: liveDataHolder});
 
     //
-    // programs
+    // Programs
     //
     var programsContent = $("<div>");
     var myProgramsDiv = $("<div>", { id: "landing-page-my-programs-view"} );
@@ -164,7 +163,7 @@ var LandingPageView = function(options) {
     var myPrograms = LandingPageMyProgramsView({id: "landing-page-my-programs-view"});
 
     //
-    // create generic landing page menu sections with collapsable content
+    // Create generic landing page menu sections with collapsable content
     //
     var createLandingPageMenuSection = function(name, content) {
         var str = name.replace(/\s/g, "");
@@ -201,7 +200,7 @@ var LandingPageView = function(options) {
     programsHeader.appendTo(menuHolder);
 
     //
-    // create the landing page menu entry for new program
+    // Create the landing page menu entry for new program
     //
     var createLandingPageNewProgramMenuEntry = function() {
 
@@ -220,7 +219,7 @@ var LandingPageView = function(options) {
         return menuentry;
     }
     //
-    // new program
+    // New program
     //
     var newProgramHeader = createLandingPageNewProgramMenuEntry();
     newProgramHeader.prependTo(programsContent);
@@ -230,7 +229,7 @@ var LandingPageView = function(options) {
 
 
     //
-    // data
+    // Data
     //
     var dataContent = $("<div>");
     var myDataDiv = $("<div>", { id: "landing-page-dataset-view"} );
