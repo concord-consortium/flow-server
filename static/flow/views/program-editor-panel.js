@@ -162,12 +162,12 @@ var ProgramEditorPanel = function(options) {
 
         _this.displayAllConnections();
 
+        _this.updateAllBlocks();
+        
         // resave program, but do not resave the state
         _this.autoSaveProgram(false, false);
 
         _this.lastChangeMoveBlock = false;
-
-        _this.updateAllBlocks();
     };
 
     // bind the undo key when we init, be sure only to call once
