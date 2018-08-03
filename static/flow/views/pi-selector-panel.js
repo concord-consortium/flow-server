@@ -29,6 +29,10 @@ var PiSelectorPanel = function(options) {
     var loadPiListTimer;
     var loadPiListTimerInterval = 30000; //30 seconds
 
+    // Check if start/stop program is not responding
+    var piResponseTimer;
+    var piResponseTimerInterval = 1000; //30 seconds
+
     //
     // Devices: list of available pis and refresh button
     //
@@ -625,6 +629,7 @@ var PiSelectorPanel = function(options) {
                         username:   g_user.user_name };
 
             startRecordingParams.response_func = function(ts, params) {
+            disablePiResponseTimer();
             if (params.success) {
                 $('#dataset-name-textfield').val('');
 
@@ -651,6 +656,7 @@ var PiSelectorPanel = function(options) {
         }
         var startRecording = MessageExecutor(startRecordingParams);
         startRecording.execute();
+        restartPiResponseTimer(true);
     });
 
     //
@@ -685,6 +691,7 @@ var PiSelectorPanel = function(options) {
             target_folder:  stopControllerPath,
             src_folder:     stopControllerPath,
             response_func:  function(ts, params) {
+                disablePiResponseTimer();
                 if (params.success) {
                     modalAlert({title: 'Stop Program', message: 'Program stopped', nextFunc: function() {
                         if (typeof refreshCallback === "function") {
@@ -715,6 +722,7 @@ var PiSelectorPanel = function(options) {
 
         var stopDiagram = MessageExecutor(stopRecordingParams);
         stopDiagram.execute();
+        restartPiResponseTimer(true, resetDeviceControls, refreshCallback);
     }
 
     //
@@ -739,6 +747,37 @@ var PiSelectorPanel = function(options) {
     //
     this.disableLoadPiListTimer = function() {
         clearTimeout(loadPiListTimer);
+    }
+
+    //
+    // Start timer to determine if pi communication is taking too long
+    //
+    this.restartPiResponseTimer = function(runProgram, resetDeviceControls, refreshCallback) {
+        clearTimeout(piResponseTimer);
+        piResponseTimer = setTimeout(stopWaitingForResponse, piResponseTimerInterval, runProgram);
+    }
+    this.disablePiResponseTimer = function() {
+        clearTimeout(piResponseTimer);
+    }
+    function stopWaitingForResponse(runProgram, resetDeviceControls, refreshCallback) {
+        // Clear message handler
+        removeMessageHandlers();
+
+        modalAlert({title: 'Pi Timeout', message: 'Communication with Pi is taking longer than expected. Please try again. If issue continues, try rebooting Pi.', nextFunc: function() {
+            // Restore UI
+            if (runProgram) {
+                updateProgramButtons(false, false, false);
+            } else {
+                if (typeof refreshCallback === "function") {
+                    refreshCallback();
+                }
+                if (resetDeviceControls) {
+                    // Failed to stop, restore stop button
+                    var showViewDataButton = viewDataButton.is(':visible');
+                    updateProgramButtons(false, true, showViewDataButton);
+                }
+            }
+        }});
     }
 
     //
