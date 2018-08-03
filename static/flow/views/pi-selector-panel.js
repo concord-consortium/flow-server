@@ -765,6 +765,7 @@ var PiSelectorPanel = function(options) {
             // Restore UI
             if (runProgram) {
                 exitRunProgramState();
+                reselectCurrentPi();
             } else {
                 if (typeof refreshCallback === "function") {
                     refreshCallback();
