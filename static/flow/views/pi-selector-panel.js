@@ -31,7 +31,7 @@ var PiSelectorPanel = function(options) {
 
     // Check if start/stop program is not responding
     var piResponseTimer;
-    var piResponseTimerInterval = 1000; //30 seconds
+    var piResponseTimerInterval = 30000; //30 seconds
 
     //
     // Devices: list of available pis and refresh button
@@ -690,7 +690,7 @@ var PiSelectorPanel = function(options) {
             src_folder:     stopControllerPath,
             response_func:  function(ts, params) {
                 disablePiResponseTimer();
-                if (params.success) {
+                if (params.success && false) {
                     modalAlert({title: 'Stop Program', message: 'Program stopped', nextFunc: function() {
                         if (typeof refreshCallback === "function") {
                             refreshCallback();
@@ -701,18 +701,18 @@ var PiSelectorPanel = function(options) {
                         }
                     }});
                 } else {
-                    if (typeof refreshCallback === "function") {
-                        refreshCallback();
-                    }
-                    if (resetDeviceControls) {
-                        // failed to stop, restore stop button
-                        var showViewDataButton = viewDataButton.is(':visible');
-                        updateProgramButtons(false, true, showViewDataButton);
-                    }
                     modalAlert({
                         title: 'Program Stop Error',
                         message: "Error stopping program: " + params.message,
                         nextFunc: function() {
+                            if (typeof refreshCallback === "function") {
+                                refreshCallback();
+                            }
+                            if (resetDeviceControls) {
+                                // failed to stop, restore stop button
+                                var showViewDataButton = viewDataButton.is(':visible');
+                                updateProgramButtons(false, true, showViewDataButton);
+                            }                           
                         }});
                 }
             }
