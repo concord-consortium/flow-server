@@ -31,7 +31,7 @@ var PiSelectorPanel = function(options) {
 
     // Check if start/stop program is not responding
     var piResponseTimer;
-    var piResponseTimerInterval = 30000; //30 seconds
+    var piResponseTimerInterval = 1000; //30 seconds
 
     //
     // Devices: list of available pis and refresh button
@@ -630,7 +630,7 @@ var PiSelectorPanel = function(options) {
 
             startRecordingParams.response_func = function(ts, params) {
             disablePiResponseTimer();
-            if (params.success && false) {
+            if (params.success) {
                 $('#dataset-name-textfield').val('');
 
                 modalAlert({title: 'Run Program', message: 'Program is now running on ' + controller.name, nextFunc: function() {
@@ -764,7 +764,7 @@ var PiSelectorPanel = function(options) {
         modalAlert({title: 'Pi Timeout', message: 'Communication with Pi is taking longer than expected. Please try again. If issue continues, try rebooting Pi.', nextFunc: function() {
             // Restore UI
             if (runProgram) {
-                updateProgramButtons(false, false, false);
+                exitRunProgramState();
             } else {
                 if (typeof refreshCallback === "function") {
                     refreshCallback();
