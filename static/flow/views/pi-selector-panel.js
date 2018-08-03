@@ -31,7 +31,7 @@ var PiSelectorPanel = function(options) {
 
     // Check if start/stop program is not responding
     var piResponseTimer;
-    var piResponseTimerInterval = 1000; //30 seconds
+    var piResponseTimerInterval = 30000; //30 seconds
 
     //
     // Devices: list of available pis and refresh button
@@ -630,7 +630,7 @@ var PiSelectorPanel = function(options) {
 
             startRecordingParams.response_func = function(ts, params) {
             disablePiResponseTimer();
-            if (params.success) {
+            if (params.success && false) {
                 $('#dataset-name-textfield').val('');
 
                 modalAlert({title: 'Run Program', message: 'Program is now running on ' + controller.name, nextFunc: function() {
@@ -644,8 +644,6 @@ var PiSelectorPanel = function(options) {
                     reselectCurrentPi();
                 }});
             } else {
-                runProgramButton.prop("disabled", false);
-                runProgramButton.removeClass("button-disabled noHover");
                 modalAlert({
                     title: 'Program Run Error',
                     message: "Error running program on " + controller.name + ": " + params.message,
