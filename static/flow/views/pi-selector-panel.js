@@ -755,7 +755,7 @@ var PiSelectorPanel = function(options) {
         if(runProgram)
             piResponseTimer = setTimeout(stopWaitingForResponse, piResponseTimerInterval, runProgram);
         else
-            piResponseTimer = setTimeout(stopWaitingForResponse, 1, runProgram);
+            piResponseTimer = setTimeout(stopWaitingForResponse, 1, runProgram, resetDeviceControls, refreshCallback);
     }
 
     //
