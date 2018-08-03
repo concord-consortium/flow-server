@@ -115,6 +115,8 @@ var ProgramEditorPanel = function(options) {
 
         this.displayAllConnections();
 
+        this.updateAllBlocks();
+
         this.lastChangeMoveBlock = false;
         storeProgramState(false);
     };
@@ -164,6 +166,8 @@ var ProgramEditorPanel = function(options) {
         _this.autoSaveProgram(false, false);
 
         _this.lastChangeMoveBlock = false;
+
+        _this.updateAllBlocks();
     };
 
     // bind the undo key when we init, be sure only to call once
