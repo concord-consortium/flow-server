@@ -648,7 +648,7 @@ var PiSelectorPanel = function(options) {
                     title: 'Program Run Error',
                     message: "Error running program on " + controller.name + ": " + params.message,
                     nextFunc: function() {
-                        updateProgramButtons(false, false, false);
+                        exitRunProgramState();
                     }});
             }
         }
