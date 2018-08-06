@@ -34,6 +34,7 @@ var DataSetView = function(options) {
 
     var closeButton = $('<button>', {   html: 'Close' , class: 'dataflow-button dataset-view-close-button'} );
     closeButton.click(function(e) {
+        clearTimeout(updateSequenceTimer);
         base.hide();
         liveDataHolder.show();
     });
@@ -103,6 +104,7 @@ var DataSetView = function(options) {
     // Load a dataset and initialize view.
     //
     base.loadDataSet = function(dataSet) {
+        clearTimeout(updateSequenceTimer);
         //console.log("[DEBUG] loadDataSet", dataSet);
         if(dataSet === null) {
             modalAlert({
