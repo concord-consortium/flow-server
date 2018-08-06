@@ -125,10 +125,12 @@ var ProgramEditorPanel = function(options) {
     // for example, 2 consecutive move block actions occur, but we only want to save the last one
     //
     var storeProgramState = function(overwrite) {
+        // Create deep copy of program spec
+        var currentProgramCopy = JSON.parse(JSON.stringify(diagramToSpec(_this.m_diagram)));
         if (overwrite) {
-            _this.programSpecStored[_this.programSpecStored.length - 1] = diagramToSpec(_this.m_diagram);
+            _this.programSpecStored[_this.programSpecStored.length - 1] = currentProgramCopy;
         } else {
-            _this.programSpecStored.push(diagramToSpec(_this.m_diagram));
+            _this.programSpecStored.push(currentProgramCopy);
         }
         if (_this.programSpecStored.length > _this.maxSpecHistory) {
             _this.programSpecStored.shift();
@@ -1335,6 +1337,7 @@ var ProgramEditorPanel = function(options) {
     //
     this.paramEntryFocusOut = function(e) {
         _this.updateParamFromEntryField(e, true);
+        _this.autoSaveProgram();
     }
 
     //
@@ -1390,7 +1393,6 @@ var ProgramEditorPanel = function(options) {
 
         // update any blocks that this action may affect
         _this.updateAllBlocks();
-        _this.autoSaveProgram();
     }
 
 
