@@ -115,6 +115,8 @@ var ProgramEditorPanel = function(options) {
 
         this.displayAllConnections();
 
+        this.updateAllBlocks();
+
         this.lastChangeMoveBlock = false;
         storeProgramState(false);
     };
@@ -162,6 +164,8 @@ var ProgramEditorPanel = function(options) {
 
         _this.displayAllConnections();
 
+        _this.updateAllBlocks();
+        
         // resave program, but do not resave the state
         _this.autoSaveProgram(false, false);
 
