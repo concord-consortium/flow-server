@@ -12,7 +12,9 @@ var LandingPageDataSetView = function(options) {
 
     var loadDataSet = function(dataset) {
         var success = dataSetView.loadDataSet(dataset);
-        if (success)showDataSetView();
+        if (success) {
+            showDataSetView();
+        }
     }
 
     var showDataSetView = function() {
@@ -29,7 +31,7 @@ var LandingPageDataSetView = function(options) {
 
         // console.log("[DEBUG] loading recorded data...");
         liveDataHolder.empty();
-        var livedatatitlebar  = jQuery("<div>", {class:"live-data-title-bar", text:"You don't have any running programs. Click \"New Program\" to get started."} );
+        var livedatatitlebar  = $("<div>", {class:"live-data-title-bar", text:"You don't have any running programs. Click \"New Program\" to get started."} );
         livedatatitlebar.appendTo(liveDataHolder);
 
         recordedDataHolder.empty();
@@ -47,11 +49,10 @@ var LandingPageDataSetView = function(options) {
                 //console.log("[DEBUG] List datasets", response);
 
                 if (response.success) {
-
                     var items = response.items;
                     var recording = [];
                     var recorded = [];
-                    for(var i = 0; i < items.length; i++) {
+                    for (var i = 0; i < items.length; i++) {
                         var item = items[i];
                         // console.log("[DEBUG] Checking metadata", item.metadata);
                         if (item.metadata && item.metadata.recording == true) {
@@ -78,7 +79,7 @@ var LandingPageDataSetView = function(options) {
                             return;
                         }
                         if (displayName == "Recording Now") {
-                            for(var i = 0; i < list.length; i++) {
+                            for (var i = 0; i < list.length; i++) {
                                 livedatatitlebar.text("Currently running programs");
                                 var livedatablock = createDatasetActivityFeedBlock ( list[i]);
                                 livedatablock.appendTo(liveDataHolder);
@@ -86,15 +87,15 @@ var LandingPageDataSetView = function(options) {
                             }
                         }
                         else{
-                            for(var i = 0; i < list.length; i++) {
+                            for (var i = 0; i < list.length; i++) {
                                 var toolTip = "";
                                 var displayedName = "";
                                 if (list[i].metadata == null || list[i].metadata.displayedName == null) {
-                                    //no displayedName indicates old style dataset where displayed name and filename are the same
+                                    // No displayedName indicates old style dataset where displayed name and filename are the same
                                     displayedName = list[i].name;
                                 }
                                 else{
-                                    //displayedName indicates new style dataset where displayed name is stored in metadata and filename is based on creation date and time
+                                    // displayedName indicates new style dataset where displayed name is stored in metadata and filename is based on creation date and time
                                     var dateifiedName = list[i].name;
                                     toolTip = convertDatasetNameToDateString(dateifiedName);
                                     displayedName = list[i].metadata.displayedName;
@@ -115,15 +116,15 @@ var LandingPageDataSetView = function(options) {
                     }
 
                     if (recording.length) {
-                        // we found a currently recording dataset...
-                        // poll the server for pi status updates to allow analogous update of activity feed state
+                        // We found a currently recording dataset...
+                        // Poll the server for pi status updates to allow analogous update of activity feed state
                         // e.g., if pi is marked as "unavailable" in activity feed, update feed if pi comes back online
                         var editor = getTopLevelView("program-editor-view");
                         var piSelectorPanel = editor.getPiSelectorPanel();
                         piSelectorPanel.restartLoadPiListTimer();
                     }
 
-                    //resize the landing page view
+                    // Resize the landing page view
                     var lpv = getTopLevelView("landing-page-view");
                     lpv.resizeMenuAndContentHolder();
 
@@ -142,18 +143,18 @@ var LandingPageDataSetView = function(options) {
     };
 
     //
-    //take an internal file name saved as a date and convert to a human readable date string
+    // Take an internal file name saved as a date and convert to a human readable date string
     //
     var convertDatasetNameToDateString = function(internalName) {
-        //dataset name is formatted like this: dataset_20180522_164244
-        //we want a date format like this: December 22, 2018 10:55 PM
+        // Dataset name is formatted like this: dataset_20180522_164244
+        // We want a date format like this: December 22, 2018 10:55 PM
         dateTimeStr = internalName.slice(8);
         finalStr = Util.convertDateTimeStringToHumanReadable(dateTimeStr);
         return finalStr;
     }
 
     //
-    //add a menu entry informing user of dataset load status
+    // Add a menu entry informing user of dataset load status
     //
      var addDatasetMessageToMenu = function(div, message) {
         div.empty();
@@ -161,7 +162,7 @@ var LandingPageDataSetView = function(options) {
         div.append(emptyButton);
     }
     //
-    //create the blocks that convey live dataset information from a currently running program
+    // Create the blocks that convey live dataset information from a currently running program
     //
     var createDatasetActivityFeedBlock = function(item) {
         var metadata = item.metadata;
@@ -169,8 +170,7 @@ var LandingPageDataSetView = function(options) {
         var displayedFilename = item.name;
         if (metadata.displayedName) {
             displayedFilename = metadata.displayedName;
-        }
-        else{
+        } else{
             displayedFilename = item.name;
         }
         var controllerName = metadata.controller_name;
@@ -184,60 +184,59 @@ var LandingPageDataSetView = function(options) {
             isEmpty = true;
         }
 
-        //main holder for activity feed item
-        var liveDataItemHolder = jQuery("<div>", {class:"live-data-item-holder"} );
+        // Main holder for activity feed item
+        var liveDataItemHolder = $("<div>", {class:"live-data-item-holder"} );
 
-        var liveDataItemBoxProgramTitle = jQuery("<div>", {class:"live-data-item-title", text:programName} );
+        var liveDataItemBoxProgramTitle = $("<div>", {class:"live-data-item-title", text:programName} );
         liveDataItemBoxProgramTitle.appendTo(liveDataItemHolder);
 
-        //device section
-        var liveDataItemBoxPi = jQuery("<div>", {class:"live-data-item-box"} );
-        //image icon
+        // Device section
+        var liveDataItemBoxPi = $("<div>", {class:"live-data-item-box"} );
+        // Image icon
         var liveDataItemBoxPiIcon = $("<img class='center'>");
         liveDataItemBoxPiIcon.attr("src", "flow-server/static/flow/images/icon-device.png");
         liveDataItemBoxPiIcon.attr("width","145");
         liveDataItemBoxPiIcon.appendTo(liveDataItemBoxPi);
-        //name of the Pi
-        var liveDataItemBoxPiName  = jQuery("<div>", {class:"live-data-item-box-name", text:controllerName} );
-        //stop button
+        // name of the Pi
+        var liveDataItemBoxPiName  = $("<div>", {class:"live-data-item-box-name", text:controllerName} );
+        // stop button
         var buttonid = "liveDataStopButton" + controllerName;
         var stopButton = $("<button>", { id: buttonid, class:"live-data-item-box-button center",   html: "stop program" } );
 
-        //add hidden status indication in case pi is offline
+        // add hidden status indication in case pi is offline
         var statusid = "liveDataStatusDiv" + controllerName;
-        var statusDiv = jQuery("<div>", {id: statusid, class:"live-data-item-box-warning"} );
-        //warning icon
+        var statusDiv = $("<div>", {id: statusid, class:"live-data-item-box-warning"} );
+        // warning icon
         var warningIcon = $("<img class='warning-icon'>");
         warningIcon.attr("src", "flow-server/static/flow/images/icon-warning.png");
         warningIcon.appendTo(statusDiv);
         var statusText = "Offline";
-        var statusMessage = jQuery("<span>", {class:"noSelect", text:statusText} );
+        var statusMessage = $("<span>", {class:"noSelect", text:statusText} );
         statusMessage.appendTo(statusDiv);
 
         liveDataItemBoxPiName.appendTo(liveDataItemBoxPi);
         stopButton.appendTo(liveDataItemBoxPi);
-        //is this Pi online?
+        // is this Pi online?
         var editor = getTopLevelView("program-editor-view");
         var piSelectorPanel = editor.getPiSelectorPanel();
         var offline = piSelectorPanel.isPiOffline(controllerName);
         if (offline) {
             stopButton.hide();
-        }
-        else{
+        } else {
             statusDiv.hide();
         }
         statusDiv.appendTo(liveDataItemBoxPi);
 
 
-        //program section
-        var liveDataItemBoxProgram = jQuery("<div>", {class:"live-data-item-box"} );
-        //image icon
+        // program section
+        var liveDataItemBoxProgram = $("<div>", {class:"live-data-item-box"} );
+        // image icon
         var liveDataItemBoxProgramIcon = $("<img class='center'>");
         liveDataItemBoxProgramIcon.attr("src", "flow-server/static/flow/images/icon-program.png");
         liveDataItemBoxProgramIcon.attr("width","145");
         liveDataItemBoxProgramIcon.appendTo(liveDataItemBoxProgram);
-        //name of the program
-        var liveDataItemBoxProgramName = jQuery("<div>", {class:"live-data-item-box-name", text:programName} );
+        // name of the program
+        var liveDataItemBoxProgramName = $("<div>", {class:"live-data-item-box-name", text:programName} );
         var viewProgramButton = $("<button>", { class:"live-data-item-box-button center",   html: "view program" } );
         liveDataItemBoxProgramName.appendTo(liveDataItemBoxProgram);
         viewProgramButton.appendTo(liveDataItemBoxProgram);
@@ -272,18 +271,18 @@ var LandingPageDataSetView = function(options) {
             });
         });
 
-        //dataset section
-        var liveDataItemBoxData = jQuery("<div>", {class:"live-data-item-box"} );
-        //image icon
+        // dataset section
+        var liveDataItemBoxData = $("<div>", {class:"live-data-item-box"} );
+        // image icon
         var liveDataItemBoxProgramIcon = $("<img class='center'>");
         liveDataItemBoxProgramIcon.attr("src", "flow-server/static/flow/images/icon-graph.png");
         liveDataItemBoxProgramIcon.attr("width","145");
         liveDataItemBoxProgramIcon.appendTo(liveDataItemBoxData);
-        //name of the dataset
+        // name of the dataset
         if (displayedFilename == null || displayedFilename == "") {
             displayedFilename = "Untitled Dataset";
         }
-        var liveDataItemBoxDataName = jQuery("<div>", {class:"live-data-item-box-name", text:displayedFilename} );
+        var liveDataItemBoxDataName = $("<div>", {class:"live-data-item-box-name", text:displayedFilename} );
         var viewButton = $("<button>", { class:"live-data-item-box-button center",   html: "view dataset" } );
         liveDataItemBoxDataName.appendTo(liveDataItemBoxData);
 
@@ -294,8 +293,8 @@ var LandingPageDataSetView = function(options) {
             loadDataSet(e.data);
         });
 
-        var liveDataItemConnector1 = jQuery("<div>", {class:"live-data-item-connector"} );
-        var liveDataItemConnector2 = jQuery("<div>", {class:"live-data-item-connector"} );
+        var liveDataItemConnector1 = $("<div>", {class:"live-data-item-connector"} );
+        var liveDataItemConnector2 = $("<div>", {class:"live-data-item-connector"} );
 
         var arrow1 = $("<img class='center'>");
         arrow1.attr("src", "flow-server/static/flow/images/icon-arrow-connector.png");
@@ -311,8 +310,6 @@ var LandingPageDataSetView = function(options) {
         liveDataItemBoxProgram.appendTo(liveDataItemHolder);
         if (!isEmpty) {
             liveDataItemConnector2.appendTo(liveDataItemHolder);
-        }
-        if (!isEmpty) {
             liveDataItemBoxData.appendTo(liveDataItemHolder);
         }
         liveDataItemHolder.appendTo(liveDataHolder);
@@ -320,13 +317,15 @@ var LandingPageDataSetView = function(options) {
     }
 
     //
-    // create a menu item button to load a saved dataset
+    // Create a menu item button to load a saved dataset
     //
     var createDatasetMenuEntry = function(item, displayedName, filename, tooltip,  index) {
         var menuentry = $("<div>", {id:"dataset"+index, class: "landing-page-menu-entry container-light-gray"});
         var btn = $("<div>", { text:displayedName, class: "landing-page-menu-entry-text" } );
         menuTooltip = $("<span>", {text:tooltip, class: "tooltiptext"});
-        if (tooltip != "")menuTooltip.appendTo(menuentry);
+        if (tooltip != "") {
+            menuTooltip.appendTo(menuentry);
+        }
         btn.click(item, function(e) {
             console.log("[DEBUG] DataSetButton click", e.data);
             loadDataSet(e.data);
@@ -436,7 +435,7 @@ var LandingPageDataSetView = function(options) {
     };
 
     base.show = function() {
-        var menucontentholder = jQuery("#" + base.getDivId());
+        var menucontentholder = $("#" + base.getDivId());
         loadDataSets(menucontentholder, liveDataHolder);
     }
 

@@ -6,7 +6,7 @@ var AdminView = function(options) {
     var base = BaseView(options);
     var _this = this;
 
-    var content = jQuery('#'+base.getDivId());
+    var content = $('#'+base.getDivId());
 
     this.adminControllerIdMap = {};
 
@@ -69,7 +69,7 @@ var AdminView = function(options) {
             data:   { csrf_token: g_csrfToken },
             success: function(data) {
                 var response = JSON.parse(data);
-                if(response.success) {
+                if (response.success) {
                     var controllers = response.controllers;
                     renderAdminViewData(controllers);
                 } else {
@@ -131,7 +131,7 @@ var AdminView = function(options) {
 
                 success: function(data) {
                     var response = JSON.parse(data);
-                    if(response.success) {
+                    if (response.success) {
                         var user = response.data;
                         var resultDiv = $('#user-admin-search-result');
 
@@ -160,7 +160,7 @@ var AdminView = function(options) {
 
 
                         var setAdmin = $('<button>');
-                        if(user.is_admin) {
+                        if (user.is_admin) {
                             setAdmin.text('Remove Admin');
                         } else {
                             setAdmin.text('Set Admin');
@@ -210,7 +210,7 @@ var AdminView = function(options) {
 
                 success: function(data) {
                     var response = JSON.parse(data);
-                    if(response.success) {
+                    if (response.success) {
 
                         alert("Updated user " + username);
 
@@ -420,7 +420,7 @@ var AdminView = function(options) {
                     _this.setAdminControllerName(  _i, controller.name);
                     _this.setAdminVersionInfo(     _i, controller.status);
 
-                    if(controller.status.operational_status == "UPDATING") {
+                    if (controller.status.operational_status == "UPDATING") {
                         swUpdateDiv.text("Updating...");
                     } else {
                         _this.setAdminAvailableVersions(
@@ -451,7 +451,7 @@ var AdminView = function(options) {
         onlineDiv.empty();
 
         var cls = "circle red";
-        if(isOnline) {
+        if (isOnline) {
             cls = "circle green";
         }
         var onlineCircle = $('<div>', { class: cls } );
@@ -465,7 +465,7 @@ var AdminView = function(options) {
         //
         onlineDiv.click( function() {
             var detailsDiv = $('#admin_details_div_'+i);
-            if(detailsDiv.is(":visible")) {
+            if (detailsDiv.is(":visible")) {
                 detailsDiv.hide();
             } else {
                 detailsDiv.show();
@@ -482,7 +482,7 @@ var AdminView = function(options) {
         var recordingDiv = $('#admin_recording_status_'+i);
         recordingDiv.empty();
 
-        if(status.recording_interval != null) {
+        if (status.recording_interval != null) {
             // Add check mark
             recordingDiv.html("&#10004;");
         }
@@ -562,8 +562,8 @@ var AdminView = function(options) {
 
         select.appendTo(availableVersionsDiv);
 
-        if(version_list && version_list.length) {
-            for(var i = 0; i < version_list.length; i++) {
+        if (version_list && version_list.length) {
+            for (var i = 0; i < version_list.length; i++) {
                 var opt = $('<option>', {   text:   version_list[i],
                                             value:  version_list[i]     });
                 opt.appendTo(select);
@@ -619,7 +619,7 @@ var AdminView = function(options) {
 
         var ipTable = $('<table>');
 
-        if( status.ip_addresses != null ) {
+        if (status.ip_addresses != null) {
             for (var key in status.ip_addresses) {
                 Util.addTableRow(ipTable,
                     [
@@ -638,7 +638,7 @@ var AdminView = function(options) {
 
         var currentProgram = $('<span>', { css: {   float: 'left',
                                                     paddingLeft: '5px' } } );
-        if(status.current_diagram == null) {
+        if (status.current_diagram == null) {
             currentProgram.text("No Current Program");
         } else {
             currentProgram.text("Current Program: " + status.current_diagram);
@@ -651,7 +651,7 @@ var AdminView = function(options) {
         var currentUser = $('<span>', { css: {    float: 'left',
                                                     paddingLeft: '5px',
                                                     paddingBottom: '2px' } } );
-        if(status.username == null) {
+        if (status.username == null) {
             currentUser.text("No Current User");
         } else {
             currentUser.text("Current User: " + status.username);
@@ -666,13 +666,13 @@ var AdminView = function(options) {
     //
     this.sendAdminMessage = function(path, type, params, response_func) {
 
-        if(response_func) {
+        if (response_func) {
             addMessageHandler( type + "_response", response_func );
         }
 
         subscribeToFolder(path);
         setTargetFolder(path);
-        if(g_webSocketInited) {
+        if (g_webSocketInited) {
             sendSubscriptions();
             sendMessage(type, params);
             return;
@@ -708,7 +708,7 @@ var AdminView = function(options) {
 
         console.log("[DEBUG] AdminView.downloadSoftwareUpdatesResponse", params);
 
-        if(!params.success) {
+        if (!params.success) {
             alert("Error downloading software update for " + params.src_folder);
             return;
         }

@@ -4,10 +4,10 @@ var g_plotHandler = null;
 var PLOTTER_MARGIN_BOTTOM = 94; // px
 
 
-function resizeCanvas(){
+function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight - PLOTTER_MARGIN_BOTTOM;
-    if (g_plotHandler){
+    if (g_plotHandler) {
         g_plotHandler.drawPlot(null, null);
     }
 }
@@ -68,11 +68,21 @@ function bleHistoryResponseHandler(timestamp, params) {
 
      */
 
-    var timestamps = params.timestamps.map(dt => new Date(dt).getTime()/1000.);
+    var timestamps = params.timestamps.map(dt => new Date(dt).getTime() / 1000.);
     //var values = params.values.map(v => v.toString());
     // convert to strings, except if value is null
-    var values = params.values.map( v => {if (v) { return v.toString() } else {return v}})
-    var newdata = {name: params.name, values: values, timestamps: timestamps}
+    var values = params.values.map(v => {
+        if (v) {
+            return v.toString()
+        } else {
+            return v
+        }
+    })
+    var newdata = {
+        name: params.name,
+        values: values,
+        timestamps: timestamps
+    }
 
 
     historyResponseHandler(newdata);
@@ -94,7 +104,7 @@ function historyResponseHandler(data) {
     for (var i = 0; i < len; i++) {
         var val = values[i];
         if (val !== null) {
-            values[i] = +val;  // convert to number
+            values[i] = +val; // convert to number
         }
     }
 
@@ -120,7 +130,7 @@ function historyResponseHandler(data) {
         }
     }
     if (dataPair) {
-        dataPair.xData.data = timestamps;  // we are updating the plotter's internal data
+        dataPair.xData.data = timestamps; // we are updating the plotter's internal data
         dataPair.yData.data = values;
         dataPair.dataReceived = true;
         // indicate to autoBounds to adjust timestamps
@@ -178,17 +188,17 @@ function setTimeFrame(timeStr) {
 
     // compute time bounds
     var frameSeconds = 0;
-    if (timeStr === '1m'){
+    if (timeStr === '1m') {
         frameSeconds = 60;
-    } else if (timeStr === '10m'){
+    } else if (timeStr === '10m') {
         frameSeconds = 60 * 10;
-    } else if (timeStr === '1h'){
+    } else if (timeStr === '1h') {
         frameSeconds = 60 * 60;
-    } else if (timeStr === '24h'){
+    } else if (timeStr === '24h') {
         frameSeconds = 60 * 60 * 24;
-    } else if (timeStr === '7d'){
+    } else if (timeStr === '7d') {
         frameSeconds = 60 * 60 * 24 * 7;
-    } else if (timeStr === '30d'){
+    } else if (timeStr === '30d') {
         frameSeconds = 60 * 60 * 24 * 30;
     }
     g_plotHandler.plotter.resetReceived();
@@ -241,7 +251,7 @@ function selectInterval() {
 
 // get selected data (or all displayed data if no selection) as a list of dictionaries
 function selectedData(maxCount) {
-    var timeThresh = 0.4;  // seconds
+    var timeThresh = 0.4; // seconds
     var dataPairs = g_plotHandler.plotter.dataPairs;
 
     // get data for quick reference
@@ -259,9 +269,9 @@ function selectedData(maxCount) {
     var ind = [];
     for (var j = 0; j < dataPairs.length; j++) {
         if (xs[j].length) {
-            ind[j] = 0;  // start at beginning
+            ind[j] = 0; // start at beginning
         } else {
-            ind[j] = -1;  // no data; done with this pair
+            ind[j] = -1; // no data; done with this pair
         }
     }
 
@@ -303,9 +313,9 @@ function selectedData(maxCount) {
                     if (keepPoint) {
                         dataPoint[dataPairs[j].yData.name] = ys[j][ind[j]];
                     }
-                    ind[j]++;  // move to next point for this sequence; we'll assume for now that each data point within a sequence has a distinct timestamp
+                    ind[j]++; // move to next point for this sequence; we'll assume for now that each data point within a sequence has a distinct timestamp
                     if (ind[j] >= xs[j].length) {
-                        ind[j] = -1;  // at end of this sequence
+                        ind[j] = -1; // at end of this sequence
                     }
                 }
             }
@@ -332,7 +342,14 @@ function exploreRecordedDataInCODAP() {
     if (dataPairs.length && dataPairs[0].xData.data.length) {
 
         // set collection attributes based on current input blocks
-        var attrs = [{name: 'seconds', type: 'numeric', precision: 2}, {name: 'timestamp', type: 'date'}];
+        var attrs = [{
+            name: 'seconds',
+            type: 'numeric',
+            precision: 2
+        }, {
+            name: 'timestamp',
+            type: 'date'
+        }];
         for (var i = 0; i < g_diagram.blocks.length; i++) {
             var block = g_diagram.blocks[i];
             if (block.inputCount === 0) {
@@ -349,7 +366,7 @@ function exploreRecordedDataInCODAP() {
             function() {
 
                 // get currently selected data (or all data if no selection)
-                var data = selectedData(3000);  // limit to 3000 points
+                var data = selectedData(3000); // limit to 3000 points
 
                 // convert timestamp to format expected by codap
                 for (var i = 0; i < data.length; i++) {
@@ -372,15 +389,18 @@ function exploreRecordedDataInCODAP() {
                 //
                 codapInterface.sendRequest(
                     {
-                        action:     "create",
-                        resource:   "component",
-                        values:     {   type:           "caseTable",
-                                        name:           "explore_flow_data",
-                                        title:          "Explore Data in CODAP",
-                                        dimensions:     {   width:  700,
-                                                            height: 500 },
-                                        dataContext:    "Flow_Data"
-                                    }
+                        action: "create",
+                        resource: "component",
+                        values: {
+                            type: "caseTable",
+                            name: "explore_flow_data",
+                            title: "Explore Data in CODAP",
+                            dimensions: {
+                                width: 700,
+                                height: 500
+                            },
+                            dataContext: "Flow_Data"
+                        }
                     },
                     function(iResult, iRequest) {
                         debug("Opened case table", iResult);
@@ -407,7 +427,7 @@ function downloadRecordedData() {
         }
 
         // get currently selected data (or all data if no selection)
-        var data = selectedData(10000);  // 10k max points
+        var data = selectedData(10000); // 10k max points
 
         // convert data to a string
         var dataStr = 'seconds,timestamp';
@@ -417,15 +437,15 @@ function downloadRecordedData() {
         dataStr += '\n';
         for (var i = 0; i < data.length; i++) {
             var dataPoint = data[i];
-            var line = dataPoint['seconds'].toFixed(2) + ','
-                + moment(dataPoint['timestamp'] * 1000).format('YYYY/M/D H:mm:ss');
+            var line = dataPoint['seconds'].toFixed(2) + ',' +
+                moment(dataPoint['timestamp'] * 1000).format('YYYY/M/D H:mm:ss');
             for (var j = 0; j < dataFieldNames.length; j++) {
                 var name = dataFieldNames[j];
                 line += ',';
                 if (dataPoint.hasOwnProperty(name)) {
                     var value = dataPoint[name];
                     if (!isNaN(value)) {
-                        line += value.toFixed(2);  // TODO: use proper number of decimal places
+                        line += value.toFixed(2); // TODO: use proper number of decimal places
                     }
                 }
             }
@@ -457,14 +477,14 @@ function deleteSequenceData() {
                             'data_only': 1,
                         },
                         success: function() {
-                            if (first) {  // only do this once
+                            if (first) { // only do this once
                                 for (var j = 0; j < g_plotHandler.plotter.dataPairs.length; j++) {
                                     var d = g_plotHandler.plotter.dataPairs[j];
-                                    d.xData.data = [];  // clear out data so it's not visible when come back
+                                    d.xData.data = []; // clear out data so it's not visible when come back
                                     d.yData.data = [];
                                 }
                                 g_plotHandler.drawPlot(null, null);
-                                closePlotter();  // close the plotter since there's no longer anything to see
+                                closePlotter(); // close the plotter since there's no longer anything to see
                                 first = false;
                             }
                         },

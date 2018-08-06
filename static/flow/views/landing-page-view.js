@@ -8,31 +8,31 @@
 var LandingPageView = function(options) {
 
     //
-    // create the main content boxes and top bar
+    // Create the main content boxes and top bar
     //
     var base = BaseView(options);
 
-    var content = jQuery("#" + base.getDivId());
+    var content = $("#" + base.getDivId());
 
-    var mainContentBox  = jQuery("<div>", {class: "main-content-box"} );
+    var mainContentBox  = $("<div>", {class: "main-content-box"} );
 
     mainContentBox.appendTo(content);
 
-    var topBar  = jQuery("<div>", {id: "landing-page-topbar", class: "topbar"} );
+    var topBar  = $("<div>", {id: "landing-page-topbar", class: "topbar"} );
 
     topBar.appendTo(mainContentBox);
 
-    //icon and title in upper left
-    var titleBar  = jQuery("<div>", {class: "topbar-title noSelect"} );
+    // Icon and title in upper left
+    var titleBar  = $("<div>", {class: "topbar-title noSelect"} );
 
     //
-    // title and icon
+    // Title and icon
     //
     var titleBarIcon = $("<img class='topbar-icon'>");
     titleBarIcon.attr("src", "flow-server/static/flow/images/icon-home.png");
     titleBarIcon.appendTo(titleBar);
 
-    var titleBarText  = jQuery("<span>", {class: "topbar-text noSelect", text: "Dataflow"} );
+    var titleBarText  = $("<span>", {class: "topbar-text noSelect", text: "Dataflow"} );
     titleBarText.appendTo(titleBar);
 
     titleBar.appendTo(topBar);
@@ -40,16 +40,16 @@ var LandingPageView = function(options) {
     //
     // Show welcome message
     //
-    var welcomeMessage  = jQuery("<div>", {class: "topbar-login noSelect"} );
-    var welcomeText = jQuery("<span>", {class: "topbar-text topbar-login-text noSelect"});
-    var signOut = jQuery("<a>", { href: "/ext/flow/logout", class: "topbar-text topbar-login-text noSelect" } );
+    var welcomeMessage  = $("<div>", {class: "topbar-login noSelect"} );
+    var welcomeText = $("<span>", {class: "topbar-text topbar-login-text noSelect"});
+    var signOut = $("<a>", { href: "/ext/flow/logout", class: "topbar-text topbar-login-text noSelect" } );
     signOut.text("logout");
     if (g_user != null) {
         welcomeText.text("Welcome, " + g_user.full_name + "!");
         welcomeMessage.append(welcomeText);
-        welcomeMessage.append(jQuery("<span>").text(" "));
+        welcomeMessage.append($("<span>").text(" "));
         welcomeMessage.append(signOut);
-        var spacing = jQuery("<span>", { css: {
+        var spacing = $("<span>", { css: {
                                     paddingRight: "5px"} } );
         spacing.text(" ");
         welcomeMessage.append(spacing);
@@ -71,11 +71,11 @@ var LandingPageView = function(options) {
     //
     // Build the left menu
     //
-    var menuAndContentHolder  = jQuery("<div>", {class: "menu-and-content-holder"} );
+    var menuAndContentHolder  = $("<div>", {class: "menu-and-content-holder"} );
 
     menuAndContentHolder.appendTo(mainContentBox);
 
-    //load dataset-view
+    // Load dataset-view
     base.loadDataSet = function(dataSet) {
          var success = dataSetView.loadDataSet(dataSet);
          if (success) {
@@ -85,7 +85,7 @@ var LandingPageView = function(options) {
          }
     }
 
-    //resize div
+    // Resize div
     base.resizeMenuAndContentHolder = function() {
         const paddingHeight = 70; //20 for dividers, 50 for usability
         var contentHeight = menuTopButtonHolder.height();
@@ -103,13 +103,13 @@ var LandingPageView = function(options) {
         menuAndContentHolder.height(newHeight);
     }
 
-    var menuHolder = jQuery("<div>", {class: "menu-holder container-light-gray"} );
+    var menuHolder = $("<div>", {class: "menu-holder container-light-gray"} );
     menuHolder.appendTo(menuAndContentHolder);
 
-    var menuTopButtonHolder = jQuery("<div>", {class: "menu-top-button-holder", id: "landing-page-menutopbuttonholder"} );
+    var menuTopButtonHolder = $("<div>", {class: "menu-top-button-holder", id: "landing-page-menutopbuttonholder"} );
     menuTopButtonHolder.appendTo(menuHolder);
 
-    var menuSeparator = jQuery("<div>", {class: "menu-separator"} );
+    var menuSeparator = $("<div>", {class: "menu-separator"} );
     menuSeparator.appendTo(menuHolder);
 
     var getNewProgramName = function() {
@@ -124,47 +124,46 @@ var LandingPageView = function(options) {
         });
     }
 
-    var menuFilesButton = jQuery("<div>", {class: "menu-top-button-inactive container-blue-select noSelect", text: "My Stuff"} );
+    var menuFilesButton = $("<div>", {class: "menu-top-button-inactive container-blue-select noSelect", text: "My Stuff"} );
     menuFilesButton.appendTo(menuTopButtonHolder);
-    var menuBlocksButton = jQuery("<button>", {class: "menu-top-button container-dark-gray noSelect", text: "Editor"} );
+    var menuBlocksButton = $("<button>", {class: "menu-top-button container-dark-gray noSelect", text: "Editor"} );
     menuBlocksButton.appendTo(menuTopButtonHolder);
     menuBlocksButton.click( function(e) {
         var editor = getTopLevelView("program-editor-view");
         if (editor.programLoaded() ) {
             showTopLevelView("program-editor-view");
-        }
-        else{
+        } else {
             getNewProgramName();
         }
     });
 
     //
-    // live data
+    // Live data
     //
-    var liveDataHolder = jQuery("<div>", {class: "live-data-holder"} );
+    var liveDataHolder = $("<div>", {class: "live-data-holder"} );
     liveDataHolder.appendTo(menuAndContentHolder);
-    var liveDataTitleBar = jQuery("<div>", {class: "live-data-title-bar", text: "currently running"} );
+    var liveDataTitleBar = $("<div>", {class: "live-data-title-bar", text: "currently running"} );
     liveDataTitleBar.appendTo(liveDataHolder);
 
     //
-    // dataview
+    // Dataview
     //
-    var dataSetViewDiv = jQuery("<div>", {id: "data-set-view", class: "dataset-view"} );
+    var dataSetViewDiv = $("<div>", {id: "data-set-view", class: "dataset-view"} );
     dataSetViewDiv.appendTo(menuAndContentHolder);
 
     var dataSetView = DataSetView({id: "data-set-view", liveDataHolder: liveDataHolder});
 
     //
-    // programs
+    // Programs
     //
     var programsContent = $("<div>");
-    var myProgramsDiv = jQuery("<div>", { id: "landing-page-my-programs-view"} );
+    var myProgramsDiv = $("<div>", { id: "landing-page-my-programs-view"} );
 
     myProgramsDiv.appendTo(programsContent);
     var myPrograms = LandingPageMyProgramsView({id: "landing-page-my-programs-view"});
 
     //
-    // create generic landing page menu sections with collapsable content
+    // Create generic landing page menu sections with collapsable content
     //
     var createLandingPageMenuSection = function(name, content) {
         var str = name.replace(/\s/g, "");
@@ -201,7 +200,7 @@ var LandingPageView = function(options) {
     programsHeader.appendTo(menuHolder);
 
     //
-    // create the landing page menu entry for new program
+    // Create the landing page menu entry for new program
     //
     var createLandingPageNewProgramMenuEntry = function() {
 
@@ -220,20 +219,20 @@ var LandingPageView = function(options) {
         return menuentry;
     }
     //
-    // new program
+    // New program
     //
     var newProgramHeader = createLandingPageNewProgramMenuEntry();
     newProgramHeader.prependTo(programsContent);
 
-    var menuSeparator = jQuery("<div>", {class: "menu-separator"} );
+    var menuSeparator = $("<div>", {class: "menu-separator"} );
     menuSeparator.appendTo(menuHolder);
 
 
     //
-    // data
+    // Data
     //
     var dataContent = $("<div>");
-    var myDataDiv = jQuery("<div>", { id: "landing-page-dataset-view"} );
+    var myDataDiv = $("<div>", { id: "landing-page-dataset-view"} );
 
     myDataDiv.appendTo(dataContent);
     var myDatasets = LandingPageDataSetView({id: "landing-page-dataset-view", liveDataHolder: liveDataHolder, dataSetView: dataSetView});
@@ -243,7 +242,7 @@ var LandingPageView = function(options) {
 
     base.show = function() {
         console.log("[DEBUG] LandingPageView show()");
-        jQuery("#" + base.getDivId()).show();
+        $("#" + base.getDivId()).show();
         myPrograms.show();
         myDatasets.show();
     }

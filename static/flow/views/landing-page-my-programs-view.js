@@ -5,7 +5,6 @@ var LandingPageMyProgramsView = function(options) {
 
     var base = BaseView(options);
 
-
     //
     // AJAX call and handler for updating "My Programs" div.
     //
@@ -33,8 +32,8 @@ var LandingPageMyProgramsView = function(options) {
                     div.empty();
                     var index = 0;
                     var items = response.items;
-                    for(var i = 0; i < items.length; i++) {
-                        //new style program consisting of a folder with date-time name, a program file and a metadata file
+                    for (var i = 0; i < items.length; i++) {
+                        // New style program consisting of a folder with date-time name, a program file and a metadata file
                         if (items[i].metadata && items[i].metadata.displayedName) {
                             if (!items[i].metadata.archived) {
                                 var dateifiedName = items[i].name;
@@ -45,7 +44,8 @@ var LandingPageMyProgramsView = function(options) {
                                 index++;
                             }
                         }
-                        else{ //handle old style programs without the folder, metadata structure
+                        else {
+                            // Handle old style programs without the folder, metadata structure
                             var tooltip = "";
                             var btn = createMyProgramBtn (  null, items[i].name, items[i].name, tooltip, index );
 
@@ -55,7 +55,7 @@ var LandingPageMyProgramsView = function(options) {
 
 
                     }
-                    //resize the landing page view
+                    // Resize the landing page view
                     var lpv = getTopLevelView("landing-page-view");
                     lpv.resizeMenuAndContentHolder();
 
@@ -73,15 +73,15 @@ var LandingPageMyProgramsView = function(options) {
     };
 
     var convertProgramNameToDateString = function(programName) {
-        //program name is formatted like this: program_20180522_164244
-        //we want a date format like this: December 22, 2018 10:55 PM
+        // Program name is formatted like this: program_20180522_164244
+        // We want a date format like this: December 22, 2018 10:55 PM
         dateTimeStr = programName.slice(8);
         finalStr = Util.convertDateTimeStringToHumanReadable(dateTimeStr);
         return finalStr;
     }
 
     //
-    //add a menu entry informing user of program load status
+    // Add a menu entry informing user of program load status
     //
     var addProgramMessageToMenu = function(div, message) {
         div.empty();
@@ -90,7 +90,7 @@ var LandingPageMyProgramsView = function(options) {
     }
 
     //
-    // create a menu item button to load a saved program
+    // Create a menu item button to load a saved program
     //
     var createMyProgramBtn = function(metadata, displayedName, filename, tooltip, index) {
         var menuentry;
@@ -98,7 +98,9 @@ var LandingPageMyProgramsView = function(options) {
         menuentry = $("<div>", {id: "program" + index, class: "landing-page-menu-entry container-light-gray"});
         btn = $("<div>", { text: displayedName, class: "landing-page-menu-entry-text" } );
         menuTooltip = $("<span>", {text: tooltip, class: "tooltiptext"});
-        if (tooltip != "")menuTooltip.appendTo(menuentry);
+        if (tooltip != "") {
+            menuTooltip.appendTo(menuentry);
+        }
         btn.click(name, function(e) {
             //console.log("[DEBUG] MyProgramBtn click", filename);
             var folderstructure = true;
@@ -204,7 +206,7 @@ var LandingPageMyProgramsView = function(options) {
     };
 
     base.show = function() {
-        var content = jQuery("#" + base.getDivId());
+        var content = $("#" + base.getDivId());
         loadPrograms(content);
     }
 

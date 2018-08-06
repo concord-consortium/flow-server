@@ -1,5 +1,4 @@
 // This file is used to send data to Concord's CODAP system; it is preliminary code based on a sample from Concord.
-
 //
 // Initialize a codapInterface object
 //
@@ -10,7 +9,10 @@ function initCodapBridge() {
     codapInterface.init({
         name: 'DataFlow',
         title: 'Data Flow',
-        dimensions: {width: 900, height: 600},
+        dimensions: {
+            width: 900,
+            height: 600
+        },
         version: '0.1'
     });
 
@@ -36,47 +38,46 @@ var CodapTest = {
         // If not, create it.
         //
         return codapInterface.sendRequest(
-            {
+        {
 
-                action:     'get',
-                resource:   'dataContext[Flow_Data]'
+            action: 'get',
+            resource: 'dataContext[Flow_Data]'
 
-            }, function (iResult, iRequest) {
+        }, function(iResult, iRequest) {
 
-                if (iResult && !iResult.success) {
+            if (iResult && !iResult.success) {
 
-                    this.debug("Creating CODAP dataContext...");
+                this.debug("Creating CODAP dataContext...");
 
-                    codapInterface.sendRequest(
-
-                        {   action:     'create',
-                            resource:   'dataContext',
-                            values: {
-                                name:   "Flow_Data",
-                            }
-                        },
-
-                        function (iResult, iRequest) {
-                            if (iResult && iResult.success) {
-                                this.debug(
-                                    "Created dataContext. Calling callback.");
-                                callback();
-                            } else {
-                                this.debug(
-                                    "Failed to create dataContext.", iResult);
-                            }
+                codapInterface.sendRequest(
+                    {
+                        action: 'create',
+                        resource: 'dataContext',
+                        values: {
+                            name: "Flow_Data",
                         }
-                    );
+                    },
 
-                } else {
-                    //
-                    // Context already exists.
-                    //
-                    this.debug("Using existing context...");
-                    callback();
-                }
+                    function(iResult, iRequest) {
+                        if (iResult && iResult.success) {
+                            this.debug(
+                                "Created dataContext. Calling callback.");
+                            callback();
+                        } else {
+                            this.debug(
+                                "Failed to create dataContext.", iResult);
+                        }
+                    }
+                );
+
+            } else {
+                //
+                // Context already exists.
+                //
+                this.debug("Using existing context...");
+                callback();
             }
-        );
+        });
     },
 
     //
@@ -114,35 +115,38 @@ var CodapTest = {
         this.debug('Adding', attrs.length, 'fields to CODAP collection');
 
         codapInterface.sendRequest({
-            action:     'create',
-            resource:   'collection',
-            values: [   // There are two collections: a parent and a child
-                {
-                    name: 'samples',
-                    //
-                    // The parent collection has just one attribute
-                    //
-                    attrs: [{name: "sample", type: 'categorical'}],
-                    childAttrName: "sample"
-                },
-                {
-                    name: 'points',
-                    parent: 'samples',
-                    labels: {
-                        pluralCase: "points",
-                        setOfCasesWithArticle: "a sample"
+                action: 'create',
+                resource: 'collection',
+                values: [ // There are two collections: a parent and a child
+                    {
+                        name: 'samples',
+                        //
+                        // The parent collection has just one attribute
+                        //
+                        attrs: [{
+                            name: "sample",
+                            type: 'categorical'
+                        }],
+                        childAttrName: "sample"
                     },
-                    attrs: attrs,
+                    {
+                        name: 'points',
+                        parent: 'samples',
+                        labels: {
+                            pluralCase: "points",
+                            setOfCasesWithArticle: "a sample"
+                        },
+                        attrs: attrs,
+                    }
+                ]
+            },
+            function(iResult, iRequest) {
+                this.debug("Create collection result", iResult, iRequest);
+                if (iResult && iResult.success) {
+                    this.debug("Collection prepared. Calling callback.");
+                    callback();
                 }
-            ]
-        },
-        function (iResult, iRequest) {
-            this.debug("Create collection result", iResult, iRequest);
-            if (iResult && iResult.success) {
-                this.debug("Collection prepared. Calling callback.");
-                callback();
-            }
-        });
+            });
     },
 
     //
@@ -153,10 +157,10 @@ var CodapTest = {
     // example: {   formatStr: "Launched rocket with %@ engine toward %@",
     //              replaceArgs: ["red", "satellite"]}
     //
-    log: function (values) {
+    log: function(values) {
 
         // ignore logging if not running in CODAP
-        if(codapInterface.connectionState !== 'active') {
+        if (codapInterface.connectionState !== 'active') {
             return;
         }
 
@@ -170,7 +174,7 @@ var CodapTest = {
     //
     // Shortcut for log() that sets formatStr based on topic
     //
-    logTopic: function (topic) {
+    logTopic: function(topic) {
         this.log({
             topic: topic,
             formatStr: "Logging topic: %@",
@@ -192,7 +196,7 @@ var CodapTest = {
         // We assume the connection should have been made by the time
         // a button is pressed.
         //
-        if(codapInterface.connectionState !== 'active') {
+        if (codapInterface.connectionState !== 'active') {
             alert("Not running in codap");
             return;
         }
@@ -243,7 +247,11 @@ var CodapTest = {
         codapInterface.sendRequest({
             action: 'create',
             resource: 'collection[samples].case',
-            values: {values: {sample: this.state.sampleNumber}}
+            values: {
+                values: {
+                    sample: this.state.sampleNumber
+                }
+            }
         }).then(sendData);
     },
 
@@ -266,4 +274,3 @@ var CodapTest = {
     }
 
 };
-

@@ -15,12 +15,12 @@ var BaseView = function(options) {
 
         show: function() {
             // console.log("[DEBUG] Base view show " + this._divId);
-            jQuery('#'+this._divId).show();
+            $('#'+this._divId).show();
         },
 
         hide: function() {
             // console.log("[DEBUG] Base view hide " + this._divId);
-            jQuery('#'+this._divId).hide();
+            $('#'+this._divId).hide();
         }
 
     };

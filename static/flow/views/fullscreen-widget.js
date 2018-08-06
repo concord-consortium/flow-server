@@ -3,8 +3,8 @@
 //
 var FullScreenWidget = function() {
 
-    var fullscreenContainer = jQuery('#fullscreen-widget');
-    var fullscreenButton  = jQuery('<div>', {id:'fullscreen-button'} );
+    var fullscreenContainer = $('#fullscreen-widget');
+    var fullscreenButton  = $('<div>', {id:'fullscreen-button'} );
     fullscreenButton.appendTo(fullscreenContainer);
     var fullscreen = false;
     fullscreenButton.click(function(e) {

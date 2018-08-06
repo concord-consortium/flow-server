@@ -1,13 +1,20 @@
 // This file provide top-level control for the data flow app.
-
 //
-// initialize the app
+// Initialize the app
 //
 function initFlowApp() {
-    registerTopLevelView(LoginPageView({id: 'login-page-view'}));
-    registerTopLevelView(LandingPageView({id: 'landing-page-view'}));
-    registerTopLevelView(ProgramEditorView({id: 'program-editor-view'}));
-    registerTopLevelView(AdminView({id: 'admin-view'}));
+    registerTopLevelView(LoginPageView({
+        id: 'login-page-view'
+    }));
+    registerTopLevelView(LandingPageView({
+        id: 'landing-page-view'
+    }));
+    registerTopLevelView(ProgramEditorView({
+        id: 'program-editor-view'
+    }));
+    registerTopLevelView(AdminView({
+        id: 'admin-view'
+    }));
     showTopLevelView('login-page-view');
 }
 
@@ -35,14 +42,14 @@ function getTopLevelView(id) {
 //
 function showTopLevelView(id) {
 
-    for(var key in topLevelViews) {
+    for (var key in topLevelViews) {
         view = topLevelViews[key];
         view.hide();
     }
 
-    for(var key in topLevelViews) {
+    for (var key in topLevelViews) {
         view = topLevelViews[key];
-        if(key == id) {
+        if (key == id) {
             view.show();
         }
     }

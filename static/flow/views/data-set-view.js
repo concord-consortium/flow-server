@@ -15,7 +15,7 @@ var DataSetView = function(options) {
 
     // console.log("[DEBUG] DataSetView base", base);
 
-    var content = jQuery('#'+base.getDivId());
+    var content = $('#'+base.getDivId());
 
     base.m_dataset              = null;
     base.m_program              = null;
@@ -105,7 +105,6 @@ var DataSetView = function(options) {
     //
     base.loadDataSet = function(dataSet) {
         clearTimeout(updateSequenceTimer);
-
         //console.log("[DEBUG] loadDataSet", dataSet);
         if(dataSet === null) {
             modalAlert({
@@ -219,11 +218,11 @@ var DataSetView = function(options) {
                     var items = response.items;
                     for(var i = 0; i < items.length; i++) {
                         if(items[i].name == "metadata" && base.m_dataSet.metadata.start_time==null){
-                            //handle case where user does following:
-                            //1. starts recording datasetv
-                            //2. chooses to view data from editor, load from constructed dataset info built in flow-server
-                            //3. since flow client actually started the recording, flow-server does not know start time
-                            //4. possible to retrieve the start time now that we have the actual metadata from the server
+                            // Handle case where user does following:
+                            // 1. starts recording datasetv
+                            // 2. chooses to view data from editor, load from constructed dataset info built in flow-server
+                            // 3. since flow client actually started the recording, flow-server does not know start time
+                            // 4. possible to retrieve the start time now that we have the actual metadata from the server
                             if(items[i].metadata.start_time!=null)
                                 base.m_dataSet.metadata.start_time = items[i].metadata.start_time;
                         }
@@ -269,7 +268,7 @@ var DataSetView = function(options) {
 
     // close the plotter screen and go back to the diagram editor
     function closePlotter() {
-        //turn off timer, turn it on after we get the dataset
+        // Turn off timer, turn it on after we get the dataset
         clearTimeout(updateSequenceTimer);
         showDiagramEditor();
     }
@@ -278,7 +277,7 @@ var DataSetView = function(options) {
     //stop live updates
     //
     base.stopLiveUpdates = function(){
-        //turn off timer, turn it on after we get the dataset
+        // Turn off timer, turn it on after we get the dataset
         clearTimeout(updateSequenceTimer);
     }
 
@@ -290,7 +289,7 @@ var DataSetView = function(options) {
         var validtimestamps = [];
 
         if(timestamps == null || values == null) {
-            // if we couldn't get a valid timestamp or value object,
+            // If we couldn't get a valid timestamp or value object,
             // something went terribly wrong and sequence is invalid
             // i.e., sequence has name="" and we tried to read the
             // contents of the dataset folder as if it were a sequence folder
@@ -302,7 +301,7 @@ var DataSetView = function(options) {
         //console.log('timestamps: ', timestamps);
         //console.log('values: ', values);
 
-        // make sure all values are numeric (or null)
+        // Make sure all values are numeric (or null)
         // fix(faster): do on server
         var len = values.length;
         for (var i = 0; i < len; i++) {
@@ -338,7 +337,7 @@ var DataSetView = function(options) {
             base.m_plotHandler.drawPlot(null, null);
         }
 
-        //if we found the final sequence and we are live, set the timer to load again
+        // If we found the final sequence and we are live, set the timer to load again
         sequenceCount--;
         if(isLive && sequenceCount == 0){
             updateSequenceTimer = setTimeout(updateSequence, updateSequenceTime);
@@ -428,7 +427,7 @@ var DataSetView = function(options) {
         var start   = moment(startDate.getTime()).toISOString();
         var end     = moment(endDate.getTime() - 1000).toISOString();
 
-        //save the start time in case we are live and need to request sequence data again
+        // Save the start time in case we are live and need to request sequence data again
         savedStartTime = start;
         savedSequences = sequences;
         sequenceCount = 0;
@@ -445,16 +444,16 @@ var DataSetView = function(options) {
         }
     }
     //
-    //update the data view when we are looking at a live recording
+    // Update the data view when we are looking at a live recording
     //
     function updateSequence() {
-        //turn off timer, turn it on after we get the dataset
+        // Turn off timer, turn it on after we get the dataset
         clearTimeout(updateSequenceTimer);
 
-        //store the number of sequences that we will request
+        // Store the number of sequences that we will request
         sequenceCount = 0;
 
-        //request dataset
+        // Request dataset
         var start   = savedStartTime;
         var d = new Date();
         var end = d.toISOString();
@@ -487,7 +486,7 @@ var DataSetView = function(options) {
         var timeThresh = 0.4;  // seconds
         var dataPairs = base.m_plotHandler.plotter.dataPairs;
         if (dataPairs.length && dataPairs[0].xData.data.length) {
-            // set collection attributes based on sequence data
+            // Set collection attributes based on sequence data
             var attrs = [{name: 'seconds', type: 'numeric', precision: 2}, {name: 'timestamp', type: 'date'}];
             for (var i = 0; i < dataPairs.length; i++) {
                 attrs.push({
@@ -500,7 +499,7 @@ var DataSetView = function(options) {
             CodapTest.prepCollection(
                 attrs,
                 function() {
-                    // get data for quick reference
+                    // Get data for quick reference
                     var xs = [];
                     var ys = [];
                     for (var j = 0; j < dataPairs.length; j++) {
@@ -508,7 +507,7 @@ var DataSetView = function(options) {
                         ys.push(dataPairs[j].yData.data);
                     }
 
-                    // get timestamp bounds
+                    // Get timestamp bounds
                     var frame = base.m_plotHandler.plotter.frames[0];
                     var minTimestamp = frame.intervalLowerX;
                     var maxTimestamp = frame.intervalUpperX;
@@ -521,13 +520,13 @@ var DataSetView = function(options) {
                         }
                     }
 
-                    // merge the sequences
+                    // Merge the sequences
                     var data = [];
                     var startTimestamp = null;
                     var step = 0;
                     while (1) {
 
-                        // get current timestamp: min across sequences at current position
+                        // Get current timestamp: min across sequences at current position
                         var timestamp = null;
                         for (var j = 0; j < dataPairs.length; j++) {
                             if (ind[j] >= 0) {
@@ -538,20 +537,20 @@ var DataSetView = function(options) {
                             }
                         }
 
-                        // if no timestamp, then we've reached the end of all sequences, stop here
+                        // If no timestamp, then we've reached the end of all sequences, stop here
                         if (timestamp === null) {
                             break;
                         }
 
-                        // check whether to keep this point
+                        // Check whether to keep this point
                         var keepPoint = ((minTimestamp === null || timestamp >= minTimestamp - timeThresh) && (maxTimestamp === null || timestamp <= maxTimestamp + timeThresh));
 
-                        // first timestamp will be start timestamp
+                        // First timestamp will be start timestamp
                         if (keepPoint && startTimestamp === null) {
                             startTimestamp = timestamp;
                         }
 
-                        // grab the data for this timestamp and move indices forward
+                        // Grab the data for this timestamp and move indices forward
                         var dataPoint = {};
                         for (var j = 0; j < dataPairs.length; j++) {
                             if (ind[j] >= 0) {
@@ -568,14 +567,14 @@ var DataSetView = function(options) {
                             }
                         }
 
-                        // add to data set to send to CODAP
+                        // Add to data set to send to CODAP
                         if (keepPoint) {
                             dataPoint['seconds'] = timestamp - startTimestamp;
                             dataPoint['timestamp'] = moment(timestamp * 1000).format('M/D/YYYY H:mm:ss');
                             data.push(dataPoint);
                         }
 
-                        // sanity check
+                        // Sanity check
                         step++;
                         if (step > 3000) {
                             break;
@@ -616,8 +615,9 @@ var DataSetView = function(options) {
         }
     }
 
-
-    // delete all history for this sequence
+    //
+    // Delete all history for this sequence
+    //  
     function deleteSequenceData() {
         modalConfirm({
             title: 'Delete Sequence Data',
