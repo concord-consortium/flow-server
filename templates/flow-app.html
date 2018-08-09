@@ -4,7 +4,8 @@
 	<script src="/static/js/jquery-1.11.3.min.js"></script>
 	<script src="/static/bootstrap/js/bootstrap.min.js"></script>
 	<script src="/ext/flow-server/static/external/svg.min.js"></script>
-	<script src="/static/js/moment.min.js"></script>
+    <script src="/static/js/moment.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.3.1/firebase.js"></script>
 	<script src="/ext/flow-server/static/common/core.js"></script>
 	<script src="/ext/flow-server/static/common/messages.js"></script>
 	<script src="/ext/flow-server/static/common/ble-messages.js"></script>
@@ -24,22 +25,22 @@
       - Login page components.
       -
       -->
-    <script 
+    <script
       src="/ext/flow-server/static/flow/views/login-page-view.js">
     </script>
- 
+
     <!--
       -
       - Landing page components.
       -
       -->
-    <script 
+    <script
       src="/ext/flow-server/static/flow/views/landing-page-view.js">
     </script>
-    <script 
+    <script
       src="/ext/flow-server/static/flow/views/landing-page-my-programs-view.js">
     </script>
-    <script 
+    <script
       src="/ext/flow-server/static/flow/views/landing-page-data-set-view.js">
     </script>
 
@@ -48,16 +49,16 @@
       - Program Editor UI components.
       -
       -->
-    <script 
+    <script
       src="/ext/flow-server/static/flow/views/program-editor-view.js">
     </script>
-    <script 
+    <script
       src="/ext/flow-server/static/flow/views/pi-selector-panel.js">
     </script>
-    <script 
+    <script
       src="/ext/flow-server/static/flow/views/program-editor-panel.js">
     </script>
-    <script 
+    <script
       src="/ext/flow-server/static/flow/views/program-editor-block-palette.js">
     </script>
 
@@ -66,7 +67,7 @@
       - DataSet view components
       -
       -->
-    <script 
+    <script
       src="/ext/flow-server/static/flow/views/data-set-view.js">
     </script>
 
@@ -75,13 +76,13 @@
       - Admin view component
       -
       -->
-    <script 
+    <script
       src="/ext/flow-server/static/flow/views/admin-view.js">
     </script>
-    <script 
+    <script
       src="/ext/flow-server/static/flow/views/fullscreen-widget.js">
     </script>
-	
+
 
 	<script src="/ext/flow-server/static/flow/ble-app.js"></script>
 	<script src="/ext/flow-server/static/flow/diagram.js"></script>
@@ -101,7 +102,7 @@
         };
     </script>
 {% endif %}
-	
+
 	<link rel="stylesheet" href="/ext/flow-server/static/flow/style.css">
 <title>Data Flow</title>
 </head>
@@ -110,7 +111,7 @@
 
 <!--
   -
-  - New DF2.0 views. 
+  - New DF2.0 views.
   -
   -->
 <div    id="login-page-view" ></div>
@@ -135,6 +136,7 @@ var g_adminEnabled = false; //1.0
 var g_user                  = {{ flow_user|safe }};
 var g_rhizo_server_version  = '{{ rhizo_server_version }}';
 var g_flow_server_version   = '{{ flow_server_version }}';
+var g_firebase_info = {{ firebase_info_json|safe }};
 
 $(function() {
 	initFlowApp();
