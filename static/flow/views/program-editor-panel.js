@@ -165,7 +165,7 @@ var ProgramEditorPanel = function(options) {
         _this.displayAllConnections();
 
         _this.updateAllBlocks();
-        
+
         // resave program, but do not resave the state
         _this.autoSaveProgram(false, false);
 
@@ -224,35 +224,25 @@ var ProgramEditorPanel = function(options) {
         var min = d.getMinutes();
         var sec = d.getSeconds();
 
+        this._formatDatePart = function(datestring, part){
+          if (part < 10) {
+            return datestring + "0" + part;
+          }
+          else {
+            return datestring + part;
+          }
+        };
+
         var potentialName = prefixStr + year;
-        if (month < 10) {
-            potentialName = potentialName + "0" + month;
-        } else {
-            potentialName = potentialName + month;
-        }
-        if (day < 10) {
-            potentialName = potentialName + "0" + day + "_";
-        } else {
-            potentialName = potentialName + day + "_";
-        }
-        if (hour < 10) {
-            potentialName = potentialName + "0" + hour;
-        } else {
-            potentialName = potentialName + hour;
-        }
-        if (min < 10) {
-            potentialName = potentialName + "0" + min;
-        } else {
-            potentialName = potentialName + min;
-        }
-        if (sec < 10) {
-            potentialName = potentialName + "0" + sec;
-        } else {
-            potentialName = potentialName + sec;
-        }
+        potentialName += this._formatDatePart(potentialName, month);
+        potentialName += this._formatDatePart(potentialName, day) + "_";;
+        potentialName += this._formatDatePart(potentialName, hour);
+        potentialName += this._formatDatePart(potentialName, min);
+        potentialName += this._formatDatePart(potentialName, sec);
 
         return potentialName;
     };
+
 
     this.getProgramName = function() {
         return this.m_diagramName;
@@ -276,7 +266,6 @@ var ProgramEditorPanel = function(options) {
         }
 
         var blockContentDiv;
-
         if (_this.isDeviceBlock(block.type)) {
             blockDiv.addClass('concordblue');
             blockContentDiv = $('<div>', {class: 'flowBlockContent', id: 'bcon_' + block.id});
@@ -944,54 +933,27 @@ var ProgramEditorPanel = function(options) {
     };
 
     //
-    // Mapping used by addDeviceBlock() for sensor type units.
+    // Mapping used by addDeviceBlock() for sensor type units, units defined in block-definitions.
     //
-    this.unitsMap = {
-        humidity:       'percent',
-        temperature:    'degrees C',
-        CO2:            'PPM',
-        light:          'lux',
-        soilmoisture:   '',
-        timer:          'seconds',
-        O2:             'percent'
-    };
-
+    this.unitsMap = UNITS_MAP;
     //
     // Used by addDeviceBlock() to create unique names
     //
     this.nameHash = {};
 
     //
-    // Determine if a block represents a physical sensor device
+    // Determine if a block represents a physical sensor device. List of device blocks defined in block-definitions
     //
-    this.isDeviceBlock = function(type) {
-        return (type == "temperature" ||
-                type == "humidity" ||
-                type == "light" ||
-                type == "soilmoisture" ||
-                type == "CO2" ||
-                type == "O2");
+    this.isDeviceBlock = function (type) {
+      return DEVICE_BLOCKS.indexOf(type) > -1
     };
 
     //
-    // Determine if a block represents a filter
+    // Determine if a block represents a filter. List of filter blocks defined in block-definitions
     //
-    this.isFilterBlock = function(type) {
-        return (type == "and" ||
-                type == "or" ||
-                type == "not" ||
-                type == "xor" ||
-                type == "nand" ||
-                type == "plus" ||
-                type == "minus" ||
-                type == "times" ||
-                type == "divided by" ||
-                type == "absolute value" ||
-                type == "equals" ||
-                type == "not equals" ||
-                type == "less than" ||
-                type == "greater than");
-    };
+    this.isFilterBlock = function (type) {
+      return FILTER_BLOCKS.indexOf(type) > -1;
+    }
 
     //
     // Used to create unique names for blocks
