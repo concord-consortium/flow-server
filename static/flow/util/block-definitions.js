@@ -11,3 +11,33 @@ const UNITS_MAP = {
   timer:          'seconds',
   O2:             'percent'
 };
+
+const ICON_TYPE_MAP = {
+  "temperature": "temperature.png",
+  "humidity": "humidity.png",
+  "CO2": "co2.png",
+  "O2": "o2.png",
+  "light": "light.png",
+  "soilmoisture": "soilmoisture.png",
+  "number":"logic-numeric.png",
+  "plus": "logic-plus.png",
+  "minus": "logic-minus.png",
+  "times": "logic-times.png",
+  "divided by": "logic-divide.png",
+  "greater than": "logic-greaterthan.png",
+  "less than": "logic-lessthan.png",
+  "equals": "logic-equals.png",
+  "not equals": "logic-notequals.png",
+  "and": "logic-and.png",
+  "or": "logic-or.png",
+  "not": "logic-not.png",
+  "nand": "logic-nand.png",
+  "xor": "logic-xor.png",
+  "absolute value": "logic-abs.png",
+  "moving average": "logic-movingavg.png",
+  "exp moving average": "logic-expmovingavg.png",
+  "timer": "timer.png",
+  "relay": "output-relay.png",
+  "plot": "output-plot.png",
+  "data storage": "output-data.png"
+}
