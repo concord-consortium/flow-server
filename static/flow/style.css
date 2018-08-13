@@ -941,3 +941,10 @@ button.filter {
     font-style: normal;
 }
 
+div.smoothie-chart-tooltip {
+  background: #ccc;
+  padding: 1em;
+  color: #333;
+  pointer-events: none;
+  border-radius: 8px;
+}

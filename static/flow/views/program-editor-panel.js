@@ -341,8 +341,11 @@ var ProgramEditorPanel = function(options) {
             input.mousedown(function(e) {e.stopPropagation()});
             input.keyup(block.id, _this.numberEntryChanged);
         } else if (block.type === 'plot') {
-            let series = createPlotCanvas('flowBlockPlotCanvas', block.id, blockContentDiv, this.blockMouseDown, this.mouseMove, this.mouseUp, !this.useManyplot);
-            block.series = series;
+            let plotData = createPlotCanvas('flowBlockPlotCanvas', block.id, blockContentDiv, this.blockMouseDown, this.mouseMove, this.mouseUp, _this.useManyplot);
+            if (plotData) {
+                block.series = plotData.series;
+                block.plot = plotData.plot;
+            }
 
         } else if (block.outputType === 'i') {  // image-valued blocks
             $('<img>', {class: 'flowBlockImage', width: 320, height: 240, id: 'bi_' + block.id}).appendTo(blockDiv);
@@ -552,9 +555,7 @@ var ProgramEditorPanel = function(options) {
 
     // Display data in a plot block
     var displayPlot = function(block) {
-      if (_this.useManyplot) {
-        displayManyPlotSeries(block);
-      }
+        displayPlotSeries(block, _this.useManyplot);
     };
 
     //
@@ -1643,25 +1644,8 @@ var ProgramEditorPanel = function(options) {
         if (block.type === 'number_entry') {
             // do nothing
         } else if (block.type === 'plot') {
-            if (this.useManyplot) {
-                if (block.value !== null && !isNaN(block.value)) {
-                    var timestamp = moment().valueOf() * 0.001 - this.m_startTimestamp;
-                    block.view.xData.data.push(timestamp);
-                    block.view.yData.data.push(block.value);
-                    if (block.view.xData.data.length > 30) {
-                        block.view.xData.data.shift();
-                        block.view.yData.data.shift();
-                    }
-                } else {
-                    block.view.xData.data = [];
-                    block.view.yData.data = [];
-                }
-                block.view.plotHandler.plotter.autoBounds();
-                block.view.plotHandler.drawPlot(null, null);
-            } else {
-                // update smoothiechart
-                block.series.append(timestamp, block.value);
-            }
+            var timestamp = moment().valueOf() * 0.001 - this.m_startTimestamp;
+            updatePlot(block, timestamp, _this.useManyplot);
         } else if (block.outputType === 'i') {  // image-valued blocks
             if (block.value === null) {
                 // fix(soon): display something to let user know camera is offline

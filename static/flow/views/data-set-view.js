@@ -189,7 +189,14 @@ var DataSetView = function(options) {
 
 
         base.m_canvas = document.getElementById('data-set-canvas');
-        base.m_plotHandler = createPlotHandler(base.m_canvas);
+        let opts = {
+          LineColor: "rgb(0,125,175)",
+          Background: "#fff",
+          AxisLine: "#333",
+          AxisLabel: "#333"
+        };
+        let showIndividualPlots = true;
+        base.m_plotHandler = createPlotHandler(base.m_canvas, showIndividualPlots, opts);
 
         context = base.m_canvas.getContext('2d');
         window.addEventListener('resize', base.resizeCanvas, false);
@@ -617,7 +624,7 @@ var DataSetView = function(options) {
 
     //
     // Delete all history for this sequence
-    //  
+    //
     function deleteSequenceData() {
         modalConfirm({
             title: 'Delete Sequence Data',
