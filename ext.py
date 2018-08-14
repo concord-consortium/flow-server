@@ -69,13 +69,13 @@ def handle_socket_connected(ws_conn, socket_sender):
     # listen for controller connections to give them their Firebase init info
     if ws_conn.controller_id and to_bool(current_app.config.get('FIREBASE_ENABLED', False)):
 
-        domain = current_app.config.get('FIREBASE_DOMAIN')
+        environment = current_app.config.get('FIREBASE_ENVIRONMENT')
         project_id = current_app.config.get('FIREBASE_PROJECT_ID')
         private_key = current_app.config.get('FIREBASE_PRIVATE_KEY')
         client_email = current_app.config.get('FIREBASE_CLIENT_EMAIL')
         api_key = current_app.config.get('FIREBASE_API_KEY')
-        if not domain or not project_id or not private_key or not client_email or not api_key:
-            print('ERROR: Need FIREBASE_DOMAIN, FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, FIREBASE_CLIENT_EMAIL, and FIREBASE_API_KEY defined when FIREBASE_ENABLED is true')
+        if not environment or not project_id or not private_key or not client_email or not api_key:
+            print('ERROR: Need FIREBASE_ENVIRONMENT, FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, FIREBASE_CLIENT_EMAIL, and FIREBASE_API_KEY defined when FIREBASE_ENABLED is true')
             return
 
         controller_id = str(ws_conn.controller_id)
@@ -87,9 +87,9 @@ def handle_socket_connected(ws_conn, socket_sender):
             'aud': 'https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit',
             'iat': now,
             'exp': now + 3600,
-            'uid': 'pi:' + domain + ':' + controller_id,
+            'uid': 'pi:' + environment + ':' + controller_id,
             'claims': {
-                'domain': domain,
+                'environment': environment,
                 'controller_id': controller_id
             }
         }
@@ -102,8 +102,8 @@ def handle_socket_connected(ws_conn, socket_sender):
             'send_sensor_data': {
                 'enabled': to_bool(current_app.config.get('FIREBASE_SEND_SENSOR_DATA_ENABLED', False)),
                 'interval': int(current_app.config.get('FIREBASE_SEND_SENSOR_DATA_INTERVAL', 1)),
-                'path': '/domains/%s/controllers/%s/sensor_data' % (
-                    current_app.config.get('FIREBASE_DOMAIN'),
+                'path': '/environments/%s/controllers/%s/sensor_data' % (
+                    current_app.config.get('FIREBASE_ENVIRONMENT'),
                     controller_id
                 )
             }
@@ -119,7 +119,7 @@ def flow_app():
         'enabled': to_bool(current_app.config.get('FIREBASE_ENABLED', False)),
         'send_sensor_data': {
             'enabled': to_bool(current_app.config.get('FIREBASE_SEND_SENSOR_DATA_ENABLED', False)),
-            'path_template': '/domains/%s/controllers/*CONTROLLER_ID*/sensor_data' % (current_app.config.get('FIREBASE_DOMAIN'))
+            'path_template': '/environments/%s/controllers/*CONTROLLER_ID*/sensor_data' % (current_app.config.get('FIREBASE_ENVIRONMENT'))
         },
         'initialize_app': {
             'apiKey': current_app.config.get('FIREBASE_API_KEY'),
@@ -127,7 +127,7 @@ def flow_app():
             'databaseURL': 'https://%s.firebaseio.com' % (firebase_project_id),
             'projectId':  firebase_project_id,
             'storageBucket': '%s.appspot.com' % (firebase_project_id),
-            'messagingSenderId': '661784569757'
+            'messagingSenderId': current_app.config.get('FIREBASE_MESSAGE_SENDER_ID')
         }
     }
 
