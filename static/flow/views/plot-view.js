@@ -84,7 +84,6 @@ var displayPlotSeries = function (block, useManyplot) {
     block.view.plotHandler.plotter.setData(dataPairs);
     block.view.plotHandler.drawPlot(null, null);
   }
-  console.log(block.view);
 }
 
 

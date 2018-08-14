@@ -18,6 +18,26 @@ function getNearest(arr,value) {
     return index;
 }
 
+var dpr = !window ? 1 : window.devicePixelRatio, width, height;
+
+var _scalePlotCanvas = function (canvas) {
+  if (dpr !== 1) {
+    // Use the canvas's inner dimensions and scale the element's size
+    // according to that size and the device pixel ratio (eg: high DPI)
+    width = parseInt(canvas.getAttribute('width'));
+    height = parseInt(canvas.getAttribute('height'));
+
+    canvas.setAttribute('width', (Math.floor(width * dpr)).toString());
+    canvas.style.width = width + 'px';
+    canvas.getContext('2d').scale(dpr, dpr);
+
+
+    canvas.setAttribute('height', (Math.floor(height * dpr)).toString());
+    canvas.style.height = height + 'px';
+    canvas.getContext('2d').scale(dpr, dpr);
+  }
+}
+
 let _plotOptions = {
   BorderColor: "rgb(200,200,200)",
   LineColor: "rgb(60,60,60)",
@@ -28,12 +48,13 @@ let _plotOptions = {
   HighlightIndicator: "rgb(200,200,200)",
   AxisLine: "#333",
   AxisLabel: "#833",
-  TimeColor: "#000"
+  TimeColor: "#000",
+  CaptionFontSize: 12,
+  SmallFontSize: 10
 };
 
 function setPlotOptions(opts) {
   for (var opt in opts) {
-    console.log(opt);
     if (_plotOptions[opt]) {
       _plotOptions[opt] = opts[opt];
     }
@@ -74,7 +95,7 @@ function createPlotHandler( canvas, multiFrame, options ) {
         e.preventDefault();
         e.stopPropagation();
         if (e.type === "mousedown") {
-            plotHandler.mouseDown = true;
+          plotHandler.mouseDown = true;
         } else if (e.type === "mouseup") {
             plotHandler.mouseDown = false;
         } else if (e.type === "mouseout" || e.type === "mouseleave") {
@@ -153,9 +174,11 @@ function createPlotter( canvas, multiFrame ) {
     // Get the canvas and ctx. If this is the plotter of a child plotBlock,
     // it won't have a canvas element.
     plotter.canvas = canvas;
-    if(plotter.canvas){
-        plotter.ctx = plotter.canvas.getContext( "2d" );
-        setInitTransform( plotter.ctx );
+    if (plotter.canvas) {
+        _scalePlotCanvas(plotter.canvas);
+        plotter.ctx = plotter.canvas.getContext("2d");
+        // TODO: Check if this is needed
+        //setInitTransform( plotter.ctx );
         addDrawMethods( plotter.ctx );
     }
 
@@ -698,6 +721,7 @@ function createPlotter( canvas, multiFrame ) {
                             color = this.dataPairs[i].color;
                         }
                         ctx.strokeStyle = color;
+                        ctx.lineWidth = 1*dpr;
                         this.frames[ i ].drawData( this.dataPairs[ i ].xData, this.dataPairs[i].yData );
                         ctx.restore(); // restore after clip
                 }
@@ -1061,8 +1085,9 @@ function createFrame( ctx ) {
 
     // compute plot frame/box bounds using caption text;
     // outerMinX/outerMaxX/outerMinY/outerMaxY specify outer bounds for the frame area (including captions)
-    frame.fitBoxToCaptions = function( outerMinX, outerMaxX, outerMinY, outerMaxY ) {
-        this.ctx.font = "12px sans-serif"; // need to set font before measure text size
+    frame.fitBoxToCaptions = function (outerMinX, outerMaxX, outerMinY, outerMaxY) {
+        let fontSize = _plotOptions.CaptionFontSize *dpr;
+        this.ctx.font = fontSize + "px sans-serif"; // need to set font before measure text size
         var minLabelSize = this.ctx.measureText( this.minLabelY ).width;
         var centLabelSize = this.rotateLabelY ? 10 : this.ctx.measureText( this.labelY ).width;
         var maxLabelSize = this.ctx.measureText( this.maxLabelY ).width;
@@ -1087,7 +1112,7 @@ function createFrame( ctx ) {
         var ctx = this.ctx;
         ctx.setTransform( 1, 0, 0, 1, 0.5, 0.5 );
         ctx.strokeStyle = _plotOptions.BorderColor; //"rgb(200,200,200)";
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1*dpr;
         ctx.beginPath();
         ctx.moveTo( this.boxMinX, this.boxMinY );
         ctx.lineTo( this.boxMinX, this.boxMaxY + 5 );
@@ -1105,7 +1130,8 @@ function createFrame( ctx ) {
         var ctx = this.ctx;
 
         // prepare font (need to do this before measure size)
-        ctx.font = "12px museo500"; //ctx.font = "12px sans-serif";
+        var size = _plotOptions.CaptionFontSize * dpr;
+        ctx.font = size + "px museo500"; //ctx.font = "12px sans-serif";
         // TODO: make a parameter
         ctx.fillStyle = _plotOptions.AxisLabel;// "rgb(0,255,255)";
 
@@ -1175,7 +1201,7 @@ function createFrame( ctx ) {
         var len = xDataRaw.length;
         var first = true;
         var ctx = this.ctx;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 2 * dpr;
         ctx.beginPath();
 
         // if no y variation, just draw a straight line across from first point to last point
@@ -1286,7 +1312,7 @@ function createFrame( ctx ) {
             first = true; // reset
             ctx.beginPath();
             ctx.strokeStyle = 'red';
-            ctx.lineWidth = 4;
+            ctx.lineWidth = 4 * dpr;
 //            for (var i = this.intervalLowerIndex; i <= this.intervalUpperIndex; i++) {
             for (var i = 0; i < xDataRaw.length; i++) {
                 var x = xDataRaw[i];
@@ -1362,7 +1388,7 @@ function createFrame( ctx ) {
         var bucketWidth = (this.boxMaxX - this.boxMinX) / bucketCount;
         var heightFactor = (this.boxMaxY - this.boxMinY) / maxCount;
         var ctx = this.ctx;
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1 * dpr;
         ctx.strokeStyle = "#009ddf";
         ctx.fillStyle = "#e9f6fd";
         for (var i = 0; i < bucketCount; i++) {
@@ -1400,8 +1426,9 @@ function createFrame( ctx ) {
                 this.ctx.fillStyle = "#007daf";
                 this.ctx.drawCircle( xScreen, yScreen, 7 );
                 this.ctx.textAlign = "center";
-                this.ctx.fillStyle = "#00FFFF";
-                this.ctx.font = 'bold 10px sans-serif';
+              this.ctx.fillStyle = "#00FFFF";
+              // TODO: continue here
+                this.ctx.font = 'bold ' + (_plotOptions.SmallFontSize * dpr) + 'px sans-serif';
                 if (left) {
                     ctx.drawTextAbsolute( "L", xScreen, yScreen );
                 } else {
@@ -1437,7 +1464,7 @@ function createFrame( ctx ) {
             var ctx = this.ctx;
             if(typeof drawLine === 'undefined' || drawLine === true){
                 // draw line
-                ctx.lineWidth = 1;
+                ctx.lineWidth = 1 * dpr;
               ctx.strokeStyle = _plotOptions.HighlightIndicator;//"rgb(200,200,200)";
                 ctx.drawLine( xScreen, this.boxMinY, xScreen, this.boxMaxY );
             }
@@ -1618,7 +1645,7 @@ function createFrame( ctx ) {
             var x = this.dataToScreenX( xVector[ bestIndex ] );
             var y = this.dataToScreenY( yVector[ bestIndex ] );
             var ctx = this.ctx;
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 1 * dpr;
             ctx.strokeStyle = "rgb( 0, 0, 0 )";
             ctx.fillStyle = "rgb( 170, 170, 225 )";
             ctx.drawCircle( x, y, 2 );
@@ -1639,7 +1666,7 @@ function createFrame( ctx ) {
             var x = this.boxMinX + i * bucketWidth;
             var y = this.boxMaxY - h;
             if (xScreen > x && xScreen < x + w && yScreen > y && yScreen < y + h) {
-                this.ctx.lineWidth = 1;
+                this.ctx.lineWidth = 1 * dpr;
                 this.ctx.strokeStyle = "rgb( 0, 0, 0 )";
                 this.ctx.fillStyle = "#b9d6dd";
                 this.ctx.drawRect( x, y, w, h );
@@ -1844,7 +1871,7 @@ function addDrawMethods(ctx) {
     // flip the coordinate system vertically
     ctx.flip = function () {
         ctx.translate(0, ctx.yMax);
-        ctx.scale(1, -1);
+        ctx.scale(1 * dpr, -1 * dpr);
     };
 
     // a helper function for setting the fill color from an (r, g, b) triplet
@@ -1861,7 +1888,7 @@ function addDrawMethods(ctx) {
     ctx.drawImageUp = function (image, x, y) {
         this.save();
         this.translate(x, y + image.height);
-        this.scale(1, -1);
+        this.scale(1 * dpr, -1 * dpr);
         this.drawImage(image, 0, 0);
         this.restore();
     };
@@ -1879,7 +1906,7 @@ function addDrawMethods(ctx) {
         if(text === undefined || !isNumber(x) || !isNumber(y)) return;
         ctx.save();
         ctx.translate(0, ctx.yMax);
-        ctx.scale(1, -1);
+        ctx.scale(1*dpr, -1*dpr);
         ctx.fillText(text, x, ctx.yMax - y);
         ctx.restore();
     };
@@ -1902,8 +1929,8 @@ function addDrawMethods(ctx) {
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         if (textLine2) {
-            ctx.drawText(textLine1, (ctx.xMin + ctx.xMax) * 0.5, (ctx.yMin + ctx.yMax) * 0.5 + 12);
-            ctx.drawText(textLine2, (ctx.xMin + ctx.xMax) * 0.5, (ctx.yMin + ctx.yMax) * 0.5 - 12);
+            ctx.drawText(textLine1, (ctx.xMin + ctx.xMax) * 0.5, (ctx.yMin + ctx.yMax) * 0.5 + (_plotOptions.SmallFontSize * dpr));
+            ctx.drawText(textLine2, (ctx.xMin + ctx.xMax) * 0.5, (ctx.yMin + ctx.yMax) * 0.5 - (_plotOptions.SmallFontSize * dpr));
         } else {
             ctx.drawText(textLine1, (ctx.xMin + ctx.xMax) * 0.5, (ctx.yMin + ctx.yMax) * 0.5);
         }
@@ -2071,9 +2098,9 @@ function localTimestampToStr( timestamp, showSeconds ) {
 function objectClickX( e ) {
     var x = 0;
     if (e.offsetX || e.offsetX === 0) { // Opera/Chrome
-        x = e.offsetX;
+        x = e.offsetX * dpr;
     } else if (e.layerX || e.layerX === 0) { // Firefox
-        x = e.layerX;
+        x = e.layerX * dpr;
     }
     return x;
 }
@@ -2082,9 +2109,9 @@ function objectClickX( e ) {
 function objectClickY( e ) {
     var y = 0;
     if (e.offsetY || e.offsetY === 0) { // Opera/Chrome
-        y = e.offsetY;
+        y = e.offsetY * dpr;
     } else if (e.layerY || e.layerY === 0) { // Firefox
-        y = e.layerY;
+        y = e.layerY * dpr;
     }
     return y;
 }
