@@ -81,7 +81,7 @@ var DataSetView = function(options) {
     detailsDiv.append(endTime);
 
 
-    var canvas = $('<canvas>', { id: 'data-set-canvas' } );
+    var canvas = $('<canvas>', { id: 'data-set-canvas' });
     content.append(canvas);
 
     //
@@ -189,11 +189,19 @@ var DataSetView = function(options) {
 
 
         base.m_canvas = document.getElementById('data-set-canvas');
+        // if (!base.m_canvas.getAttribute('width')) {
+        //   base.m_canvas.setAttribute('width', base.m_canvas.width * window.devicePixelRatio);
+        //   base.m_canvas.setAttribute('height', base.m_canvas.height * window.devicePixelRatio);
+        // }
+
+      console.log(base.m_canvas.width, base.m_canvas.height);
         let opts = {
           LineColor: "rgb(0,125,175)",
           Background: "#fff",
           AxisLine: "#333",
-          AxisLabel: "#333"
+          AxisLabel: "#333",
+          CaptionFontSize: 12,
+          SmallFontSize: 10
         };
         let showIndividualPlots = true;
         base.m_plotHandler = createPlotHandler(base.m_canvas, showIndividualPlots, opts);
@@ -266,7 +274,8 @@ var DataSetView = function(options) {
         //                window.innerWidth,
         //                window.innerHeight);
         base.m_canvas.width = window.innerWidth - RIGHT_PANEL_WIDTH - HORIZONTAL_MARGIN;
-        base.m_canvas.height = window.innerHeight - PLOTTER_MARGIN_BOTTOM - VERTICAL_MARGIN;
+      base.m_canvas.height = window.innerHeight - PLOTTER_MARGIN_BOTTOM - VERTICAL_MARGIN;
+      _resizePlotCanvas(base.m_canvas, base.m_canvas.width, base.m_canvas.height);
         if (base.m_plotHandler){
             base.m_plotHandler.drawPlot(null, null);
         }

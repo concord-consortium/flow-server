@@ -26,16 +26,18 @@ var _scalePlotCanvas = function (canvas) {
     // according to that size and the device pixel ratio (eg: high DPI)
     width = parseInt(canvas.getAttribute('width'));
     height = parseInt(canvas.getAttribute('height'));
-
-    canvas.setAttribute('width', (Math.floor(width * dpr)).toString());
-    canvas.style.width = width + 'px';
-    canvas.getContext('2d').scale(dpr, dpr);
-
-
-    canvas.setAttribute('height', (Math.floor(height * dpr)).toString());
-    canvas.style.height = height + 'px';
-    canvas.getContext('2d').scale(dpr, dpr);
+    _resizePlotCanvas(canvas, width, height);
   }
+}
+
+var _resizePlotCanvas = function (canvas, width, height) {
+  canvas.setAttribute('width', (Math.floor(width * dpr)).toString());
+  canvas.style.width = width + 'px';
+  canvas.getContext('2d').scale(dpr, dpr);
+
+  canvas.setAttribute('height', (Math.floor(height * dpr)).toString());
+  canvas.style.height = height + 'px';
+  canvas.getContext('2d').scale(dpr, dpr);
 }
 
 let _plotOptions = {
@@ -47,26 +49,24 @@ let _plotOptions = {
   TextBoxBackground: "rgb(255,255,255)",
   HighlightIndicator: "rgb(200,200,200)",
   AxisLine: "#333",
-  AxisLabel: "#833",
+  AxisLabel: "#333",
   TimeColor: "#000",
   CaptionFontSize: 12,
   SmallFontSize: 10
 };
 
-function setPlotOptions(opts) {
-  for (var opt in opts) {
-    if (_plotOptions[opt]) {
-      _plotOptions[opt] = opts[opt];
-    }
-  }
-};
-
-function createPlotHandler( canvas, multiFrame, options ) {
+function createPlotHandler(canvas, multiFrame, options) {
+    let plotOptions = JSON.parse(JSON.stringify(_plotOptions));
     if (options) {
-      setPlotOptions(options);
+      for (var opt in options) {
+        if (plotOptions[opt]) {
+          plotOptions[opt] = options[opt];
+        }
+      }
     }
     var plotHandler = {};
-    plotHandler.plotter = createPlotter( canvas, multiFrame );
+    plotHandler.opts = plotOptions;
+    plotHandler.plotter = createPlotter( canvas, multiFrame, plotOptions );
     plotHandler.mouseDown = false;
     plotHandler.xDownLast = null;
     plotHandler.intervalSelect = false; // Start in pan mode
@@ -166,11 +166,13 @@ function createPlotHandler( canvas, multiFrame, options ) {
 
 
 // returns a plotter object suitable for displaying numeric plots on an HTML5 canvas context
-function createPlotter( canvas, multiFrame ) {
+function createPlotter( canvas, multiFrame, options ) {
     // If multiFrame is false, then we'll draw all frames in one plot.
     // If true, then each frame will have it's own box, captions, etc.
     if(typeof multiFrame === 'undefined') multiFrame = true;
     var plotter = {};
+    // Pass on options for line thickness, font size, etc
+    plotter.opts = options;
     // Get the canvas and ctx. If this is the plotter of a child plotBlock,
     // it won't have a canvas element.
     plotter.canvas = canvas;
@@ -179,7 +181,7 @@ function createPlotter( canvas, multiFrame ) {
         plotter.ctx = plotter.canvas.getContext("2d");
         // TODO: Check if this is needed
         //setInitTransform( plotter.ctx );
-        addDrawMethods( plotter.ctx );
+        addDrawMethods( plotter.ctx, options );
     }
 
     plotter.dataPairs = []; // A list of objects {"xData":DataColumn, "yData":DataColumn, "color":"rgb(#,#,#)"}
@@ -228,7 +230,7 @@ function createPlotter( canvas, multiFrame ) {
     // fix(soon): refactor
     plotter.setFrameCount = function( frameCount ) {
         while (this.frames.length < frameCount) {
-            this.frames.push( createFrame( this.canvas.getContext( "2d" ) ) );
+            this.frames.push( createFrame( this.canvas.getContext( "2d" ), plotter.opts ) );
         }
         if (this.frames.length > frameCount) {
             this.frames = this.frames.slice( 0, frameCount );
@@ -637,7 +639,7 @@ function createPlotter( canvas, multiFrame ) {
             ctx.save();
             this.frames[ i ].clipBox();
             ctx.setTransform( 1, 0, 0, 1, 0, 0 );
-          ctx.fillStyle = _plotOptions.Background; //"rgb(255,255,255)";
+            ctx.fillStyle = plotter.opts.Background; //"rgb(255,255,255)";
             ctx.fillRect( 0, 0, this.canvas.width, this.canvas.height );
             ctx.restore();
         }
@@ -716,7 +718,7 @@ function createPlotter( canvas, multiFrame ) {
                         if (clip) {
                           this.frames[i].clipBox();
                         }
-                        var color = _plotOptions.LineColor;//"rgb(0,125,175)";
+                        var color = plotter.opts.LineColor;//"rgb(0,125,175)";
                         if(typeof this.dataPairs[i].color !== 'undefined'){
                             color = this.dataPairs[i].color;
                         }
@@ -741,7 +743,7 @@ function createPlotter( canvas, multiFrame ) {
     plotter.drawDataDots = function(clip) {
         if(this.frames.length < 1) return;
         var ctx = this.ctx;
-      var color = _plotOptions.DataPointColor;//"rgba(0,157,223,0.5)";
+      var color = plotter.opts.DataPointColor;//"rgba(0,157,223,0.5)";
         if(typeof this.dataPairs[0].color !== 'undefined'){
             color = this.dataPairs[0].color;
         }
@@ -999,8 +1001,9 @@ function createPlotter( canvas, multiFrame ) {
 }
 
 // the Frame object is responsible for the rendering and rendering-related coordinate transformations for a plot
-function createFrame( ctx ) {
+function createFrame( ctx, options ) {
     var frame = {};
+    frame.opts = options;
     frame.ctx = ctx; // store a reference to the context for quick reference
 
     // these are the bounds (in pixels) of the box containing the data, relative to the canvas
@@ -1086,7 +1089,7 @@ function createFrame( ctx ) {
     // compute plot frame/box bounds using caption text;
     // outerMinX/outerMaxX/outerMinY/outerMaxY specify outer bounds for the frame area (including captions)
     frame.fitBoxToCaptions = function (outerMinX, outerMaxX, outerMinY, outerMaxY) {
-        let fontSize = _plotOptions.CaptionFontSize *dpr;
+        let fontSize = frame.opts.CaptionFontSize * dpr;
         this.ctx.font = fontSize + "px sans-serif"; // need to set font before measure text size
         var minLabelSize = this.ctx.measureText( this.minLabelY ).width;
         var centLabelSize = this.rotateLabelY ? 10 : this.ctx.measureText( this.labelY ).width;
@@ -1111,8 +1114,8 @@ function createFrame( ctx ) {
     frame.drawBox = function() {
         var ctx = this.ctx;
         ctx.setTransform( 1, 0, 0, 1, 0.5, 0.5 );
-        ctx.strokeStyle = _plotOptions.BorderColor; //"rgb(200,200,200)";
-        ctx.lineWidth = 1*dpr;
+        ctx.strokeStyle = frame.opts.BorderColor; //"rgb(200,200,200)";
+        ctx.lineWidth = 1 * dpr;
         ctx.beginPath();
         ctx.moveTo( this.boxMinX, this.boxMinY );
         ctx.lineTo( this.boxMinX, this.boxMaxY + 5 );
@@ -1130,10 +1133,10 @@ function createFrame( ctx ) {
         var ctx = this.ctx;
 
         // prepare font (need to do this before measure size)
-        var size = _plotOptions.CaptionFontSize * dpr;
+        var size = frame.opts.CaptionFontSize * dpr;
         ctx.font = size + "px museo500"; //ctx.font = "12px sans-serif";
         // TODO: make a parameter
-        ctx.fillStyle = _plotOptions.AxisLabel;// "rgb(0,255,255)";
+        ctx.fillStyle = frame.opts.AxisLabel;// "rgb(0,255,255)";
 
         // get bounds for quick reference
         var boxMinX = this.boxMinX;
@@ -1343,7 +1346,7 @@ function createFrame( ctx ) {
         var w = size.width + 10;
         var h = 20; // size.height + 20;
         var fill = ctx.fillStyle;
-        ctx.fillStyle = _plotOptions.TextBoxBackground; //"rgb(255,255,255)";
+        ctx.fillStyle = frame.opts.TextBoxBackground; //"rgb(255,255,255)";
         if (x + w > this.boxMaxX) {
             x -= w;
         }
@@ -1428,7 +1431,7 @@ function createFrame( ctx ) {
                 this.ctx.textAlign = "center";
               this.ctx.fillStyle = "#00FFFF";
               // TODO: continue here
-                this.ctx.font = 'bold ' + (_plotOptions.SmallFontSize * dpr) + 'px sans-serif';
+                this.ctx.font = 'bold ' + (frame.opts.SmallFontSize * dpr) + 'px sans-serif';
                 if (left) {
                     ctx.drawTextAbsolute( "L", xScreen, yScreen );
                 } else {
@@ -1465,7 +1468,7 @@ function createFrame( ctx ) {
             if(typeof drawLine === 'undefined' || drawLine === true){
                 // draw line
                 ctx.lineWidth = 1 * dpr;
-              ctx.strokeStyle = _plotOptions.HighlightIndicator;//"rgb(200,200,200)";
+              ctx.strokeStyle = frame.opts.HighlightIndicator;//"rgb(200,200,200)";
                 ctx.drawLine( xScreen, this.boxMinY, xScreen, this.boxMaxY );
             }
 
@@ -1474,7 +1477,7 @@ function createFrame( ctx ) {
                 var showSeconds = false;
                 if (xData.min && xData.max && xData.max - xData.min < 24 * 60 * 60)
                     showSeconds = true;
-              ctx.fillStyle = _plotOptions.TimeColor; //"rgb(0,0,0)";
+              ctx.fillStyle = frame.opts.TimeColor; //"rgb(0,0,0)";
                 if(typeof useTimestamp !== 'undefined' && useTimestamp){
                     if (x > 1000000) { // if standard unix timestamp (we'll assume small numbers are elapsed time, not timestamps)
                         this.drawTextBox( xScreen, this.boxMinY, localTimestampToStr( x, showSeconds ) );
@@ -1780,7 +1783,7 @@ function computeHistogram( data, bucketCount, min, max ) {
 }
 
 // add our custom drawing methods to an HTML5 canvas context
-function addDrawMethods(ctx) {
+function addDrawMethods(ctx, opts) {
 
     // draw a line between the two points
     ctx.drawLine = function (x1, y1, x2, y2) {
@@ -1906,7 +1909,7 @@ function addDrawMethods(ctx) {
         if(text === undefined || !isNumber(x) || !isNumber(y)) return;
         ctx.save();
         ctx.translate(0, ctx.yMax);
-        ctx.scale(1*dpr, -1*dpr);
+        ctx.scale(1 * dpr, -1 * dpr);
         ctx.fillText(text, x, ctx.yMax - y);
         ctx.restore();
     };
@@ -1929,8 +1932,8 @@ function addDrawMethods(ctx) {
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         if (textLine2) {
-            ctx.drawText(textLine1, (ctx.xMin + ctx.xMax) * 0.5, (ctx.yMin + ctx.yMax) * 0.5 + (_plotOptions.SmallFontSize * dpr));
-            ctx.drawText(textLine2, (ctx.xMin + ctx.xMax) * 0.5, (ctx.yMin + ctx.yMax) * 0.5 - (_plotOptions.SmallFontSize * dpr));
+            ctx.drawText(textLine1, (ctx.xMin + ctx.xMax) * 0.5, (ctx.yMin + ctx.yMax) * 0.5 + (opts.SmallFontSize * dpr));
+            ctx.drawText(textLine2, (ctx.xMin + ctx.xMax) * 0.5, (ctx.yMin + ctx.yMax) * 0.5 - (opts.SmallFontSize * dpr));
         } else {
             ctx.drawText(textLine1, (ctx.xMin + ctx.xMax) * 0.5, (ctx.yMin + ctx.yMax) * 0.5);
         }
