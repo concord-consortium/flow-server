@@ -920,7 +920,7 @@ var ProgramEditorPanel = function(options) {
     };
 
     //
-    // Mapping used by addDeviceBlock() for sensor type units, units defined in block-definitions.
+    // Mapping used by addDeviceBlock() for sensor type units, units defined in utils/definitions.
     //
     this.unitsMap = UNITS_MAP;
     //
@@ -929,14 +929,14 @@ var ProgramEditorPanel = function(options) {
     this.nameHash = {};
 
     //
-    // Determine if a block represents a physical sensor device. List of device blocks defined in block-definitions
+    // Determine if a block represents a physical sensor device. List of device blocks defined in utils/definitions
     //
     this.isDeviceBlock = function (type) {
       return DEVICE_BLOCKS.indexOf(type) > -1
     };
 
     //
-    // Determine if a block represents a filter. List of filter blocks defined in block-definitions
+    // Determine if a block represents a filter. List of filter blocks defined in utils/definitions
     //
     this.isFilterBlock = function (type) {
       return FILTER_BLOCKS.indexOf(type) > -1;
