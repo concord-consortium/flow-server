@@ -189,10 +189,7 @@ var DataSetView = function(options) {
 
 
         base.m_canvas = document.getElementById('data-set-canvas');
-        // if (!base.m_canvas.getAttribute('width')) {
-        //   base.m_canvas.setAttribute('width', base.m_canvas.width * window.devicePixelRatio);
-        //   base.m_canvas.setAttribute('height', base.m_canvas.height * window.devicePixelRatio);
-        // }
+        // Define rendering style options for Manyplot
         let opts = {
           LineColor: "rgb(0,125,175)",
           Background: "#fff",
@@ -201,6 +198,8 @@ var DataSetView = function(options) {
           CaptionFontSize: 12,
           SmallFontSize: 10
         };
+        // Manyplot supports overlaying multiple data sets on the same plot. Currently we show individual plots.
+        // To overlay multiple plots we'd need to use different line colors for each data series and offset y-axis labels
         let showIndividualPlots = true;
         base.m_plotHandler = createPlotHandler(base.m_canvas, showIndividualPlots, opts);
 
@@ -224,8 +223,6 @@ var DataSetView = function(options) {
             success: function(data) {
                 var response = JSON.parse(data);
 
-                // console.log("[DEBUG] List sequences", response);
-
                 if(response.success) {
 
                     var items = response.items;
@@ -248,11 +245,11 @@ var DataSetView = function(options) {
                                     base.m_dataSet.metadata.end_time );
 
                 } else {
-                    console.log("[ERROR] Error listing sequences", response);
+                    console.error("[ERROR] Error listing sequences", response);
                 }
             },
             error: function(data) {
-                console.log("[ERROR] List sequences error", data);
+                console.error("[ERROR] List sequences error", data);
             },
         });
 
@@ -268,9 +265,6 @@ var DataSetView = function(options) {
     // Resize canvas
     //
     base.resizeCanvas = function() {
-        //console.log("[DEBUG] resizeCanvas",
-        //                window.innerWidth,
-        //                window.innerHeight);
         base.m_canvas.width = window.innerWidth - RIGHT_PANEL_WIDTH - HORIZONTAL_MARGIN;
         base.m_canvas.height = window.innerHeight - PLOTTER_MARGIN_BOTTOM - VERTICAL_MARGIN;
         // resize logic exists inside of manyplot to handle dpi shifts for retina
@@ -500,6 +494,8 @@ var DataSetView = function(options) {
     function exploreRecordedDataInCODAP() {
         var timeThresh = 0.4;  // seconds
         var dataPairs = base.m_plotHandler.plotter.dataPairs;
+        // Here we see the presentation layer grabbing data from a graphing library
+        // TODO: Refactor! The graphing library should not be a data store.
         if (dataPairs.length && dataPairs[0].xData.data.length) {
             // Set collection attributes based on sequence data
             var attrs = [{name: 'seconds', type: 'numeric', precision: 2}, {name: 'timestamp', type: 'date'}];
