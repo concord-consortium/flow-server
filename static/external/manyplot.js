@@ -20,6 +20,8 @@ function getNearest(arr,value) {
 
 var dpr = !window ? 1 : window.devicePixelRatio, width, height;
 
+// When the canvas is initially created, if it is created with explicit width and height,
+// rescale for DPI
 var _scalePlotCanvas = function (canvas) {
   if (dpr !== 1) {
     // Use the canvas's inner dimensions and scale the element's size
@@ -30,6 +32,7 @@ var _scalePlotCanvas = function (canvas) {
   }
 }
 
+// Resizing canvas needs to maintain dpr calculations
 var _resizePlotCanvas = function (canvas, width, height) {
   canvas.setAttribute('width', (Math.floor(width * dpr)).toString());
   canvas.style.width = width + 'px';
@@ -40,7 +43,9 @@ var _resizePlotCanvas = function (canvas, width, height) {
   canvas.getContext('2d').scale(dpr, dpr);
 }
 
+// Centralize all options for plots, overridden in initial creation as required
 let _plotOptions = {
+  FontName: "museo500",
   BorderColor: "rgb(200,200,200)",
   LineColor: "rgb(60,60,60)",
   DataPointColor: "rgba(0,157,223,0.5)",
@@ -52,10 +57,12 @@ let _plotOptions = {
   AxisLabel: "#333",
   TimeColor: "#000",
   CaptionFontSize: 12,
-  SmallFontSize: 10
+  SmallFontSize: 10,
+  XAxisLabelPadding: 5
 };
 
 function createPlotHandler(canvas, multiFrame, options) {
+    // Deep clone the object
     let plotOptions = JSON.parse(JSON.stringify(_plotOptions));
     if (options) {
       for (var opt in options) {
@@ -621,7 +628,7 @@ function createPlotter( canvas, multiFrame, options ) {
         // fit frame to caption text and draw caption text
         this.setFrameCount( 1 );
         this.frames[ 0 ].setCaptions( xLabel, xMinLabel, xMaxLabel, yLabel, yLabelUnit, yMinLabel, yMaxLabel, rotateLabelY, true, true );
-        this.frames[ 0 ].fitBoxToCaptions( 0, width - 1, 0, height - 1 );
+        this.frames[ 0 ].fitBoxToCaptions( 0, width - (1 * dpr), 0, height - (2 * dpr) );
         this.frames[ 0 ].drawCaptions();
     };
 
@@ -1090,15 +1097,15 @@ function createFrame( ctx, options ) {
     // outerMinX/outerMaxX/outerMinY/outerMaxY specify outer bounds for the frame area (including captions)
     frame.fitBoxToCaptions = function (outerMinX, outerMaxX, outerMinY, outerMaxY) {
         let fontSize = frame.opts.CaptionFontSize * dpr;
-        this.ctx.font = fontSize + "px sans-serif"; // need to set font before measure text size
+        this.ctx.font = fontSize + "px " + frame.opts.FontName; // need to set font before measure text size
         var minLabelSize = this.ctx.measureText( this.minLabelY ).width;
-        var centLabelSize = this.rotateLabelY ? 10 : this.ctx.measureText( this.labelY ).width;
+        var centLabelSize = this.rotateLabelY ? frame.opts.CaptionFontSize * dpr : this.ctx.measureText( this.labelY ).width;
         var maxLabelSize = this.ctx.measureText( this.maxLabelY ).width;
         var yLabelSize = Math.max( minLabelSize, centLabelSize, maxLabelSize );
-        this.boxMinX = outerMinX + 12 + yLabelSize;
-        this.boxMaxX = outerMaxX - 14;
-        this.boxMinY = outerMinY + 14;
-        this.boxMaxY = outerMaxY - 20;
+        this.boxMinX = outerMinX + (frame.opts.CaptionFontSize * dpr) + yLabelSize;
+        this.boxMaxX = outerMaxX - (frame.opts.CaptionFontSize * dpr);
+        this.boxMinY = outerMinY + (frame.opts.CaptionFontSize * dpr);
+        this.boxMaxY = outerMaxY - (frame.opts.CaptionFontSize * dpr);
     };
 
     // clip subsequent drawing to inside box
@@ -1134,8 +1141,7 @@ function createFrame( ctx, options ) {
 
         // prepare font (need to do this before measure size)
         var size = frame.opts.CaptionFontSize * dpr;
-        ctx.font = size + "px museo500"; //ctx.font = "12px sans-serif";
-        // TODO: make a parameter
+        ctx.font = size + "px " + frame.opts.FontName;
         ctx.fillStyle = frame.opts.AxisLabel;// "rgb(0,255,255)";
 
         // get bounds for quick reference
@@ -1150,20 +1156,19 @@ function createFrame( ctx, options ) {
         ctx.textBaseline = "top";
         ctx.textAlign = "center";
 
-
-        ctx.fillText( this.labelX, (boxMinX + boxMaxX) * 0.5, boxMaxY + 5 );
+        ctx.fillText( this.labelX, (boxMinX + boxMaxX) * 0.5, boxMaxY  );
         if(!this.hideXaxisLabel){
             if (xMinLabelSize < 20) {
-                ctx.fillText( this.minLabelX, boxMinX, boxMaxY + 5 );
+                ctx.fillText( this.minLabelX, boxMinX, boxMaxY + frame.opts.XAxisLabelPadding );
             } else {
                 ctx.textAlign = "left";
-                ctx.fillText( this.minLabelX, boxMinX - 5, boxMaxY + 5 );
+                ctx.fillText( this.minLabelX, boxMinX - 5, boxMaxY + frame.opts.XAxisLabelPadding );
             }
             if (xMaxLabelSize < 20) {
-                ctx.fillText( this.maxLabelX, boxMaxX, boxMaxY + 5 );
+                ctx.fillText( this.maxLabelX, boxMaxX, boxMaxY + frame.opts.XAxisLabelPadding);
             } else {
                 ctx.textAlign = "right";
-                ctx.fillText( this.maxLabelX, boxMaxX + 5, boxMaxY + 5 );
+                ctx.fillText( this.maxLabelX, boxMaxX + 5, boxMaxY + frame.opts.XAxisLabelPadding );
             }
         }
         // draw text for y labels
@@ -1431,7 +1436,7 @@ function createFrame( ctx, options ) {
                 this.ctx.textAlign = "center";
               this.ctx.fillStyle = "#00FFFF";
               // TODO: continue here
-                this.ctx.font = 'bold ' + (frame.opts.SmallFontSize * dpr) + 'px sans-serif';
+              this.ctx.font = 'bold ' + (frame.opts.SmallFontSize * dpr) + 'px ' + frame.opts.FontName;
                 if (left) {
                     ctx.drawTextAbsolute( "L", xScreen, yScreen );
                 } else {
@@ -1812,7 +1817,7 @@ function addDrawMethods(ctx, opts) {
 
     // draw a rectangle with the lower-left in the given position
     ctx.drawRect = function (x, y, width, height, stroke) {
-        ctx.fillRect(x, y, width, height);
+      ctx.fillRect(x, y, width, height);
         if(typeof stroke == 'undefined'){
             stroke = true;
         }

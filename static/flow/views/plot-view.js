@@ -1,6 +1,6 @@
 var createPlotCanvas = function (className, id, parent, mouseDownHandler, mouseMoveHandler, mouseUpHandler, useManyplot) {
   let blockId = 'bc_' + id;
-  let canvas = $('<canvas>', { class: className, id: 'bc_' + id }).prop({width: 290, height: 130}).appendTo(parent);
+  let canvas = $('<canvas>', { class: className, id: 'bc_' + id }).prop({width: 300, height: 145}).appendTo(parent);
   canvas.mousedown(mouseDownHandler);
   canvas.mousemove(mouseMoveHandler);
   canvas.mouseup(mouseUpHandler);
