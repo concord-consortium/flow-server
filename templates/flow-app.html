@@ -4,7 +4,8 @@
 	<script src="/static/js/jquery-1.11.3.min.js"></script>
 	<script src="/static/bootstrap/js/bootstrap.min.js"></script>
 	<script src="/ext/flow-server/static/external/svg.min.js"></script>
-	<script src="/static/js/moment.min.js"></script>
+    <script src="/static/js/moment.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.3.1/firebase.js"></script>
 	<script src="/ext/flow-server/static/common/core.js"></script>
 	<script src="/ext/flow-server/static/common/messages.js"></script>
 	<script src="/ext/flow-server/static/common/ble-messages.js"></script>
@@ -144,6 +145,7 @@ var g_adminEnabled = false; //1.0
 var g_user                  = {{ flow_user|safe }};
 var g_rhizo_server_version  = '{{ rhizo_server_version }}';
 var g_flow_server_version   = '{{ flow_server_version }}';
+var g_firebase_info = {{ firebase_info_json|safe }};
 
 $(function() {
 	initFlowApp();
