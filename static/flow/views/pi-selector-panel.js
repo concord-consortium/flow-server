@@ -1,3 +1,5 @@
+var firebaseInitialized = false;
+
 //
 // A widget that shows available Pis and record button.
 //
@@ -38,6 +40,18 @@ var PiSelectorPanel = function(options) {
     //
     this.availableControllers = [];
     this.selectedController = null;
+
+    // Firebase controller
+    var firebaseControllerRef = null;
+    var handleFirebaseControllerValueChange = function (snapshot) {
+        var val = snapshot.val() || {};
+        editor.getProgramEditorPanel().handleSensorData(val.timestamp, val)
+    };
+    var firebaseControllerHasValue = function (callback) {
+        return function (snapshot) {
+            callback(!!snapshot.val());
+        };
+    };
 
     //
     // Determine if a pi is online or offline
@@ -413,6 +427,27 @@ var PiSelectorPanel = function(options) {
     // Handle selection of pi (user can select from menu, called after start program, called when simulating program run)
     //
     this.selectPi = function(deviceName) {
+        var sendSensorDataMessageToPi = function (controller) {
+            var execParams = {
+                message_type:   'send_sensor_data',
+                message_params: {},
+                target_folder:  controller.path,
+                src_folder:     controller.path,
+                remove_handler: false,
+                response_func:  editor.getProgramEditorPanel().handleSensorData
+            };
+
+            console.log("[DEBUG] Requesting sensor data from ", controller.path);
+
+            var sendSensorData = MessageExecutor(execParams);
+            sendSensorData.execute();
+        };
+
+        if (firebaseControllerRef) {
+            firebaseControllerRef.off("value", handleFirebaseControllerValueChange);
+            firebaseControllerRef = null;
+        }
+
         if (deviceName == "none") {
             // invalid index, none was probably selected
             selectNoPi();
@@ -432,17 +467,6 @@ var PiSelectorPanel = function(options) {
                 //
                 var controller = this.selectedController;
 
-                var execParams = {
-                        message_type:   'send_sensor_data',
-                        message_params: {},
-                        target_folder:  controller.path,
-                        src_folder:     controller.path,
-                        remove_handler: false,
-                        response_func:  editor.getProgramEditorPanel().handleSensorData
-                };
-
-                console.log("[DEBUG] Requesting sensor data from ", controller.path);
-
                 if (!_this.currentlyRecording) {
                    updateProgramButtons(false, false, false);
                     //
@@ -455,10 +479,27 @@ var PiSelectorPanel = function(options) {
 
                 // clear any existing subscriptions
                 clearSubscriptions();
+                removeMessageHandlers();
 
-                var sendSensorData = MessageExecutor(execParams);
-                sendSensorData.execute();
+                if (g_firebase_info.enabled && g_firebase_info.send_sensor_data.enabled) {
 
+                    // check if there is data for the controller in Firebase
+                    var path = g_firebase_info.send_sensor_data.path_template.replace('*CONTROLLER_ID*', controller.id);
+                    firebaseControllerRef = firebase.database().ref(path);
+                    firebaseControllerRef.once("value", function (snapshot) {
+                        if (snapshot.val()) {
+                            // yes there is data so use it for live sensor data
+                            firebaseControllerRef.on("value", handleFirebaseControllerValueChange);
+                        }
+                        else {
+                            firebaseControllerRef = null;
+                            sendSensorDataMessageToPi(controller);
+                        }
+                    });
+                }
+                else {
+                    sendSensorDataMessageToPi(controller);
+                }
             }
         }
     }
@@ -794,6 +835,11 @@ var PiSelectorPanel = function(options) {
         var lpv = getTopLevelView('landing-page-view');
         lpv.loadDataSet(_this.currentRecordingDataset);
     });
+
+    if (!firebaseInitialized && g_firebase_info.enabled) {
+        firebase.initializeApp(g_firebase_info.initialize_app);
+        firebaseInitialized = true;
+    }
 
     this.setProgramControlsToNeutral();
     this.loadPiList(true);

@@ -7,6 +7,7 @@ import subprocess
 import datetime
 import string
 import random
+import time
 
 #
 # External imports
@@ -15,6 +16,7 @@ from flask              import request, abort, current_app, url_for, redirect, s
 from flask_login        import current_user, login_user, logout_user
 from sqlalchemy.orm.exc import NoResultFound
 from rauth              import OAuth2Service
+from jose               import jwt
 
 #
 # Internal imports
@@ -36,8 +38,8 @@ flow_extension = None
 # a server extension class
 class Flow(Extension):
 
-    def __init__(self):
-        super(Flow, self).__init__()
+    def __init__(self, extension_interface=None):
+        super(Flow, self).__init__(extension_interface)
 
     def view(self, resource, parent):
         if resource.name == 'Flow':
@@ -51,16 +53,83 @@ class Flow(Extension):
 
 
 # create an instance of the extension class
-def create():
+def create(extension_interface=None):
     global flow_extension
-    flow_extension = Flow()
+    flow_extension = Flow(extension_interface)
+    if extension_interface:
+        extension_interface.on('socket_connected', handle_socket_connected)
     return flow_extension
 
+def to_bool(value):
+    if str(value).lower() in ("true", "1"):
+        return True
+    return False
+
+def handle_socket_connected(ws_conn, socket_sender):
+    # listen for controller connections to give them their Firebase init info
+    if ws_conn.controller_id and to_bool(current_app.config.get('FIREBASE_ENABLED', False)):
+
+        environment = current_app.config.get('FIREBASE_ENVIRONMENT')
+        project_id = current_app.config.get('FIREBASE_PROJECT_ID')
+        private_key = current_app.config.get('FIREBASE_PRIVATE_KEY')
+        client_email = current_app.config.get('FIREBASE_CLIENT_EMAIL')
+        api_key = current_app.config.get('FIREBASE_API_KEY')
+        if not environment or not project_id or not private_key or not client_email or not api_key:
+            print('ERROR: Need FIREBASE_ENVIRONMENT, FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, FIREBASE_CLIENT_EMAIL, and FIREBASE_API_KEY defined when FIREBASE_ENABLED is true')
+            return
+
+        controller_id = str(ws_conn.controller_id)
+        now = int(time.time())
+        auth_payload = {
+            'alg': 'RS256',
+            'iss': client_email,
+            'sub': client_email,
+            'aud': 'https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit',
+            'iat': now,
+            'exp': now + 3600,
+            'uid': 'pi:' + environment + ':' + controller_id,
+            'claims': {
+                'environment': environment,
+                'controller_id': controller_id
+            }
+        }
+        token = jwt.encode(auth_payload, private_key, algorithm='RS256')
+
+        socket_sender.send_message(ws_conn, 'flow_server::firebase_init', {
+            'project_id': project_id,
+            'token': token,
+            'api_key': api_key,
+            'send_sensor_data': {
+                'enabled': to_bool(current_app.config.get('FIREBASE_SEND_SENSOR_DATA_ENABLED', False)),
+                'interval': int(current_app.config.get('FIREBASE_SEND_SENSOR_DATA_INTERVAL', 1)),
+                'path': '/environments/%s/controllers/%s/sensor_data' % (
+                    current_app.config.get('FIREBASE_ENVIRONMENT'),
+                    controller_id
+                )
+            }
+        })
 
 # display the data flow app (a single page app)
 @app.route('/ext/flow')
 def flow_app():
     controller_infos = get_controller_info()
+
+    firebase_project_id = current_app.config.get('FIREBASE_PROJECT_ID')
+    firebase_info = {
+        'enabled': to_bool(current_app.config.get('FIREBASE_ENABLED', False)),
+        'send_sensor_data': {
+            'enabled': to_bool(current_app.config.get('FIREBASE_SEND_SENSOR_DATA_ENABLED', False)),
+            'path_template': '/environments/%s/controllers/*CONTROLLER_ID*/sensor_data' % (current_app.config.get('FIREBASE_ENVIRONMENT'))
+        },
+        'initialize_app': {
+            'apiKey': current_app.config.get('FIREBASE_API_KEY'),
+            'authDomain': '%s.firebaseapp.com' % (firebase_project_id),
+            'databaseURL': 'https://%s.firebaseio.com' % (firebase_project_id),
+            'projectId':  firebase_project_id,
+            'storageBucket': '%s.appspot.com' % (firebase_project_id),
+            'messagingSenderId': current_app.config.get('FIREBASE_MESSAGE_SENDER_ID')
+        }
+    }
 
     default_dev_enabled = current_app.config.get('FLOW_DEV', False)
 
@@ -87,7 +156,7 @@ def flow_app():
 
     flow_user = None
     if current_user.is_authenticated:
-        flow_user = { 
+        flow_user = {
                 'user_name':        current_user.user_name,
                 'full_name':        current_user.full_name,
                 'email_address':    current_user.email_address,
@@ -97,6 +166,7 @@ def flow_app():
 
     return flow_extension.render_template('flow-app.html',
         controllers_json = json.dumps(controller_infos),
+        firebase_info_json = json.dumps(firebase_info),
         use_codap = (request.args.get('use_codap', 0) or request.args.get('codap', 0)),
         use_fullscreen = (request.args.get('fullscreen', 0)),
         flow_user               = json.dumps(flow_user),
@@ -186,7 +256,7 @@ def file_operation(operation, type):
             'success': False,
             'message': 'User not authenticated.'
         })
- 
+
     filename    = request.values.get('filename')
 
     if operation in ['save', 'load', 'delete'] and filename is None or filename == '':
@@ -222,12 +292,12 @@ def file_operation(operation, type):
                 path = '%s/%s/%s/%s/%s/metadata' % (org_name, 'student-folders', username, type, filename)
             else:
                 path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, type, filename)
-        elif type == 'datasetmeta': 
-            path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, 'datasets', filename)     
-        elif type == 'programmeta': 
-            path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, 'programs', filename)                 
+        elif type == 'datasetmeta':
+            path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, 'datasets', filename)
+        elif type == 'programmeta':
+            path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, 'programs', filename)
         else:
-            
+
             path = '%s/%s/%s/%s/%s' % (org_name, 'student-folders', username, type, filename)
 
     #
@@ -266,7 +336,7 @@ def file_operation(operation, type):
         data        = read_resource(resource)
         if data is not None:
             data = data.decode('utf-8')
-        
+
         return json.dumps({
                     'success': True,
                     'message': 'Loaded file %s.' % (resource.name),
@@ -298,8 +368,8 @@ def file_operation(operation, type):
     def _list():
         resource    = find_resource(path)
         children    = Resource.query.filter(Resource.parent_id == resource.id, Resource.deleted == False)
-        items = []      
-        
+        items = []
+
         for child in children:
             metadata = None
 
@@ -354,16 +424,16 @@ def file_operation(operation, type):
 @app.route('/ext/flow/save_program', methods=['POST'])
 def save_program():
     return file_operation('save', 'programs')
-    
+
 #
 # API for saving a program metadata to the rhizo-server
 #
 @app.route('/ext/flow/save_program_metadata', methods=['POST'])
 def save_program_metadata():
     return file_operation('save', 'programmeta')
-    
+
 #
-# API for loading (retrieving the contents of) a program 
+# API for loading (retrieving the contents of) a program
 # from the rhizo-server
 #
 @app.route('/ext/flow/load_program', methods=['POST'])
@@ -398,7 +468,7 @@ def list_datasets():
 @app.route('/ext/flow/load_dataset', methods=['POST'])
 def load_dataset():
     return file_operation('load', 'datasets')
- 
+
 #
 # API for deleting a named dataset
 #
@@ -411,16 +481,16 @@ def delete_dataset():
 #
 @app.route('/ext/flow/save_dataset_metadata', methods=['POST'])
 def save_dataset_metadata():
-    return file_operation('save', 'datasetmeta')    
+    return file_operation('save', 'datasetmeta')
 
 #
 # API for listing dataset sequences saved on the rhizo-server
 #
 @app.route('/ext/flow/list_datasetsequences', methods=['POST'])
 def list_datasetsequences():
-    return file_operation('list', 'sequences')  
+    return file_operation('list', 'sequences')
 
-    
+
 #
 # Create portal oauth service
 #
@@ -445,7 +515,7 @@ def get_portal_oauth():
 
 #
 # SSO Client Login
-# 
+#
 @app.route('/ext/flow/login')
 def sso_login():
 
@@ -531,13 +601,13 @@ def authorized():
 
         else:
             #
-            # User exists but this is not an SSO user. 
-            # Do not allow login for this user from 
+            # User exists but this is not an SSO user.
+            # Do not allow login for this user from
             # the SSO provider.
             #
             print("User %s not an SSO user." % (username))
             return redirect(url_for('flow_app', features=1))
-    
+
     else:
         #
         # There does not yet exist a user for this SSO provider account.
@@ -598,10 +668,10 @@ def get_user():
                                 'full_name':        user.full_name,
                                 'is_sso':       is_sso,
                                 'is_admin':     (user.role == User.SYSTEM_ADMIN)
-                            } 
+                            }
             })
 
-    
+
 #
 # Set user info
 #
@@ -629,7 +699,7 @@ def set_user():
                 'message':  'User not found' })
 
     data = request.values.get('data')
-    
+
     if data is None:
         return json.dumps({
                 'success':  False,
