@@ -6,32 +6,11 @@ var createPlotCanvas = function (className, id, parent, mouseDownHandler, mouseM
     let canvasElement = $(canvas)[0];
 
     if (!useManyplot) {
-        // create a plot and return a reference to a new TimeSeries object
-        return _createSmoothiePlot(canvasElement);
+        // TODO: implement alternative plot
+        return;
     } else {
         return;
     }
-}
-
-// Optional alternative chart style for small plots to show live data streams
-var _createSmoothiePlot = function (canvasElement) {
-    var smoothiePlot = new SmoothieChart(
-        {
-            grid: { fillStyle: '#fff', strokeStyle: 'rgba(119,119,119,0.2)', millisPerLine: 3000 },
-            labels: { fillStyle: '#5a5a5a' }, tooltip: true, maxValueScale: 1.05, minValueScale: 1.05,
-            yMinFormatter: function (min) {
-                return parseFloat(min).toFixed(0);
-            },
-            yMaxFormatter: function (max) {
-                return parseFloat(max).toFixed(0);
-            },
-            scaleSmoothing: 0.25
-        });
-    var plotTimeSeries = new TimeSeries();
-
-    smoothiePlot.addTimeSeries(plotTimeSeries, { lineWidth: 4, strokeStyle: '#0592af', fillStyle: 'rgba(0,0,0,0.05)' });
-    smoothiePlot.streamTo(canvasElement, 500);
-    return { plot: smoothiePlot, series: plotTimeSeries };
 }
 
 var displayPlotSeries = function (block, useManyplot) {
@@ -81,11 +60,6 @@ var updatePlot = function (block, timestamp, useManyplot) {
         block.view.plotHandler.plotter.autoBounds();
         block.view.plotHandler.drawPlot(null, null);
     } else {
-        // update smoothiechart
-        if (block.series) {
-            block.series.append(new Date().getTime(), block.value);
-            block.series.resetBounds();
-            block.plot.updateValueRange();
-        }
+        // TODO: If using alternative plot library, handle update here
     }
 }
