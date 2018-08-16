@@ -45,10 +45,12 @@ var displayPlotSeries = function (block, useManyplot) {
     if (useManyplot) {
         const opts = {
             LineColor: "rgb(0,125,175)",
+            CaptionColor: "rgb(0,125,175)",
             Background: "#fff",
             AxisLine: "#333",
             AxisLabel: "#fff"
         };
+        // Second parameter = true = always show individual plots via manyplot for the small plotter
         block.view.plotHandler = createPlotHandler(canvas, true, opts);
         block.view.plotHandler.plotter.addYaxisBuffer(10);
         block.view.plotHandler.plotter.showTimeHighlight = false;

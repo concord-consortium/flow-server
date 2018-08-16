@@ -18,6 +18,10 @@ function getNearest(arr,value) {
     return index;
 }
 
+// DPR = Device Pixel Ratio - on older displays, this is always 1 as one pixel is always one pixel
+// but on retina / 4k displays, operating systems can double-up or more to show sharper text at
+// higher resolutions. Take this into account in all size calculations to ensure consistent results
+// and sharp results on high-dpi displays.
 var dpr = !window ? 1 : window.devicePixelRatio, width, height;
 
 // When the canvas is initially created, if it is created with explicit width and height,
@@ -55,6 +59,7 @@ let _plotOptions = {
   HighlightIndicator: "rgb(200,200,200)",
   AxisLine: "#333",
   AxisLabel: "#333",
+  CaptionColor: "rgb(0,125,175)",
   TimeColor: "#000",
   CaptionFontSize: 12,
   SmallFontSize: 10,
@@ -266,7 +271,7 @@ function createPlotter( canvas, multiFrame, options ) {
             // If we don't fix the decimals, then the elapsed time can visually bounce around when it hits whole numbers
             captionOverrides["xMinLabelOverride"] = toFixedSafe(captionOverrides["xMinLabelOverride"], 2);
             captionOverrides["xMaxLabelOverride"] = toFixedSafe(captionOverrides["xMaxLabelOverride"], 2);
-            captionOverrides["xLabelOverride"] = "seconds!!!";
+            captionOverrides["xLabelOverride"] = "seconds";
         }
         return captionOverrides;
     };
@@ -1347,11 +1352,15 @@ function createFrame( ctx, options ) {
     // draw text in a box with a border in the plot; x and y are in canvas/pixel coordinates
     frame.drawTextBox = function( x, y, text ) {
         var ctx = this.ctx;
-        var size = ctx.measureText( text );
-        var w = size.width + 10;
-        var h = 20; // size.height + 20;
+        ctx.font = (frame.opts.CaptionFontSize * dpr) + 'px ' + frame.opts.FontName;
+        ctx.fillStyle = frame.opts.CaptionColor;
+        var size = ctx.measureText(text);
+        // Padding around one edge of hover-textbox rectangle
+        const boxPaddingX = 5, boxPaddingY = 10;
+        var w = size.width + (boxPaddingX * 2 * dpr); // centered text requires padding on both edges
+        var h = boxPaddingY * 2 * dpr; // size.height + 20;
         var fill = ctx.fillStyle;
-        ctx.fillStyle = frame.opts.TextBoxBackground; //"rgb(255,255,255)";
+        ctx.fillStyle = frame.opts.TextBoxBackground;
         if (x + w > this.boxMaxX) {
             x -= w;
         }
@@ -1361,7 +1370,7 @@ function createFrame( ctx, options ) {
         ctx.drawRect( x, y, w, h );
         ctx.fillStyle = fill;
         ctx.textAlign = "left";
-        ctx.drawTextAbsolute( text, x + 5, y + 10 );
+        ctx.drawTextAbsolute( text, x + (boxPaddingX * dpr), y + (boxPaddingY * dpr) );
     };
 
     // draw data (x coordinates and corresponding y coordinates) as dots
@@ -1434,9 +1443,8 @@ function createFrame( ctx, options ) {
                 this.ctx.fillStyle = "#007daf";
                 this.ctx.drawCircle( xScreen, yScreen, 7 );
                 this.ctx.textAlign = "center";
-              this.ctx.fillStyle = "#00FFFF";
-              // TODO: continue here
-              this.ctx.font = 'bold ' + (frame.opts.SmallFontSize * dpr) + 'px ' + frame.opts.FontName;
+                this.ctx.fillStyle = "#00FFFF";
+                this.ctx.font = 'bold ' + (frame.opts.SmallFontSize * dpr) + 'px ' + frame.opts.FontName;
                 if (left) {
                     ctx.drawTextAbsolute( "L", xScreen, yScreen );
                 } else {
@@ -1473,7 +1481,7 @@ function createFrame( ctx, options ) {
             if(typeof drawLine === 'undefined' || drawLine === true){
                 // draw line
                 ctx.lineWidth = 1 * dpr;
-              ctx.strokeStyle = frame.opts.HighlightIndicator;//"rgb(200,200,200)";
+                ctx.strokeStyle = frame.opts.HighlightIndicator;//"rgb(200,200,200)";
                 ctx.drawLine( xScreen, this.boxMinY, xScreen, this.boxMaxY );
             }
 
@@ -1487,7 +1495,7 @@ function createFrame( ctx, options ) {
                     if (x > 1000000) { // if standard unix timestamp (we'll assume small numbers are elapsed time, not timestamps)
                         this.drawTextBox( xScreen, this.boxMinY, localTimestampToStr( x, showSeconds ) );
                     } else {
-                        this.drawTextBox( xScreen, this.boxMinY, toFixedSafe( x, 3 ) + " seconds!!" ); // fix: use decimalPlaces?
+                        this.drawTextBox( xScreen, this.boxMinY, toFixedSafe( x, 3 ) + " seconds" ); // fix: use decimalPlaces?
                     }
                 }else if(typeof useTimestamp !== 'undefined' && !useTimestamp && xData.type === "timestamp"){
                     // If we're not using timestamp but the xData is a timestamp, then we should show elapsed time values
@@ -1524,7 +1532,7 @@ function createFrame( ctx, options ) {
                     offset = 5;
                 }
 
-                ctx.fillStyle = "#007daf";
+                ctx.fillStyle = frame.opts.AxisLabel;
                 //refine treatment of decimal places in highlighted value
                 var dataDecimalPlaces = 0;
                 var parts = y.toString().split(".")
@@ -1578,10 +1586,10 @@ function createFrame( ctx, options ) {
 
 
     frame.selectInterval = function( xData, yData, xMouseData ) {
-        console.log('selectInterval');
-        console.log(xData);
-        console.log(yData);
-        console.log(xMouseData);
+        console.info('selectInterval');
+        console.info(xData);
+        console.info(yData);
+        console.info(xMouseData);
 
         // find nearest index (if mouse is within data bounds)
         var nearestIndex = -1;
