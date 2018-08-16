@@ -225,12 +225,12 @@ var ProgramEditorPanel = function(options) {
         var sec = d.getSeconds();
 
         this._formatDatePart = function(datestring, part){
-          if (part < 10) {
-            return datestring + "0" + part;
-          }
-          else {
-            return datestring + part;
-          }
+            if (part < 10) {
+                return datestring + "0" + part;
+            }
+            else {
+                return datestring + part;
+            }
         };
 
         var potentialName = prefixStr + year;
@@ -242,7 +242,6 @@ var ProgramEditorPanel = function(options) {
 
         return potentialName;
     };
-
 
     this.getProgramName = function() {
         return this.m_diagramName;
@@ -343,8 +342,8 @@ var ProgramEditorPanel = function(options) {
         } else if (block.type === 'plot') {
             let plotData = createPlotCanvas('flowBlockPlotCanvas', block.id, blockContentDiv, this.blockMouseDown, this.mouseMove, this.mouseUp, _this.useManyplot);
             if (plotData) {
-                block.series = plotData.series;
-                block.plot = plotData.plot;
+                // TODO: this is currently unused, but when using alternative libraries we can store references to chart-specific
+                // time series information and the plot itself (useful when referencing a specific chart / plot).
             }
 
         } else if (block.outputType === 'i') {  // image-valued blocks

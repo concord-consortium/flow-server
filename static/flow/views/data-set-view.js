@@ -200,7 +200,7 @@ var DataSetView = function(options) {
         };
         // Manyplot supports overlaying multiple data sets on the same plot. Currently we show individual plots.
         // To overlay multiple plots we'd need to use different line colors for each data series and offset y-axis labels
-        let showIndividualPlots = true;
+        const showIndividualPlots = true;
         base.m_plotHandler = createPlotHandler(base.m_canvas, showIndividualPlots, opts);
 
         context = base.m_canvas.getContext('2d');
@@ -493,9 +493,9 @@ var DataSetView = function(options) {
 
     function exploreRecordedDataInCODAP() {
         var timeThresh = 0.4;  // seconds
-        var dataPairs = base.m_plotHandler.plotter.dataPairs;
         // Here we see the presentation layer grabbing data from a graphing library
         // TODO: Refactor! The graphing library should not be a data store.
+        var dataPairs = base.m_plotHandler.plotter.dataPairs;
         if (dataPairs.length && dataPairs[0].xData.data.length) {
             // Set collection attributes based on sequence data
             var attrs = [{name: 'seconds', type: 'numeric', precision: 2}, {name: 'timestamp', type: 'date'}];
