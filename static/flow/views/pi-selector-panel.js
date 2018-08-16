@@ -487,8 +487,15 @@ var PiSelectorPanel = function(options) {
                     var path = g_firebase_info.send_sensor_data.path_template.replace('*CONTROLLER_ID*', controller.id);
                     firebaseControllerRef = firebase.database().ref(path);
                     firebaseControllerRef.once("value", function (snapshot) {
-                        if (snapshot.val()) {
-                            // yes there is data so use it for live sensor data
+                        // check the latest timestamp value
+                        var latest = snapshot.val();
+                        var timestamp = latest && latest.timestamp ? new Date(latest.timestamp) : null;
+                        var timestampTime = timestamp ? timestamp.getTime() : 0;
+                        var timeSinceLastUpdate = Date.now() - timestampTime;
+
+                        // if the controller has updated Firebase within the last 5 minutes use Firebase
+                        if (timeSinceLastUpdate < (5*60*1000)) {
+                            console.log("[DEBUG] Using Firebase for instantaneous sensor data");
                             firebaseControllerRef.on("value", handleFirebaseControllerValueChange);
                         }
                         else {
@@ -500,6 +507,8 @@ var PiSelectorPanel = function(options) {
                 else {
                     sendSensorDataMessageToPi(controller);
                 }
+
+                return;
             }
         }
     }
