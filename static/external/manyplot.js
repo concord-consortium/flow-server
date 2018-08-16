@@ -651,7 +651,7 @@ function createPlotter( canvas, multiFrame, options ) {
             ctx.save();
             this.frames[ i ].clipBox();
             ctx.setTransform( 1, 0, 0, 1, 0, 0 );
-            ctx.fillStyle = plotter.opts.Background; //"rgb(255,255,255)";
+            ctx.fillStyle = plotter.opts.Background;
             ctx.fillRect( 0, 0, this.canvas.width, this.canvas.height );
             ctx.restore();
         }
@@ -730,7 +730,7 @@ function createPlotter( canvas, multiFrame, options ) {
                         if (clip) {
                           this.frames[i].clipBox();
                         }
-                        var color = plotter.opts.LineColor;//"rgb(0,125,175)";
+                        var color = plotter.opts.LineColor;
                         if(typeof this.dataPairs[i].color !== 'undefined'){
                             color = this.dataPairs[i].color;
                         }
@@ -755,7 +755,7 @@ function createPlotter( canvas, multiFrame, options ) {
     plotter.drawDataDots = function(clip) {
         if(this.frames.length < 1) return;
         var ctx = this.ctx;
-      var color = plotter.opts.DataPointColor;//"rgba(0,157,223,0.5)";
+      var color = plotter.opts.DataPointColor;
         if(typeof this.dataPairs[0].color !== 'undefined'){
             color = this.dataPairs[0].color;
         }
@@ -1126,7 +1126,7 @@ function createFrame( ctx, options ) {
     frame.drawBox = function() {
         var ctx = this.ctx;
         ctx.setTransform( 1, 0, 0, 1, 0.5, 0.5 );
-        ctx.strokeStyle = frame.opts.BorderColor; //"rgb(200,200,200)";
+        ctx.strokeStyle = frame.opts.BorderColor;
         ctx.lineWidth = 1 * dpr;
         ctx.beginPath();
         ctx.moveTo( this.boxMinX, this.boxMinY );
@@ -1147,7 +1147,7 @@ function createFrame( ctx, options ) {
         // prepare font (need to do this before measure size)
         var size = frame.opts.CaptionFontSize * dpr;
         ctx.font = size + "px " + frame.opts.FontName;
-        ctx.fillStyle = frame.opts.AxisLabel;// "rgb(0,255,255)";
+        ctx.fillStyle = frame.opts.AxisLabel;
 
         // get bounds for quick reference
         var boxMinX = this.boxMinX;
@@ -1481,7 +1481,7 @@ function createFrame( ctx, options ) {
             if(typeof drawLine === 'undefined' || drawLine === true){
                 // draw line
                 ctx.lineWidth = 1 * dpr;
-                ctx.strokeStyle = frame.opts.HighlightIndicator;//"rgb(200,200,200)";
+                ctx.strokeStyle = frame.opts.HighlightIndicator;
                 ctx.drawLine( xScreen, this.boxMinY, xScreen, this.boxMaxY );
             }
 
@@ -1490,7 +1490,7 @@ function createFrame( ctx, options ) {
                 var showSeconds = false;
                 if (xData.min && xData.max && xData.max - xData.min < 24 * 60 * 60)
                     showSeconds = true;
-              ctx.fillStyle = frame.opts.TimeColor; //"rgb(0,0,0)";
+                ctx.fillStyle = frame.opts.TimeColor;
                 if(typeof useTimestamp !== 'undefined' && useTimestamp){
                     if (x > 1000000) { // if standard unix timestamp (we'll assume small numbers are elapsed time, not timestamps)
                         this.drawTextBox( xScreen, this.boxMinY, localTimestampToStr( x, showSeconds ) );
