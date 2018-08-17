@@ -8,6 +8,7 @@ import datetime
 import string
 import random
 import time
+import gevent
 
 #
 # External imports
@@ -95,7 +96,7 @@ def handle_socket_connected(ws_conn, socket_sender):
         }
         token = jwt.encode(auth_payload, private_key, algorithm='RS256')
 
-        socket_sender.send_message(ws_conn, 'flow_server::firebase_init', {
+        init_message = {
             'project_id': project_id,
             'token': token,
             'api_key': api_key,
@@ -107,7 +108,14 @@ def handle_socket_connected(ws_conn, socket_sender):
                     controller_id
                 )
             }
-        })
+        }
+
+        # delay sending the init message to allow cold booted Pis to handle the message
+        gevent.spawn(send_delayed_firebase_init, ws_conn, socket_sender, init_message)
+
+def send_delayed_firebase_init(ws_conn, socket_sender, init_message):
+    gevent.sleep(1)
+    socket_sender.send_message(ws_conn, 'flow_server::firebase_init', init_message)
 
 # display the data flow app (a single page app)
 @app.route('/ext/flow')
