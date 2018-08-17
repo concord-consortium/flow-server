@@ -63,61 +63,9 @@ var ProgramEditorBlockPalette = function(options) {
 
         // Icon
         var menuIcon = $('<img class="menu-icon">');
-        if (type=="temperature") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-temperature.png");
-        } else if (type=="humidity") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-humidity.png");
-        } else if (type=="CO2") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-co2.png");
-        } else if (type=="O2") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-o2.png");
-        } else if (type=="light") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-light.png");
-        } else if (type=="soilmoisture") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-soilmoisture.png");
-        } else if (type=="number") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-numeric.png");
-        } else if (type=="plus") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-plus.png");
-        } else if (type=="minus") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-minus.png");
-        } else if (type=="times") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-times.png");
-        } else if (type=="divided by") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-divide.png");
-        } else if (type=="greater than") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-greaterthan.png");
-        } else if (type=="less than") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-lessthan.png");
-        } else if (type=="equals") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-equals.png");
-        } else if (type=="not equals") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-notequals.png");
-        } else if (type=="and") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-and.png");
-        } else if (type=="or") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-or.png");
-        } else if (type=="not") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-not.png");
-        } else if (type=="nand") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-nand.png");
-        } else if (type=="xor") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-xor.png");
-        } else if (type=="absolute value") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-abs.png");
-        } else if (type=="moving average") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-movingavg.png");
-        } else if (type=="exp moving average") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-logic-expmovingavg.png");
-        } else if (type=="timer") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-timer.png");
-        } else if (type=="relay") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-output-relay.png");
-        } else if (type=="plot") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-output-plot.png");
-        } else if (type=="data storage") {
-            menuIcon.attr('src', "flow-server/static/flow/images/icon-output-data.png");
-        }
+        const STATIC_IMAGES_DIR = "flow-server/static/flow/images/icon-";
+        // Lookup icon from types defined in block-definitions
+        menuIcon.attr('src', STATIC_IMAGES_DIR + ICON_TYPE_MAP[type]);
 
         menuIcon.attr("height","20");
         menuIcon.appendTo(menuentry);

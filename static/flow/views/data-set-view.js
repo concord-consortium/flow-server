@@ -81,7 +81,7 @@ var DataSetView = function(options) {
     detailsDiv.append(endTime);
 
 
-    var canvas = $('<canvas>', { id: 'data-set-canvas' } );
+    var canvas = $('<canvas>', { id: 'data-set-canvas' });
     content.append(canvas);
 
     //
@@ -189,7 +189,19 @@ var DataSetView = function(options) {
 
 
         base.m_canvas = document.getElementById('data-set-canvas');
-        base.m_plotHandler = createPlotHandler(base.m_canvas);
+        // Define rendering style options for Manyplot
+        let opts = {
+          LineColor: "rgb(0,125,175)",
+          Background: "#fff",
+          AxisLine: "#333",
+          AxisLabel: "#333",
+          CaptionFontSize: 12,
+          SmallFontSize: 10
+        };
+        // Manyplot supports overlaying multiple data sets on the same plot. Currently we show individual plots.
+        // To overlay multiple plots we'd need to use different line colors for each data series and offset y-axis labels
+        const showIndividualPlots = true;
+        base.m_plotHandler = createPlotHandler(base.m_canvas, showIndividualPlots, opts);
 
         context = base.m_canvas.getContext('2d');
         window.addEventListener('resize', base.resizeCanvas, false);
@@ -210,8 +222,6 @@ var DataSetView = function(options) {
             data: data,
             success: function(data) {
                 var response = JSON.parse(data);
-
-                // console.log("[DEBUG] List sequences", response);
 
                 if(response.success) {
 
@@ -235,11 +245,11 @@ var DataSetView = function(options) {
                                     base.m_dataSet.metadata.end_time );
 
                 } else {
-                    console.log("[ERROR] Error listing sequences", response);
+                    console.error("[ERROR] Error listing sequences", response);
                 }
             },
             error: function(data) {
-                console.log("[ERROR] List sequences error", data);
+                console.error("[ERROR] List sequences error", data);
             },
         });
 
@@ -255,11 +265,10 @@ var DataSetView = function(options) {
     // Resize canvas
     //
     base.resizeCanvas = function() {
-        //console.log("[DEBUG] resizeCanvas",
-        //                window.innerWidth,
-        //                window.innerHeight);
         base.m_canvas.width = window.innerWidth - RIGHT_PANEL_WIDTH - HORIZONTAL_MARGIN;
         base.m_canvas.height = window.innerHeight - PLOTTER_MARGIN_BOTTOM - VERTICAL_MARGIN;
+        // resize logic exists inside of manyplot to handle dpi shifts for retina
+        _resizePlotCanvas(base.m_canvas, base.m_canvas.width, base.m_canvas.height);
         if (base.m_plotHandler){
             base.m_plotHandler.drawPlot(null, null);
         }
@@ -484,6 +493,8 @@ var DataSetView = function(options) {
 
     function exploreRecordedDataInCODAP() {
         var timeThresh = 0.4;  // seconds
+        // Here we see the presentation layer grabbing data from a graphing library
+        // TODO: Refactor! The graphing library should not be a data store.
         var dataPairs = base.m_plotHandler.plotter.dataPairs;
         if (dataPairs.length && dataPairs[0].xData.data.length) {
             // Set collection attributes based on sequence data
@@ -617,7 +628,7 @@ var DataSetView = function(options) {
 
     //
     // Delete all history for this sequence
-    //  
+    //
     function deleteSequenceData() {
         modalConfirm({
             title: 'Delete Sequence Data',

@@ -83,7 +83,7 @@ var ProgramEditorView = function(options) {
         programSpec.displayedName = displayedFilename;
         programSpec.name = filename;
         var programStr = JSON.stringify(programSpec);
-        console.log("Saving:", programStr);
+        console.info("Saving:", programStr);
         var metadata = {};
         metadata.archived = false;
         metadata.displayedName = displayedFilename;
@@ -105,9 +105,7 @@ var ProgramEditorView = function(options) {
             success:    function(data) {
                 var response = JSON.parse(data);
 
-                console.log(
-                    "[DEBUG] Save program response",
-                    response);
+                console.debug("[DEBUG] Save program response",response);
 
                 if (response.success) {
                     if (typeof completionCallback === "function") {
@@ -120,7 +118,7 @@ var ProgramEditorView = function(options) {
                 }
             },
             error: function(data) {
-                console.log("[ERROR] Save error", data);
+                console.error("[ERROR] Save error", data);
                 if (typeof completionCallback === "function") {
                     completionCallback(false);
                 }
@@ -271,7 +269,7 @@ var ProgramEditorView = function(options) {
     //
     base.resetEditor = function() {
 
-        // console.log("[DEBUG] Reset editor.");
+        console.debug("[DEBUG] Reset editor.");
 
         var nameWidget      = $('#program-editor-filename');
 
@@ -292,7 +290,7 @@ var ProgramEditorView = function(options) {
     //
     base.loadProgramFromSpec = function(params) {
 
-        // console.log("[DEBUG] ProgramEditorView loadProgramFromSpec()", params);
+        console.debug ("[DEBUG] ProgramEditorView loadProgramFromSpec()", params);
         programloaded = true;
 
         var programSpec = params.programdata;
@@ -321,7 +319,7 @@ var ProgramEditorView = function(options) {
     //
     base.loadProgram = function(params) {
         programloaded = true;
-        // console.log("[DEBUG] ProgramEditorView loadProgram()", params);
+        console.debug("[DEBUG] ProgramEditorView loadProgram()", params);
 
         var nameWidget      = $('#program-editor-filename');
 
@@ -367,7 +365,7 @@ var ProgramEditorView = function(options) {
                 success: function(data) {
                     var response = JSON.parse(data);
 
-                    console.log("[DEBUG] Load program response", response);
+                    console.debug("[DEBUG] Load program response", response);
 
                     if (response.success) {
                         var content = response.content;
@@ -391,7 +389,7 @@ var ProgramEditorView = function(options) {
                         nextFunc: function() {
                         }
                     });
-                    console.log("[ERROR] Load error", data);
+                    console.error("[ERROR] Load error", data);
                 }
             });
         }

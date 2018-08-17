@@ -18,10 +18,67 @@ function getNearest(arr,value) {
     return index;
 }
 
-function createPlotHandler( canvas, multiFrame ) {
+// DPR = Device Pixel Ratio - on older displays, this is always 1 as one pixel is always one pixel
+// but on retina / 4k displays, operating systems can double-up or more to show sharper text at
+// higher resolutions. Take this into account in all size calculations to ensure consistent results
+// and sharp results on high-dpi displays.
+var dpr = !window ? 1 : window.devicePixelRatio, width, height;
 
+// When the canvas is initially created, if it is created with explicit width and height,
+// rescale for DPI
+var _scalePlotCanvas = function (canvas) {
+  if (dpr !== 1) {
+    // Use the canvas's inner dimensions and scale the element's size
+    // according to that size and the device pixel ratio (eg: high DPI)
+    width = parseInt(canvas.getAttribute('width'));
+    height = parseInt(canvas.getAttribute('height'));
+    _resizePlotCanvas(canvas, width, height);
+  }
+}
+
+// Resizing canvas needs to maintain dpr calculations
+var _resizePlotCanvas = function (canvas, width, height) {
+  canvas.setAttribute('width', (Math.floor(width * dpr)).toString());
+  canvas.style.width = width + 'px';
+  canvas.getContext('2d').scale(dpr, dpr);
+
+  canvas.setAttribute('height', (Math.floor(height * dpr)).toString());
+  canvas.style.height = height + 'px';
+  canvas.getContext('2d').scale(dpr, dpr);
+}
+
+// Centralize all options for plots, overridden in initial creation as required
+let _plotOptions = {
+  FontName: "museo500",
+  BorderColor: "rgb(200,200,200)",
+  LineColor: "rgb(60,60,60)",
+  DataPointColor: "rgba(0,157,223,0.5)",
+  ScatterPointColor: "rgba(0,157,223,0.5)",
+  Background: "#fff",
+  TextBoxBackground: "rgb(255,255,255)",
+  HighlightIndicator: "rgb(200,200,200)",
+  AxisLine: "#333",
+  AxisLabel: "#333",
+  CaptionColor: "rgb(0,125,175)",
+  TimeColor: "#000",
+  CaptionFontSize: 12,
+  SmallFontSize: 10,
+  XAxisLabelPadding: 5
+};
+
+function createPlotHandler(canvas, multiFrame, options) {
+    // Deep clone the object
+    let plotOptions = JSON.parse(JSON.stringify(_plotOptions));
+    if (options) {
+      for (var opt in options) {
+        if (plotOptions[opt]) {
+          plotOptions[opt] = options[opt];
+        }
+      }
+    }
     var plotHandler = {};
-    plotHandler.plotter = createPlotter( canvas, multiFrame );
+    plotHandler.opts = plotOptions;
+    plotHandler.plotter = createPlotter( canvas, multiFrame, plotOptions );
     plotHandler.mouseDown = false;
     plotHandler.xDownLast = null;
     plotHandler.intervalSelect = false; // Start in pan mode
@@ -34,12 +91,12 @@ function createPlotHandler( canvas, multiFrame ) {
             "presentIsZero": false,
             "intervalSelect": this.intervalSelect
         };
-        
+
         if(xMouse===null && !isNaN(!this.xOverLast))
             xMouse = this.xOverLast;
         if(yMouse===null && !isNaN(!this.yOverLast))
             yMouse = this.yOverLast;
-        
+
         this.plotter.drawPlot( xMouse, yMouse, args );
     }
 
@@ -50,7 +107,7 @@ function createPlotHandler( canvas, multiFrame ) {
         e.preventDefault();
         e.stopPropagation();
         if (e.type === "mousedown") {
-            plotHandler.mouseDown = true;
+          plotHandler.mouseDown = true;
         } else if (e.type === "mouseup") {
             plotHandler.mouseDown = false;
         } else if (e.type === "mouseout" || e.type === "mouseleave") {
@@ -121,18 +178,22 @@ function createPlotHandler( canvas, multiFrame ) {
 
 
 // returns a plotter object suitable for displaying numeric plots on an HTML5 canvas context
-function createPlotter( canvas, multiFrame ) {
+function createPlotter( canvas, multiFrame, options ) {
     // If multiFrame is false, then we'll draw all frames in one plot.
     // If true, then each frame will have it's own box, captions, etc.
     if(typeof multiFrame === 'undefined') multiFrame = true;
     var plotter = {};
+    // Pass on options for line thickness, font size, etc
+    plotter.opts = options;
     // Get the canvas and ctx. If this is the plotter of a child plotBlock,
     // it won't have a canvas element.
     plotter.canvas = canvas;
-    if(plotter.canvas){
-        plotter.ctx = plotter.canvas.getContext( "2d" );
-        setInitTransform( plotter.ctx );
-        addDrawMethods( plotter.ctx );
+    if (plotter.canvas) {
+        _scalePlotCanvas(plotter.canvas);
+        plotter.ctx = plotter.canvas.getContext("2d");
+        // TODO: Check if this is needed
+        //setInitTransform( plotter.ctx );
+        addDrawMethods( plotter.ctx, options );
     }
 
     plotter.dataPairs = []; // A list of objects {"xData":DataColumn, "yData":DataColumn, "color":"rgb(#,#,#)"}
@@ -181,7 +242,7 @@ function createPlotter( canvas, multiFrame ) {
     // fix(soon): refactor
     plotter.setFrameCount = function( frameCount ) {
         while (this.frames.length < frameCount) {
-            this.frames.push( createFrame( this.canvas.getContext( "2d" ) ) );
+            this.frames.push( createFrame( this.canvas.getContext( "2d" ), plotter.opts ) );
         }
         if (this.frames.length > frameCount) {
             this.frames = this.frames.slice( 0, frameCount );
@@ -210,7 +271,7 @@ function createPlotter( canvas, multiFrame ) {
             // If we don't fix the decimals, then the elapsed time can visually bounce around when it hits whole numbers
             captionOverrides["xMinLabelOverride"] = toFixedSafe(captionOverrides["xMinLabelOverride"], 2);
             captionOverrides["xMaxLabelOverride"] = toFixedSafe(captionOverrides["xMaxLabelOverride"], 2);
-            captionOverrides["xLabelOverride"] = "seconds!!!";
+            captionOverrides["xLabelOverride"] = "seconds";
         }
         return captionOverrides;
     };
@@ -238,12 +299,12 @@ function createPlotter( canvas, multiFrame ) {
             }
         }
     };
-    
+
     //add a buffer around the y axis values for improved display
     plotter.addYaxisBuffer = function(bufferPercent) {
         this.showYaxisBuffer = true;
         this.YaxisBufferPercent = bufferPercent;
-        
+
     }
 
     // Recalculate the bounds based on the current data
@@ -266,7 +327,7 @@ function createPlotter( canvas, multiFrame ) {
                 xMax = xD.maxBound === null ? xD.max : xD.maxBound;
                 yMin = yD.minBound === null ? yD.min : yD.minBound;
                 yMax = yD.maxBound === null ? yD.max : yD.maxBound;
-                
+
                 if(this.showYaxisBuffer){
                     var yRange = yMax - yMin;
                     var buffer = yRange * this.YaxisBufferPercent * .01;
@@ -281,8 +342,8 @@ function createPlotter( canvas, multiFrame ) {
                     yMin = Math.floor(yMin);
                     yMax = Math.ceil(yMax);
                 }
-                
-                
+
+
                 if (xMin && (xMinAll === null || xMin < xMinAll)) {
                     xMinAll = xMin;
                 }
@@ -381,15 +442,15 @@ function createPlotter( canvas, multiFrame ) {
 
         for (var i=0; i < this.dataPairs.length; i++) {
             var dataPair = this.dataPairs[i];
-            
+
             //determine the number of decimal places to use on the axis
             var maxDecimalPlaces = countDecimals(dataPair.yData.max);
             var minDecimalPlaces = countDecimals(dataPair.yData.min);
             var plotDecimalPlaces = maxDecimalPlaces;
             if(minDecimalPlaces > maxDecimalPlaces)
                 plotDecimalPlaces = minDecimalPlaces;
-            dataPair.yData.decimalPlacesAxis = plotDecimalPlaces; 
-            
+            dataPair.yData.decimalPlacesAxis = plotDecimalPlaces;
+
             //determine the number of decimal places to use on the data
             var dataDecimalPlaces = countDecimals(dataPair.yData.data);
             var dataIntegerPlaces;
@@ -572,7 +633,7 @@ function createPlotter( canvas, multiFrame ) {
         // fit frame to caption text and draw caption text
         this.setFrameCount( 1 );
         this.frames[ 0 ].setCaptions( xLabel, xMinLabel, xMaxLabel, yLabel, yLabelUnit, yMinLabel, yMaxLabel, rotateLabelY, true, true );
-        this.frames[ 0 ].fitBoxToCaptions( 0, width - 1, 0, height - 1 );
+        this.frames[ 0 ].fitBoxToCaptions( 0, width - (1 * dpr), 0, height - (2 * dpr) );
         this.frames[ 0 ].drawCaptions();
     };
 
@@ -590,7 +651,7 @@ function createPlotter( canvas, multiFrame ) {
             ctx.save();
             this.frames[ i ].clipBox();
             ctx.setTransform( 1, 0, 0, 1, 0, 0 );
-            ctx.fillStyle = "rgb(255,255,255)";
+            ctx.fillStyle = plotter.opts.Background;
             ctx.fillRect( 0, 0, this.canvas.width, this.canvas.height );
             ctx.restore();
         }
@@ -666,13 +727,15 @@ function createPlotter( canvas, multiFrame ) {
         if (this.dataPairs.length == this.frames.length) { // if one frame per data pair
                 for (var i = 0; i < this.frames.length; i++) {
                         ctx.save(); // save before clip
-                        if (clip)
-                                this.frames[ i ].clipBox();
-                        var color = "rgb(0,125,175)";
+                        if (clip) {
+                          this.frames[i].clipBox();
+                        }
+                        var color = plotter.opts.LineColor;
                         if(typeof this.dataPairs[i].color !== 'undefined'){
                             color = this.dataPairs[i].color;
                         }
                         ctx.strokeStyle = color;
+                        ctx.lineWidth = 1*dpr;
                         this.frames[ i ].drawData( this.dataPairs[ i ].xData, this.dataPairs[i].yData );
                         ctx.restore(); // restore after clip
                 }
@@ -692,7 +755,7 @@ function createPlotter( canvas, multiFrame ) {
     plotter.drawDataDots = function(clip) {
         if(this.frames.length < 1) return;
         var ctx = this.ctx;
-        var color = "rgba(0,157,223,0.5)";
+      var color = plotter.opts.DataPointColor;
         if(typeof this.dataPairs[0].color !== 'undefined'){
             color = this.dataPairs[0].color;
         }
@@ -950,8 +1013,9 @@ function createPlotter( canvas, multiFrame ) {
 }
 
 // the Frame object is responsible for the rendering and rendering-related coordinate transformations for a plot
-function createFrame( ctx ) {
+function createFrame( ctx, options ) {
     var frame = {};
+    frame.opts = options;
     frame.ctx = ctx; // store a reference to the context for quick reference
 
     // these are the bounds (in pixels) of the box containing the data, relative to the canvas
@@ -981,10 +1045,10 @@ function createFrame( ctx ) {
     frame.rotateLabelY = false;
     frame.hideXaxisLabel = false;
     frame.hideYaxisLabel = false;
-    
+
     // highlights
     frame.showTimeHighlight = true;
-    
+
     // ================ coordinates / transforms ================
 
     // transform screen (canvas-relative) x-coordinate to data x-coordinate
@@ -1036,16 +1100,17 @@ function createFrame( ctx ) {
 
     // compute plot frame/box bounds using caption text;
     // outerMinX/outerMaxX/outerMinY/outerMaxY specify outer bounds for the frame area (including captions)
-    frame.fitBoxToCaptions = function( outerMinX, outerMaxX, outerMinY, outerMaxY ) {
-        this.ctx.font = "12px sans-serif"; // need to set font before measure text size
+    frame.fitBoxToCaptions = function (outerMinX, outerMaxX, outerMinY, outerMaxY) {
+        let fontSize = frame.opts.CaptionFontSize * dpr;
+        this.ctx.font = fontSize + "px " + frame.opts.FontName; // need to set font before measure text size
         var minLabelSize = this.ctx.measureText( this.minLabelY ).width;
-        var centLabelSize = this.rotateLabelY ? 10 : this.ctx.measureText( this.labelY ).width;
+        var centLabelSize = this.rotateLabelY ? frame.opts.CaptionFontSize * dpr : this.ctx.measureText( this.labelY ).width;
         var maxLabelSize = this.ctx.measureText( this.maxLabelY ).width;
         var yLabelSize = Math.max( minLabelSize, centLabelSize, maxLabelSize );
-        this.boxMinX = outerMinX + 12 + yLabelSize;
-        this.boxMaxX = outerMaxX - 14;
-        this.boxMinY = outerMinY + 14;
-        this.boxMaxY = outerMaxY - 20;
+        this.boxMinX = outerMinX + (frame.opts.CaptionFontSize * dpr) + yLabelSize;
+        this.boxMaxX = outerMaxX - (frame.opts.CaptionFontSize * dpr);
+        this.boxMinY = outerMinY + (frame.opts.CaptionFontSize * dpr);
+        this.boxMaxY = outerMaxY - (frame.opts.CaptionFontSize * dpr);
     };
 
     // clip subsequent drawing to inside box
@@ -1061,8 +1126,8 @@ function createFrame( ctx ) {
     frame.drawBox = function() {
         var ctx = this.ctx;
         ctx.setTransform( 1, 0, 0, 1, 0.5, 0.5 );
-        ctx.strokeStyle = "rgb(200,200,200)";
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = frame.opts.BorderColor;
+        ctx.lineWidth = 1 * dpr;
         ctx.beginPath();
         ctx.moveTo( this.boxMinX, this.boxMinY );
         ctx.lineTo( this.boxMinX, this.boxMaxY + 5 );
@@ -1080,8 +1145,9 @@ function createFrame( ctx ) {
         var ctx = this.ctx;
 
         // prepare font (need to do this before measure size)
-        ctx.font = "12px museo500"; //ctx.font = "12px sans-serif";
-        ctx.fillStyle = "rgb(255,255,255)";
+        var size = frame.opts.CaptionFontSize * dpr;
+        ctx.font = size + "px " + frame.opts.FontName;
+        ctx.fillStyle = frame.opts.AxisLabel;
 
         // get bounds for quick reference
         var boxMinX = this.boxMinX;
@@ -1095,20 +1161,19 @@ function createFrame( ctx ) {
         ctx.textBaseline = "top";
         ctx.textAlign = "center";
 
-        
-        ctx.fillText( this.labelX, (boxMinX + boxMaxX) * 0.5, boxMaxY + 5 );
-        if(!this.hideXaxisLabel){    
+        ctx.fillText( this.labelX, (boxMinX + boxMaxX) * 0.5, boxMaxY  );
+        if(!this.hideXaxisLabel){
             if (xMinLabelSize < 20) {
-                ctx.fillText( this.minLabelX, boxMinX, boxMaxY + 5 );
+                ctx.fillText( this.minLabelX, boxMinX, boxMaxY + frame.opts.XAxisLabelPadding );
             } else {
                 ctx.textAlign = "left";
-                ctx.fillText( this.minLabelX, boxMinX - 5, boxMaxY + 5 );
+                ctx.fillText( this.minLabelX, boxMinX - 5, boxMaxY + frame.opts.XAxisLabelPadding );
             }
             if (xMaxLabelSize < 20) {
-                ctx.fillText( this.maxLabelX, boxMaxX, boxMaxY + 5 );
+                ctx.fillText( this.maxLabelX, boxMaxX, boxMaxY + frame.opts.XAxisLabelPadding);
             } else {
                 ctx.textAlign = "right";
-                ctx.fillText( this.maxLabelX, boxMaxX + 5, boxMaxY + 5 );
+                ctx.fillText( this.maxLabelX, boxMaxX + 5, boxMaxY + frame.opts.XAxisLabelPadding );
             }
         }
         // draw text for y labels
@@ -1149,8 +1214,8 @@ function createFrame( ctx ) {
         var len = xDataRaw.length;
         var first = true;
         var ctx = this.ctx;
-        ctx.lineWidth = 2;
-        ctx.beginPath();        
+        ctx.lineWidth = 2 * dpr;
+        ctx.beginPath();
 
         // if no y variation, just draw a straight line across from first point to last point
         if (yDataMax === yDataMin) {
@@ -1260,7 +1325,7 @@ function createFrame( ctx ) {
             first = true; // reset
             ctx.beginPath();
             ctx.strokeStyle = 'red';
-            ctx.lineWidth = 4;
+            ctx.lineWidth = 4 * dpr;
 //            for (var i = this.intervalLowerIndex; i <= this.intervalUpperIndex; i++) {
             for (var i = 0; i < xDataRaw.length; i++) {
                 var x = xDataRaw[i];
@@ -1287,11 +1352,15 @@ function createFrame( ctx ) {
     // draw text in a box with a border in the plot; x and y are in canvas/pixel coordinates
     frame.drawTextBox = function( x, y, text ) {
         var ctx = this.ctx;
-        var size = ctx.measureText( text );
-        var w = size.width + 10;
-        var h = 20; // size.height + 20;
+        ctx.font = (frame.opts.CaptionFontSize * dpr) + 'px ' + frame.opts.FontName;
+        ctx.fillStyle = frame.opts.CaptionColor;
+        var size = ctx.measureText(text);
+        // Padding around one edge of hover-textbox rectangle
+        const boxPaddingX = 5, boxPaddingY = 10;
+        var w = size.width + (boxPaddingX * 2 * dpr); // centered text requires padding on both edges
+        var h = boxPaddingY * 2 * dpr; // size.height + 20;
         var fill = ctx.fillStyle;
-        ctx.fillStyle = "rgb(255,255,255)";
+        ctx.fillStyle = frame.opts.TextBoxBackground;
         if (x + w > this.boxMaxX) {
             x -= w;
         }
@@ -1301,7 +1370,7 @@ function createFrame( ctx ) {
         ctx.drawRect( x, y, w, h );
         ctx.fillStyle = fill;
         ctx.textAlign = "left";
-        ctx.drawTextAbsolute( text, x + 5, y + 10 );
+        ctx.drawTextAbsolute( text, x + (boxPaddingX * dpr), y + (boxPaddingY * dpr) );
     };
 
     // draw data (x coordinates and corresponding y coordinates) as dots
@@ -1336,7 +1405,7 @@ function createFrame( ctx ) {
         var bucketWidth = (this.boxMaxX - this.boxMinX) / bucketCount;
         var heightFactor = (this.boxMaxY - this.boxMinY) / maxCount;
         var ctx = this.ctx;
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1 * dpr;
         ctx.strokeStyle = "#009ddf";
         ctx.fillStyle = "#e9f6fd";
         for (var i = 0; i < bucketCount; i++) {
@@ -1374,8 +1443,8 @@ function createFrame( ctx ) {
                 this.ctx.fillStyle = "#007daf";
                 this.ctx.drawCircle( xScreen, yScreen, 7 );
                 this.ctx.textAlign = "center";
-                this.ctx.fillStyle = "#FFFFFF";
-                this.ctx.font = 'bold 10px sans-serif';
+                this.ctx.fillStyle = "#00FFFF";
+                this.ctx.font = 'bold ' + (frame.opts.SmallFontSize * dpr) + 'px ' + frame.opts.FontName;
                 if (left) {
                     ctx.drawTextAbsolute( "L", xScreen, yScreen );
                 } else {
@@ -1411,8 +1480,8 @@ function createFrame( ctx ) {
             var ctx = this.ctx;
             if(typeof drawLine === 'undefined' || drawLine === true){
                 // draw line
-                ctx.lineWidth = 1;
-                ctx.strokeStyle = "rgb(200,200,200)";
+                ctx.lineWidth = 1 * dpr;
+                ctx.strokeStyle = frame.opts.HighlightIndicator;
                 ctx.drawLine( xScreen, this.boxMinY, xScreen, this.boxMaxY );
             }
 
@@ -1421,12 +1490,12 @@ function createFrame( ctx ) {
                 var showSeconds = false;
                 if (xData.min && xData.max && xData.max - xData.min < 24 * 60 * 60)
                     showSeconds = true;
-                ctx.fillStyle = "rgb(0,0,0)";
+                ctx.fillStyle = frame.opts.TimeColor;
                 if(typeof useTimestamp !== 'undefined' && useTimestamp){
                     if (x > 1000000) { // if standard unix timestamp (we'll assume small numbers are elapsed time, not timestamps)
                         this.drawTextBox( xScreen, this.boxMinY, localTimestampToStr( x, showSeconds ) );
                     } else {
-                        this.drawTextBox( xScreen, this.boxMinY, toFixedSafe( x, 3 ) + " seconds!!" ); // fix: use decimalPlaces?
+                        this.drawTextBox( xScreen, this.boxMinY, toFixedSafe( x, 3 ) + " seconds" ); // fix: use decimalPlaces?
                     }
                 }else if(typeof useTimestamp !== 'undefined' && !useTimestamp && xData.type === "timestamp"){
                     // If we're not using timestamp but the xData is a timestamp, then we should show elapsed time values
@@ -1463,7 +1532,7 @@ function createFrame( ctx ) {
                     offset = 5;
                 }
 
-                ctx.fillStyle = "#007daf";
+                ctx.fillStyle = frame.opts.AxisLabel;
                 //refine treatment of decimal places in highlighted value
                 var dataDecimalPlaces = 0;
                 var parts = y.toString().split(".")
@@ -1471,7 +1540,7 @@ function createFrame( ctx ) {
                     dataDecimalPlaces = 0;
                 } else {
                     dataDecimalPlaces = parts[1].length || 0;
-                }                
+                }
                 var dataIntegerPlaces;
                 var value = Math.floor(y);
                 dataIntegerPlaces = value.toString().length;
@@ -1517,10 +1586,10 @@ function createFrame( ctx ) {
 
 
     frame.selectInterval = function( xData, yData, xMouseData ) {
-        console.log('selectInterval');
-        console.log(xData);
-        console.log(yData);
-        console.log(xMouseData);
+        console.info('selectInterval');
+        console.info(xData);
+        console.info(yData);
+        console.info(xMouseData);
 
         // find nearest index (if mouse is within data bounds)
         var nearestIndex = -1;
@@ -1592,7 +1661,7 @@ function createFrame( ctx ) {
             var x = this.dataToScreenX( xVector[ bestIndex ] );
             var y = this.dataToScreenY( yVector[ bestIndex ] );
             var ctx = this.ctx;
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 1 * dpr;
             ctx.strokeStyle = "rgb( 0, 0, 0 )";
             ctx.fillStyle = "rgb( 170, 170, 225 )";
             ctx.drawCircle( x, y, 2 );
@@ -1613,7 +1682,7 @@ function createFrame( ctx ) {
             var x = this.boxMinX + i * bucketWidth;
             var y = this.boxMaxY - h;
             if (xScreen > x && xScreen < x + w && yScreen > y && yScreen < y + h) {
-                this.ctx.lineWidth = 1;
+                this.ctx.lineWidth = 1 * dpr;
                 this.ctx.strokeStyle = "rgb( 0, 0, 0 )";
                 this.ctx.fillStyle = "#b9d6dd";
                 this.ctx.drawRect( x, y, w, h );
@@ -1670,7 +1739,7 @@ function createDataColumn( name, data ) {
                 else{
                     dp = numericDecimalPlaces;
                 }
-                
+
                 value = toFixedSafe( parseFloat( value ), dp );
             } else if ((this.type == 'latitude' || this.type == 'longitude') && value.length !== 0) {
                 value = toFixedSafe( parseFloat( value ), 6 );
@@ -1727,7 +1796,7 @@ function computeHistogram( data, bucketCount, min, max ) {
 }
 
 // add our custom drawing methods to an HTML5 canvas context
-function addDrawMethods(ctx) {
+function addDrawMethods(ctx, opts) {
 
     // draw a line between the two points
     ctx.drawLine = function (x1, y1, x2, y2) {
@@ -1756,7 +1825,7 @@ function addDrawMethods(ctx) {
 
     // draw a rectangle with the lower-left in the given position
     ctx.drawRect = function (x, y, width, height, stroke) {
-        ctx.fillRect(x, y, width, height);
+      ctx.fillRect(x, y, width, height);
         if(typeof stroke == 'undefined'){
             stroke = true;
         }
@@ -1818,7 +1887,7 @@ function addDrawMethods(ctx) {
     // flip the coordinate system vertically
     ctx.flip = function () {
         ctx.translate(0, ctx.yMax);
-        ctx.scale(1, -1);
+        ctx.scale(1 * dpr, -1 * dpr);
     };
 
     // a helper function for setting the fill color from an (r, g, b) triplet
@@ -1835,7 +1904,7 @@ function addDrawMethods(ctx) {
     ctx.drawImageUp = function (image, x, y) {
         this.save();
         this.translate(x, y + image.height);
-        this.scale(1, -1);
+        this.scale(1 * dpr, -1 * dpr);
         this.drawImage(image, 0, 0);
         this.restore();
     };
@@ -1853,7 +1922,7 @@ function addDrawMethods(ctx) {
         if(text === undefined || !isNumber(x) || !isNumber(y)) return;
         ctx.save();
         ctx.translate(0, ctx.yMax);
-        ctx.scale(1, -1);
+        ctx.scale(1 * dpr, -1 * dpr);
         ctx.fillText(text, x, ctx.yMax - y);
         ctx.restore();
     };
@@ -1876,8 +1945,8 @@ function addDrawMethods(ctx) {
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         if (textLine2) {
-            ctx.drawText(textLine1, (ctx.xMin + ctx.xMax) * 0.5, (ctx.yMin + ctx.yMax) * 0.5 + 12);
-            ctx.drawText(textLine2, (ctx.xMin + ctx.xMax) * 0.5, (ctx.yMin + ctx.yMax) * 0.5 - 12);
+            ctx.drawText(textLine1, (ctx.xMin + ctx.xMax) * 0.5, (ctx.yMin + ctx.yMax) * 0.5 + (opts.SmallFontSize * dpr));
+            ctx.drawText(textLine2, (ctx.xMin + ctx.xMax) * 0.5, (ctx.yMin + ctx.yMax) * 0.5 - (opts.SmallFontSize * dpr));
         } else {
             ctx.drawText(textLine1, (ctx.xMin + ctx.xMax) * 0.5, (ctx.yMin + ctx.yMax) * 0.5);
         }
@@ -2045,9 +2114,9 @@ function localTimestampToStr( timestamp, showSeconds ) {
 function objectClickX( e ) {
     var x = 0;
     if (e.offsetX || e.offsetX === 0) { // Opera/Chrome
-        x = e.offsetX;
+        x = e.offsetX * dpr;
     } else if (e.layerX || e.layerX === 0) { // Firefox
-        x = e.layerX;
+        x = e.layerX * dpr;
     }
     return x;
 }
@@ -2056,9 +2125,9 @@ function objectClickX( e ) {
 function objectClickY( e ) {
     var y = 0;
     if (e.offsetY || e.offsetY === 0) { // Opera/Chrome
-        y = e.offsetY;
+        y = e.offsetY * dpr;
     } else if (e.layerY || e.layerY === 0) { // Firefox
-        y = e.layerY;
+        y = e.layerY * dpr;
     }
     return y;
 }
