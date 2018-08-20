@@ -849,6 +849,8 @@ var ProgramEditorPanel = function(options) {
     // Handle mouse down in pin SVG element
     //
     this.pinMouseDown = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
          //console.log("[DEBUG] pinMouseDown this", this);
         _this.m_activeStartPin = this.remember('pin');
     };
