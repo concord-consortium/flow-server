@@ -267,26 +267,37 @@ var DataSetView = function(options) {
         }
 
         // TODO: don't use plotter as data source
+        var rows = [];
         var headers = [];
+        var headerRow = ["date,timestamp"];
         var valuesAtTimestamp = {};
         var dataPairs = (base.m_plotHandler.plotter.dataPairs || []).filter(pair => pair.dataReceived);
-        dataPairs.forEach(pair => {
-            var header = pair.yData.name;
+        dataPairs.forEach((pair, index) => {
+            var header = {
+                id: index,
+                name: pair.yData.name,
+                units: pair.yData.units
+            };
             headers.push(header);
             pair.xData.data.forEach((timestamp, index) => {
                 if (!valuesAtTimestamp[timestamp]) {
                     valuesAtTimestamp[timestamp] = {};
                 }
-                valuesAtTimestamp[timestamp][header] = pair.yData.data[index];
+                valuesAtTimestamp[timestamp][header.id] = pair.yData.data[index];
             });
         });
-        headers.sort();
-        var rows = ["date,timestamp," + headers.join(",")];
+        headers.sort((a, b) => a.name.localeCompare(b.name));
+        headers.forEach(header => headerRow = headerRow.concat([header.name, header.name + " units"]));
+        rows.push(headerRow);
+
         Object.keys(valuesAtTimestamp).sort().forEach(timestamp => {
             var date = new Date(timestamp * 1000);
             var row = ['"' + date.toLocaleString() + '"', timestamp];
             var values = valuesAtTimestamp[timestamp];
-            headers.forEach(header => row.push(values.hasOwnProperty(header) ? values[header] : ""));
+            headers.forEach(header => {
+                row.push(values.hasOwnProperty(header.id) ? values[header.id] : "");
+                row.push(header.units || "n/a");
+            });
             rows.push(row.join(","));
         });
 
@@ -339,6 +350,7 @@ var DataSetView = function(options) {
         sequenceName = data.name;
         var values = data.values;
         var timestamps = data.timestamps;
+        var units = data.units || "";
         var validvalues = [];
         var validtimestamps = [];
 
@@ -385,6 +397,7 @@ var DataSetView = function(options) {
         if (dataPair) {
             dataPair.xData.data = validtimestamps;  // we are updating the plotter's internal data
             dataPair.yData.data = validvalues;
+            dataPair.yData.units = units;
             dataPair.dataReceived = true;
             // indicate to autoBounds to adjust timestamps
             base.m_plotHandler.plotter.autoBounds(true);
