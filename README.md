@@ -1,7 +1,5 @@
 # Flow-Server
 
-_This material is based upon work supported by the National Science Foundation under Grant No. DRL-1640054. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation._
-
 Developed by the Concord Consortium in collaboration with Manylabs, flow system lets people create data
 flow diagrams that interface with sensors and actuators. This repository contains the user interface for
 viewing and editing data flow diagrams and for viewing recorded data. The flow diagrams are executed on a
@@ -100,3 +98,7 @@ Every function in a Javascript or Python file should have a comment of some kind
 *   replug sensors
 *   plug in relay
 *   create diagram that controls relay
+
+## Acknowledgement
+
+_This material is based upon work supported by the National Science Foundation under Grant No. DRL-1640054. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation._
