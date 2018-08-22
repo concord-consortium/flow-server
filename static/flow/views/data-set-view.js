@@ -38,8 +38,16 @@ var DataSetView = function(options) {
         base.hide();
         liveDataHolder.show();
     });
+    var exportCSVButton = $('<button>', {   html: 'Export CSV' , class: 'dataflow-button dataset-view-export-button'} );
+    exportCSVButton.click(function(e) {
+        base.exportCSV();
+    });
+    var buttonContainer = $('<div>', {class: 'dataset-buttons'});
+    buttonContainer.append(exportCSVButton);
+    buttonContainer.append(closeButton);
+
     datasetTopbar.append(datasetName);
-    datasetTopbar.append(closeButton);
+    datasetTopbar.append(buttonContainer);
 
     var datasetDetailsButton = $('<div>', { class: 'dataset-info-text dataset-view-details-button noSelect' });
     var datasetDetails = $('<span>', { class: 'dataset-view-details-text' }).text('Dataset Details');
@@ -261,6 +269,63 @@ var DataSetView = function(options) {
     //
     base.getDataSet = function() { return base.m_dataSet; }
 
+    base.exportCSV = function() {
+        var dataset = base.m_dataSet;
+        if (!dataset) {
+            alert("No dataset found to export");
+            return;
+        }
+
+        // TODO: don't use plotter as data source
+        var rows = [];
+        var headers = [];
+        var headerRow = ["date,timestamp"];
+        var valuesAtTimestamp = {};
+        var dataPairs = (base.m_plotHandler.plotter.dataPairs || []).filter(pair => pair.dataReceived);
+        dataPairs.forEach((pair, index) => {
+            var header = {
+                id: index,
+                name: pair.yData.name,
+                units: pair.yData.units
+            };
+            headers.push(header);
+            pair.xData.data.forEach((timestamp, index) => {
+                if (!valuesAtTimestamp[timestamp]) {
+                    valuesAtTimestamp[timestamp] = {};
+                }
+                valuesAtTimestamp[timestamp][header.id] = pair.yData.data[index];
+            });
+        });
+        headers.sort((a, b) => a.name.localeCompare(b.name));
+        headers.forEach(header => headerRow = headerRow.concat([header.name, header.name + " units"]));
+        rows.push(headerRow);
+
+        Object.keys(valuesAtTimestamp).sort().forEach(timestamp => {
+            var date = new Date(timestamp * 1000);
+            var row = ['"' + date.toLocaleString() + '"', timestamp];
+            var values = valuesAtTimestamp[timestamp];
+            headers.forEach(header => {
+                row.push(values.hasOwnProperty(header.id) ? values[header.id] : "");
+                row.push(header.units || "n/a");
+            });
+            rows.push(row.join(","));
+        });
+
+        var csvFilename = (dataset.metadata && dataset.metadata.hasOwnProperty("displayedName") ? dataset.metadata.displayedName : dataset.name) + ".csv";
+        var csvBlob = new Blob([rows.join("\n")], {type: "text/csv;charset=utf-8;"});
+        if (navigator.msSaveBlob) {
+            navigator.msSaveBlob(csvBlob, csvFilename);
+        }
+        else {
+            var link = document.createElement("a");
+            link.href = window.URL.createObjectURL(csvBlob);
+            link.setAttribute("download", csvFilename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
+
     //
     // Resize canvas
     //
@@ -294,6 +359,7 @@ var DataSetView = function(options) {
         sequenceName = data.name;
         var values = data.values;
         var timestamps = data.timestamps;
+        var units = data.units || "";
         var validvalues = [];
         var validtimestamps = [];
 
@@ -340,6 +406,7 @@ var DataSetView = function(options) {
         if (dataPair) {
             dataPair.xData.data = validtimestamps;  // we are updating the plotter's internal data
             dataPair.yData.data = validvalues;
+            dataPair.yData.units = units;
             dataPair.dataReceived = true;
             // indicate to autoBounds to adjust timestamps
             base.m_plotHandler.plotter.autoBounds(true);
