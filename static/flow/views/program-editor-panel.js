@@ -234,11 +234,11 @@ var ProgramEditorPanel = function(options) {
         };
 
         var potentialName = prefixStr + year;
-        potentialName += this._formatDatePart(potentialName, month);
-        potentialName += this._formatDatePart(potentialName, day) + "_";;
-        potentialName += this._formatDatePart(potentialName, hour);
-        potentialName += this._formatDatePart(potentialName, min);
-        potentialName += this._formatDatePart(potentialName, sec);
+        potentialName = this._formatDatePart(potentialName, month);
+        potentialName = this._formatDatePart(potentialName, day) + "_";
+        potentialName = this._formatDatePart(potentialName, hour);
+        potentialName = this._formatDatePart(potentialName, min);
+        potentialName = this._formatDatePart(potentialName, sec);
 
         return potentialName;
     };

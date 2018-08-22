@@ -112,6 +112,14 @@ Util.convertDateTimeStringToHumanReadable = function(dateTimeStr) {
     var hour = dateTimeStr.substring(9, 11);
     var min = dateTimeStr.substring(11, 13);
 
+    var dayNum = parseInt(day, 10);
+    var hourNum = parseInt(hour, 10);
+    var minNum = parseInt(min, 10);
+
+    if (isNaN(dayNum) || isNaN(hourNum) || isNaN(minNum)) {
+        return "Invalid date in filename";
+    }
+
     if (month == "01")
         month = "January";
     else if (month == "02")
@@ -136,8 +144,6 @@ Util.convertDateTimeStringToHumanReadable = function(dateTimeStr) {
         month = "November";
     else if (month == "12")
         month = "December";
-    var dayNum = parseInt(day, 10);
-    var hourNum = parseInt(hour, 10);
     var ampm = "AM";
     if (hourNum == 0) {
         hourNum = 12;
@@ -149,7 +155,6 @@ Util.convertDateTimeStringToHumanReadable = function(dateTimeStr) {
         hourNum -= 12;
         ampm = "PM";
     }
-    var minNum = parseInt(min, 10);
     if (min < 10) {
         minNum = "0" + minNum;
     }
