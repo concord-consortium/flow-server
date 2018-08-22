@@ -1334,12 +1334,14 @@ var ProgramEditorPanel = function(options) {
                     var str = $('#b' + block.id + '_bp_' + param.name).val();
                     str = str.replace ( /[^0-9.]/g, '' ); // strip out non-numeric values
                     $('#b' + block.id + '_bp_' + param.name).val(str); // put stripped back in the input field
-                    var val = parseFloat(str);
-                    if (isNaN(val)) {
-                        param.value = param['default'];
-                         $('#b' + block.id + '_bp_' + param.name).val(param.value);
-                    } else {
-                        param.value = val;
+                    if (str !== '') {
+                        var val = parseFloat(str);
+                        if (isNaN(val)) {
+                            param.value = param['default'];
+                             $('#b' + block.id + '_bp_' + param.name).val(param.value);
+                        } else {
+                            param.value = val;
+                        }
                     }
                 }
             }
