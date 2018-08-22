@@ -553,6 +553,9 @@
     margin-left: 2px;
     margin-bottom: 8px;
     margin-right: 2px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 .live-data-item-box-button {
     -webkit-transition-duration: 0.2s; /* Safari */

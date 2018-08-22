@@ -29,20 +29,22 @@ The web app itself is stored in the `static` and `templates` folders witin this 
 ## Installation
 
 1.  Install `rhizo-server` according to the instructions in its `README.md`.
-2.  Install rauth
+2.  Install rauth, python-jose and requests
 ```
-    pip install rauth
+    pip install rauth python-jose requests
 ```
 3.  Create an `extensions` folder inside `rhizo-server`
 4.  Create an empty `__init__.py` file inside it.
 5.  Place the `flow-server` repo (this repo) inside that.
     (If everything is in the right place, you should have a `rhizo-server/extensions/flow-server/ext.py` file.)
-6.  In `rhizo-server/settings/config.py` change the `EXTENSIONS = []` line to `EXTENSIONS = ['flow-server']`.
-7.  Start/restart the server (using `python run.py -s`) and visit it's web interface.
+7.  Copy `flow-server/autoload-config.sample.py` to `flow-server/autoload-config.py` and fill in private settings denoted by `***`.
+    If you are running this somewhere other than production change `FIREBASE_ENVIRONMENT` from `production` to something unique, like `staging` or `dmartin`.
+    If you don't want to use Firebase change `FIREBASE_ENABLED` to `False`.
+8.  Start/restart the server (using `AUTOLOAD_EXTENSIONS=true python run.py -s`) and visit it's web interface.
     If you are running the server locally, visit [http://localhost:5000/](http://localhost:5000/).
-8.  Log in as a system admin.
-9.  Select `System` / `Organizations` / `New Organization` and create a `Testing` organization with a `testing` folder name.
-10.  Click on the organization and then `Assign User` to add yourself to the new organization.
+9.  Log in as a system admin.
+10.  Select `System` / `Organizations` / `New Organization` and create a `Testing` organization with a `testing` folder name.
+11.  Click on the organization and then `Assign User` to add yourself to the new organization.
 
 ## Configure SSO Login
 

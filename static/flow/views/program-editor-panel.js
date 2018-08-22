@@ -234,11 +234,11 @@ var ProgramEditorPanel = function(options) {
         };
 
         var potentialName = prefixStr + year;
-        potentialName += this._formatDatePart(potentialName, month);
-        potentialName += this._formatDatePart(potentialName, day) + "_";;
-        potentialName += this._formatDatePart(potentialName, hour);
-        potentialName += this._formatDatePart(potentialName, min);
-        potentialName += this._formatDatePart(potentialName, sec);
+        potentialName = this._formatDatePart(potentialName, month);
+        potentialName = this._formatDatePart(potentialName, day) + "_";
+        potentialName = this._formatDatePart(potentialName, hour);
+        potentialName = this._formatDatePart(potentialName, min);
+        potentialName = this._formatDatePart(potentialName, sec);
 
         return potentialName;
     };
@@ -1334,12 +1334,14 @@ var ProgramEditorPanel = function(options) {
                     var str = $('#b' + block.id + '_bp_' + param.name).val();
                     str = str.replace ( /[^0-9.]/g, '' ); // strip out non-numeric values
                     $('#b' + block.id + '_bp_' + param.name).val(str); // put stripped back in the input field
-                    var val = parseFloat(str);
-                    if (isNaN(val)) {
-                        param.value = param['default'];
-                         $('#b' + block.id + '_bp_' + param.name).val(param.value);
-                    } else {
-                        param.value = val;
+                    if (str !== '') {
+                        var val = parseFloat(str);
+                        if (isNaN(val)) {
+                            param.value = param['default'];
+                             $('#b' + block.id + '_bp_' + param.name).val(param.value);
+                        } else {
+                            param.value = val;
+                        }
                     }
                 }
             }
