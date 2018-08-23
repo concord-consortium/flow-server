@@ -1290,7 +1290,7 @@ var ProgramEditorPanel = function(options) {
     // Triggered when a parameter entry field loses focus
     //
     this.paramEntryFocusOut = function(e) {
-        _this.updateParamFromEntryField(e, true);
+        _this.updateParamFromEntryField(e, true, true);
         _this.autoSaveProgram();
     }
 
@@ -1298,10 +1298,10 @@ var ProgramEditorPanel = function(options) {
     // Triggered when a parameter entry field is edited
     //
     this.paramEntryChanged = function(e) {
-        _this.updateParamFromEntryField(e, false);
+        _this.updateParamFromEntryField(e, false, false);
     }
 
-    this.updateParamFromEntryField = function(e, stripwhitespace) {
+    this.updateParamFromEntryField = function(e, stripwhitespace, focusedOut) {
         var block = _this.m_diagram.findBlockById(e.data.blockid);
         var paramname = e.data.paramname;
         var connectedblockid = e.data.connectedblockid;
@@ -1342,6 +1342,9 @@ var ProgramEditorPanel = function(options) {
                         } else {
                             param.value = val;
                         }
+                    }
+                    else if (focusedOut) {
+                        $('#b' + block.id + '_bp_' + param.name).val(defval)
                     }
                 }
             }
