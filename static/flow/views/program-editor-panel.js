@@ -566,6 +566,9 @@ var ProgramEditorPanel = function(options) {
             var block = _this.m_diagram.blocks[i];
             _this.displayBlock(block);
             _this.nameHash[block.name] = block;
+            if (_this.isDeviceBlock(block.type)) {
+                _this.deviceHash[block.type] = block;
+            }
         }
     };
 
@@ -839,6 +842,14 @@ var ProgramEditorPanel = function(options) {
             _this.undisplayBlock(block);
             _this.m_diagram.removeBlock(block);
             delete _this.nameHash[block.name];
+            if (_this.isDeviceBlock(block.type)) {
+                delete _this.deviceHash[block.type];
+                // see if there is another device with this type
+                var existingBlock = _this.m_diagram.findBlockByType(block.type);
+                if (existingBlock) {
+                    _this.deviceHash[existingBlock.type] = existingBlock;
+                }
+            }
         }
         // update any blocks that this action may affect
         _this.updateAllBlocks();
@@ -930,6 +941,11 @@ var ProgramEditorPanel = function(options) {
     this.nameHash = {};
 
     //
+    // Used by addDeviceBlock() to map device types to blocks
+    //
+    this.deviceHash = {};
+
+    //
     // Determine if a block represents a physical sensor device. List of device blocks defined in utils/definitions
     //
     this.isDeviceBlock = function (type) {
@@ -1010,6 +1026,7 @@ var ProgramEditorPanel = function(options) {
         var block = createFlowBlock(blockSpec);
         _this.m_diagram.blocks.push(block);
         _this.nameHash[name] = block;
+        _this.deviceHash[type] = block;  // NOTE: this hash only stores one block per device
         _this.displayBlock(block);
         CodapTest.logTopic('Dataflow/ConnectSensor');
         _this.autoSaveProgram();
@@ -1367,7 +1384,7 @@ var ProgramEditorPanel = function(options) {
         for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
             var block = _this.m_diagram.blocks[i];
             if (_this.isDeviceBlock(block.type)) {
-                if (!_this.receivedSensorData[block.name]) {
+                if (!_this.receivedSensorData[block.id]) {
                     ret.push(block.name);
                 }
             }
@@ -1387,12 +1404,12 @@ var ProgramEditorPanel = function(options) {
                 var sensor  = params.data[i];
                 var name    = sensor.name;
                 var value   = sensor.value;
-                var block   = _this.nameHash[name];
+                var block   = _this.nameHash[name] || _this.deviceHash[sensor.type];
                 if (block) {
                     block.updateValue(value);
                     _this.displayBlockValue(block);
+                    _this.receivedSensorData[block.id] = sensor;
                 }
-                _this.receivedSensorData[name] = sensor;
             }
 
             //
@@ -1405,7 +1422,7 @@ var ProgramEditorPanel = function(options) {
             for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
                 var block = _this.m_diagram.blocks[i];
                 if (_this.isDeviceBlock(block.type)) {
-                    if (!_this.receivedSensorData[block.name]) {
+                    if (!_this.receivedSensorData[block.id]) {
                         block.updateValue(null);
                         _this.displayBlockValue(block);
                     }

@@ -86,6 +86,19 @@ function createDiagram() {
         return block;
     };
 
+    // find a block by type; returns null if not found
+    // (note: types are not necessarily unique; will return first found)
+    diagram.findBlockByType = function(type) {
+        var block = null;
+        for (var i = 0; i < this.blocks.length; i++) {
+            if (this.blocks[i].type === type) {
+                block = this.blocks[i];
+                break;
+            }
+        }
+        return block;
+    };
+
     // find a list of connection destination pins (pins for which the given block is source)
     diagram.findDestPins = function(block) {
         var pins = [];
