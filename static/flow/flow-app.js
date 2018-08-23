@@ -16,6 +16,9 @@ function initFlowApp() {
         id: 'admin-view'
     }));
     showTopLevelView('login-page-view');
+    if(g_fullscreen) {
+        FullScreenWidget();
+    }
 }
 
 //
