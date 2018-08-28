@@ -63,7 +63,8 @@ let _plotOptions = {
   TimeColor: "#000",
   CaptionFontSize: 12,
   SmallFontSize: 10,
-  XAxisLabelPadding: 5
+  XAxisLabelPadding: 5,
+  SortSequences: true
 };
 
 function createPlotHandler(canvas, multiFrame, options) {
@@ -223,7 +224,7 @@ function createPlotter( canvas, multiFrame, options ) {
 
     // set data to use for plotting; updates plot bounds from data
     plotter.setData = function( dataPairs ) {
-        this.dataPairs = dataPairs;
+        this.dataPairs = plotter.opts.SortSequences ? this.sortData(dataPairs) : dataPairs;
         // Frame count
         var frameCount = multiFrame ? this.dataPairs.length : 1;
         if(frameCount < 1){
@@ -237,6 +238,25 @@ function createPlotter( canvas, multiFrame, options ) {
         if(this.plotMode === "scatter"){
             this.autoBounds();
         }
+    };
+
+    plotter.sortData = function (dataPairs) {
+        dataPairs.sort((a, b) => {
+            // Sanity check that the pairs contain data
+            if (a.yData && a.yData.name && b.yData && b.yData.name) {
+                var nameA = a.yData.name.toUpperCase(),
+                    nameB = b.yData.name.toUpperCase();
+                if (nameA < nameB) {
+                    return -1;
+                }
+                if (nameA > nameB) {
+                    return 1;
+                }
+            }
+            // names must be equal
+            return 0;
+        });
+        return dataPairs;
     };
 
     // fix(soon): refactor

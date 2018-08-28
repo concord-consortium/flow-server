@@ -204,7 +204,8 @@ var DataSetView = function(options) {
           AxisLine: "#333",
           AxisLabel: "#333",
           CaptionFontSize: 12,
-          SmallFontSize: 10
+          SmallFontSize: 10,
+          SortSequences: true // always display datasets with alphabetic sorting for consistency
         };
         // Manyplot supports overlaying multiple data sets on the same plot. Currently we show individual plots.
         // To overlay multiple plots we'd need to use different line colors for each data series and offset y-axis labels
