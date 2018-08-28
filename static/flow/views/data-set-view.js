@@ -204,7 +204,8 @@ var DataSetView = function(options) {
           AxisLine: "#333",
           AxisLabel: "#333",
           CaptionFontSize: 12,
-          SmallFontSize: 10
+          SmallFontSize: 10,
+          SortSequences: true // always display datasets with alphabetic sorting for consistency
         };
         // Manyplot supports overlaying multiple data sets on the same plot. Currently we show individual plots.
         // To overlay multiple plots we'd need to use different line colors for each data series and offset y-axis labels
@@ -562,8 +563,15 @@ var DataSetView = function(options) {
         var timeThresh = 0.4;  // seconds
         // Here we see the presentation layer grabbing data from a graphing library
         // TODO: Refactor! The graphing library should not be a data store.
-        var dataPairs = base.m_plotHandler.plotter.dataPairs;
-        if (dataPairs.length && dataPairs[0].xData.data.length) {
+        var dataPairs = [];
+        // Only export data sequences that have data pairs
+        base.m_plotHandler.plotter.dataPairs.forEach(dataPair => {
+            if (dataPair.xData.data.length > 0) {
+                dataPairs.push(dataPair);
+            }
+        });
+
+        if (dataPairs.length > 0) {
             // Set collection attributes based on sequence data
             var attrs = [{name: 'seconds', type: 'numeric', precision: 2}, {name: 'timestamp', type: 'date'}];
             for (var i = 0; i < dataPairs.length; i++) {
