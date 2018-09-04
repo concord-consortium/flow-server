@@ -831,7 +831,7 @@ function createPlotter( canvas, multiFrame, options ) {
         }
     };
 
-    plotter.setIntervalFirstBound = function(xMouse){
+    plotter.setIntervalFirstBound = function (xMouse) {
         var xMouseData = this.frames[ 0 ].screenToDataX( xMouse );
         for (var i = 0; i < this.frames.length; i++) {
             this.frames[i].snapIntervalFirstBound(xMouseData, this.dataPairs[i].xData.data);
@@ -858,20 +858,23 @@ function createPlotter( canvas, multiFrame, options ) {
                 frame.intervalUpperX = upperX;
 
             } else {
-                // Sanity check
-                console.log('Interval improperly set: clearing')
-                this.clearIntervalBounds();
+                // Sanity check - can't set an interval for a frame that has no data pairs
+                console.info('Cannot set interval for this frame - no data.')
+                this.clearFrameIntervalBounds(frame);
             }
         }
+    }
+    plotter.clearFrameIntervalBounds = function (frame) {
+        frame.intervalFirstBoundX = null;
+        frame.intervalSecondBoundX = null;
+        frame.intervalLowerIndex = null;
+        frame.intervalUpperIndex = null;
     }
 
     plotter.clearIntervalBounds = function() {
         for (var i = 0; i < this.frames.length; i++) {
             var frame = this.frames[i];
-            frame.intervalFirstBoundX = null;
-            frame.intervalSecondBoundX = null;
-            frame.intervalLowerIndex = null;
-            frame.intervalUpperIndex = null;
+            this.clearFrameIntervalBounds(frame);
         }
     }
 

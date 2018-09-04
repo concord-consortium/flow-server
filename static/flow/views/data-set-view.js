@@ -25,9 +25,9 @@ var DataSetView = function(options) {
 
     PLOTTER_PADDING_VERTICAL    = 80;   // px
     RIGHT_PANEL_WIDTH           = 200;  // px
-    VERTICAL_MARGIN             = 80;   // px
+    VERTICAL_MARGIN             = 100;   // px
     HORIZONTAL_MARGIN           = 100;  // px
-    PLOTTER_MARGIN_BOTTOM       = 94; // px
+    PLOTTER_MARGIN_BOTTOM       = 100; // px
 
     var datasetTopbar = $('<div>', { class: 'dataset-info-topbar' });
     var datasetName = $('<div>', { class: 'dataset-info-text dataset-info-text-title' }).text('Dataset Name: ');
@@ -454,7 +454,6 @@ var DataSetView = function(options) {
         var dataPairs = base.m_plotHandler.plotter.dataPairs;
         for (var i = 0; i < dataPairs.length; i++) {
             var d = dataPairs[i];
-            console.log("[DEBUG] findDataPair checking", d.yData.name, sequenceName);
             if (d.yData.name === sequenceName) {
                 dataPair = d;
                 break;
@@ -510,7 +509,7 @@ var DataSetView = function(options) {
         sequenceCount = 0;
 
         for (var i = 0; i < sequences.length; i++) {
-            if(sequences[i].name!="metadata"){
+            if (sequences[i].name != "metadata") {
                 sequenceCount++;
                 base.requestServerSequenceData(sequences[i].name, {
                     count: 100000,
@@ -563,10 +562,18 @@ var DataSetView = function(options) {
         var timeThresh = 0.4;  // seconds
         // Here we see the presentation layer grabbing data from a graphing library
         // TODO: Refactor! The graphing library should not be a data store.
-        var dataPairs = base.m_plotHandler.plotter.dataPairs;
-        if (dataPairs.length && dataPairs[0].xData.data.length) {
+        var dataPairs = [];
+        var includeEmptyDataSequences = true
+        base.m_plotHandler.plotter.dataPairs.forEach(dataPair => {
+            // Can filter out empty data sequences by only adding dataPairs with data
+            if (includeEmptyDataSequences || dataPair.xData.data.length > 0) {
+                dataPairs.push(dataPair);
+            }
+        });
+
+        if (dataPairs.length > 0) {
             // Set collection attributes based on sequence data
-            var attrs = [{name: 'seconds', type: 'numeric', precision: 2}, {name: 'timestamp', type: 'date'}];
+            var attrs = [{ name: 'seconds', type: 'numeric', precision: 2 }, { name: 'timestamp', type: 'date' }];
             for (var i = 0; i < dataPairs.length; i++) {
                 attrs.push({
                     name: dataPairs[i].yData.name,
@@ -577,7 +584,7 @@ var DataSetView = function(options) {
 
             CodapTest.prepCollection(
                 attrs,
-                function() {
+                function () {
                     // Get data for quick reference
                     var xs = [];
                     var ys = [];
@@ -675,22 +682,28 @@ var DataSetView = function(options) {
                     //
                     codapInterface.sendRequest(
                         {
-                            action:     "create",
-                            resource:   "component",
-                            values:     {   type:           "caseTable",
-                                            name:           "explore_flow_data",
-                                            title:          "Explore Data in CODAP",
-                                            dimensions:     {   width:  700,
-                                                                height: 500 },
-                                            dataContext:    "Flow_Data"
-                                        }
+                            action: "create",
+                            resource: "component",
+                            values: {
+                                type: "caseTable",
+                                name: "explore_flow_data",
+                                title: "Explore Data in CODAP",
+                                dimensions: {
+                                    width: 700,
+                                    height: 500
+                                },
+                                dataContext: "Flow_Data"
+                            }
                         },
-                        function(iResult, iRequest) {
+                        function (iResult, iRequest) {
                             debug("Opened case table", iResult);
                         }
                     );
                 }
             );
+        } else {
+            // no data pairs have data, so we have nothing to select or export to CODAP
+            console.error("No data selected to be sent to CODAP");
         }
     }
 
