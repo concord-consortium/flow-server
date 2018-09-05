@@ -24,6 +24,10 @@ controllers by name.
 
 The web app itself is stored in the `static` and `templates` folders witin this repo.
 
+## Current Releases
+
+Release information for flow-server can be found at [https://github.com/concord-consortium/flow-server/releases](https://github.com/concord-consortium/flow-server/releases)
+
 ## Installation
 
 1.  Install `rhizo-server` according to the instructions in its `README.md`.
