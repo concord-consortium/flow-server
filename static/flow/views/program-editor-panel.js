@@ -953,7 +953,7 @@ var ProgramEditorPanel = function(options) {
             return name;
         }
         var count = 2;
-        while(this.nameHash[name + count]) {
+        while(this.nameHash[name + " " + count]) {
             count++;
         }
         return name + count;
