@@ -303,7 +303,7 @@ var ProgramEditorPanel = function(options) {
         // Add menu
         //
         var menuData = createMenuData();
-        if (!_this.isFilterBlock(block.type) && !_this.isDeviceBlock(block.type) && block.type!="plot") {
+        if (!_this.isFilterBlock(block.type) && !_this.isDeviceBlock(block.type) && block.type!="plot" && block.type!="timer") {
             menuData.add('Rename', this.renameBlock, {id: block.id});
         }
         menuData.add('Delete', this.deleteBlock, {id: block.id});
