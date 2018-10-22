@@ -80,11 +80,6 @@ var ProgramEditorPanel = function(options) {
         // Handle mouseup to stop moving blocks when outside of the program canvas area
         $('#program-editor-view').mouseup(this.mouseUp);
 
-        //
-        // Maintain set of block names
-        //
-        this.nameHash = {};
-
         this.programSpecStored = [];
 
         //
@@ -112,6 +107,8 @@ var ProgramEditorPanel = function(options) {
         this.m_diagramDisplayedName = programSpec.displayedName;
 
         this.displayAllBlocks();
+
+        this.updateNameHash();
 
         this.displayAllConnections();
 
@@ -152,7 +149,6 @@ var ProgramEditorPanel = function(options) {
 
         // clear existing program
         _this.undisplayAllBlocks();
-        _this.nameHash = {};
 
         // the final spec in the array is the current state, get the (n-1)th entry
         _this.m_diagram = specToDiagram(_this.programSpecStored[_this.programSpecStored.length - 2]);
@@ -161,6 +157,8 @@ var ProgramEditorPanel = function(options) {
         _this.programSpecStored.pop();
 
         _this.displayAllBlocks();
+
+        _this.updateNameHash();
 
         _this.displayAllConnections();
 
@@ -565,7 +563,6 @@ var ProgramEditorPanel = function(options) {
             // console.log("[DEBUG] display block", _this.m_diagram.blocks[i]);
             var block = _this.m_diagram.blocks[i];
             _this.displayBlock(block);
-            _this.nameHash[block.name] = block;
         }
     };
 
@@ -825,6 +822,7 @@ var ProgramEditorPanel = function(options) {
                     block.name = newName;
                     $('#bn_' + block.id).html(newName);
                     _this.autoSaveProgram();
+                    _this.updateNameHash();
                 }
             });
         }
@@ -838,7 +836,7 @@ var ProgramEditorPanel = function(options) {
         if (block) {
             _this.undisplayBlock(block);
             _this.m_diagram.removeBlock(block);
-            delete _this.nameHash[block.name];
+            _this.updateNameHash();
         }
         // update any blocks that this action may affect
         _this.updateAllBlocks();
@@ -930,6 +928,19 @@ var ProgramEditorPanel = function(options) {
     this.nameHash = {};
 
     //
+    // Recompute nameHash object which stores sensor and timer block names
+    //
+    this.updateNameHash = function() {
+        _this.nameHash = {};
+        for (var i = 0; i < _this.m_diagram.blocks.length; i++) {
+            var block = _this.m_diagram.blocks[i];
+              if (_this.isDeviceBlock(block.type) || block.type === 'timer') {
+                  _this.nameHash[block.name] = block;
+              }
+        }
+    };
+
+    //
     // Determine if a block represents a physical sensor device. List of device blocks defined in utils/definitions
     //
     this.isDeviceBlock = function (type) {
@@ -947,7 +958,6 @@ var ProgramEditorPanel = function(options) {
     // Used to create unique names for blocks
     //
     this.getUniqueName = function(name) {
-
         var block = this.nameHash[name];
         if (!block) {
             return name;
@@ -956,7 +966,7 @@ var ProgramEditorPanel = function(options) {
         while(this.nameHash[name + " " + count]) {
             count++;
         }
-        return name + count;
+        return name + " " + count;
     };
     //
     // Used to get intial position x offset for block
@@ -1041,7 +1051,6 @@ var ProgramEditorPanel = function(options) {
         };
         var block = createFlowBlock(blockSpec);
         _this.m_diagram.blocks.push(block);
-        _this.nameHash[name] = block;
         _this.displayBlock(block);
         //CodapTest.logTopic('Dataflow/ConnectSensor');
         _this.autoSaveProgram();
@@ -1109,7 +1118,6 @@ var ProgramEditorPanel = function(options) {
 
         var block = createFlowBlock(blockSpec);
         _this.m_diagram.blocks.push(block);
-        _this.nameHash[name] = block;
         _this.displayBlock(block);
         //CodapTest.logTopic('Dataflow/ConnectSensor');
         _this.autoSaveProgram();
