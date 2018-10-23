@@ -341,21 +341,6 @@ var PiSelectorPanel = function(options) {
     }
 
     //
-    // Select no pis from the list
-    //
-    var selectNoPi = function() {
-        // set state of run program button
-        updateProgramButtons(true, false, false);
-
-        // stop listening for messages from any existing Pi
-        clearSubscriptions();
-        removeMessageHandlers();
-
-        // handle unselection of pi, clear program editor state
-        editor.getProgramEditorPanel().piUnselected();
-
-    }
-    //
     // Change editor state to running program
     //
     var enterRunProgramState = function() {
