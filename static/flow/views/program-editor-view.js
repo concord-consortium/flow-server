@@ -304,6 +304,7 @@ var ProgramEditorView = function(options) {
         piSelectorPanel.disableLoadPiListTimer();
 
         piSelectorPanel.resetStateOnProgramLoad();
+        piSelectorPanel.firebaseControllerReset();
         piSelectorPanel.resetPiSelectionState();
 
         //
@@ -330,6 +331,7 @@ var ProgramEditorView = function(options) {
         piSelectorPanel.setProgramControlsToNeutral();
         piSelectorPanel.loadPiList(true);
         piSelectorPanel.resetStateOnProgramLoad();
+        piSelectorPanel.firebaseControllerReset();
         piSelectorPanel.resetPiSelectionState();
 
         //
