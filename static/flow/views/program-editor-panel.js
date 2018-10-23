@@ -97,6 +97,13 @@ var ProgramEditorPanel = function(options) {
             // then it might not have a valid file name
             programSpec.name = this.createDateTimeName("program_");
         }
+        // null values from sensors and timers in case they were erroneously saved
+        for (var specBlocks = 0; specBlocks < programSpec.blocks.length; specBlocks++) {
+            var specBlockType = programSpec.blocks[specBlocks].type;
+            if (this.isDeviceBlock(specBlockType) || specBlockType==="timer") {
+                 programSpec.blocks[specBlocks].value = null;
+            }
+        }
 
         this.undisplayAllBlocks();
 
