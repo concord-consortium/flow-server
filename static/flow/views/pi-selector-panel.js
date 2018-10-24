@@ -52,6 +52,12 @@ var PiSelectorPanel = function(options) {
             callback(!!snapshot.val());
         };
     };
+    this.firebaseControllerReset = function () {
+        if (firebaseControllerRef) {
+            firebaseControllerRef.off("value", handleFirebaseControllerValueChange);
+            firebaseControllerRef = null;
+        }
+    };
 
     //
     // Determine if a pi is online or offline
@@ -273,8 +279,8 @@ var PiSelectorPanel = function(options) {
             }
         }
         if (!foundPi) {
-            deviceSelectedText.text("none");
-            selectNoPi();
+            firebaseControllerReset();
+            resetPiSelectionState();
         }
     }
 
@@ -291,7 +297,6 @@ var PiSelectorPanel = function(options) {
     // Need to call when we open a program, create a new program
     //
     this.resetPiSelectionState = function() {
-
         // select none from the menu
         // not needed if we regen the list
         deviceSelectedText.text("none");
@@ -301,6 +306,9 @@ var PiSelectorPanel = function(options) {
         // stop listening for messages from any existing Pi
         clearSubscriptions();
         removeMessageHandlers();
+
+        // handle unselection of pi, clear program editor state
+        editor.getProgramEditorPanel().piUnselected();
     }
 
     //
@@ -332,21 +340,6 @@ var PiSelectorPanel = function(options) {
         }
     }
 
-    //
-    // Select no pis from the list
-    //
-    var selectNoPi = function() {
-        // set state of run program button
-        updateProgramButtons(true, false, false);
-
-        // stop listening for messages from any existing Pi
-        clearSubscriptions();
-        removeMessageHandlers();
-
-        // handle unselection of pi, clear program editor state
-        editor.getProgramEditorPanel().piUnselected();
-
-    }
     //
     // Change editor state to running program
     //
@@ -443,14 +436,9 @@ var PiSelectorPanel = function(options) {
             sendSensorData.execute();
         };
 
-        if (firebaseControllerRef) {
-            firebaseControllerRef.off("value", handleFirebaseControllerValueChange);
-            firebaseControllerRef = null;
-        }
-
+        firebaseControllerReset();
         if (deviceName == "none") {
-            // invalid index, none was probably selected
-            selectNoPi();
+            resetPiSelectionState();
             return;
         }
         if (!_this.currentlyRecording) {
