@@ -232,13 +232,7 @@ function createFlowBlock(blockSpec) {
         }
         var value = this.value;
         //strip out values from sensors and timers, these should NOT be saved
-        if (this.type == "temperature" ||
-            this.type == "humidity" ||
-            this.type == "light" ||
-            this.type == "soilmoisture" ||
-            this.type == "CO2" ||
-            this.type == "O2" ||
-            this.type == "timer")
+        if (DEVICE_BLOCKS.indexOf(this.type) > -1 || this.type == "timer")
             value = null;
         return {
             id: this.id,
