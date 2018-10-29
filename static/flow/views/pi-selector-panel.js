@@ -494,7 +494,7 @@ var PiSelectorPanel = function(options) {
                         var timeSinceLastUpdate = Date.now() - timestampTime;
 
                         // if the controller has updated Firebase within the last 5 minutes use Firebase
-                        if (timeSinceLastUpdate < (5*60*1000)) {
+                        if (timeSinceLastUpdate < (15*1000)) {
                             console.log("[DEBUG] Using Firebase for instantaneous sensor data");
                             firebaseControllerRef.on("value", handleFirebaseControllerValueChange);
                         }
