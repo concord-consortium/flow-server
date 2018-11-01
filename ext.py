@@ -114,7 +114,7 @@ def handle_socket_connected(ws_conn, socket_sender):
         gevent.spawn(send_delayed_firebase_init, ws_conn, socket_sender, init_message)
 
 def send_delayed_firebase_init(ws_conn, socket_sender, init_message):
-    gevent.sleep(1)
+    gevent.sleep(6) # testing on Pi zero shows this needs to be much longer than 1 sec 
     socket_sender.send_message(ws_conn, 'flow_server::firebase_init', init_message)
 
 # display the data flow app (a single page app)
