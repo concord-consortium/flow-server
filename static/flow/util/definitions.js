@@ -1,4 +1,4 @@
-const DEVICE_BLOCKS = ["temperature", "humidity", "light", "soilmoisture", "CO2", "O2"];
+const DEVICE_BLOCKS = ["temperature", "humidity", "light", "soilmoisture", "CO2", "O2", "particulates"];
 
 const FILTER_BLOCKS = ["and", "or", "not", "xor", "nand", "plus", "minus", "times", "divided by", "absolute value", "equals", "not equals", "less than", "greater than"];
 
@@ -9,7 +9,8 @@ const UNITS_MAP = {
     light: 'lux',
     soilmoisture: '',
     timer: 'seconds',
-    O2: 'percent'
+    O2: 'percent',
+    particulates: 'PM2.5'
 };
 
 const ICON_TYPE_MAP = {
@@ -19,6 +20,7 @@ const ICON_TYPE_MAP = {
     "O2": "o2.png",
     "light": "light.png",
     "soilmoisture": "soilmoisture.png",
+    "particulates": "particulates.png",
     "number": "logic-numeric.png",
     "plus": "logic-plus.png",
     "minus": "logic-minus.png",

@@ -72,7 +72,8 @@ var ProgramEditorBlockPalette = function(options) {
 
         btn.text(name);
         menuentry.click( function() {
-            if (type=='temperature' || type=='humidity' || type=='CO2' || type=='O2' || type=='light' || type=='soilmoisture') {
+            if (type=='temperature' || type=='humidity' || type=='CO2' || type=='O2'
+                || type=='light' || type=='soilmoisture' || type=='particulates') {
                 programEditorPanel.addDeviceBlock(type);
             } else if (type=='relay') {
                 programEditorPanel.addRelayBlock("relay");
@@ -101,7 +102,7 @@ var ProgramEditorBlockPalette = function(options) {
     var o2          = createBtn("O2", "O2", "contains oxygen sensor values");
     var light       = createBtn("light", "light", "contains light sensor values");
     var soil        = createBtn("soil moisture", "soilmoisture", "contains soil moisture sensor values");
-
+    var particulate = createBtn("particulates", "particulates", "contains particulate matter sensor values");
 
     var sensorContent = $('<div>');
     sensorContent.append(temp);
@@ -110,7 +111,8 @@ var ProgramEditorBlockPalette = function(options) {
     sensorContent.append(o2);
     sensorContent.append(light);
     sensorContent.append(soil);
-    var sensors     = createSection("Input", sensorContent, false);
+    sensorContent.append(particulate);
+    var sensors = createSection("Input", sensorContent, false);
     container.append(sensors);
 
     //
