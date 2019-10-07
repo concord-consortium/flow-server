@@ -528,7 +528,7 @@ def get_portal_oauth():
 def sso_login():
 
     redirect_uri = url_for('authorized', _external=True)
-    params = { 'redirect_uri': redirect_uri }
+    params = { 'response_type': 'code', 'redirect_uri': redirect_uri }
 
     url = get_portal_oauth().get_authorize_url(**params)
     return redirect(url)
